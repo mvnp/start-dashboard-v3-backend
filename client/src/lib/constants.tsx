@@ -21,6 +21,13 @@ import {
 
 export const navigationItems = [
   {
+    name: "Landing",
+    href: "/landing",
+    icon: Home,
+    current: false,
+    target: "_blank",
+  },
+  {
     name: "Dashboard",
     href: "/",
     icon: Home,

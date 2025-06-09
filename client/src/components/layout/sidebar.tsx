@@ -47,6 +47,29 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               const isActive = location === item.href;
               const Icon = item.icon;
               
+              if (item.target === "_blank") {
+                return (
+                  <a 
+                    key={item.name} 
+                    href={item.href} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={cn(
+                      "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer",
+                      "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    )}
+                    onClick={() => {
+                      if (window.innerWidth < 1024) {
+                        onClose();
+                      }
+                    }}
+                  >
+                    <Icon className="w-5 h-5 mr-3" />
+                    {item.name}
+                  </a>
+                );
+              }
+              
               return (
                 <Link key={item.name} href={item.href}>
                   <div 
