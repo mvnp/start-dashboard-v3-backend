@@ -201,7 +201,7 @@ export default function Landing() {
       </div>
 
       {/* Pricing Section */}
-      <div id="pricing" className="py-20 bg-slate-50">
+      <div id="pricing" className="py-20" style={{ backgroundColor: 'rgb(140 57 18 / 4%)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
