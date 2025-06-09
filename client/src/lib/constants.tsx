@@ -21,13 +21,6 @@ import {
 
 export const navigationItems = [
   {
-    name: "Landing",
-    href: "/landing",
-    icon: Home,
-    current: false,
-    target: "_blank",
-  },
-  {
     name: "Dashboard",
     href: "/",
     icon: Home,
@@ -98,6 +91,13 @@ export const navigationItems = [
     href: "/support",
     icon: HeadphonesIcon,
     current: false,
+  },
+  {
+    name: "Landing Page",
+    href: "/landing",
+    icon: Home,
+    current: false,
+    target: "_blank",
   },
 ];
 
