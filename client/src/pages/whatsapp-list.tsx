@@ -121,6 +121,21 @@ export default function WhatsappList() {
     );
   }
 
+  // Debug display
+  if (!isLoading && instances.length === 0) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-4">WhatsApp Instances Debug</h1>
+        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded">
+          <p>Loading: {isLoading ? 'Yes' : 'No'}</p>
+          <p>Instances length: {instances.length}</p>
+          <p>Raw data: {JSON.stringify(instances)}</p>
+          <p>Error: {error ? JSON.stringify(error) : 'None'}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 w-full">
       <div className="mb-6">
