@@ -212,7 +212,7 @@ export default function AccountingForm() {
   const categories = selectedType === "revenue" ? revenueCategories : expenseCategories;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 w-full">
       <div className="mb-6">
         <Button 
           variant="outline" 
