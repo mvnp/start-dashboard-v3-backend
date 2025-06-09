@@ -86,11 +86,57 @@ export default function Landing() {
     return Math.round(price / months);
   };
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const navigationItems = [
+    { name: 'Home', id: 'hero' },
+    { name: 'Features', id: 'features' },
+    { name: 'Pricing', id: 'pricing' },
+    { name: 'About', id: 'about' },
+    { name: 'Contact', id: 'contact' }
+  ];
+
   return (
     <div className="min-h-screen">
+      {/* Top Navigation */}
+      <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm shadow-sm z-50 border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <Crown className="h-8 w-8 text-barber-primary mr-2" />
+              <span className="text-xl font-bold text-slate-900">BarberPro</span>
+            </div>
+            <div className="hidden md:flex items-center space-x-8">
+              {navigationItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => scrollToSection(item.id)}
+                  className="text-slate-600 hover:text-barber-primary transition-colors duration-200 font-medium"
+                >
+                  {item.name}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center space-x-4">
+              <Button variant="outline" size="sm">
+                Sign In
+              </Button>
+              <Button size="sm" className="bg-barber-primary hover:bg-barber-secondary">
+                Get Started
+              </Button>
+            </div>
+          </div>
+        </div>
+      </nav>
       {/* Hero Section */}
       <div 
-        className="relative bg-gradient-to-r from-barber-primary to-barber-secondary py-20"
+        id="hero"
+        className="relative bg-gradient-to-r from-barber-primary to-barber-secondary py-20 pt-36"
         style={{
           backgroundImage: `linear-gradient(rgba(139, 69, 19, 0.8), rgba(210, 105, 30, 0.8)), url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080')`,
           backgroundSize: "cover",
@@ -123,7 +169,7 @@ export default function Landing() {
       </div>
 
       {/* Features Section */}
-      <div className="py-20 bg-white">
+      <div id="features" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
@@ -154,7 +200,7 @@ export default function Landing() {
       </div>
 
       {/* Pricing Section */}
-      <div className="py-20 bg-slate-50">
+      <div id="pricing" className="py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
@@ -275,6 +321,129 @@ export default function Landing() {
           >
             Get Started Today
           </Button>
+        </div>
+      </div>
+
+      {/* About Section */}
+      <div id="about" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">
+                About BarberPro
+              </h2>
+              <p className="text-lg text-slate-600 mb-6">
+                We understand the unique challenges of running a modern barbershop. That's why we created BarberPro - a comprehensive management platform designed specifically for barbershop owners who want to focus on their craft while growing their business.
+              </p>
+              <p className="text-lg text-slate-600 mb-8">
+                With over 5 years of experience in the industry, we've helped thousands of barbershops streamline their operations, increase revenue, and provide exceptional customer service.
+              </p>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-barber-primary mb-2">5K+</div>
+                  <div className="text-slate-600">Active Barbershops</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-barber-primary mb-2">1M+</div>
+                  <div className="text-slate-600">Appointments Booked</div>
+                </div>
+              </div>
+            </div>
+            <div className="relative">
+              <img 
+                src="https://images.unsplash.com/photo-1622286342621-4bd786c2447c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"
+                alt="Modern barbershop interior"
+                className="rounded-lg shadow-xl"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Contact Section */}
+      <div id="contact" className="py-20 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              Get in Touch
+            </h2>
+            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+              Have questions? We're here to help you get started with BarberPro
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-barber-primary rounded-xl flex items-center justify-center mx-auto mb-4">
+                <User className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">Sales</h3>
+              <p className="text-slate-600 mb-4">Get a personalized demo and pricing</p>
+              <a href="mailto:sales@barberpro.com" className="text-barber-primary hover:underline">
+                sales@barberpro.com
+              </a>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Settings className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">Support</h3>
+              <p className="text-slate-600 mb-4">Technical help and assistance</p>
+              <a href="mailto:support@barberpro.com" className="text-barber-primary hover:underline">
+                support@barberpro.com
+              </a>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">Community</h3>
+              <p className="text-slate-600 mb-4">Join our barbershop community</p>
+              <a href="mailto:community@barberpro.com" className="text-barber-primary hover:underline">
+                community@barberpro.com
+              </a>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl mx-auto">
+            <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">
+              Start Your Free Trial Today
+            </h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input 
+                  type="text" 
+                  placeholder="First Name"
+                  className="px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-barber-primary"
+                />
+                <input 
+                  type="text" 
+                  placeholder="Last Name"
+                  className="px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-barber-primary"
+                />
+              </div>
+              <input 
+                type="email" 
+                placeholder="Email Address"
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-barber-primary"
+              />
+              <input 
+                type="tel" 
+                placeholder="Phone Number"
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-barber-primary"
+              />
+              <textarea 
+                placeholder="Tell us about your barbershop"
+                rows={4}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-barber-primary"
+              ></textarea>
+              <Button className="w-full py-3 bg-barber-primary hover:bg-barber-secondary text-white font-semibold">
+                Start Free Trial
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
