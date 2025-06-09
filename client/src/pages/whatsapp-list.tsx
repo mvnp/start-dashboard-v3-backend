@@ -57,7 +57,7 @@ export default function WhatsappList() {
     },
   });
 
-  const filteredInstances = instances.filter((instance: WhatsappInstance) => {
+  const filteredInstances = (instances || []).filter((instance: WhatsappInstance) => {
     const matchesSearch = 
       instance.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       instance.phone_number.toLowerCase().includes(searchTerm.toLowerCase());
@@ -68,10 +68,10 @@ export default function WhatsappList() {
   });
 
   const getInstanceStats = () => {
-    const total = instances.length;
-    const connected = instances.filter((i: WhatsappInstance) => i.status === "connected").length;
-    const connecting = instances.filter((i: WhatsappInstance) => i.status === "connecting").length;
-    const disconnected = instances.filter((i: WhatsappInstance) => i.status === "disconnected").length;
+    const total = (instances || []).length;
+    const connected = (instances || []).filter((i: WhatsappInstance) => i.status === "connected").length;
+    const connecting = (instances || []).filter((i: WhatsappInstance) => i.status === "connecting").length;
+    const disconnected = (instances || []).filter((i: WhatsappInstance) => i.status === "disconnected").length;
     
     return { total, connected, connecting, disconnected };
   };
