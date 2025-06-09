@@ -25,6 +25,8 @@ import PaymentGatewayList from "@/pages/payment-gateway-list";
 import PaymentGatewayForm from "@/pages/payment-gateway-form";
 import AccountingList from "@/pages/accounting-list";
 import AccountingForm from "@/pages/accounting-form";
+import SupportTicketList from "@/pages/support-ticket-list";
+import SupportTicketForm from "@/pages/support-ticket-form";
 import Support from "@/pages/support";
 import NotFound from "@/pages/not-found";
 
@@ -165,6 +167,26 @@ function Router() {
       <Route path="/accounting/:id/edit">
         <Layout>
           <AccountingForm />
+        </Layout>
+      </Route>
+      <Route path="/support-tickets">
+        <Layout>
+          <SupportTicketList />
+        </Layout>
+      </Route>
+      <Route path="/support-tickets/new">
+        <Layout>
+          <SupportTicketForm />
+        </Layout>
+      </Route>
+      <Route path="/support-tickets/:id">
+        <Layout>
+          <SupportTicketForm />
+        </Layout>
+      </Route>
+      <Route path="/support-tickets/:id/edit">
+        <Layout>
+          <SupportTicketForm />
         </Layout>
       </Route>
       <Route path="/support">
