@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan } from "@shared/schema";
+import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -28,6 +28,13 @@ export interface IStorage {
   createBarberPlan(plan: InsertBarberPlan): Promise<BarberPlan>;
   updateBarberPlan(id: number, plan: Partial<InsertBarberPlan>): Promise<BarberPlan | undefined>;
   deleteBarberPlan(id: number): Promise<boolean>;
+  
+  // Service methods
+  getAllServices(): Promise<Service[]>;
+  getService(id: number): Promise<Service | undefined>;
+  createService(service: InsertService): Promise<Service>;
+  updateService(id: number, service: Partial<InsertService>): Promise<Service | undefined>;
+  deleteService(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -35,25 +42,30 @@ export class MemStorage implements IStorage {
   private staff: Map<number, Staff>;
   private clients: Map<number, Client>;
   private barberPlans: Map<number, BarberPlan>;
+  private services: Map<number, Service>;
   private currentUserId: number;
   private currentStaffId: number;
   private currentClientId: number;
   private currentBarberPlanId: number;
+  private currentServiceId: number;
 
   constructor() {
     this.users = new Map();
     this.staff = new Map();
     this.clients = new Map();
     this.barberPlans = new Map();
+    this.services = new Map();
     this.currentUserId = 1;
     this.currentStaffId = 1;
     this.currentClientId = 1;
     this.currentBarberPlanId = 1;
+    this.currentServiceId = 1;
     
     // Add sample data
     this.seedStaffData();
     this.seedClientData();
     this.seedBarberPlanData();
+    this.seedServiceData();
   }
 
   private seedStaffData() {
@@ -315,6 +327,93 @@ export class MemStorage implements IStorage {
 
   async deleteBarberPlan(id: number): Promise<boolean> {
     return this.barberPlans.delete(id);
+  }
+
+  private seedServiceData() {
+    const sampleServices = [
+      {
+        name: "Classic Haircut",
+        description: "Traditional men's haircut with scissor and clipper styling",
+        duration: 30,
+        price: 2500, // $25.00
+        staff_id: 1,
+        is_active: true
+      },
+      {
+        name: "Beard Trim",
+        description: "Professional beard trimming and shaping",
+        duration: 20,
+        price: 1500, // $15.00
+        staff_id: 1,
+        is_active: true
+      },
+      {
+        name: "Deluxe Cut & Style",
+        description: "Premium haircut with wash, cut, and styling",
+        duration: 45,
+        price: 4000, // $40.00
+        staff_id: 2,
+        is_active: true
+      },
+      {
+        name: "Hot Towel Shave",
+        description: "Traditional straight razor shave with hot towel treatment",
+        duration: 40,
+        price: 3500, // $35.00
+        staff_id: 2,
+        is_active: true
+      }
+    ];
+
+    sampleServices.forEach((serviceData) => {
+      const id = this.currentServiceId++;
+      const now = new Date();
+      const service: Service = {
+        ...serviceData,
+        id,
+        created_at: now,
+        updated_at: now
+      };
+      this.services.set(id, service);
+    });
+  }
+
+  async getAllServices(): Promise<Service[]> {
+    return Array.from(this.services.values());
+  }
+
+  async getService(id: number): Promise<Service | undefined> {
+    return this.services.get(id);
+  }
+
+  async createService(insertService: InsertService): Promise<Service> {
+    const id = this.currentServiceId++;
+    const now = new Date();
+    const service: Service = { 
+      ...insertService, 
+      id,
+      created_at: now,
+      updated_at: now
+    };
+    this.services.set(id, service);
+    return service;
+  }
+
+  async updateService(id: number, updateData: Partial<InsertService>): Promise<Service | undefined> {
+    const existingService = this.services.get(id);
+    if (!existingService) return undefined;
+    
+    const updatedService: Service = {
+      ...existingService,
+      ...updateData,
+      updated_at: new Date()
+    };
+    this.services.set(id, updatedService);
+    return updatedService;
+  }
+
+  async deleteService(id: number): Promise<boolean> {
+    return this.services.delete(id);
   }
 }
 

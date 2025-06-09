@@ -50,6 +50,18 @@ export const barberPlans = pgTable("barber_plans", {
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
+export const services = pgTable("services", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  duration: integer("duration").notNull(), // in minutes
+  price: integer("price").notNull(), // in cents
+  staff_id: integer("staff_id").notNull(),
+  is_active: boolean("is_active").notNull().default(true),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -73,6 +85,12 @@ export const insertBarberPlanSchema = createInsertSchema(barberPlans).omit({
   updated_at: true,
 });
 
+export const insertServiceSchema = createInsertSchema(services).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertStaff = z.infer<typeof insertStaffSchema>;
@@ -81,3 +99,5 @@ export type InsertClient = z.infer<typeof insertClientSchema>;
 export type Client = typeof clients.$inferSelect;
 export type InsertBarberPlan = z.infer<typeof insertBarberPlanSchema>;
 export type BarberPlan = typeof barberPlans.$inferSelect;
+export type InsertService = z.infer<typeof insertServiceSchema>;
+export type Service = typeof services.$inferSelect;
