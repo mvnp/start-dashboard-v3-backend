@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService } from "@shared/schema";
+import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService, type Appointment, type InsertAppointment } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -35,6 +35,13 @@ export interface IStorage {
   createService(service: InsertService): Promise<Service>;
   updateService(id: number, service: Partial<InsertService>): Promise<Service | undefined>;
   deleteService(id: number): Promise<boolean>;
+  
+  // Appointment methods
+  getAllAppointments(): Promise<Appointment[]>;
+  getAppointment(id: number): Promise<Appointment | undefined>;
+  createAppointment(appointment: InsertAppointment): Promise<Appointment>;
+  updateAppointment(id: number, appointment: Partial<InsertAppointment>): Promise<Appointment | undefined>;
+  deleteAppointment(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -43,11 +50,13 @@ export class MemStorage implements IStorage {
   private clients: Map<number, Client>;
   private barberPlans: Map<number, BarberPlan>;
   private services: Map<number, Service>;
+  private appointments: Map<number, Appointment>;
   private currentUserId: number;
   private currentStaffId: number;
   private currentClientId: number;
   private currentBarberPlanId: number;
   private currentServiceId: number;
+  private currentAppointmentId: number;
 
   constructor() {
     this.users = new Map();
@@ -55,17 +64,20 @@ export class MemStorage implements IStorage {
     this.clients = new Map();
     this.barberPlans = new Map();
     this.services = new Map();
+    this.appointments = new Map();
     this.currentUserId = 1;
     this.currentStaffId = 1;
     this.currentClientId = 1;
     this.currentBarberPlanId = 1;
     this.currentServiceId = 1;
+    this.currentAppointmentId = 1;
     
     // Add sample data
     this.seedStaffData();
     this.seedClientData();
     this.seedBarberPlanData();
     this.seedServiceData();
+    this.seedAppointmentData();
   }
 
   private seedStaffData() {
@@ -414,6 +426,97 @@ export class MemStorage implements IStorage {
 
   async deleteService(id: number): Promise<boolean> {
     return this.services.delete(id);
+  }
+
+  private seedAppointmentData() {
+    const sampleAppointments = [
+      {
+        client_id: 1,
+        staff_id: 1,
+        service_id: 1,
+        appointment_date: "2024-12-15",
+        appointment_time: "10:00",
+        status: "scheduled",
+        notes: "First time client, prefers shorter length"
+      },
+      {
+        client_id: 2,
+        staff_id: 1,
+        service_id: 2,
+        appointment_date: "2024-12-15",
+        appointment_time: "11:00",
+        status: "confirmed",
+        notes: "Regular client, usual beard trim"
+      },
+      {
+        client_id: 1,
+        staff_id: 2,
+        service_id: 3,
+        appointment_date: "2024-12-16",
+        appointment_time: "14:30",
+        status: "scheduled",
+        notes: "Deluxe package for special event"
+      },
+      {
+        client_id: 2,
+        staff_id: 2,
+        service_id: 4,
+        appointment_date: "2024-12-16",
+        appointment_time: "16:00",
+        status: "completed",
+        notes: "Excellent traditional shave experience"
+      }
+    ];
+
+    sampleAppointments.forEach((appointmentData) => {
+      const id = this.currentAppointmentId++;
+      const now = new Date();
+      const appointment: Appointment = {
+        ...appointmentData,
+        id,
+        created_at: now,
+        updated_at: now
+      };
+      this.appointments.set(id, appointment);
+    });
+  }
+
+  async getAllAppointments(): Promise<Appointment[]> {
+    return Array.from(this.appointments.values());
+  }
+
+  async getAppointment(id: number): Promise<Appointment | undefined> {
+    return this.appointments.get(id);
+  }
+
+  async createAppointment(insertAppointment: InsertAppointment): Promise<Appointment> {
+    const id = this.currentAppointmentId++;
+    const now = new Date();
+    const appointment: Appointment = { 
+      ...insertAppointment, 
+      id,
+      created_at: now,
+      updated_at: now
+    };
+    this.appointments.set(id, appointment);
+    return appointment;
+  }
+
+  async updateAppointment(id: number, updateData: Partial<InsertAppointment>): Promise<Appointment | undefined> {
+    const existingAppointment = this.appointments.get(id);
+    if (!existingAppointment) return undefined;
+    
+    const updatedAppointment: Appointment = {
+      ...existingAppointment,
+      ...updateData,
+      updated_at: new Date()
+    };
+    this.appointments.set(id, updatedAppointment);
+    return updatedAppointment;
+  }
+
+  async deleteAppointment(id: number): Promise<boolean> {
+    return this.appointments.delete(id);
   }
 }
 
