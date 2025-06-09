@@ -120,14 +120,7 @@ function Router() {
           <StaffForm />
         </Layout>
       </Route>
-      <Route path="/whatsapp">
-        <Layout>
-          <div className="p-6">
-            <h1 className="text-3xl font-bold text-slate-900">WhatsApp Instances</h1>
-            <p className="text-slate-600 mt-2">WhatsApp integration management coming soon...</p>
-          </div>
-        </Layout>
-      </Route>
+
       <Route path="/plans">
         <Layout>
           <BarberPlanList />
