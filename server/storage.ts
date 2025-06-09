@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient } from "@shared/schema";
+import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -21,27 +21,39 @@ export interface IStorage {
   createClient(client: InsertClient): Promise<Client>;
   updateClient(id: number, client: Partial<InsertClient>): Promise<Client | undefined>;
   deleteClient(id: number): Promise<boolean>;
+  
+  // Barber Plan methods
+  getAllBarberPlans(): Promise<BarberPlan[]>;
+  getBarberPlan(id: number): Promise<BarberPlan | undefined>;
+  createBarberPlan(plan: InsertBarberPlan): Promise<BarberPlan>;
+  updateBarberPlan(id: number, plan: Partial<InsertBarberPlan>): Promise<BarberPlan | undefined>;
+  deleteBarberPlan(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private staff: Map<number, Staff>;
   private clients: Map<number, Client>;
+  private barberPlans: Map<number, BarberPlan>;
   private currentUserId: number;
   private currentStaffId: number;
   private currentClientId: number;
+  private currentBarberPlanId: number;
 
   constructor() {
     this.users = new Map();
     this.staff = new Map();
     this.clients = new Map();
+    this.barberPlans = new Map();
     this.currentUserId = 1;
     this.currentStaffId = 1;
     this.currentClientId = 1;
+    this.currentBarberPlanId = 1;
     
     // Add sample data
     this.seedStaffData();
     this.seedClientData();
+    this.seedBarberPlanData();
   }
 
   private seedStaffData() {
@@ -226,6 +238,83 @@ export class MemStorage implements IStorage {
 
   async deleteClient(id: number): Promise<boolean> {
     return this.clients.delete(id);
+  }
+
+  private seedBarberPlanData() {
+    const samplePlans = [
+      {
+        title: "Basic Plan",
+        subtitle: "Perfect for starting barbers",
+        benefits: ["Online booking system", "Customer management", "Basic reporting"],
+        image1: "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=400",
+        image2: "https://images.unsplash.com/photo-1622287162716-f311baa1a2b8?w=400",
+        price1m: 2999,
+        price3m: 7999,
+        price12m: 29999,
+        payment_link: "https://payment.example.com/basic"
+      },
+      {
+        title: "Professional Plan",
+        subtitle: "For established barbershops",
+        benefits: ["Everything in Basic", "Advanced analytics", "Staff management", "Inventory tracking"],
+        image1: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400",
+        image2: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400",
+        price1m: 4999,
+        price3m: 13999,
+        price12m: 49999,
+        payment_link: "https://payment.example.com/professional"
+      }
+    ];
+
+    samplePlans.forEach((planData) => {
+      const id = this.currentBarberPlanId++;
+      const now = new Date();
+      const plan: BarberPlan = {
+        ...planData,
+        id,
+        created_at: now,
+        updated_at: now
+      };
+      this.barberPlans.set(id, plan);
+    });
+  }
+
+  async getAllBarberPlans(): Promise<BarberPlan[]> {
+    return Array.from(this.barberPlans.values());
+  }
+
+  async getBarberPlan(id: number): Promise<BarberPlan | undefined> {
+    return this.barberPlans.get(id);
+  }
+
+  async createBarberPlan(insertPlan: InsertBarberPlan): Promise<BarberPlan> {
+    const id = this.currentBarberPlanId++;
+    const now = new Date();
+    const plan: BarberPlan = { 
+      ...insertPlan, 
+      id,
+      created_at: now,
+      updated_at: now
+    };
+    this.barberPlans.set(id, plan);
+    return plan;
+  }
+
+  async updateBarberPlan(id: number, updateData: Partial<InsertBarberPlan>): Promise<BarberPlan | undefined> {
+    const existingPlan = this.barberPlans.get(id);
+    if (!existingPlan) return undefined;
+    
+    const updatedPlan: BarberPlan = {
+      ...existingPlan,
+      ...updateData,
+      updated_at: new Date()
+    };
+    this.barberPlans.set(id, updatedPlan);
+    return updatedPlan;
+  }
+
+  async deleteBarberPlan(id: number): Promise<boolean> {
+    return this.barberPlans.delete(id);
   }
 }
 
