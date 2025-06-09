@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService, type Appointment, type InsertAppointment, type PaymentGateway, type InsertPaymentGateway, type AccountingTransaction, type InsertAccountingTransaction, type SupportTicket, type InsertSupportTicket, type Faq, type InsertFaq } from "@shared/schema";
+import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService, type Appointment, type InsertAppointment, type PaymentGateway, type InsertPaymentGateway, type AccountingTransaction, type InsertAccountingTransaction, type SupportTicket, type InsertSupportTicket, type Faq, type InsertFaq, type WhatsappInstance, type InsertWhatsappInstance } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -70,6 +70,15 @@ export interface IStorage {
   createFaq(faq: InsertFaq): Promise<Faq>;
   updateFaq(id: number, faq: Partial<InsertFaq>): Promise<Faq | undefined>;
   deleteFaq(id: number): Promise<boolean>;
+  
+  // WhatsApp Instance methods
+  getAllWhatsappInstances(): Promise<WhatsappInstance[]>;
+  getWhatsappInstance(id: number): Promise<WhatsappInstance | undefined>;
+  createWhatsappInstance(instance: InsertWhatsappInstance): Promise<WhatsappInstance>;
+  updateWhatsappInstance(id: number, instance: Partial<InsertWhatsappInstance>): Promise<WhatsappInstance | undefined>;
+  deleteWhatsappInstance(id: number): Promise<boolean>;
+  generateQrCode(id: number): Promise<string | null>;
+  connectInstance(id: number, sessionId: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -83,6 +92,7 @@ export class MemStorage implements IStorage {
   private accountingTransactions: Map<number, AccountingTransaction>;
   private supportTickets: Map<number, SupportTicket>;
   private faqs: Map<number, Faq>;
+  private whatsappInstances: Map<number, WhatsappInstance>;
   private currentUserId: number;
   private currentStaffId: number;
   private currentClientId: number;
@@ -93,6 +103,7 @@ export class MemStorage implements IStorage {
   private currentAccountingTransactionId: number;
   private currentSupportTicketId: number;
   private currentFaqId: number;
+  private currentWhatsappInstanceId: number;
 
   constructor() {
     this.users = new Map();
@@ -105,6 +116,7 @@ export class MemStorage implements IStorage {
     this.accountingTransactions = new Map();
     this.supportTickets = new Map();
     this.faqs = new Map();
+    this.whatsappInstances = new Map();
     this.currentUserId = 1;
     this.currentStaffId = 1;
     this.currentClientId = 1;
@@ -115,6 +127,7 @@ export class MemStorage implements IStorage {
     this.currentAccountingTransactionId = 1;
     this.currentSupportTicketId = 1;
     this.currentFaqId = 1;
+    this.currentWhatsappInstanceId = 1;
     
     // Add sample data
     this.seedStaffData();

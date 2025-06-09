@@ -194,6 +194,28 @@ export const insertFaqSchema = createInsertSchema(faqs).omit({
   updated_at: true,
 });
 
+export const whatsappInstances = pgTable("whatsapp_instances", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  phone_number: text("phone_number").notNull(),
+  status: text("status").notNull().default("disconnected"), // disconnected, connecting, connected
+  qr_code: text("qr_code"),
+  session_id: text("session_id"),
+  last_seen: timestamp("last_seen"),
+  webhook_url: text("webhook_url"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow()
+});
+
+export const insertWhatsappInstanceSchema = createInsertSchema(whatsappInstances).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  qr_code: true,
+  session_id: true,
+  last_seen: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertStaff = z.infer<typeof insertStaffSchema>;
@@ -214,3 +236,5 @@ export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
 export type SupportTicket = typeof supportTickets.$inferSelect;
 export type InsertFaq = z.infer<typeof insertFaqSchema>;
 export type Faq = typeof faqs.$inferSelect;
+export type InsertWhatsappInstance = z.infer<typeof insertWhatsappInstanceSchema>;
+export type WhatsappInstance = typeof whatsappInstances.$inferSelect;
