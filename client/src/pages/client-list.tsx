@@ -58,7 +58,7 @@ export default function ClientList() {
   });
 
   const filteredClients = clients.filter(client =>
-    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    `${client.first_name} ${client.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.address.toLowerCase().includes(searchTerm.toLowerCase())
@@ -155,10 +155,10 @@ export default function ClientList() {
                   >
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-barber-primary rounded-full flex items-center justify-center text-white font-semibold">
-                        {client.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
+                        {client.first_name[0]}{client.last_name[0]}
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-slate-900">{client.name}</h3>
+                        <h3 className="font-semibold text-slate-900">{client.first_name} {client.last_name}</h3>
                         <div className="flex items-center space-x-4 mt-1 text-sm text-slate-600">
                           <div className="flex items-center">
                             <Mail className="w-4 h-4 mr-1" />
@@ -207,7 +207,7 @@ export default function ClientList() {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete Client</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete {client.name}? This action cannot be undone.
+                                Are you sure you want to delete {client.first_name} {client.last_name}? This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

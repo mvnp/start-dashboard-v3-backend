@@ -222,7 +222,7 @@ export default function StaffList() {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete Staff Member</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete {member.name}? This action cannot be undone.
+                                Are you sure you want to delete {member.first_name} {member.last_name}? This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
