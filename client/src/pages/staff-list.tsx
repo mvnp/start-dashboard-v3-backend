@@ -63,7 +63,7 @@ export default function StaffList() {
   });
 
   const deleteStaffMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/staff/${id}`, { method: "DELETE" }),
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/staff/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
       toast({
@@ -186,7 +186,7 @@ export default function StaffList() {
                   >
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-barber-primary rounded-full flex items-center justify-center text-white font-semibold">
-                        {member.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                        {member.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
                       </div>
                       <div>
                         <h3 className="font-semibold text-slate-900">{member.name}</h3>

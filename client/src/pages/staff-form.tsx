@@ -1,9 +1,6 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { ArrowLeft, Save, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,23 +13,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { insertStaffSchema, Staff } from "@shared/schema";
+import { Staff } from "@shared/schema";
 
-const staffFormSchema = insertStaffSchema.extend({
-  salary: z.string().transform((val) => parseInt(val, 10)),
-});
-
-type StaffFormData = z.infer<typeof staffFormSchema>;
+interface StaffFormData {
+  name: string;
+  email: string;
+  phone: string;
+  tax_id: string;
+  role: string;
+  hire_date: string;
+  salary: number;
+}
 
 const roleOptions = [
   { value: "super-admin", label: "Super Admin" },
@@ -48,17 +41,14 @@ export default function StaffForm() {
   const isEdit = !!params.id;
   const staffId = params.id ? parseInt(params.id) : null;
 
-  const form = useForm<StaffFormData>({
-    resolver: zodResolver(staffFormSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      tax_id: "",
-      role: "",
-      hire_date: "",
-      salary: "",
-    },
+  const [formData, setFormData] = useState<StaffFormData>({
+    name: "",
+    email: "",
+    phone: "",
+    tax_id: "",
+    role: "",
+    hire_date: "",
+    salary: 0,
   });
 
   const { data: staffMember, isLoading } = useQuery({
@@ -68,13 +58,7 @@ export default function StaffForm() {
   });
 
   const createStaffMutation = useMutation({
-    mutationFn: (data: StaffFormData) => apiRequest("/api/staff", {
-      method: "POST",
-      body: JSON.stringify({
-        ...data,
-        salary: parseInt(data.salary.toString(), 10),
-      }),
-    }),
+    mutationFn: (data: StaffFormData) => apiRequest("POST", "/api/staff", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
       toast({
@@ -93,13 +77,7 @@ export default function StaffForm() {
   });
 
   const updateStaffMutation = useMutation({
-    mutationFn: (data: StaffFormData) => apiRequest(`/api/staff/${staffId}`, {
-      method: "PUT",
-      body: JSON.stringify({
-        ...data,
-        salary: parseInt(data.salary.toString(), 10),
-      }),
-    }),
+    mutationFn: (data: StaffFormData) => apiRequest("PUT", `/api/staff/${staffId}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
       queryClient.invalidateQueries({ queryKey: ["/api/staff", staffId] });
@@ -120,24 +98,32 @@ export default function StaffForm() {
 
   useEffect(() => {
     if (staffMember && isEdit) {
-      form.reset({
+      setFormData({
         name: staffMember.name,
         email: staffMember.email,
         phone: staffMember.phone,
         tax_id: staffMember.tax_id,
         role: staffMember.role,
         hire_date: staffMember.hire_date,
-        salary: staffMember.salary.toString(),
+        salary: staffMember.salary,
       });
     }
-  }, [staffMember, isEdit, form]);
+  }, [staffMember, isEdit]);
 
-  const onSubmit = (data: StaffFormData) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     if (isEdit) {
-      updateStaffMutation.mutate(data);
+      updateStaffMutation.mutate(formData);
     } else {
-      createStaffMutation.mutate(data);
+      createStaffMutation.mutate(formData);
     }
+  };
+
+  const handleInputChange = (field: keyof StaffFormData, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: field === 'salary' ? parseInt(value) || 0 : value
+    }));
   };
 
   const isSubmitting = createStaffMutation.isPending || updateStaffMutation.isPending;
@@ -189,147 +175,116 @@ export default function StaffForm() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter full name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email Address</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="Enter email address" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter phone number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tax_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tax ID</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter tax identification number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Role</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select staff role" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {roleOptions.map((role) => (
-                            <SelectItem key={role.value} value={role.value}>
-                              {role.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="hire_date"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Hire Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="salary"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2">
-                      <FormLabel>Annual Salary (USD)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="Enter annual salary" 
-                          min="0"
-                          step="1000"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  placeholder="Enter full name"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  required
                 />
               </div>
 
-              <div className="flex justify-end space-x-4 pt-6 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setLocation("/staff")}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-barber-primary hover:bg-barber-secondary"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  {isSubmitting 
-                    ? (isEdit ? "Updating..." : "Creating...") 
-                    : (isEdit ? "Update Staff" : "Create Staff")
-                  }
-                </Button>
+              <div>
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter email address"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  required
+                />
               </div>
-            </form>
-          </Form>
+
+              <div>
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  placeholder="Enter phone number"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="tax_id">Tax ID</Label>
+                <Input
+                  id="tax_id"
+                  placeholder="Enter tax identification number"
+                  value={formData.tax_id}
+                  onChange={(e) => handleInputChange('tax_id', e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="role">Role</Label>
+                <Select onValueChange={(value) => handleInputChange('role', value)} value={formData.role}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select staff role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roleOptions.map((role) => (
+                      <SelectItem key={role.value} value={role.value}>
+                        {role.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="hire_date">Hire Date</Label>
+                <Input
+                  id="hire_date"
+                  type="date"
+                  value={formData.hire_date}
+                  onChange={(e) => handleInputChange('hire_date', e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <Label htmlFor="salary">Annual Salary (USD)</Label>
+                <Input
+                  id="salary"
+                  type="number"
+                  placeholder="Enter annual salary"
+                  min="0"
+                  step="1000"
+                  value={formData.salary}
+                  onChange={(e) => handleInputChange('salary', e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-4 pt-6 border-t">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setLocation("/staff")}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-barber-primary hover:bg-barber-secondary"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {isSubmitting 
+                  ? (isEdit ? "Updating..." : "Creating...") 
+                  : (isEdit ? "Update Staff" : "Create Staff")
+                }
+              </Button>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

@@ -11,6 +11,8 @@ import Dashboard from "@/pages/dashboard";
 import Login from "@/pages/login";
 import Logout from "@/pages/logout";
 import Landing from "@/pages/landing";
+import StaffList from "@/pages/staff-list";
+import StaffForm from "@/pages/staff-form";
 import NotFound from "@/pages/not-found";
 
 function Layout({ children }: { children: React.ReactNode }) {
