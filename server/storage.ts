@@ -27,6 +27,53 @@ export class MemStorage implements IStorage {
     this.staff = new Map();
     this.currentUserId = 1;
     this.currentStaffId = 1;
+    
+    // Add sample staff data
+    this.seedStaffData();
+  }
+
+  private seedStaffData() {
+    const sampleStaff = [
+      {
+        name: "John Martinez",
+        email: "john@barberpro.com",
+        phone: "+1 (555) 123-4567",
+        tax_id: "123-45-6789",
+        role: "super-admin",
+        hire_date: "2023-01-15",
+        salary: 75000
+      },
+      {
+        name: "Sarah Johnson",
+        email: "sarah@barberpro.com", 
+        phone: "+1 (555) 234-5678",
+        tax_id: "234-56-7890",
+        role: "merchant",
+        hire_date: "2023-03-20",
+        salary: 55000
+      },
+      {
+        name: "Mike Rodriguez",
+        email: "mike@barberpro.com",
+        phone: "+1 (555) 345-6789", 
+        tax_id: "345-67-8901",
+        role: "collaborator",
+        hire_date: "2023-06-10",
+        salary: 45000
+      }
+    ];
+
+    sampleStaff.forEach(staffData => {
+      const id = this.currentStaffId++;
+      const now = new Date();
+      const staff: Staff = {
+        ...staffData,
+        id,
+        created_at: now,
+        updated_at: now
+      };
+      this.staff.set(id, staff);
+    });
   }
 
   async getUser(id: number): Promise<User | undefined> {

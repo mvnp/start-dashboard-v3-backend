@@ -67,10 +67,17 @@ function Router() {
       </Route>
       <Route path="/staff">
         <Layout>
-          <div className="p-6">
-            <h1 className="text-3xl font-bold text-slate-900">Staff</h1>
-            <p className="text-slate-600 mt-2">Staff management coming soon...</p>
-          </div>
+          <StaffList />
+        </Layout>
+      </Route>
+      <Route path="/staff/new">
+        <Layout>
+          <StaffForm />
+        </Layout>
+      </Route>
+      <Route path="/staff/edit/:id">
+        <Layout>
+          <StaffForm />
         </Layout>
       </Route>
       <Route path="/reports">
