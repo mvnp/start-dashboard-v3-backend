@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService, type Appointment, type InsertAppointment, type PaymentGateway, type InsertPaymentGateway } from "@shared/schema";
+import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService, type Appointment, type InsertAppointment, type PaymentGateway, type InsertPaymentGateway, type AccountingTransaction, type InsertAccountingTransaction } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -49,6 +49,13 @@ export interface IStorage {
   createPaymentGateway(gateway: InsertPaymentGateway): Promise<PaymentGateway>;
   updatePaymentGateway(id: number, gateway: Partial<InsertPaymentGateway>): Promise<PaymentGateway | undefined>;
   deletePaymentGateway(id: number): Promise<boolean>;
+  
+  // Accounting Transaction methods
+  getAllAccountingTransactions(): Promise<AccountingTransaction[]>;
+  getAccountingTransaction(id: number): Promise<AccountingTransaction | undefined>;
+  createAccountingTransaction(transaction: InsertAccountingTransaction): Promise<AccountingTransaction>;
+  updateAccountingTransaction(id: number, transaction: Partial<InsertAccountingTransaction>): Promise<AccountingTransaction | undefined>;
+  deleteAccountingTransaction(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -59,6 +66,7 @@ export class MemStorage implements IStorage {
   private services: Map<number, Service>;
   private appointments: Map<number, Appointment>;
   private paymentGateways: Map<number, PaymentGateway>;
+  private accountingTransactions: Map<number, AccountingTransaction>;
   private currentUserId: number;
   private currentStaffId: number;
   private currentClientId: number;
@@ -66,6 +74,7 @@ export class MemStorage implements IStorage {
   private currentServiceId: number;
   private currentAppointmentId: number;
   private currentPaymentGatewayId: number;
+  private currentAccountingTransactionId: number;
 
   constructor() {
     this.users = new Map();
@@ -75,6 +84,7 @@ export class MemStorage implements IStorage {
     this.services = new Map();
     this.appointments = new Map();
     this.paymentGateways = new Map();
+    this.accountingTransactions = new Map();
     this.currentUserId = 1;
     this.currentStaffId = 1;
     this.currentClientId = 1;
@@ -82,6 +92,7 @@ export class MemStorage implements IStorage {
     this.currentServiceId = 1;
     this.currentAppointmentId = 1;
     this.currentPaymentGatewayId = 1;
+    this.currentAccountingTransactionId = 1;
     
     // Add sample data
     this.seedStaffData();

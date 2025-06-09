@@ -89,6 +89,23 @@ export const paymentGateways = pgTable("payment_gateways", {
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
+export const accountingTransactions = pgTable("accounting_transactions", {
+  id: serial("id").primaryKey(),
+  type: text("type").notNull(), // "revenue" or "expense"
+  category: text("category").notNull(),
+  description: text("description").notNull(),
+  amount: integer("amount").notNull(), // Amount in cents
+  payment_method: text("payment_method").notNull(),
+  reference_number: text("reference_number"),
+  client_id: integer("client_id"),
+  staff_id: integer("staff_id"),
+  transaction_date: text("transaction_date").notNull(),
+  notes: text("notes"),
+  is_recurring: boolean("is_recurring").notNull().default(false),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -130,6 +147,12 @@ export const insertPaymentGatewaySchema = createInsertSchema(paymentGateways).om
   updated_at: true,
 });
 
+export const insertAccountingTransactionSchema = createInsertSchema(accountingTransactions).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertStaff = z.infer<typeof insertStaffSchema>;
@@ -144,3 +167,5 @@ export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 export type Appointment = typeof appointments.$inferSelect;
 export type InsertPaymentGateway = z.infer<typeof insertPaymentGatewaySchema>;
 export type PaymentGateway = typeof paymentGateways.$inferSelect;
+export type InsertAccountingTransaction = z.infer<typeof insertAccountingTransactionSchema>;
+export type AccountingTransaction = typeof accountingTransactions.$inferSelect;
