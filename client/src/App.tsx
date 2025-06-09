@@ -13,6 +13,8 @@ import Logout from "@/pages/logout";
 import Landing from "@/pages/landing";
 import StaffList from "@/pages/staff-list";
 import StaffForm from "@/pages/staff-form";
+import ClientList from "@/pages/client-list";
+import ClientForm from "@/pages/client-form";
 import NotFound from "@/pages/not-found";
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -51,10 +53,17 @@ function Router() {
       </Route>
       <Route path="/clients">
         <Layout>
-          <div className="p-6">
-            <h1 className="text-3xl font-bold text-slate-900">Clients</h1>
-            <p className="text-slate-600 mt-2">Client management coming soon...</p>
-          </div>
+          <ClientList />
+        </Layout>
+      </Route>
+      <Route path="/clients/new">
+        <Layout>
+          <ClientForm />
+        </Layout>
+      </Route>
+      <Route path="/clients/edit/:id">
+        <Layout>
+          <ClientForm />
         </Layout>
       </Route>
       <Route path="/services">
