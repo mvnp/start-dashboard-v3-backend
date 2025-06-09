@@ -914,7 +914,11 @@ export class MemStorage implements IStorage {
       const id = this.currentFaqId++;
       const faq: Faq = {
         id,
-        ...faqData,
+        question: faqData.question,
+        answer: faqData.answer,
+        category: faqData.category,
+        is_published: faqData.is_published,
+        order_index: faqData.order_index,
         created_at: new Date(),
         updated_at: new Date()
       };

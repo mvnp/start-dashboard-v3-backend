@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertStaffSchema, insertClientSchema, insertBarberPlanSchema, insertServiceSchema, insertAppointmentSchema, insertPaymentGatewaySchema, insertAccountingTransactionSchema, insertSupportTicketSchema } from "@shared/schema";
+import { insertStaffSchema, insertClientSchema, insertBarberPlanSchema, insertServiceSchema, insertAppointmentSchema, insertPaymentGatewaySchema, insertAccountingTransactionSchema, insertSupportTicketSchema, insertFaqSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -530,6 +530,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete support ticket" });
+    }
+  });
+
+  // FAQ routes
+  app.get("/api/faqs", async (req, res) => {
+    try {
+      const faqs = await storage.getAllFaqs();
+      res.json(faqs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch FAQs" });
+    }
+  });
+
+  app.get("/api/faqs/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const faq = await storage.getFaq(id);
+      if (!faq) {
+        return res.status(404).json({ error: "FAQ not found" });
+      }
+      res.json(faq);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch FAQ" });
+    }
+  });
+
+  app.post("/api/faqs", async (req, res) => {
+    try {
+      const validatedData = insertFaqSchema.parse(req.body);
+      const faq = await storage.createFaq(validatedData);
+      res.status(201).json(faq);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create FAQ" });
+    }
+  });
+
+  app.put("/api/faqs/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertFaqSchema.partial().parse(req.body);
+      const faq = await storage.updateFaq(id, validatedData);
+      if (!faq) {
+        return res.status(404).json({ error: "FAQ not found" });
+      }
+      res.json(faq);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update FAQ" });
+    }
+  });
+
+  app.delete("/api/faqs/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteFaq(id);
+      if (!deleted) {
+        return res.status(404).json({ error: "FAQ not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete FAQ" });
     }
   });
 

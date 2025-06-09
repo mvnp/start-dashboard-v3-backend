@@ -27,6 +27,8 @@ import AccountingList from "@/pages/accounting-list";
 import AccountingForm from "@/pages/accounting-form";
 import SupportTicketList from "@/pages/support-ticket-list";
 import SupportTicketForm from "@/pages/support-ticket-form";
+import FaqList from "@/pages/faq-list";
+import FaqForm from "@/pages/faq-form";
 import Support from "@/pages/support";
 import NotFound from "@/pages/not-found";
 
@@ -204,10 +206,17 @@ function Router() {
       </Route>
       <Route path="/faqs">
         <Layout>
-          <div className="p-6">
-            <h1 className="text-3xl font-bold text-slate-900">FAQs</h1>
-            <p className="text-slate-600 mt-2">FAQ management coming soon...</p>
-          </div>
+          <FaqList />
+        </Layout>
+      </Route>
+      <Route path="/faqs/new">
+        <Layout>
+          <FaqForm />
+        </Layout>
+      </Route>
+      <Route path="/faqs/:id/edit">
+        <Layout>
+          <FaqForm />
         </Layout>
       </Route>
       <Route path="/accounting">
