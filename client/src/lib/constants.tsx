@@ -9,7 +9,14 @@ import {
   Plus,
   UserPlus,
   CreditCard,
-  Check
+  Check,
+  MessageCircle,
+  Crown,
+  CreditCard as PaymentIcon,
+  HelpCircle,
+  FileText,
+  Calculator,
+  HeadphonesIcon
 } from "lucide-react";
 
 export const navigationItems = [
@@ -20,15 +27,21 @@ export const navigationItems = [
     current: true,
   },
   {
-    name: "Appointments",
-    href: "/appointments",
-    icon: Calendar,
+    name: "Staff",
+    href: "/staff",
+    icon: User,
     current: false,
   },
   {
-    name: "Clients",
+    name: "Customers",
     href: "/clients",
     icon: Users,
+    current: false,
+  },
+  {
+    name: "Appointments",
+    href: "/appointments",
+    icon: Calendar,
     current: false,
   },
   {
@@ -38,15 +51,45 @@ export const navigationItems = [
     current: false,
   },
   {
-    name: "Staff",
-    href: "/staff",
-    icon: User,
+    name: "WhatsApp Instances",
+    href: "/whatsapp",
+    icon: MessageCircle,
     current: false,
   },
   {
-    name: "Reports",
-    href: "/reports",
-    icon: BarChart3,
+    name: "Barber Plans",
+    href: "/plans",
+    icon: Crown,
+    current: false,
+  },
+  {
+    name: "Payment Gateways",
+    href: "/payments",
+    icon: PaymentIcon,
+    current: false,
+  },
+  {
+    name: "Support Tickets",
+    href: "/tickets",
+    icon: HelpCircle,
+    current: false,
+  },
+  {
+    name: "FAQs",
+    href: "/faqs",
+    icon: FileText,
+    current: false,
+  },
+  {
+    name: "Accounting",
+    href: "/accounting",
+    icon: Calculator,
+    current: false,
+  },
+  {
+    name: "Support",
+    href: "/support",
+    icon: HeadphonesIcon,
     current: false,
   },
 ];

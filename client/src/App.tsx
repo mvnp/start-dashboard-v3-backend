@@ -89,11 +89,59 @@ function Router() {
           <StaffForm />
         </Layout>
       </Route>
-      <Route path="/reports">
+      <Route path="/whatsapp">
         <Layout>
           <div className="p-6">
-            <h1 className="text-3xl font-bold text-slate-900">Reports</h1>
-            <p className="text-slate-600 mt-2">Reports and analytics coming soon...</p>
+            <h1 className="text-3xl font-bold text-slate-900">WhatsApp Instances</h1>
+            <p className="text-slate-600 mt-2">WhatsApp integration management coming soon...</p>
+          </div>
+        </Layout>
+      </Route>
+      <Route path="/plans">
+        <Layout>
+          <div className="p-6">
+            <h1 className="text-3xl font-bold text-slate-900">Barber Plans</h1>
+            <p className="text-slate-600 mt-2">Subscription and plan management coming soon...</p>
+          </div>
+        </Layout>
+      </Route>
+      <Route path="/payments">
+        <Layout>
+          <div className="p-6">
+            <h1 className="text-3xl font-bold text-slate-900">Payment Gateways</h1>
+            <p className="text-slate-600 mt-2">Payment gateway configuration coming soon...</p>
+          </div>
+        </Layout>
+      </Route>
+      <Route path="/tickets">
+        <Layout>
+          <div className="p-6">
+            <h1 className="text-3xl font-bold text-slate-900">Support Tickets</h1>
+            <p className="text-slate-600 mt-2">Support ticket management coming soon...</p>
+          </div>
+        </Layout>
+      </Route>
+      <Route path="/faqs">
+        <Layout>
+          <div className="p-6">
+            <h1 className="text-3xl font-bold text-slate-900">FAQs</h1>
+            <p className="text-slate-600 mt-2">FAQ management coming soon...</p>
+          </div>
+        </Layout>
+      </Route>
+      <Route path="/accounting">
+        <Layout>
+          <div className="p-6">
+            <h1 className="text-3xl font-bold text-slate-900">Accounting</h1>
+            <p className="text-slate-600 mt-2">Financial reporting and accounting coming soon...</p>
+          </div>
+        </Layout>
+      </Route>
+      <Route path="/support">
+        <Layout>
+          <div className="p-6">
+            <h1 className="text-3xl font-bold text-slate-900">Support</h1>
+            <p className="text-slate-600 mt-2">Customer support tools coming soon...</p>
           </div>
         </Layout>
       </Route>
