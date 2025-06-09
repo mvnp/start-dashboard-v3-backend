@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService, type Appointment, type InsertAppointment, type PaymentGateway, type InsertPaymentGateway, type AccountingTransaction, type InsertAccountingTransaction, type SupportTicket, type InsertSupportTicket } from "@shared/schema";
+import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService, type Appointment, type InsertAppointment, type PaymentGateway, type InsertPaymentGateway, type AccountingTransaction, type InsertAccountingTransaction, type SupportTicket, type InsertSupportTicket, type Faq, type InsertFaq } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -63,6 +63,13 @@ export interface IStorage {
   createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
   updateSupportTicket(id: number, ticket: Partial<InsertSupportTicket>): Promise<SupportTicket | undefined>;
   deleteSupportTicket(id: number): Promise<boolean>;
+  
+  // FAQ methods
+  getAllFaqs(): Promise<Faq[]>;
+  getFaq(id: number): Promise<Faq | undefined>;
+  createFaq(faq: InsertFaq): Promise<Faq>;
+  updateFaq(id: number, faq: Partial<InsertFaq>): Promise<Faq | undefined>;
+  deleteFaq(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -75,6 +82,7 @@ export class MemStorage implements IStorage {
   private paymentGateways: Map<number, PaymentGateway>;
   private accountingTransactions: Map<number, AccountingTransaction>;
   private supportTickets: Map<number, SupportTicket>;
+  private faqs: Map<number, Faq>;
   private currentUserId: number;
   private currentStaffId: number;
   private currentClientId: number;
@@ -84,6 +92,7 @@ export class MemStorage implements IStorage {
   private currentPaymentGatewayId: number;
   private currentAccountingTransactionId: number;
   private currentSupportTicketId: number;
+  private currentFaqId: number;
 
   constructor() {
     this.users = new Map();
@@ -95,6 +104,7 @@ export class MemStorage implements IStorage {
     this.paymentGateways = new Map();
     this.accountingTransactions = new Map();
     this.supportTickets = new Map();
+    this.faqs = new Map();
     this.currentUserId = 1;
     this.currentStaffId = 1;
     this.currentClientId = 1;
@@ -104,6 +114,7 @@ export class MemStorage implements IStorage {
     this.currentPaymentGatewayId = 1;
     this.currentAccountingTransactionId = 1;
     this.currentSupportTicketId = 1;
+    this.currentFaqId = 1;
     
     // Add sample data
     this.seedStaffData();
@@ -114,6 +125,7 @@ export class MemStorage implements IStorage {
     this.seedPaymentGatewayData();
     this.seedAccountingTransactionData();
     this.seedSupportTicketData();
+    this.seedFaqData();
   }
 
   private seedStaffData() {
@@ -850,6 +862,101 @@ export class MemStorage implements IStorage {
 
   async deleteSupportTicket(id: number): Promise<boolean> {
     return this.supportTickets.delete(id);
+  }
+
+  private seedFaqData() {
+    const sampleFaqs = [
+      {
+        question: "What are your operating hours?",
+        answer: "We are open Monday through Saturday from 9:00 AM to 7:00 PM, and Sunday from 10:00 AM to 5:00 PM. We are closed on major holidays.",
+        category: "General",
+        is_published: true,
+        order_index: 1
+      },
+      {
+        question: "How do I book an appointment?",
+        answer: "You can book an appointment through our online booking system, by calling us directly, or by visiting our shop. We recommend booking in advance to secure your preferred time slot.",
+        category: "Appointments",
+        is_published: true,
+        order_index: 2
+      },
+      {
+        question: "What services do you offer?",
+        answer: "We offer a full range of barbering services including haircuts, beard trims, hot towel shaves, styling, and grooming packages. Check our services page for detailed descriptions and pricing.",
+        category: "Services",
+        is_published: true,
+        order_index: 3
+      },
+      {
+        question: "What is your cancellation policy?",
+        answer: "We require at least 24 hours notice for cancellations. Same-day cancellations or no-shows may be subject to a cancellation fee.",
+        category: "Policies",
+        is_published: true,
+        order_index: 4
+      },
+      {
+        question: "Do you accept walk-ins?",
+        answer: "Yes, we accept walk-ins based on availability. However, we recommend booking an appointment to guarantee your preferred time and avoid waiting.",
+        category: "Appointments",
+        is_published: true,
+        order_index: 5
+      },
+      {
+        question: "What payment methods do you accept?",
+        answer: "We accept cash, credit cards (Visa, MasterCard, American Express), debit cards, and digital payments including Apple Pay and Google Pay.",
+        category: "Payment",
+        is_published: true,
+        order_index: 6
+      }
+    ];
+
+    sampleFaqs.forEach((faqData) => {
+      const id = this.currentFaqId++;
+      const faq: Faq = {
+        id,
+        ...faqData,
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+      this.faqs.set(id, faq);
+    });
+  }
+
+  async getAllFaqs(): Promise<Faq[]> {
+    return Array.from(this.faqs.values()).sort((a, b) => a.order_index - b.order_index);
+  }
+
+  async getFaq(id: number): Promise<Faq | undefined> {
+    return this.faqs.get(id);
+  }
+
+  async createFaq(insertFaq: InsertFaq): Promise<Faq> {
+    const id = this.currentFaqId++;
+    const faq: Faq = { 
+      ...insertFaq, 
+      id,
+      created_at: new Date(),
+      updated_at: new Date()
+    };
+    this.faqs.set(id, faq);
+    return faq;
+  }
+
+  async updateFaq(id: number, updateData: Partial<InsertFaq>): Promise<Faq | undefined> {
+    const existingFaq = this.faqs.get(id);
+    if (!existingFaq) return undefined;
+    
+    const updatedFaq: Faq = {
+      ...existingFaq,
+      ...updateData,
+      updated_at: new Date()
+    };
+    this.faqs.set(id, updatedFaq);
+    return updatedFaq;
+  }
+
+  async deleteFaq(id: number): Promise<boolean> {
+    return this.faqs.delete(id);
   }
 }
 

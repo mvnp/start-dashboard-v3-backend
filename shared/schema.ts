@@ -123,6 +123,17 @@ export const supportTickets = pgTable("support_tickets", {
   resolved_at: timestamp("resolved_at"),
 });
 
+export const faqs = pgTable("faqs", {
+  id: serial("id").primaryKey(),
+  question: text("question").notNull(),
+  answer: text("answer").notNull(),
+  category: text("category").notNull(),
+  is_published: boolean("is_published").notNull().default(true),
+  order_index: integer("order_index").notNull().default(0),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -177,6 +188,12 @@ export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit
   resolved_at: true,
 });
 
+export const insertFaqSchema = createInsertSchema(faqs).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertStaff = z.infer<typeof insertStaffSchema>;
@@ -195,3 +212,5 @@ export type InsertAccountingTransaction = z.infer<typeof insertAccountingTransac
 export type AccountingTransaction = typeof accountingTransactions.$inferSelect;
 export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
 export type SupportTicket = typeof supportTickets.$inferSelect;
+export type InsertFaq = z.infer<typeof insertFaqSchema>;
+export type Faq = typeof faqs.$inferSelect;
