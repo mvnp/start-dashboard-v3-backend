@@ -81,7 +81,7 @@ export default function StaffList() {
   });
 
   const filteredStaff = staff.filter(member =>
-    member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    `${member.first_name} ${member.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     member.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -186,10 +186,10 @@ export default function StaffList() {
                   >
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-barber-primary rounded-full flex items-center justify-center text-white font-semibold">
-                        {member.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
+                        {member.first_name[0]}{member.last_name[0]}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-slate-900">{member.name}</h3>
+                        <h3 className="font-semibold text-slate-900">{member.first_name} {member.last_name}</h3>
                         <p className="text-sm text-slate-600">{member.email}</p>
                         <p className="text-sm text-slate-500">{member.phone}</p>
                       </div>

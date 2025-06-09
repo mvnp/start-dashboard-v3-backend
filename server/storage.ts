@@ -47,7 +47,8 @@ export class MemStorage implements IStorage {
   private seedStaffData() {
     const sampleStaff = [
       {
-        name: "John Martinez",
+        first_name: "John",
+        last_name: "Martinez",
         email: "john@barberpro.com",
         phone: "+1 (555) 123-4567",
         tax_id: "123-45-6789",
@@ -56,7 +57,8 @@ export class MemStorage implements IStorage {
         salary: 75000
       },
       {
-        name: "Sarah Johnson",
+        first_name: "Sarah",
+        last_name: "Johnson",
         email: "sarah@barberpro.com", 
         phone: "+1 (555) 234-5678",
         tax_id: "234-56-7890",
@@ -65,7 +67,8 @@ export class MemStorage implements IStorage {
         salary: 55000
       },
       {
-        name: "Mike Rodriguez",
+        first_name: "Mike",
+        last_name: "Rodriguez",
         email: "mike@barberpro.com",
         phone: "+1 (555) 345-6789", 
         tax_id: "345-67-8901",
@@ -146,7 +149,8 @@ export class MemStorage implements IStorage {
   private seedClientData() {
     const sampleClients = [
       {
-        name: "David Wilson",
+        first_name: "David",
+        last_name: "Wilson",
         email: "david.wilson@email.com",
         phone: "+1 (555) 456-7890",
         tax_id: "456-78-9012",
@@ -154,7 +158,8 @@ export class MemStorage implements IStorage {
         address: "123 Main St, City, State 12345"
       },
       {
-        name: "Emma Thompson",
+        first_name: "Emma",
+        last_name: "Thompson",
         email: "emma.thompson@email.com",
         phone: "+1 (555) 567-8901",
         tax_id: "567-89-0123",
@@ -162,7 +167,8 @@ export class MemStorage implements IStorage {
         address: "456 Oak Ave, City, State 12345"
       },
       {
-        name: "James Brown",
+        first_name: "James",
+        last_name: "Brown",
         email: "james.brown@email.com",
         phone: "+1 (555) 678-9012",
         tax_id: "678-90-1234",

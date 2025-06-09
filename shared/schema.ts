@@ -10,7 +10,8 @@ export const users = pgTable("users", {
 
 export const staff = pgTable("staff", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
+  first_name: text("first_name").notNull(),
+  last_name: text("last_name").notNull(),
   email: text("email").notNull().unique(),
   phone: text("phone").notNull(),
   tax_id: text("tax_id").notNull(),
@@ -23,7 +24,8 @@ export const staff = pgTable("staff", {
 
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
+  first_name: text("first_name").notNull(),
+  last_name: text("last_name").notNull(),
   email: text("email").notNull().unique(),
   phone: text("phone").notNull(),
   tax_id: text("tax_id").notNull(),

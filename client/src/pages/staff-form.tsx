@@ -18,7 +18,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Staff } from "@shared/schema";
 
 interface StaffFormData {
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
   phone: string;
   tax_id: string;
@@ -42,7 +43,8 @@ export default function StaffForm() {
   const staffId = params.id ? parseInt(params.id) : null;
 
   const [formData, setFormData] = useState<StaffFormData>({
-    name: "",
+    first_name: "",
+    last_name: "",
     email: "",
     phone: "",
     tax_id: "",
@@ -99,7 +101,8 @@ export default function StaffForm() {
   useEffect(() => {
     if (staffMember && isEdit) {
       setFormData({
-        name: staffMember.name,
+        first_name: staffMember.first_name,
+        last_name: staffMember.last_name,
         email: staffMember.email,
         phone: staffMember.phone,
         tax_id: staffMember.tax_id,
@@ -178,12 +181,23 @@ export default function StaffForm() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="first_name">First Name</Label>
                 <Input
-                  id="name"
-                  placeholder="Enter full name"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  id="first_name"
+                  placeholder="Enter first name"
+                  value={formData.first_name}
+                  onChange={(e) => handleInputChange('first_name', e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="last_name">Last Name</Label>
+                <Input
+                  id="last_name"
+                  placeholder="Enter last name"
+                  value={formData.last_name}
+                  onChange={(e) => handleInputChange('last_name', e.target.value)}
                   required
                 />
               </div>
