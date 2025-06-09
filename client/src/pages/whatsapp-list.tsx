@@ -17,9 +17,14 @@ export default function WhatsappList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: instances = [], isLoading } = useQuery<WhatsappInstance[]>({
+  const { data: instances = [], isLoading, error } = useQuery<WhatsappInstance[]>({
     queryKey: ["/api/whatsapp-instances"],
   });
+
+  // Debug logging
+  console.log("WhatsApp instances data:", instances);
+  console.log("Loading state:", isLoading);
+  console.log("Error:", error);
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/whatsapp-instances/${id}`),
