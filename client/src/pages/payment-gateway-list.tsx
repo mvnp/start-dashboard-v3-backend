@@ -115,7 +115,7 @@ export default function PaymentGatewayList() {
           <p className="text-slate-600 mt-2">Manage payment processing systems</p>
         </div>
         <Button
-          onClick={() => setLocation("/payment-gateways/new")}
+          onClick={() => setLocation("/payments/new")}
           className="bg-amber-600 hover:bg-amber-700 text-white"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -191,7 +191,7 @@ export default function PaymentGatewayList() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setLocation(`/payment-gateways/${gateway.id}/edit`)}
+                  onClick={() => setLocation(`/payments/${gateway.id}/edit`)}
                   className="flex-1"
                 >
                   <Edit className="w-4 h-4 mr-1" />
@@ -219,7 +219,7 @@ export default function PaymentGatewayList() {
             {searchTerm ? "No gateways match your search criteria." : "Get started by adding your first payment gateway."}
           </p>
           <Button
-            onClick={() => setLocation("/payment-gateways/new")}
+            onClick={() => setLocation("/payments/new")}
             className="bg-amber-600 hover:bg-amber-700 text-white"
           >
             <Plus className="w-4 h-4 mr-2" />
