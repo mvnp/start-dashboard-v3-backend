@@ -134,17 +134,17 @@ function Router() {
           <BarberPlanForm />
         </Layout>
       </Route>
-      <Route path="/payments">
+      <Route path="/payment-gateways">
         <Layout>
           <PaymentGatewayList />
         </Layout>
       </Route>
-      <Route path="/payments/new">
+      <Route path="/payment-gateways/new">
         <Layout>
           <PaymentGatewayForm />
         </Layout>
       </Route>
-      <Route path="/payments/:id/edit">
+      <Route path="/payment-gateways/:id/edit">
         <Layout>
           <PaymentGatewayForm />
         </Layout>

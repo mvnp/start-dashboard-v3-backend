@@ -60,7 +60,7 @@ export default function PaymentGatewayForm() {
         title: "Success",
         description: "Payment gateway created successfully",
       });
-      setLocation("/payments");
+      setLocation("/payment-gateways");
     },
     onError: () => {
       toast({
@@ -80,7 +80,7 @@ export default function PaymentGatewayForm() {
         title: "Success",
         description: "Payment gateway updated successfully",
       });
-      setLocation("/payments");
+      setLocation("/payment-gateways");
     },
     onError: () => {
       toast({
@@ -182,7 +182,7 @@ export default function PaymentGatewayForm() {
   return (
     <div className="w-full p-6">
       <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" size="sm" onClick={() => setLocation("/payments")}>
+        <Button variant="ghost" size="sm" onClick={() => setLocation("/payment-gateways")}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Payment Gateways
         </Button>
@@ -328,7 +328,7 @@ export default function PaymentGatewayForm() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setLocation("/payments")}
+                onClick={() => setLocation("/payment-gateways")}
               >
                 Cancel
               </Button>
