@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService, type Appointment, type InsertAppointment, type PaymentGateway, type InsertPaymentGateway, type AccountingTransaction, type InsertAccountingTransaction } from "@shared/schema";
+import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService, type Appointment, type InsertAppointment, type PaymentGateway, type InsertPaymentGateway, type AccountingTransaction, type InsertAccountingTransaction, type SupportTicket, type InsertSupportTicket } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -56,6 +56,13 @@ export interface IStorage {
   createAccountingTransaction(transaction: InsertAccountingTransaction): Promise<AccountingTransaction>;
   updateAccountingTransaction(id: number, transaction: Partial<InsertAccountingTransaction>): Promise<AccountingTransaction | undefined>;
   deleteAccountingTransaction(id: number): Promise<boolean>;
+  
+  // Support Ticket methods
+  getAllSupportTickets(): Promise<SupportTicket[]>;
+  getSupportTicket(id: number): Promise<SupportTicket | undefined>;
+  createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
+  updateSupportTicket(id: number, ticket: Partial<InsertSupportTicket>): Promise<SupportTicket | undefined>;
+  deleteSupportTicket(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -67,6 +74,7 @@ export class MemStorage implements IStorage {
   private appointments: Map<number, Appointment>;
   private paymentGateways: Map<number, PaymentGateway>;
   private accountingTransactions: Map<number, AccountingTransaction>;
+  private supportTickets: Map<number, SupportTicket>;
   private currentUserId: number;
   private currentStaffId: number;
   private currentClientId: number;
@@ -75,6 +83,7 @@ export class MemStorage implements IStorage {
   private currentAppointmentId: number;
   private currentPaymentGatewayId: number;
   private currentAccountingTransactionId: number;
+  private currentSupportTicketId: number;
 
   constructor() {
     this.users = new Map();

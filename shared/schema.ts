@@ -106,6 +106,23 @@ export const accountingTransactions = pgTable("accounting_transactions", {
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
+export const supportTickets = pgTable("support_tickets", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  priority: text("priority").notNull().default("medium"), // 'low', 'medium', 'high', 'urgent'
+  status: text("status").notNull().default("open"), // 'open', 'in_progress', 'resolved', 'closed'
+  category: text("category").notNull(),
+  client_email: text("client_email").notNull(),
+  client_name: text("client_name").notNull(),
+  assigned_staff_id: integer("assigned_staff_id"),
+  resolution_notes: text("resolution_notes"),
+  attachments: text("attachments").array().default([]), // Array of file URLs/paths
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+  resolved_at: timestamp("resolved_at"),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -153,6 +170,13 @@ export const insertAccountingTransactionSchema = createInsertSchema(accountingTr
   updated_at: true,
 });
 
+export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  resolved_at: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertStaff = z.infer<typeof insertStaffSchema>;
@@ -169,3 +193,5 @@ export type InsertPaymentGateway = z.infer<typeof insertPaymentGatewaySchema>;
 export type PaymentGateway = typeof paymentGateways.$inferSelect;
 export type InsertAccountingTransaction = z.infer<typeof insertAccountingTransactionSchema>;
 export type AccountingTransaction = typeof accountingTransactions.$inferSelect;
+export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
+export type SupportTicket = typeof supportTickets.$inferSelect;
