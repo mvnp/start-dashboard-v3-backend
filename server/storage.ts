@@ -101,6 +101,7 @@ export class MemStorage implements IStorage {
     this.seedServiceData();
     this.seedAppointmentData();
     this.seedPaymentGatewayData();
+    this.seedAccountingTransactionData();
   }
 
   private seedStaffData() {
@@ -625,6 +626,126 @@ export class MemStorage implements IStorage {
 
   async deletePaymentGateway(id: number): Promise<boolean> {
     return this.paymentGateways.delete(id);
+  }
+
+  private seedAccountingTransactionData() {
+    const sampleTransactions = [
+      {
+        type: "revenue",
+        category: "Haircut Services",
+        description: "Classic Haircut - John Martinez",
+        amount: 3500, // $35.00
+        payment_method: "Cash",
+        reference_number: "REV-001",
+        client_id: 1,
+        staff_id: 1,
+        transaction_date: "2024-01-15",
+        notes: "Regular customer",
+        is_recurring: false
+      },
+      {
+        type: "revenue",
+        category: "Beard Services",
+        description: "Beard Trim - Premium Service",
+        amount: 2500, // $25.00
+        payment_method: "Credit Card",
+        reference_number: "REV-002",
+        client_id: 2,
+        staff_id: 2,
+        transaction_date: "2024-01-15",
+        notes: "Premium service package",
+        is_recurring: false
+      },
+      {
+        type: "expense",
+        category: "Supplies",
+        description: "Hair Products - Monthly Supply",
+        amount: 15000, // $150.00
+        payment_method: "Bank Transfer",
+        reference_number: "EXP-001",
+        client_id: null,
+        staff_id: null,
+        transaction_date: "2024-01-10",
+        notes: "Shampoo, conditioner, styling products",
+        is_recurring: true
+      },
+      {
+        type: "expense",
+        category: "Rent",
+        description: "Shop Rent - January 2024",
+        amount: 120000, // $1200.00
+        payment_method: "Bank Transfer",
+        reference_number: "EXP-002",
+        client_id: null,
+        staff_id: null,
+        transaction_date: "2024-01-01",
+        notes: "Monthly rent payment",
+        is_recurring: true
+      },
+      {
+        type: "revenue",
+        category: "Special Services",
+        description: "Wedding Package - Complete Grooming",
+        amount: 8500, // $85.00
+        payment_method: "Credit Card",
+        reference_number: "REV-003",
+        client_id: 3,
+        staff_id: 1,
+        transaction_date: "2024-01-20",
+        notes: "Special event package",
+        is_recurring: false
+      }
+    ];
+
+    sampleTransactions.forEach((transactionData) => {
+      const id = this.currentAccountingTransactionId++;
+      const now = new Date();
+      const transaction: AccountingTransaction = {
+        ...transactionData,
+        id,
+        created_at: now,
+        updated_at: now
+      };
+      this.accountingTransactions.set(id, transaction);
+    });
+  }
+
+  async getAllAccountingTransactions(): Promise<AccountingTransaction[]> {
+    return Array.from(this.accountingTransactions.values());
+  }
+
+  async getAccountingTransaction(id: number): Promise<AccountingTransaction | undefined> {
+    return this.accountingTransactions.get(id);
+  }
+
+  async createAccountingTransaction(insertTransaction: InsertAccountingTransaction): Promise<AccountingTransaction> {
+    const id = this.currentAccountingTransactionId++;
+    const now = new Date();
+    const transaction: AccountingTransaction = { 
+      ...insertTransaction, 
+      id,
+      created_at: now,
+      updated_at: now
+    };
+    this.accountingTransactions.set(id, transaction);
+    return transaction;
+  }
+
+  async updateAccountingTransaction(id: number, updateData: Partial<InsertAccountingTransaction>): Promise<AccountingTransaction | undefined> {
+    const existingTransaction = this.accountingTransactions.get(id);
+    if (!existingTransaction) return undefined;
+    
+    const updatedTransaction: AccountingTransaction = {
+      ...existingTransaction,
+      ...updateData,
+      updated_at: new Date()
+    };
+    this.accountingTransactions.set(id, updatedTransaction);
+    return updatedTransaction;
+  }
+
+  async deleteAccountingTransaction(id: number): Promise<boolean> {
+    return this.accountingTransactions.delete(id);
   }
 }
 

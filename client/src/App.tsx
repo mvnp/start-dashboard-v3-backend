@@ -23,6 +23,8 @@ import AppointmentList from "@/pages/appointment-list";
 import AppointmentForm from "@/pages/appointment-form";
 import PaymentGatewayList from "@/pages/payment-gateway-list";
 import PaymentGatewayForm from "@/pages/payment-gateway-form";
+import AccountingList from "@/pages/accounting-list";
+import AccountingForm from "@/pages/accounting-form";
 import Support from "@/pages/support";
 import NotFound from "@/pages/not-found";
 
