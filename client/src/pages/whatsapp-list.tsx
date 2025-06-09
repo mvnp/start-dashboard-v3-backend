@@ -21,11 +21,6 @@ export default function WhatsappList() {
     queryKey: ["/api/whatsapp-instances"],
   });
 
-  // Debug logging
-  console.log("WhatsApp instances data:", instances);
-  console.log("Loading state:", isLoading);
-  console.log("Error:", error);
-  
   if (error) {
     return (
       <div className="p-6">
@@ -134,15 +129,6 @@ export default function WhatsappList() {
 
   return (
     <div className="p-6 w-full">
-      {/* Debug Section */}
-      <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded">
-        <h3 className="font-bold">Debug Info:</h3>
-        <p>Loading: {isLoading ? 'true' : 'false'}</p>
-        <p>Instances Array Length: {instances?.length || 0}</p>
-        <p>Raw Instances: {JSON.stringify(instances).substring(0, 200)}...</p>
-        <p>Filtered Length: {filteredInstances?.length || 0}</p>
-      </div>
-
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
