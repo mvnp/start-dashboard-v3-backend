@@ -21,6 +21,8 @@ import ServiceList from "@/pages/service-list";
 import ServiceForm from "@/pages/service-form";
 import AppointmentList from "@/pages/appointment-list";
 import AppointmentForm from "@/pages/appointment-form";
+import PaymentGatewayList from "@/pages/payment-gateway-list";
+import PaymentGatewayForm from "@/pages/payment-gateway-form";
 import NotFound from "@/pages/not-found";
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -134,10 +136,17 @@ function Router() {
       </Route>
       <Route path="/payments">
         <Layout>
-          <div className="p-6">
-            <h1 className="text-3xl font-bold text-slate-900">Payment Gateways</h1>
-            <p className="text-slate-600 mt-2">Payment gateway configuration coming soon...</p>
-          </div>
+          <PaymentGatewayList />
+        </Layout>
+      </Route>
+      <Route path="/payments/new">
+        <Layout>
+          <PaymentGatewayForm />
+        </Layout>
+      </Route>
+      <Route path="/payments/:id/edit">
+        <Layout>
+          <PaymentGatewayForm />
         </Layout>
       </Route>
       <Route path="/tickets">

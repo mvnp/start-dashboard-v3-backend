@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertStaffSchema, insertClientSchema, insertBarberPlanSchema, insertServiceSchema, insertAppointmentSchema } from "@shared/schema";
+import { insertStaffSchema, insertClientSchema, insertBarberPlanSchema, insertServiceSchema, insertAppointmentSchema, insertPaymentGatewaySchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -332,6 +332,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete appointment" });
+    }
+  });
+
+  // Payment Gateway routes
+  app.get("/api/payment-gateways", async (req, res) => {
+    try {
+      const gateways = await storage.getAllPaymentGateways();
+      res.json(gateways);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch payment gateways" });
+    }
+  });
+
+  app.get("/api/payment-gateways/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const gateway = await storage.getPaymentGateway(id);
+      if (!gateway) {
+        return res.status(404).json({ error: "Payment gateway not found" });
+      }
+      res.json(gateway);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch payment gateway" });
+    }
+  });
+
+  app.post("/api/payment-gateways", async (req, res) => {
+    try {
+      const validatedData = insertPaymentGatewaySchema.parse(req.body);
+      const gateway = await storage.createPaymentGateway(validatedData);
+      res.status(201).json(gateway);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create payment gateway" });
+    }
+  });
+
+  app.put("/api/payment-gateways/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertPaymentGatewaySchema.partial().parse(req.body);
+      const gateway = await storage.updatePaymentGateway(id, validatedData);
+      if (!gateway) {
+        return res.status(404).json({ error: "Payment gateway not found" });
+      }
+      res.json(gateway);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update payment gateway" });
+    }
+  });
+
+  app.delete("/api/payment-gateways/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deletePaymentGateway(id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Payment gateway not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete payment gateway" });
     }
   });
 
