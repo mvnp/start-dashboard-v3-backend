@@ -70,7 +70,7 @@ export const navigationItems = [
   },
   {
     name: "Support Tickets",
-    href: "/tickets",
+    href: "/support-tickets",
     icon: HelpCircle,
     current: false,
   },

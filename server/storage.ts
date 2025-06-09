@@ -94,6 +94,7 @@ export class MemStorage implements IStorage {
     this.appointments = new Map();
     this.paymentGateways = new Map();
     this.accountingTransactions = new Map();
+    this.supportTickets = new Map();
     this.currentUserId = 1;
     this.currentStaffId = 1;
     this.currentClientId = 1;
@@ -102,6 +103,7 @@ export class MemStorage implements IStorage {
     this.currentAppointmentId = 1;
     this.currentPaymentGatewayId = 1;
     this.currentAccountingTransactionId = 1;
+    this.currentSupportTicketId = 1;
     
     // Add sample data
     this.seedStaffData();
@@ -111,6 +113,7 @@ export class MemStorage implements IStorage {
     this.seedAppointmentData();
     this.seedPaymentGatewayData();
     this.seedAccountingTransactionData();
+    this.seedSupportTicketData();
   }
 
   private seedStaffData() {
@@ -755,6 +758,98 @@ export class MemStorage implements IStorage {
 
   async deleteAccountingTransaction(id: number): Promise<boolean> {
     return this.accountingTransactions.delete(id);
+  }
+
+  private seedSupportTicketData() {
+    const sampleTickets = [
+      {
+        title: "Unable to book appointment online",
+        description: "The booking system shows an error when I try to select a time slot for next week.",
+        priority: "high",
+        status: "open",
+        category: "Technical Issue",
+        client_email: "customer@example.com",
+        client_name: "John Customer",
+        assigned_staff_id: 1,
+        resolution_notes: null,
+        attachments: []
+      },
+      {
+        title: "Request for cancellation policy",
+        description: "I need to understand the cancellation policy for appointments. Can someone clarify?",
+        priority: "medium",
+        status: "in_progress",
+        category: "General Inquiry",
+        client_email: "mary.client@email.com",
+        client_name: "Mary Client",
+        assigned_staff_id: 2,
+        resolution_notes: null,
+        attachments: []
+      },
+      {
+        title: "Service pricing question",
+        description: "What are the current prices for beard trimming services?",
+        priority: "low",
+        status: "resolved",
+        category: "Pricing",
+        client_email: "info.seeker@domain.com",
+        client_name: "Alex Seeker",
+        assigned_staff_id: 1,
+        resolution_notes: "Provided updated pricing list via email.",
+        attachments: []
+      }
+    ];
+
+    sampleTickets.forEach((ticketData) => {
+      const id = this.currentSupportTicketId++;
+      const ticket: SupportTicket = {
+        id,
+        ...ticketData,
+        created_at: new Date(),
+        updated_at: new Date(),
+        resolved_at: ticketData.status === "resolved" ? new Date() : null
+      };
+      this.supportTickets.set(id, ticket);
+    });
+  }
+
+  async getAllSupportTickets(): Promise<SupportTicket[]> {
+    return Array.from(this.supportTickets.values());
+  }
+
+  async getSupportTicket(id: number): Promise<SupportTicket | undefined> {
+    return this.supportTickets.get(id);
+  }
+
+  async createSupportTicket(insertTicket: InsertSupportTicket): Promise<SupportTicket> {
+    const id = this.currentSupportTicketId++;
+    const ticket: SupportTicket = { 
+      ...insertTicket, 
+      id,
+      created_at: new Date(),
+      updated_at: new Date(),
+      resolved_at: null
+    };
+    this.supportTickets.set(id, ticket);
+    return ticket;
+  }
+
+  async updateSupportTicket(id: number, updateData: Partial<InsertSupportTicket>): Promise<SupportTicket | undefined> {
+    const existingTicket = this.supportTickets.get(id);
+    if (!existingTicket) return undefined;
+    
+    const updatedTicket: SupportTicket = {
+      ...existingTicket,
+      ...updateData,
+      updated_at: new Date(),
+      resolved_at: updateData.status === "resolved" ? new Date() : existingTicket.resolved_at
+    };
+    this.supportTickets.set(id, updatedTicket);
+    return updatedTicket;
+  }
+
+  async deleteSupportTicket(id: number): Promise<boolean> {
+    return this.supportTickets.delete(id);
   }
 }
 

@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertStaffSchema, insertClientSchema, insertBarberPlanSchema, insertServiceSchema, insertAppointmentSchema, insertPaymentGatewaySchema, insertAccountingTransactionSchema } from "@shared/schema";
+import { insertStaffSchema, insertClientSchema, insertBarberPlanSchema, insertServiceSchema, insertAppointmentSchema, insertPaymentGatewaySchema, insertAccountingTransactionSchema, insertSupportTicketSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -464,6 +464,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete accounting transaction" });
+    }
+  });
+
+  // Support Tickets routes
+  app.get("/api/support-tickets", async (req, res) => {
+    try {
+      const tickets = await storage.getAllSupportTickets();
+      res.json(tickets);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch support tickets" });
+    }
+  });
+
+  app.get("/api/support-tickets/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const ticket = await storage.getSupportTicket(id);
+      if (!ticket) {
+        return res.status(404).json({ error: "Support ticket not found" });
+      }
+      res.json(ticket);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch support ticket" });
+    }
+  });
+
+  app.post("/api/support-tickets", async (req, res) => {
+    try {
+      const validatedData = insertSupportTicketSchema.parse(req.body);
+      const ticket = await storage.createSupportTicket(validatedData);
+      res.status(201).json(ticket);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create support ticket" });
+    }
+  });
+
+  app.put("/api/support-tickets/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertSupportTicketSchema.partial().parse(req.body);
+      const ticket = await storage.updateSupportTicket(id, validatedData);
+      if (!ticket) {
+        return res.status(404).json({ error: "Support ticket not found" });
+      }
+      res.json(ticket);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update support ticket" });
+    }
+  });
+
+  app.delete("/api/support-tickets/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteSupportTicket(id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Support ticket not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete support ticket" });
     }
   });
 
