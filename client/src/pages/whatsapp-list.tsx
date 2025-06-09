@@ -17,7 +17,7 @@ export default function WhatsappList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: instances = [], isLoading } = useQuery({
+  const { data: instances = [], isLoading } = useQuery<WhatsappInstance[]>({
     queryKey: ["/api/whatsapp-instances"],
   });
 

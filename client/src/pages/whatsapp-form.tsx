@@ -103,7 +103,10 @@ export default function WhatsappForm() {
   });
 
   const generateQrMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("POST", `/api/whatsapp-instances/${id}/generate-qr`),
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("POST", `/api/whatsapp-instances/${id}/generate-qr`);
+      return response as { qr_code: string };
+    },
     onSuccess: (data: { qr_code: string }) => {
       setQrCode(data.qr_code);
       setIsConnecting(true);
