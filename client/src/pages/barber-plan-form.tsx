@@ -122,21 +122,21 @@ export default function BarberPlanForm() {
   const addBenefit = () => {
     setFormData(prev => ({
       ...prev,
-      benefits: [...prev.benefits, ""]
+      benefits: [...(prev.benefits || []), ""]
     }));
   };
 
   const removeBenefit = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      benefits: prev.benefits.filter((_, i) => i !== index)
+      benefits: (prev.benefits || []).filter((_, i) => i !== index)
     }));
   };
 
   const updateBenefit = (index: number, value: string) => {
     setFormData(prev => ({
       ...prev,
-      benefits: prev.benefits.map((benefit, i) => i === index ? value : benefit)
+      benefits: (prev.benefits || []).map((benefit, i) => i === index ? value : benefit)
     }));
   };
 
@@ -284,7 +284,7 @@ export default function BarberPlanForm() {
                 </Button>
               </div>
               <div className="space-y-3">
-                {formData.benefits.map((benefit, index) => (
+                {formData.benefits?.map((benefit, index) => (
                   <div key={index} className="flex gap-2">
                     <Input
                       placeholder={`Benefit ${index + 1}`}
@@ -292,7 +292,7 @@ export default function BarberPlanForm() {
                       onChange={(e) => updateBenefit(index, e.target.value)}
                       required
                     />
-                    {formData.benefits.length > 1 && (
+                    {formData.benefits && formData.benefits.length > 1 && (
                       <Button
                         type="button"
                         variant="outline"
