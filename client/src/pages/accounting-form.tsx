@@ -370,14 +370,14 @@ export default function AccountingForm() {
               <div>
                 <Label htmlFor="client_id">Client (Optional)</Label>
                 <Select 
-                  value={form.watch("client_id")?.toString() || ""} 
-                  onValueChange={(value) => form.setValue("client_id", value ? parseInt(value) : undefined)}
+                  value={form.watch("client_id")?.toString() || "none"} 
+                  onValueChange={(value) => form.setValue("client_id", value === "none" ? undefined : parseInt(value))}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select client" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No client</SelectItem>
+                    <SelectItem value="none">No client</SelectItem>
                     {clients.map((client) => (
                       <SelectItem key={client.id} value={client.id.toString()}>
                         {client.first_name} {client.last_name}
@@ -390,14 +390,14 @@ export default function AccountingForm() {
               <div>
                 <Label htmlFor="staff_id">Staff (Optional)</Label>
                 <Select 
-                  value={form.watch("staff_id")?.toString() || ""} 
-                  onValueChange={(value) => form.setValue("staff_id", value ? parseInt(value) : undefined)}
+                  value={form.watch("staff_id")?.toString() || "none"} 
+                  onValueChange={(value) => form.setValue("staff_id", value === "none" ? undefined : parseInt(value))}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select staff" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No staff</SelectItem>
+                    <SelectItem value="none">No staff</SelectItem>
                     {staff.map((member) => (
                       <SelectItem key={member.id} value={member.id.toString()}>
                         {member.first_name} {member.last_name}
