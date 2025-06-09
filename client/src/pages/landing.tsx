@@ -447,6 +447,151 @@ export default function Landing() {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-slate-900 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Company Column */}
+            <div>
+              <div className="flex items-center mb-6">
+                <Crown className="h-8 w-8 text-barber-primary mr-2" />
+                <span className="text-xl font-bold">BarberPro</span>
+              </div>
+              <p className="text-slate-300 mb-6">
+                The complete barbershop management solution trusted by thousands of professionals worldwide.
+              </p>
+              <div className="flex space-x-4">
+                <a href="#" className="text-slate-400 hover:text-white transition-colors">
+                  <Users className="w-5 h-5" />
+                </a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors">
+                  <Calendar className="w-5 h-5" />
+                </a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors">
+                  <Settings className="w-5 h-5" />
+                </a>
+              </div>
+            </div>
+
+            {/* Product Column */}
+            <div>
+              <h3 className="text-lg font-semibold mb-6">Product</h3>
+              <ul className="space-y-3">
+                <li>
+                  <a href="#features" className="text-slate-300 hover:text-white transition-colors">
+                    Features
+                  </a>
+                </li>
+                <li>
+                  <a href="#pricing" className="text-slate-300 hover:text-white transition-colors">
+                    Pricing
+                  </a>
+                </li>
+                <li>
+                  <Link href="/dashboard" className="text-slate-300 hover:text-white transition-colors">
+                    Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <a href="#" className="text-slate-300 hover:text-white transition-colors">
+                    API Documentation
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-slate-300 hover:text-white transition-colors">
+                    Integrations
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Support Column */}
+            <div>
+              <h3 className="text-lg font-semibold mb-6">Support</h3>
+              <ul className="space-y-3">
+                <li>
+                  <a href="#contact" className="text-slate-300 hover:text-white transition-colors">
+                    Contact Us
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-slate-300 hover:text-white transition-colors">
+                    Help Center
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-slate-300 hover:text-white transition-colors">
+                    Documentation
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-slate-300 hover:text-white transition-colors">
+                    Video Tutorials
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-slate-300 hover:text-white transition-colors">
+                    Community Forum
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Company Info Column */}
+            <div>
+              <h3 className="text-lg font-semibold mb-6">Company</h3>
+              <ul className="space-y-3">
+                <li>
+                  <a href="#about" className="text-slate-300 hover:text-white transition-colors">
+                    About Us
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-slate-300 hover:text-white transition-colors">
+                    Careers
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-slate-300 hover:text-white transition-colors">
+                    Press
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-slate-300 hover:text-white transition-colors">
+                    Privacy Policy
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-slate-300 hover:text-white transition-colors">
+                    Terms of Service
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Footer Bottom */}
+          <div className="border-t border-slate-800 mt-12 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <p className="text-slate-400 text-sm">
+                © 2024 BarberPro. All rights reserved.
+              </p>
+              <div className="flex space-x-6 mt-4 md:mt-0">
+                <a href="#" className="text-slate-400 hover:text-white text-sm transition-colors">
+                  Privacy
+                </a>
+                <a href="#" className="text-slate-400 hover:text-white text-sm transition-colors">
+                  Terms
+                </a>
+                <a href="#" className="text-slate-400 hover:text-white text-sm transition-colors">
+                  Cookies
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
