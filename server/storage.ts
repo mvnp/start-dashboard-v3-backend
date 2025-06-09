@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService, type Appointment, type InsertAppointment } from "@shared/schema";
+import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService, type Appointment, type InsertAppointment, type PaymentGateway, type InsertPaymentGateway } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -42,6 +42,13 @@ export interface IStorage {
   createAppointment(appointment: InsertAppointment): Promise<Appointment>;
   updateAppointment(id: number, appointment: Partial<InsertAppointment>): Promise<Appointment | undefined>;
   deleteAppointment(id: number): Promise<boolean>;
+  
+  // Payment Gateway methods
+  getAllPaymentGateways(): Promise<PaymentGateway[]>;
+  getPaymentGateway(id: number): Promise<PaymentGateway | undefined>;
+  createPaymentGateway(gateway: InsertPaymentGateway): Promise<PaymentGateway>;
+  updatePaymentGateway(id: number, gateway: Partial<InsertPaymentGateway>): Promise<PaymentGateway | undefined>;
+  deletePaymentGateway(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -51,12 +58,14 @@ export class MemStorage implements IStorage {
   private barberPlans: Map<number, BarberPlan>;
   private services: Map<number, Service>;
   private appointments: Map<number, Appointment>;
+  private paymentGateways: Map<number, PaymentGateway>;
   private currentUserId: number;
   private currentStaffId: number;
   private currentClientId: number;
   private currentBarberPlanId: number;
   private currentServiceId: number;
   private currentAppointmentId: number;
+  private currentPaymentGatewayId: number;
 
   constructor() {
     this.users = new Map();
@@ -65,12 +74,14 @@ export class MemStorage implements IStorage {
     this.barberPlans = new Map();
     this.services = new Map();
     this.appointments = new Map();
+    this.paymentGateways = new Map();
     this.currentUserId = 1;
     this.currentStaffId = 1;
     this.currentClientId = 1;
     this.currentBarberPlanId = 1;
     this.currentServiceId = 1;
     this.currentAppointmentId = 1;
+    this.currentPaymentGatewayId = 1;
     
     // Add sample data
     this.seedStaffData();
@@ -78,6 +89,7 @@ export class MemStorage implements IStorage {
     this.seedBarberPlanData();
     this.seedServiceData();
     this.seedAppointmentData();
+    this.seedPaymentGatewayData();
   }
 
   private seedStaffData() {
@@ -517,6 +529,91 @@ export class MemStorage implements IStorage {
 
   async deleteAppointment(id: number): Promise<boolean> {
     return this.appointments.delete(id);
+  }
+
+  private seedPaymentGatewayData() {
+    const sampleGateways = [
+      {
+        name: "Main Mercado Pago",
+        type: "Mercado Pago",
+        api_url: "https://api.mercadopago.com",
+        api_key: "APP_USR_123456789",
+        token: "access_token_123",
+        email: "admin@barbershop.com",
+        staff_id: 1,
+        is_active: true
+      },
+      {
+        name: "Asaas Payment",
+        type: "Asaas",
+        api_url: "https://www.asaas.com/api/v3",
+        api_key: "asaas_api_key_456",
+        token: "asaas_token_456",
+        email: "payments@barbershop.com",
+        staff_id: 1,
+        is_active: true
+      },
+      {
+        name: "PagBank Gateway",
+        type: "Pagbank",
+        api_url: "https://ws.pagseguro.uol.com.br",
+        api_key: "pagbank_key_789",
+        token: "pagbank_token_789",
+        email: "finance@barbershop.com",
+        staff_id: 2,
+        is_active: false
+      }
+    ];
+
+    sampleGateways.forEach((gatewayData) => {
+      const id = this.currentPaymentGatewayId++;
+      const now = new Date();
+      const gateway: PaymentGateway = {
+        ...gatewayData,
+        id,
+        created_at: now,
+        updated_at: now
+      };
+      this.paymentGateways.set(id, gateway);
+    });
+  }
+
+  async getAllPaymentGateways(): Promise<PaymentGateway[]> {
+    return Array.from(this.paymentGateways.values());
+  }
+
+  async getPaymentGateway(id: number): Promise<PaymentGateway | undefined> {
+    return this.paymentGateways.get(id);
+  }
+
+  async createPaymentGateway(insertGateway: InsertPaymentGateway): Promise<PaymentGateway> {
+    const id = this.currentPaymentGatewayId++;
+    const now = new Date();
+    const gateway: PaymentGateway = { 
+      ...insertGateway, 
+      id,
+      created_at: now,
+      updated_at: now
+    };
+    this.paymentGateways.set(id, gateway);
+    return gateway;
+  }
+
+  async updatePaymentGateway(id: number, updateData: Partial<InsertPaymentGateway>): Promise<PaymentGateway | undefined> {
+    const existingGateway = this.paymentGateways.get(id);
+    if (!existingGateway) return undefined;
+    
+    const updatedGateway: PaymentGateway = {
+      ...existingGateway,
+      ...updateData,
+      updated_at: new Date()
+    };
+    this.paymentGateways.set(id, updatedGateway);
+    return updatedGateway;
+  }
+
+  async deletePaymentGateway(id: number): Promise<boolean> {
+    return this.paymentGateways.delete(id);
   }
 }
 
