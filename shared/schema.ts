@@ -21,6 +21,18 @@ export const staff = pgTable("staff", {
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
+export const clients = pgTable("clients", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  phone: text("phone").notNull(),
+  tax_id: text("tax_id").notNull(),
+  type: text("type").notNull(),
+  address: text("address").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -32,7 +44,15 @@ export const insertStaffSchema = createInsertSchema(staff).omit({
   updated_at: true,
 });
 
+export const insertClientSchema = createInsertSchema(clients).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertStaff = z.infer<typeof insertStaffSchema>;
 export type Staff = typeof staff.$inferSelect;
+export type InsertClient = z.infer<typeof insertClientSchema>;
+export type Client = typeof clients.$inferSelect;

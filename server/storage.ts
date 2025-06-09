@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, type Staff, type InsertStaff } from "@shared/schema";
+import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -14,22 +14,34 @@ export interface IStorage {
   createStaff(staff: InsertStaff): Promise<Staff>;
   updateStaff(id: number, staff: Partial<InsertStaff>): Promise<Staff | undefined>;
   deleteStaff(id: number): Promise<boolean>;
+  
+  // Client methods
+  getAllClients(): Promise<Client[]>;
+  getClient(id: number): Promise<Client | undefined>;
+  createClient(client: InsertClient): Promise<Client>;
+  updateClient(id: number, client: Partial<InsertClient>): Promise<Client | undefined>;
+  deleteClient(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private staff: Map<number, Staff>;
+  private clients: Map<number, Client>;
   private currentUserId: number;
   private currentStaffId: number;
+  private currentClientId: number;
 
   constructor() {
     this.users = new Map();
     this.staff = new Map();
+    this.clients = new Map();
     this.currentUserId = 1;
     this.currentStaffId = 1;
+    this.currentClientId = 1;
     
-    // Add sample staff data
+    // Add sample data
     this.seedStaffData();
+    this.seedClientData();
   }
 
   private seedStaffData() {
@@ -129,6 +141,85 @@ export class MemStorage implements IStorage {
 
   async deleteStaff(id: number): Promise<boolean> {
     return this.staff.delete(id);
+  }
+
+  private seedClientData() {
+    const sampleClients = [
+      {
+        name: "David Wilson",
+        email: "david.wilson@email.com",
+        phone: "+1 (555) 456-7890",
+        tax_id: "456-78-9012",
+        type: "customer",
+        address: "123 Main St, City, State 12345"
+      },
+      {
+        name: "Emma Thompson",
+        email: "emma.thompson@email.com",
+        phone: "+1 (555) 567-8901",
+        tax_id: "567-89-0123",
+        type: "customer",
+        address: "456 Oak Ave, City, State 12345"
+      },
+      {
+        name: "James Brown",
+        email: "james.brown@email.com",
+        phone: "+1 (555) 678-9012",
+        tax_id: "678-90-1234",
+        type: "customer",
+        address: "789 Pine Rd, City, State 12345"
+      }
+    ];
+
+    sampleClients.forEach(clientData => {
+      const id = this.currentClientId++;
+      const now = new Date();
+      const client: Client = {
+        ...clientData,
+        id,
+        created_at: now,
+        updated_at: now
+      };
+      this.clients.set(id, client);
+    });
+  }
+
+  async getAllClients(): Promise<Client[]> {
+    return Array.from(this.clients.values());
+  }
+
+  async getClient(id: number): Promise<Client | undefined> {
+    return this.clients.get(id);
+  }
+
+  async createClient(insertClient: InsertClient): Promise<Client> {
+    const id = this.currentClientId++;
+    const now = new Date();
+    const client: Client = { 
+      ...insertClient, 
+      id,
+      created_at: now,
+      updated_at: now
+    };
+    this.clients.set(id, client);
+    return client;
+  }
+
+  async updateClient(id: number, updateData: Partial<InsertClient>): Promise<Client | undefined> {
+    const existingClient = this.clients.get(id);
+    if (!existingClient) return undefined;
+    
+    const updatedClient: Client = {
+      ...existingClient,
+      ...updateData,
+      updated_at: new Date()
+    };
+    this.clients.set(id, updatedClient);
+    return updatedClient;
+  }
+
+  async deleteClient(id: number): Promise<boolean> {
+    return this.clients.delete(id);
   }
 }
 
