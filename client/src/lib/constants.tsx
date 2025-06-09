@@ -64,7 +64,7 @@ export const navigationItems = [
   },
   {
     name: "Payment Gateways",
-    href: "/payments",
+    href: "/payment-gateways",
     icon: PaymentIcon,
     current: false,
   },
