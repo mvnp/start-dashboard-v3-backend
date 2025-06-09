@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -93,12 +93,17 @@ export default function Login() {
               {isLoading ? "Signing in..." : "Sign in"}
             </Button>
 
-            <div className="text-center">
+            <div className="text-center space-y-3">
               <p className="text-sm text-slate-600">
                 Don't have an account?{" "}
                 <a href="#" className="font-medium barber-primary hover:text-barber-secondary">
                   Contact your administrator
                 </a>
+              </p>
+              <p className="text-sm">
+                <Link href="/landing" className="font-medium text-barber-primary hover:text-barber-secondary">
+                  ← Go to home
+                </Link>
               </p>
             </div>
           </form>
