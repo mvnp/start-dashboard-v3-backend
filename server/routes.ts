@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertStaffSchema, insertClientSchema, insertBarberPlanSchema, insertServiceSchema, insertAppointmentSchema, insertPaymentGatewaySchema, insertAccountingTransactionSchema, insertSupportTicketSchema, insertFaqSchema } from "@shared/schema";
+import { insertStaffSchema, insertClientSchema, insertBarberPlanSchema, insertServiceSchema, insertAppointmentSchema, insertPaymentGatewaySchema, insertAccountingTransactionSchema, insertSupportTicketSchema, insertFaqSchema, insertWhatsappInstanceSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -596,6 +596,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete FAQ" });
+    }
+  });
+
+  // WhatsApp Instance routes
+  app.get("/api/whatsapp-instances", async (req, res) => {
+    try {
+      const instances = await storage.getAllWhatsappInstances();
+      res.json(instances);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch WhatsApp instances" });
+    }
+  });
+
+  app.get("/api/whatsapp-instances/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const instance = await storage.getWhatsappInstance(id);
+      if (!instance) {
+        return res.status(404).json({ error: "WhatsApp instance not found" });
+      }
+      res.json(instance);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch WhatsApp instance" });
+    }
+  });
+
+  app.post("/api/whatsapp-instances", async (req, res) => {
+    try {
+      const validatedData = insertWhatsappInstanceSchema.parse(req.body);
+      const instance = await storage.createWhatsappInstance(validatedData);
+      res.status(201).json(instance);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create WhatsApp instance" });
+    }
+  });
+
+  app.put("/api/whatsapp-instances/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertWhatsappInstanceSchema.partial().parse(req.body);
+      const instance = await storage.updateWhatsappInstance(id, validatedData);
+      if (!instance) {
+        return res.status(404).json({ error: "WhatsApp instance not found" });
+      }
+      res.json(instance);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update WhatsApp instance" });
+    }
+  });
+
+  app.delete("/api/whatsapp-instances/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteWhatsappInstance(id);
+      if (!deleted) {
+        return res.status(404).json({ error: "WhatsApp instance not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete WhatsApp instance" });
+    }
+  });
+
+  app.post("/api/whatsapp-instances/:id/generate-qr", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const qrCode = await storage.generateQrCode(id);
+      if (!qrCode) {
+        return res.status(404).json({ error: "WhatsApp instance not found" });
+      }
+      res.json({ qr_code: qrCode });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to generate QR code" });
+    }
+  });
+
+  app.post("/api/whatsapp-instances/:id/connect", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { session_id } = req.body;
+      if (!session_id) {
+        return res.status(400).json({ error: "session_id is required" });
+      }
+      const success = await storage.connectInstance(id, session_id);
+      if (!success) {
+        return res.status(404).json({ error: "WhatsApp instance not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to connect instance" });
     }
   });
 

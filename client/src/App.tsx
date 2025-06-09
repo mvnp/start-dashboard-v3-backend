@@ -29,6 +29,8 @@ import SupportTicketList from "@/pages/support-ticket-list";
 import SupportTicketForm from "@/pages/support-ticket-form";
 import FaqList from "@/pages/faq-list";
 import FaqForm from "@/pages/faq-form";
+import WhatsappList from "@/pages/whatsapp-list";
+import WhatsappForm from "@/pages/whatsapp-form";
 import Support from "@/pages/support";
 import NotFound from "@/pages/not-found";
 
@@ -217,6 +219,21 @@ function Router() {
       <Route path="/faqs/:id/edit">
         <Layout>
           <FaqForm />
+        </Layout>
+      </Route>
+      <Route path="/whatsapp">
+        <Layout>
+          <WhatsappList />
+        </Layout>
+      </Route>
+      <Route path="/whatsapp/new">
+        <Layout>
+          <WhatsappForm />
+        </Layout>
+      </Route>
+      <Route path="/whatsapp/:id/edit">
+        <Layout>
+          <WhatsappForm />
         </Layout>
       </Route>
       <Route path="/accounting">

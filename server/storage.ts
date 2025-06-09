@@ -139,6 +139,7 @@ export class MemStorage implements IStorage {
     this.seedAccountingTransactionData();
     this.seedSupportTicketData();
     this.seedFaqData();
+    this.seedWhatsappInstanceData();
   }
 
   private seedStaffData() {
@@ -974,6 +975,118 @@ export class MemStorage implements IStorage {
 
   async deleteFaq(id: number): Promise<boolean> {
     return this.faqs.delete(id);
+  }
+
+  private seedWhatsappInstanceData() {
+    const sampleInstances = [
+      {
+        name: "Main Business WhatsApp",
+        phone_number: "+1234567890",
+        status: "connected",
+        webhook_url: "https://example.com/webhook",
+        session_id: "main_session_123",
+        last_seen: new Date()
+      },
+      {
+        name: "Customer Support",
+        phone_number: "+1234567891",
+        status: "disconnected",
+        webhook_url: "https://example.com/webhook2"
+      }
+    ];
+
+    sampleInstances.forEach((instanceData) => {
+      const id = this.currentWhatsappInstanceId++;
+      const instance: WhatsappInstance = {
+        id,
+        name: instanceData.name,
+        phone_number: instanceData.phone_number,
+        status: instanceData.status,
+        webhook_url: instanceData.webhook_url,
+        session_id: instanceData.session_id || null,
+        last_seen: instanceData.last_seen || null,
+        qr_code: null,
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+      this.whatsappInstances.set(id, instance);
+    });
+  }
+
+  async getAllWhatsappInstances(): Promise<WhatsappInstance[]> {
+    return Array.from(this.whatsappInstances.values()).sort((a, b) => b.id - a.id);
+  }
+
+  async getWhatsappInstance(id: number): Promise<WhatsappInstance | undefined> {
+    return this.whatsappInstances.get(id);
+  }
+
+  async createWhatsappInstance(insertInstance: InsertWhatsappInstance): Promise<WhatsappInstance> {
+    const id = this.currentWhatsappInstanceId++;
+    const instance: WhatsappInstance = {
+      ...insertInstance,
+      id,
+      status: "disconnected",
+      qr_code: null,
+      session_id: null,
+      last_seen: null,
+      created_at: new Date(),
+      updated_at: new Date()
+    };
+    this.whatsappInstances.set(id, instance);
+    return instance;
+  }
+
+  async updateWhatsappInstance(id: number, updateData: Partial<InsertWhatsappInstance>): Promise<WhatsappInstance | undefined> {
+    const existingInstance = this.whatsappInstances.get(id);
+    if (!existingInstance) return undefined;
+
+    const updatedInstance: WhatsappInstance = {
+      ...existingInstance,
+      ...updateData,
+      updated_at: new Date()
+    };
+    this.whatsappInstances.set(id, updatedInstance);
+    return updatedInstance;
+  }
+
+  async deleteWhatsappInstance(id: number): Promise<boolean> {
+    return this.whatsappInstances.delete(id);
+  }
+
+  async generateQrCode(id: number): Promise<string | null> {
+    const instance = this.whatsappInstances.get(id);
+    if (!instance) return null;
+
+    // Generate a mock QR code data (in real implementation, this would integrate with WhatsApp Business API)
+    const qrCodeData = `whatsapp://qr/${instance.phone_number}_${Date.now()}`;
+    
+    const updatedInstance: WhatsappInstance = {
+      ...instance,
+      status: "connecting",
+      qr_code: qrCodeData,
+      updated_at: new Date()
+    };
+    
+    this.whatsappInstances.set(id, updatedInstance);
+    return qrCodeData;
+  }
+
+  async connectInstance(id: number, sessionId: string): Promise<boolean> {
+    const instance = this.whatsappInstances.get(id);
+    if (!instance) return false;
+
+    const updatedInstance: WhatsappInstance = {
+      ...instance,
+      status: "connected",
+      session_id: sessionId,
+      qr_code: null,
+      last_seen: new Date(),
+      updated_at: new Date()
+    };
+
+    this.whatsappInstances.set(id, updatedInstance);
+    return true;
   }
 }
 
