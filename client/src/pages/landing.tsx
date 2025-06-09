@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -123,8 +124,8 @@ export default function Landing() {
               ))}
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm">
-                Sign In
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/login">Sign In</Link>
               </Button>
               <Button size="sm" className="bg-barber-primary hover:bg-barber-secondary">
                 Get Started
