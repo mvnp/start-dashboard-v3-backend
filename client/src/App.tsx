@@ -15,6 +15,8 @@ import StaffList from "@/pages/staff-list";
 import StaffForm from "@/pages/staff-form";
 import ClientList from "@/pages/client-list";
 import ClientForm from "@/pages/client-form";
+import BarberPlanList from "@/pages/barber-plan-list";
+import BarberPlanForm from "@/pages/barber-plan-form";
 import NotFound from "@/pages/not-found";
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -99,10 +101,17 @@ function Router() {
       </Route>
       <Route path="/plans">
         <Layout>
-          <div className="p-6">
-            <h1 className="text-3xl font-bold text-slate-900">Barber Plans</h1>
-            <p className="text-slate-600 mt-2">Subscription and plan management coming soon...</p>
-          </div>
+          <BarberPlanList />
+        </Layout>
+      </Route>
+      <Route path="/plans/new">
+        <Layout>
+          <BarberPlanForm />
+        </Layout>
+      </Route>
+      <Route path="/plans/:id/edit">
+        <Layout>
+          <BarberPlanForm />
         </Layout>
       </Route>
       <Route path="/payments">

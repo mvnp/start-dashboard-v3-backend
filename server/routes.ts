@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertStaffSchema, insertClientSchema } from "@shared/schema";
+import { insertStaffSchema, insertClientSchema, insertBarberPlanSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -134,6 +134,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete client" });
+    }
+  });
+
+  // Barber Plans routes
+  app.get("/api/barber-plans", async (req, res) => {
+    try {
+      const plans = await storage.getAllBarberPlans();
+      res.json(plans);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch barber plans" });
+    }
+  });
+
+  app.get("/api/barber-plans/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const plan = await storage.getBarberPlan(id);
+      if (!plan) {
+        return res.status(404).json({ error: "Barber plan not found" });
+      }
+      res.json(plan);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch barber plan" });
+    }
+  });
+
+  app.post("/api/barber-plans", async (req, res) => {
+    try {
+      const validatedData = insertBarberPlanSchema.parse(req.body);
+      const plan = await storage.createBarberPlan(validatedData);
+      res.status(201).json(plan);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create barber plan" });
+    }
+  });
+
+  app.put("/api/barber-plans/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertBarberPlanSchema.partial().parse(req.body);
+      const plan = await storage.updateBarberPlan(id, validatedData);
+      if (!plan) {
+        return res.status(404).json({ error: "Barber plan not found" });
+      }
+      res.json(plan);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update barber plan" });
+    }
+  });
+
+  app.delete("/api/barber-plans/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteBarberPlan(id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Barber plan not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete barber plan" });
     }
   });
 
