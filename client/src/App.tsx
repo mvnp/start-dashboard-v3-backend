@@ -19,6 +19,8 @@ import BarberPlanList from "@/pages/barber-plan-list";
 import BarberPlanForm from "@/pages/barber-plan-form";
 import ServiceList from "@/pages/service-list";
 import ServiceForm from "@/pages/service-form";
+import AppointmentList from "@/pages/appointment-list";
+import AppointmentForm from "@/pages/appointment-form";
 import NotFound from "@/pages/not-found";
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -49,10 +51,17 @@ function Router() {
       </Route>
       <Route path="/appointments">
         <Layout>
-          <div className="p-6">
-            <h1 className="text-3xl font-bold text-slate-900">Appointments</h1>
-            <p className="text-slate-600 mt-2">Appointment management coming soon...</p>
-          </div>
+          <AppointmentList />
+        </Layout>
+      </Route>
+      <Route path="/appointments/new">
+        <Layout>
+          <AppointmentForm />
+        </Layout>
+      </Route>
+      <Route path="/appointments/:id/edit">
+        <Layout>
+          <AppointmentForm />
         </Layout>
       </Route>
       <Route path="/clients">
