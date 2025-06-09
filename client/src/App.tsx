@@ -152,6 +152,21 @@ function Router() {
           <PaymentGatewayForm />
         </Layout>
       </Route>
+      <Route path="/accounting">
+        <Layout>
+          <AccountingList />
+        </Layout>
+      </Route>
+      <Route path="/accounting/new">
+        <Layout>
+          <AccountingForm />
+        </Layout>
+      </Route>
+      <Route path="/accounting/:id/edit">
+        <Layout>
+          <AccountingForm />
+        </Layout>
+      </Route>
       <Route path="/support">
         <Layout>
           <Support />
