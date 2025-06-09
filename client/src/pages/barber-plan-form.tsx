@@ -174,7 +174,7 @@ export default function BarberPlanForm() {
         </div>
       </div>
 
-      <Card className="max-w-4xl">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-xl font-semibold text-slate-900">
             Plan Information
