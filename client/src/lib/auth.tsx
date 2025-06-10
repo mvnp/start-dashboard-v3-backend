@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 interface User {
   id: number;
@@ -15,6 +15,7 @@ interface AuthContextType {
   setUser: (user: User | null) => void;
   switchUser: (userId: number) => Promise<void>;
   getCurrentUser: () => Promise<void>;
+  refreshData: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,9 +42,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await apiRequest('POST', '/api/switch-user', { userId });
       const data = await response.json();
       setUser(data.user);
+      // Invalidate all queries when switching users
+      queryClient.invalidateQueries();
     } catch (error) {
       console.error('Failed to switch user:', error);
       throw error;
+    }
+  };
+
+  const refreshData = () => {
+    queryClient.invalidateQueries();
+  };
+
+  // Enhanced setUser that also refreshes data
+  const setUserAndRefresh = (newUser: User | null) => {
+    setUser(newUser);
+    if (newUser) {
+      // Small delay to ensure user context is updated before refreshing data
+      setTimeout(() => {
+        queryClient.invalidateQueries();
+      }, 100);
     }
   };
 
@@ -52,7 +70,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, setUser, switchUser, getCurrentUser }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      setUser: setUserAndRefresh, 
+      switchUser, 
+      getCurrentUser, 
+      refreshData 
+    }}>
       {children}
     </AuthContext.Provider>
   );
