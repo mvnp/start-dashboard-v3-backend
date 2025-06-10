@@ -89,10 +89,11 @@ export function registerRoutes(app: Express): void {
   // Business routes
   app.get("/api/businesses", async (req, res) => {
     try {
-      // Development mode: Use Super Admin access (user ID: 1)
-      const userData = await storage.getUserWithRoleAndBusiness(1);
+      // For testing: Use User ID 21 (Role ID: 2, Business ID: 1) instead of Super Admin
+      const testUserId = 21; // This should be replaced with proper session management
+      const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
-        return res.status(500).json({ error: "Super Admin user not found" });
+        return res.status(500).json({ error: "User not found" });
       }
 
       let businesses;
@@ -178,10 +179,11 @@ export function registerRoutes(app: Express): void {
   // Staff routes (using persons table now) - roles 1,2,3 (super-admin, merchant, employee)
   app.get("/api/staff", async (req, res) => {
     try {
-      // Development mode: Use Super Admin access (user ID: 1)
-      const userData = await storage.getUserWithRoleAndBusiness(1);
+      // For testing: Use User ID 21 (Role ID: 2, Business ID: 1) instead of Super Admin
+      const testUserId = 21; // This should be replaced with proper session management
+      const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
-        return res.status(500).json({ error: "Super Admin user not found" });
+        return res.status(500).json({ error: "User not found" });
       }
 
       let persons;
@@ -309,10 +311,11 @@ export function registerRoutes(app: Express): void {
   // Client routes (also using persons table) - role 4 (client)
   app.get("/api/clients", async (req, res) => {
     try {
-      // Development mode: Use Super Admin access (user ID: 1)
-      const userData = await storage.getUserWithRoleAndBusiness(1);
+      // For testing: Use User ID 21 (Role ID: 2, Business ID: 1) instead of Super Admin
+      const testUserId = 21; // This should be replaced with proper session management
+      const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
-        return res.status(500).json({ error: "Super Admin user not found" });
+        return res.status(500).json({ error: "User not found" });
       }
 
       let persons;
