@@ -238,7 +238,7 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/clients", async (req, res) => {
     try {
-      const { email, type, address, business_id, role_id, ...personData } = req.body;
+      const { email, address, business_id, role_id, ...personData } = req.body;
       
       let userId = null;
       
