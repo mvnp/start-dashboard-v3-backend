@@ -95,13 +95,17 @@ export function registerRoutes(app: Express): void {
       if (!userData) {
         return res.status(500).json({ error: "User not found" });
       }
+      
+      console.log("DEBUG - Business endpoint userData:", JSON.stringify(userData, null, 2));
 
       let businesses;
       // Super Admin (role ID: 1) can see all businesses
       if (userData.roleId === 1) {
+        console.log("DEBUG - User is Super Admin, fetching all businesses");
         businesses = await storage.getAllBusinesses();
       } else {
         // Other users see only their associated businesses
+        console.log("DEBUG - User is not Super Admin, filtering by business IDs:", userData.businessIds);
         businesses = [];
         for (const businessId of userData.businessIds) {
           const business = await storage.getBusiness(businessId);
@@ -109,6 +113,7 @@ export function registerRoutes(app: Express): void {
         }
       }
       
+      console.log("DEBUG - Final businesses count:", businesses.length);
       res.json(businesses);
     } catch (error) {
       console.error("Business fetch error:", error);
