@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
 import { useMutation } from "@tanstack/react-query";
 import { DemoCredentials } from "@/components/demo-credentials";
+import { queryClient } from "@/lib/queryClient";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -36,6 +37,8 @@ export default function Login() {
     },
     onSuccess: (data) => {
       setUser(data.user);
+      // Invalidate all queries to refresh data with new user context
+      queryClient.invalidateQueries();
       toast({
         title: "Login successful",
         description: "Welcome to BarberPro Dashboard",
