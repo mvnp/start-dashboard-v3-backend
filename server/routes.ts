@@ -453,6 +453,17 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  // Role routes
+  app.get("/api/roles", async (req, res) => {
+    try {
+      const roles = await storage.getAllRoles();
+      res.json(roles);
+    } catch (error) {
+      console.error("Role fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch roles" });
+    }
+  });
+
   // WhatsApp Instance routes
   app.get("/api/whatsapp", async (req, res) => {
     try {

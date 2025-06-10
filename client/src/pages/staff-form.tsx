@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Person, Business } from "@shared/schema";
+import { Person, Business, Role } from "@shared/schema";
 
 interface StaffFormData {
   first_name: string;
@@ -29,12 +29,7 @@ interface StaffFormData {
   business_id: number;
 }
 
-const roleOptions = [
-  { value: "super-admin", label: "Super Admin" },
-  { value: "merchant", label: "Merchant" },
-  { value: "collaborator", label: "Collaborator" },
-  { value: "customer", label: "Customer" },
-];
+
 
 export default function StaffForm() {
   const [, setLocation] = useLocation();
@@ -64,6 +59,11 @@ export default function StaffForm() {
   const { data: businesses } = useQuery({
     queryKey: ["/api/businesses"],
     select: (data: Business[]) => data,
+  });
+
+  const { data: roles } = useQuery({
+    queryKey: ["/api/roles"],
+    select: (data: Role[]) => data,
   });
 
   const createStaffMutation = useMutation({
@@ -280,9 +280,9 @@ export default function StaffForm() {
                     <SelectValue placeholder="Select staff role" />
                   </SelectTrigger>
                   <SelectContent>
-                    {roleOptions.map((role) => (
-                      <SelectItem key={role.value} value={role.value}>
-                        {role.label}
+                    {roles?.map((role) => (
+                      <SelectItem key={role.id} value={role.type}>
+                        {role.type.charAt(0).toUpperCase() + role.type.slice(1).replace('-', ' ')}
                       </SelectItem>
                     ))}
                   </SelectContent>
