@@ -13,6 +13,8 @@ import {
   insertSupportTicketSchema,
   insertFaqSchema,
   insertWhatsappInstanceSchema,
+  insertUserBusinessSchema,
+  insertUserRoleSchema,
 } from "@shared/schema";
 
 export function registerRoutes(app: Express): void {

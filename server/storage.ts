@@ -10,6 +10,8 @@ import {
   type Business, type InsertBusiness,
   type Person, type InsertPerson,
   type Role, type InsertRole,
+  type UserBusiness, type InsertUserBusiness,
+  type UserRole, type InsertUserRole,
   type Service, type InsertService,
   type Appointment, type InsertAppointment,
   type BarberPlan, type InsertBarberPlan,
@@ -50,8 +52,8 @@ export interface IStorage {
   getRole(id: number): Promise<Role | undefined>;
   
   // Junction table methods
-  createUserBusiness(userBusiness: InsertUserBusiness): Promise<UserBusiness>;
-  createUserRole(userRole: InsertUserRole): Promise<UserRole>;
+  createUserBusiness(insertUserBusiness: InsertUserBusiness): Promise<UserBusiness>;
+  createUserRole(insertUserRole: InsertUserRole): Promise<UserRole>;
   
   // Service methods
   getAllServices(): Promise<Service[]>;
@@ -397,6 +399,17 @@ class PostgresStorage implements IStorage {
   async deleteWhatsappInstance(id: number): Promise<boolean> {
     const result = await this.db.delete(whatsapp_instances).where(eq(whatsapp_instances.id, id));
     return result.rowCount > 0;
+  }
+
+  // Junction table methods
+  async createUserBusiness(insertUserBusiness: InsertUserBusiness): Promise<UserBusiness> {
+    const result = await this.db.insert(users_business).values(insertUserBusiness).returning();
+    return result[0];
+  }
+
+  async createUserRole(insertUserRole: InsertUserRole): Promise<UserRole> {
+    const result = await this.db.insert(users_roles).values(insertUserRole).returning();
+    return result[0];
   }
 }
 
