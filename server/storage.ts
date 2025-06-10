@@ -29,6 +29,7 @@ export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUsersByRole(roleType: string): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
   deleteUser(id: number): Promise<boolean>;
@@ -124,6 +125,23 @@ class PostgresStorage implements IStorage {
   async getUserByEmail(email: string): Promise<User | undefined> {
     const result = await this.db.select().from(users).where(eq(users.email, email));
     return result[0];
+  }
+
+  async getUsersByRole(roleType: string): Promise<User[]> {
+    const result = await this.db
+      .select({
+        id: users.id,
+        email: users.email,
+        password: users.password,
+        created_at: users.created_at,
+        updated_at: users.updated_at,
+        deleted_at: users.deleted_at,
+      })
+      .from(users)
+      .innerJoin(users_roles, eq(users.id, users_roles.user_id))
+      .innerJoin(roles, eq(users_roles.role_id, roles.id))
+      .where(eq(roles.type, roleType));
+    return result;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {

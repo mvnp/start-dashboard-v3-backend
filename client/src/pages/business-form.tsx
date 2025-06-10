@@ -10,7 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
-import { insertBusinessSchema, type InsertBusiness, type Business } from "@shared/schema";
+import { insertBusinessSchema, type InsertBusiness, type Business, type User } from "@shared/schema";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface BusinessFormProps {
   businessId?: number;
@@ -29,6 +30,11 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
   const { data: business } = useQuery<Business>({
     queryKey: ["/api/businesses", actualBusinessId],
     enabled: isEditing,
+  });
+
+  // Query for super-admin users
+  const { data: superAdminUsers } = useQuery<User[]>({
+    queryKey: ["/api/users/super-admins"],
   });
 
   const form = useForm<InsertBusiness>({

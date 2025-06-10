@@ -523,6 +523,17 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  // Users with super-admin role
+  app.get("/api/users/super-admins", async (req, res) => {
+    try {
+      const users = await storage.getUsersByRole("super-admin");
+      res.json(users);
+    } catch (error) {
+      console.error("Super-admin users fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch super-admin users" });
+    }
+  });
+
   // WhatsApp Instance routes
   app.get("/api/whatsapp", async (req, res) => {
     try {

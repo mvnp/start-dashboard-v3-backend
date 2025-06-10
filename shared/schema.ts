@@ -31,6 +31,7 @@ export const businesses = pgTable("businesses", {
   phone: text("phone"),
   email: text("email"),
   tax_id: text("tax_id"),
+  user_id: integer("user_id").references(() => users.id),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
