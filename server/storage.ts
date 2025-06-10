@@ -174,12 +174,38 @@ class PostgresStorage implements IStorage {
 
   async createBusiness(insertBusiness: InsertBusiness): Promise<Business> {
     const result = await this.db.insert(businesses).values(insertBusiness).returning();
-    return result[0];
+    const business = result[0];
+    
+    // Create users_business relationship if user_id is provided
+    if (business.user_id) {
+      await this.db.insert(users_business).values({
+        user_id: business.user_id,
+        business_id: business.id
+      });
+    }
+    
+    return business;
   }
 
   async updateBusiness(id: number, updateData: Partial<InsertBusiness>): Promise<Business | undefined> {
     const result = await this.db.update(businesses).set(updateData).where(eq(businesses.id, id)).returning();
-    return result[0];
+    const business = result[0];
+    
+    // Update users_business relationship if user_id is being changed
+    if (business && updateData.user_id !== undefined) {
+      // First, remove existing users_business relationship for this business
+      await this.db.delete(users_business).where(eq(users_business.business_id, id));
+      
+      // Then create new relationship if user_id is provided
+      if (updateData.user_id) {
+        await this.db.insert(users_business).values({
+          user_id: updateData.user_id,
+          business_id: id
+        });
+      }
+    }
+    
+    return business;
   }
 
   async deleteBusiness(id: number): Promise<boolean> {
