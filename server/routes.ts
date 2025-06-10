@@ -89,19 +89,23 @@ export function registerRoutes(app: Express): void {
   // Business routes
   app.get("/api/businesses", async (req, res) => {
     try {
-      // For testing: Use User ID 21 (Role ID: 2, Business ID: 1) instead of Super Admin
-      const testUserId = 21; // This should be replaced with proper session management
+      // For testing: Use User ID 1 (Super Admin) to see all system data
+      const testUserId = 1; // This should be replaced with proper session management
       const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
         return res.status(500).json({ error: "User not found" });
       }
       
       let businesses;
+      console.log("DEBUG - Business endpoint: userData.roleId =", userData.roleId, "businessIds =", userData.businessIds);
       // Super Admin (role ID: 1) can see all businesses
       if (userData.roleId === 1) {
+        console.log("DEBUG - Super Admin detected, fetching ALL businesses");
         businesses = await storage.getAllBusinesses();
+        console.log("DEBUG - All businesses fetched, count:", businesses.length);
       } else {
         // Other users see only their associated businesses
+        console.log("DEBUG - Regular user, filtering by business IDs");
         businesses = [];
         for (const businessId of userData.businessIds) {
           const business = await storage.getBusiness(businessId);
@@ -178,8 +182,8 @@ export function registerRoutes(app: Express): void {
   // Staff routes (using persons table now) - roles 1,2,3 (super-admin, merchant, employee)
   app.get("/api/staff", async (req, res) => {
     try {
-      // For testing: Use User ID 21 (Role ID: 2, Business ID: 1) instead of Super Admin
-      const testUserId = 21; // This should be replaced with proper session management
+      // For testing: Use User ID 1 (Super Admin) to see all system data
+      const testUserId = 1; // This should be replaced with proper session management
       const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
         return res.status(500).json({ error: "User not found" });
@@ -310,8 +314,8 @@ export function registerRoutes(app: Express): void {
   // Client routes (also using persons table) - role 4 (client)
   app.get("/api/clients", async (req, res) => {
     try {
-      // For testing: Use User ID 21 (Role ID: 2, Business ID: 1) instead of Super Admin
-      const testUserId = 21; // This should be replaced with proper session management
+      // For testing: Use User ID 1 (Super Admin) to see all system data
+      const testUserId = 1; // This should be replaced with proper session management
       const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
         return res.status(500).json({ error: "User not found" });
