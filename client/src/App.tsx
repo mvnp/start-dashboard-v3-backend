@@ -31,6 +31,8 @@ import FaqList from "@/pages/faq-list";
 import FaqForm from "@/pages/faq-form";
 import WhatsappList from "@/pages/whatsapp-list";
 import WhatsappForm from "@/pages/whatsapp-form";
+import BusinessList from "@/pages/business-list";
+import BusinessForm from "@/pages/business-form";
 import Support from "@/pages/support";
 import NotFound from "@/pages/not-found";
 
@@ -119,6 +121,24 @@ function Router() {
         <Layout>
           <StaffForm />
         </Layout>
+      </Route>
+
+      <Route path="/businesses">
+        <Layout>
+          <BusinessList />
+        </Layout>
+      </Route>
+      <Route path="/businesses/new">
+        <Layout>
+          <BusinessForm />
+        </Layout>
+      </Route>
+      <Route path="/businesses/:id/edit">
+        {(params) => (
+          <Layout>
+            <BusinessForm businessId={parseInt(params.id)} />
+          </Layout>
+        )}
       </Route>
 
       <Route path="/plans">
