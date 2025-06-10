@@ -135,6 +135,35 @@ export function registerRoutes(app: Express): void {
     });
   });
 
+  // Get users by role for user switcher
+  app.get("/api/users/by-role", async (req, res) => {
+    try {
+      // Get all roles first
+      const roles = await storage.getAllRoles();
+      const usersByRole = [];
+
+      for (const role of roles) {
+        const users = await storage.getUsersByRole(role.type);
+        if (users.length > 0) {
+          // Get the first user for this role
+          const firstUser = users[0];
+          usersByRole.push({
+            id: firstUser.id,
+            email: firstUser.email,
+            roleId: role.id,
+            roleType: role.type,
+            roleName: role.description || role.type,
+          });
+        }
+      }
+
+      res.json(usersByRole);
+    } catch (error) {
+      console.error("Error fetching users by role:", error);
+      res.status(500).json({ error: "Failed to fetch users by role" });
+    }
+  });
+
   // User switching endpoint for testing different access levels
   app.post("/api/switch-user", async (req, res) => {
     try {

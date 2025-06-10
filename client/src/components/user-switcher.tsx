@@ -12,17 +12,57 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Shield, Building, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
+import { useQuery } from '@tanstack/react-query';
 
-const TEST_USERS = [
-  { id: 1, name: 'Super Admin', email: 'admin@system.com', role: 'Super Admin', icon: Shield },
-  { id: 21, name: 'Carlos Silva (Merchant)', email: 'carlos.silva@axitech.com', role: 'Merchant', icon: Building },
-  { id: 22, name: 'Marina Santos (Employee)', email: 'marina.santos@axitech.com', role: 'Employee', icon: User },
-];
+interface RoleUser {
+  id: number;
+  email: string;
+  roleId: number;
+  roleType: string;
+  roleName: string;
+}
+
+const getRoleIcon = (roleType: string) => {
+  switch (roleType) {
+    case 'super-admin':
+      return Shield;
+    case 'merchant':
+      return Building;
+    case 'employee':
+      return User;
+    default:
+      return User;
+  }
+};
+
+const getRoleDisplayName = (roleType: string) => {
+  switch (roleType) {
+    case 'super-admin':
+      return 'Super Admin';
+    case 'merchant':
+      return 'Merchant';
+    case 'employee':
+      return 'Employee';
+    default:
+      return roleType;
+  }
+};
 
 export default function UserSwitcher() {
   const { user, switchUser } = useAuth();
   const [switching, setSwitching] = useState(false);
   const { toast } = useToast();
+
+  const { data: usersByRole = [], isLoading } = useQuery({
+    queryKey: ['/api/users/by-role'],
+    queryFn: async () => {
+      const response = await fetch('/api/users/by-role');
+      if (!response.ok) {
+        throw new Error('Failed to fetch users by role');
+      }
+      return response.json() as Promise<RoleUser[]>;
+    },
+  });
 
   const handleUserSwitch = async (userId: string) => {
     setSwitching(true);
@@ -30,9 +70,10 @@ export default function UserSwitcher() {
       await switchUser(parseInt(userId));
       // Invalidate all queries to refresh data with new user context
       queryClient.invalidateQueries();
+      const switchedUser = usersByRole.find(u => u.id === parseInt(userId));
       toast({
         title: "User switched",
-        description: `Successfully switched to ${TEST_USERS.find(u => u.id === parseInt(userId))?.name}`,
+        description: `Successfully switched to ${switchedUser?.email}`,
       });
     } catch (error) {
       toast({
@@ -45,8 +86,8 @@ export default function UserSwitcher() {
     }
   };
 
-  const currentUser = TEST_USERS.find(u => u.id === user?.id);
-  const IconComponent = currentUser?.icon || User;
+  const currentUser = usersByRole.find(u => u.id === user?.id);
+  const IconComponent = currentUser ? getRoleIcon(currentUser.roleType) : User;
 
   return (
     <Card className="mb-4">
@@ -62,10 +103,10 @@ export default function UserSwitcher() {
             <IconComponent className="w-4 h-4 text-slate-600" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-slate-900 truncate">
-                {currentUser?.name || user.email}
+                {user.email}
               </p>
               <p className="text-xs text-slate-600">
-                {currentUser?.role || `Role ID: ${user.roleId}`}
+                {currentUser ? getRoleDisplayName(currentUser.roleType) : `Role ID: ${user.roleId}`}
               </p>
             </div>
           </div>
@@ -74,26 +115,32 @@ export default function UserSwitcher() {
         <Select
           value={user?.id.toString()}
           onValueChange={handleUserSwitch}
-          disabled={switching}
+          disabled={switching || isLoading}
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Switch user..." />
           </SelectTrigger>
           <SelectContent>
-            {TEST_USERS.map((testUser) => {
-              const Icon = testUser.icon;
-              return (
-                <SelectItem key={testUser.id} value={testUser.id.toString()}>
-                  <div className="flex items-center gap-2">
-                    <Icon className="w-4 h-4" />
-                    <div>
-                      <div className="font-medium">{testUser.name}</div>
-                      <div className="text-xs text-slate-600">{testUser.role}</div>
+            {isLoading ? (
+              <SelectItem value="loading" disabled>
+                Loading users...
+              </SelectItem>
+            ) : (
+              usersByRole.map((roleUser) => {
+                const Icon = getRoleIcon(roleUser.roleType);
+                return (
+                  <SelectItem key={roleUser.id} value={roleUser.id.toString()}>
+                    <div className="flex items-center gap-2">
+                      <Icon className="w-4 h-4" />
+                      <div>
+                        <div className="font-medium">{roleUser.email}</div>
+                        <div className="text-xs text-slate-600">{getRoleDisplayName(roleUser.roleType)}</div>
+                      </div>
                     </div>
-                  </div>
-                </SelectItem>
-              );
-            })}
+                  </SelectItem>
+                );
+              })
+            )}
           </SelectContent>
         </Select>
 
