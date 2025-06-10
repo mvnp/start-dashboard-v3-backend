@@ -1120,6 +1120,31 @@ export class PostgresStorage implements IStorage {
     return result[0];
   }
 
+  // Business methods
+  async getAllBusinesses(): Promise<Business[]> {
+    return await db.select().from(business);
+  }
+
+  async getBusiness(id: number): Promise<Business | undefined> {
+    const result = await db.select().from(business).where(eq(business.id, id));
+    return result[0];
+  }
+
+  async createBusiness(insertBusiness: InsertBusiness): Promise<Business> {
+    const result = await db.insert(business).values(insertBusiness).returning();
+    return result[0];
+  }
+
+  async updateBusiness(id: number, updateData: Partial<InsertBusiness>): Promise<Business | undefined> {
+    const result = await db.update(business).set(updateData).where(eq(business.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteBusiness(id: number): Promise<boolean> {
+    const result = await db.delete(business).where(eq(business.id, id));
+    return result.rowCount > 0;
+  }
+
   // Staff methods
   async getAllStaff(): Promise<Staff[]> {
     return await db.select().from(staff);

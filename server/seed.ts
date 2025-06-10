@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
-import { users, staff, clients, barberPlans, services, appointments, paymentGateways, accountingTransactions, supportTickets, faqs, whatsappInstances } from "@shared/schema";
+import { users, business, staff, clients, barberPlans, services, appointments, paymentGateways, accountingTransactions, supportTickets, faqs, whatsappInstances } from "@shared/schema";
 
 const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
@@ -32,10 +32,33 @@ async function seedDatabase() {
     { username: "william.anderson", password: "william123", role: "client" }
   ]).returning();
 
-  // Create staff records linked to users
+  // Create business records linked to merchant users
+  const businesses = await db.insert(business).values([
+    {
+      user_id: staffUsers[1].id, // John Martinez as merchant
+      name: "Elite Barbershop",
+      description: "Premium barbershop providing high-quality cuts and grooming services",
+      address: "123 Main Street, Downtown",
+      phone: "+1234567891",
+      email: "contact@elitebarbershop.com",
+      tax_id: "987654321"
+    },
+    {
+      user_id: staffUsers[0].id, // Admin as super-admin can have a business too
+      name: "Admin Business Hub",
+      description: "Administrative business management center",
+      address: "456 Admin Avenue",
+      phone: "+1234567890",
+      email: "admin@barbershop.com",
+      tax_id: "123456789"
+    }
+  ]).returning();
+
+  // Create staff records linked to users and businesses
   const staffMembers = await db.insert(staff).values([
     {
       user_id: staffUsers[0].id,
+      business_id: businesses[1].id, // Admin Business Hub
       first_name: "Admin",
       last_name: "Super",
       email: "admin@barbershop.com",
@@ -47,6 +70,7 @@ async function seedDatabase() {
     },
     {
       user_id: staffUsers[1].id,
+      business_id: businesses[0].id, // Elite Barbershop
       first_name: "John",
       last_name: "Martinez",
       email: "john@barbershop.com",
@@ -58,6 +82,7 @@ async function seedDatabase() {
     },
     {
       user_id: staffUsers[2].id,
+      business_id: businesses[0].id, // Elite Barbershop
       first_name: "Maria",
       last_name: "Rodriguez",
       email: "maria@barbershop.com",
@@ -69,6 +94,7 @@ async function seedDatabase() {
     },
     {
       user_id: staffUsers[3].id,
+      business_id: businesses[0].id, // Elite Barbershop
       first_name: "Carlos",
       last_name: "Silva",
       email: "carlos@barbershop.com",
@@ -80,6 +106,7 @@ async function seedDatabase() {
     },
     {
       user_id: staffUsers[4].id,
+      business_id: businesses[0].id, // Elite Barbershop
       first_name: "Ana",
       last_name: "Costa",
       email: "ana@barbershop.com",
@@ -91,6 +118,7 @@ async function seedDatabase() {
     },
     {
       user_id: staffUsers[5].id,
+      business_id: businesses[0].id, // Elite Barbershop
       first_name: "Pedro",
       last_name: "Santos",
       email: "pedro@barbershop.com",
@@ -102,6 +130,7 @@ async function seedDatabase() {
     },
     {
       user_id: staffUsers[6].id,
+      business_id: businesses[0].id, // Elite Barbershop
       first_name: "Lucia",
       last_name: "Oliveira",
       email: "lucia@barbershop.com",
@@ -113,6 +142,7 @@ async function seedDatabase() {
     },
     {
       user_id: staffUsers[7].id,
+      business_id: businesses[0].id, // Elite Barbershop
       first_name: "Rafael",
       last_name: "Almeida",
       email: "rafael@barbershop.com",
