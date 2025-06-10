@@ -154,10 +154,11 @@ async function seedDatabase() {
     }
   ]).returning();
 
-  // Create client records linked to users
+  // Create client records linked to users and businesses
   const clientList = await db.insert(clients).values([
     {
       user_id: clientUsers[0].id,
+      business_id: businesses[0].id, // Elite Barbershop
       first_name: "David",
       last_name: "Wilson",
       email: "david.wilson@email.com",
@@ -168,6 +169,7 @@ async function seedDatabase() {
     },
     {
       user_id: clientUsers[1].id,
+      business_id: businesses[0].id, // Elite Barbershop
       first_name: "Michael",
       last_name: "Johnson",
       email: "m.johnson@email.com",
@@ -178,6 +180,7 @@ async function seedDatabase() {
     },
     {
       user_id: clientUsers[2].id,
+      business_id: businesses[0].id, // Elite Barbershop
       first_name: "Sarah",
       last_name: "Brown",
       email: "sarah.brown@email.com",
@@ -188,6 +191,7 @@ async function seedDatabase() {
     },
     {
       user_id: clientUsers[3].id,
+      business_id: businesses[0].id, // Elite Barbershop
       first_name: "James",
       last_name: "Davis",
       email: "james.davis@email.com",
@@ -198,6 +202,7 @@ async function seedDatabase() {
     },
     {
       user_id: clientUsers[4].id,
+      business_id: businesses[0].id, // Elite Barbershop
       first_name: "Emma",
       last_name: "Miller",
       email: "emma.miller@email.com",
@@ -208,6 +213,7 @@ async function seedDatabase() {
     },
     {
       user_id: clientUsers[5].id,
+      business_id: businesses[0].id, // Elite Barbershop
       first_name: "Robert",
       last_name: "Garcia",
       email: "robert.garcia@email.com",
@@ -218,6 +224,7 @@ async function seedDatabase() {
     },
     {
       user_id: clientUsers[6].id,
+      business_id: businesses[0].id, // Elite Barbershop
       first_name: "Lisa",
       last_name: "Martinez",
       email: "lisa.martinez@email.com",
@@ -228,6 +235,7 @@ async function seedDatabase() {
     },
     {
       user_id: clientUsers[7].id,
+      business_id: businesses[0].id, // Elite Barbershop
       first_name: "William",
       last_name: "Anderson",
       email: "william.anderson@email.com",
