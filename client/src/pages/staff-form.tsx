@@ -136,10 +136,12 @@ export default function StaffForm() {
     }
   };
 
-  const handleInputChange = (field: keyof StaffFormData, value: string) => {
+  const handleInputChange = (field: keyof StaffFormData, value: string | number) => {
     setFormData(prev => ({
       ...prev,
-      [field]: field === 'salary' ? parseInt(value) || 0 : value
+      [field]: field === 'salary' || field === 'business_id' 
+        ? (typeof value === 'string' ? parseInt(value) || 0 : value)
+        : value
     }));
   };
 
@@ -277,7 +279,7 @@ export default function StaffForm() {
 
               <div>
                 <Label htmlFor="business_id">Business</Label>
-                <Select onValueChange={(value) => handleInputChange('business_id', parseInt(value))} value={formData.business_id.toString()}>
+                <Select onValueChange={(value) => handleInputChange('business_id', value)} value={formData.business_id > 0 ? formData.business_id.toString() : ""}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select business" />
                   </SelectTrigger>

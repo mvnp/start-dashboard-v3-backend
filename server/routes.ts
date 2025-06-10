@@ -114,6 +114,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const staff = await storage.createStaff(validatedStaffData);
       res.status(201).json(staff);
     } catch (error) {
+      console.error("Staff creation error:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: "Invalid data", details: error.errors });
       }
