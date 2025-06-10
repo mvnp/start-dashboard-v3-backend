@@ -8,28 +8,28 @@ const db = drizzle(sql);
 async function seedDatabase() {
   console.log("Starting database seeding...");
 
-  // First create users for staff (super-admin, merchant, collaborator)
+  // First create users for staff
   const staffUsers = await db.insert(users).values([
-    { username: "admin", password: "admin123", role: "super-admin" },
-    { username: "john.martinez", password: "john123", role: "merchant" },
-    { username: "maria.rodriguez", password: "maria123", role: "collaborator" },
-    { username: "carlos.silva", password: "carlos123", role: "collaborator" },
-    { username: "ana.costa", password: "ana123", role: "collaborator" },
-    { username: "pedro.santos", password: "pedro123", role: "collaborator" },
-    { username: "lucia.oliveira", password: "lucia123", role: "collaborator" },
-    { username: "rafael.almeida", password: "rafael123", role: "collaborator" }
+    { username: "admin", password: "admin123" },
+    { username: "john.martinez", password: "john123" },
+    { username: "maria.rodriguez", password: "maria123" },
+    { username: "carlos.silva", password: "carlos123" },
+    { username: "ana.costa", password: "ana123" },
+    { username: "pedro.santos", password: "pedro123" },
+    { username: "lucia.oliveira", password: "lucia123" },
+    { username: "rafael.almeida", password: "rafael123" }
   ]).returning();
 
   // Create users for clients
   const clientUsers = await db.insert(users).values([
-    { username: "david.wilson", password: "david123", role: "client" },
-    { username: "michael.johnson", password: "michael123", role: "client" },
-    { username: "sarah.brown", password: "sarah123", role: "client" },
-    { username: "james.davis", password: "james123", role: "client" },
-    { username: "emma.miller", password: "emma123", role: "client" },
-    { username: "robert.garcia", password: "robert123", role: "client" },
-    { username: "lisa.martinez", password: "lisa123", role: "client" },
-    { username: "william.anderson", password: "william123", role: "client" }
+    { username: "david.wilson", password: "david123" },
+    { username: "michael.johnson", password: "michael123" },
+    { username: "sarah.brown", password: "sarah123" },
+    { username: "james.davis", password: "james123" },
+    { username: "emma.miller", password: "emma123" },
+    { username: "robert.garcia", password: "robert123" },
+    { username: "lisa.martinez", password: "lisa123" },
+    { username: "william.anderson", password: "william123" }
   ]).returning();
 
   // Create business records linked to merchant users
