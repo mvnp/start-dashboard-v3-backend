@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
 import { eq } from "drizzle-orm";
-import { users, staff, clients, barberPlans, services, appointments, paymentGateways, accountingTransactions, supportTickets, faqs, whatsappInstances, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService, type Appointment, type InsertAppointment, type PaymentGateway, type InsertPaymentGateway, type AccountingTransaction, type InsertAccountingTransaction, type SupportTicket, type InsertSupportTicket, type Faq, type InsertFaq, type WhatsappInstance, type InsertWhatsappInstance } from "@shared/schema";
+import { users, business, staff, clients, barberPlans, services, appointments, paymentGateways, accountingTransactions, supportTickets, faqs, whatsappInstances, type User, type InsertUser, type Business, type InsertBusiness, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService, type Appointment, type InsertAppointment, type PaymentGateway, type InsertPaymentGateway, type AccountingTransaction, type InsertAccountingTransaction, type SupportTicket, type InsertSupportTicket, type Faq, type InsertFaq, type WhatsappInstance, type InsertWhatsappInstance } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -10,6 +10,13 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  
+  // Business methods
+  getAllBusinesses(): Promise<Business[]>;
+  getBusiness(id: number): Promise<Business | undefined>;
+  createBusiness(business: InsertBusiness): Promise<Business>;
+  updateBusiness(id: number, business: Partial<InsertBusiness>): Promise<Business | undefined>;
+  deleteBusiness(id: number): Promise<boolean>;
   
   // Staff methods
   getAllStaff(): Promise<Staff[]>;

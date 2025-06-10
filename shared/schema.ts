@@ -9,9 +9,23 @@ export const users = pgTable("users", {
   role: text("role").notNull().default("client"), // super-admin, merchant, collaborator, client
 });
 
+export const business = pgTable("business", {
+  id: serial("id").primaryKey(),
+  user_id: integer("user_id").references(() => users.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  address: text("address"),
+  phone: text("phone"),
+  email: text("email"),
+  tax_id: text("tax_id"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
 export const staff = pgTable("staff", {
   id: serial("id").primaryKey(),
   user_id: integer("user_id").references(() => users.id),
+  business_id: integer("business_id").references(() => business.id),
   first_name: text("first_name").notNull(),
   last_name: text("last_name").notNull(),
   email: text("email").notNull().unique(),
@@ -27,6 +41,7 @@ export const staff = pgTable("staff", {
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
   user_id: integer("user_id").references(() => users.id),
+  business_id: integer("business_id").references(() => business.id),
   first_name: text("first_name").notNull(),
   last_name: text("last_name").notNull(),
   email: text("email").notNull().unique(),
@@ -142,6 +157,12 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
 });
 
+export const insertBusinessSchema = createInsertSchema(business).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
 export const insertStaffSchema = createInsertSchema(staff).omit({
   id: true,
   created_at: true,
@@ -221,6 +242,8 @@ export const insertWhatsappInstanceSchema = createInsertSchema(whatsappInstances
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type InsertBusiness = z.infer<typeof insertBusinessSchema>;
+export type Business = typeof business.$inferSelect;
 export type InsertStaff = z.infer<typeof insertStaffSchema>;
 export type Staff = typeof staff.$inferSelect;
 export type InsertClient = z.infer<typeof insertClientSchema>;
