@@ -49,6 +49,10 @@ export interface IStorage {
   getAllRoles(): Promise<Role[]>;
   getRole(id: number): Promise<Role | undefined>;
   
+  // Junction table methods
+  createUserBusiness(userBusiness: InsertUserBusiness): Promise<UserBusiness>;
+  createUserRole(userRole: InsertUserRole): Promise<UserRole>;
+  
   // Service methods
   getAllServices(): Promise<Service[]>;
   getService(id: number): Promise<Service | undefined>;

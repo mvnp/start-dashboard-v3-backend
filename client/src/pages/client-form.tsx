@@ -54,6 +54,18 @@ export default function ClientForm() {
     select: (data: Person) => data,
   });
 
+  // Query for businesses
+  const { data: businesses } = useQuery({
+    queryKey: ["/api/businesses"],
+    select: (data: Business[]) => data,
+  });
+
+  // Query for roles
+  const { data: roles } = useQuery({
+    queryKey: ["/api/roles"],
+    select: (data: Role[]) => data,
+  });
+
   const createClientMutation = useMutation({
     mutationFn: (data: ClientFormData) => apiRequest("POST", "/api/clients", data),
     onSuccess: () => {
@@ -96,13 +108,15 @@ export default function ClientForm() {
   useEffect(() => {
     if (clientMember && isEdit) {
       setFormData({
-        first_name: clientMember.first_name,
-        last_name: clientMember.last_name,
-        email: clientMember.email,
-        phone: clientMember.phone,
-        tax_id: clientMember.tax_id,
-        type: clientMember.type,
-        address: clientMember.address,
+        first_name: clientMember.first_name || "",
+        last_name: clientMember.last_name || "",
+        email: "",
+        phone: clientMember.phone || "",
+        tax_id: clientMember.tax_id || "",
+        type: "customer",
+        address: "",
+        business_id: "",
+        role_id: "",
       });
     }
   }, [clientMember, isEdit]);
@@ -251,6 +265,38 @@ export default function ClientForm() {
                   onChange={(e) => handleInputChange('address', e.target.value)}
                   required
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="business">Business</Label>
+                <Select onValueChange={(value) => handleInputChange('business_id', value)} value={formData.business_id}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select business" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {businesses?.map((business) => (
+                      <SelectItem key={business.id} value={business.id.toString()}>
+                        {business.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="role">Role</Label>
+                <Select onValueChange={(value) => handleInputChange('role_id', value)} value={formData.role_id}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles?.map((role) => (
+                      <SelectItem key={role.id} value={role.id.toString()}>
+                        {role.type.charAt(0).toUpperCase() + role.type.slice(1).replace('-', ' ')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
