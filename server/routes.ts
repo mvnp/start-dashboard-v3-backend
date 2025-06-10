@@ -86,6 +86,55 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  // Login endpoint
+  app.post("/api/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
+
+      // Authenticate user with email and password
+      const userData = await storage.authenticateUser(email, password);
+      if (!userData) {
+        return res.status(401).json({ error: "Invalid email or password" });
+      }
+
+      // Set session data
+      req.session.userId = userData.user.id;
+      req.session.userEmail = userData.user.email;
+      req.session.roleId = userData.roleId;
+      req.session.businessIds = userData.businessIds;
+      req.session.isAuthenticated = true;
+
+      res.json({
+        message: "Login successful",
+        user: {
+          id: userData.user.id,
+          email: userData.user.email,
+          roleId: userData.roleId,
+          businessIds: userData.businessIds,
+          isSuperAdmin: userData.roleId === 1
+        }
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  // Logout endpoint
+  app.post("/api/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Logout error:", err);
+        return res.status(500).json({ error: "Logout failed" });
+      }
+      res.json({ message: "Logout successful" });
+    });
+  });
+
   // User switching endpoint for testing different access levels
   app.post("/api/switch-user", async (req, res) => {
     try {
