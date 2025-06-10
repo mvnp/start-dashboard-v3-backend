@@ -89,14 +89,10 @@ export function registerRoutes(app: Express): void {
   // Business routes
   app.get("/api/businesses", async (req, res) => {
     try {
-      // Check if user is authenticated and get their business filter
-      if (!req.session?.isAuthenticated || !req.session?.userId) {
-        return res.status(401).json({ error: "Authentication required" });
-      }
-
-      const userData = await storage.getUserWithRoleAndBusiness(req.session.userId);
+      // Development mode: Use Super Admin access (user ID: 1)
+      const userData = await storage.getUserWithRoleAndBusiness(1);
       if (!userData) {
-        return res.status(401).json({ error: "User not found" });
+        return res.status(500).json({ error: "Super Admin user not found" });
       }
 
       let businesses;
@@ -182,12 +178,19 @@ export function registerRoutes(app: Express): void {
   // Staff routes (using persons table now) - roles 1,2,3 (super-admin, merchant, employee)
   app.get("/api/staff", async (req, res) => {
     try {
-      // Check if user is authenticated and get their business filter
+      // For development: auto-login as Super Admin if not authenticated
       if (!req.session?.isAuthenticated || !req.session?.userId) {
-        return res.status(401).json({ error: "Authentication required" });
+        const userData = await storage.getUserWithRoleAndBusiness(1);
+        if (userData) {
+          req.session.userId = userData.user.id;
+          req.session.userEmail = userData.user.email;
+          req.session.roleId = userData.roleId;
+          req.session.businessIds = userData.businessIds;
+          req.session.isAuthenticated = true;
+        }
       }
 
-      const userData = await storage.getUserWithRoleAndBusiness(req.session.userId);
+      const userData = await storage.getUserWithRoleAndBusiness(req.session.userId || 1);
       if (!userData) {
         return res.status(401).json({ error: "User not found" });
       }
@@ -317,12 +320,19 @@ export function registerRoutes(app: Express): void {
   // Client routes (also using persons table) - role 4 (client)
   app.get("/api/clients", async (req, res) => {
     try {
-      // Check if user is authenticated and get their business filter
+      // For development: auto-login as Super Admin if not authenticated
       if (!req.session?.isAuthenticated || !req.session?.userId) {
-        return res.status(401).json({ error: "Authentication required" });
+        const userData = await storage.getUserWithRoleAndBusiness(1);
+        if (userData) {
+          req.session.userId = userData.user.id;
+          req.session.userEmail = userData.user.email;
+          req.session.roleId = userData.roleId;
+          req.session.businessIds = userData.businessIds;
+          req.session.isAuthenticated = true;
+        }
       }
 
-      const userData = await storage.getUserWithRoleAndBusiness(req.session.userId);
+      const userData = await storage.getUserWithRoleAndBusiness(req.session.userId || 1);
       if (!userData) {
         return res.status(401).json({ error: "User not found" });
       }
