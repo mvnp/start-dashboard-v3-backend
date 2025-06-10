@@ -205,24 +205,40 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/clients", async (req, res) => {
     try {
-      const { email, password, ...personData } = req.body;
+      console.log("Received client data:", req.body);
       
-      // Only create user if both email and password are provided and not empty
+      const { email, type, address, ...personData } = req.body;
+      
       let userId = null;
-      if (email && email.trim() && password && password.trim()) {
+      
+      // If email is provided, create user account with generated password
+      if (email && email.trim()) {
         try {
-          const userData = insertUserSchema.parse({ email: email.trim(), password });
+          // Generate a random password (8 characters)
+          const generatedPassword = Math.random().toString(36).slice(-8);
+          
+          console.log("Creating user with email:", email.trim(), "and password:", generatedPassword);
+          
+          const userData = insertUserSchema.parse({ 
+            email: email.trim(), 
+            password: generatedPassword 
+          });
           const user = await storage.createUser(userData);
           userId = user.id;
+          
+          console.log("User created successfully with ID:", userId);
         } catch (userError) {
           console.error("User creation error:", userError);
           return res.status(400).json({ error: "Failed to create user account", details: userError });
         }
       }
       
-      // Create person record with or without user_id
+      // Filter out fields that don't exist in the new schema and create person record
       const validatedPersonData = insertPersonSchema.parse({
-        ...personData,
+        first_name: personData.first_name,
+        last_name: personData.last_name,
+        phone: personData.phone,
+        tax_id: personData.tax_id,
         user_id: userId
       });
       const person = await storage.createPerson(validatedPersonData);
