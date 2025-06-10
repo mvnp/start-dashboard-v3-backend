@@ -12,6 +12,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  setUser: (user: User | null) => void;
   switchUser: (userId: number) => Promise<void>;
   getCurrentUser: () => Promise<void>;
 }
@@ -51,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, switchUser, getCurrentUser }}>
+    <AuthContext.Provider value={{ user, loading, setUser, switchUser, getCurrentUser }}>
       {children}
     </AuthContext.Provider>
   );
