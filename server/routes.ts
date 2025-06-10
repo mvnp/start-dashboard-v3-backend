@@ -85,6 +85,42 @@ export function registerRoutes(app: Express): void {
       res.status(500).json({ error: "Failed to fetch user data" });
     }
   });
+
+  // User switching endpoint for testing different access levels
+  app.post("/api/switch-user", async (req, res) => {
+    try {
+      const { userId } = req.body;
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+      
+      const userData = await storage.getUserWithRoleAndBusiness(parseInt(userId));
+      if (!userData) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Update session with new user data
+      req.session.userId = userData.user.id;
+      req.session.userEmail = userData.user.email;
+      req.session.roleId = userData.roleId;
+      req.session.businessIds = userData.businessIds;
+      req.session.isAuthenticated = true;
+      
+      res.json({
+        message: "User switched successfully",
+        user: {
+          id: userData.user.id,
+          email: userData.user.email,
+          roleId: userData.roleId,
+          businessIds: userData.businessIds,
+          isSuperAdmin: userData.roleId === 1
+        }
+      });
+    } catch (error) {
+      console.error("User switch error:", error);
+      res.status(500).json({ error: "Failed to switch user" });
+    }
+  });
   
   // Business routes
   app.get("/api/businesses", async (req, res) => {
