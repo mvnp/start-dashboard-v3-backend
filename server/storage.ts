@@ -30,6 +30,8 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUsersByRole(roleType: string): Promise<User[]>;
+  getUserWithRoleAndBusiness(userId: number): Promise<{user: User, roleId: number, businessIds: number[]} | undefined>;
+  authenticateUser(email: string, password: string): Promise<{user: User, roleId: number, businessIds: number[]} | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
   deleteUser(id: number): Promise<boolean>;
@@ -44,6 +46,7 @@ export interface IStorage {
   // Person methods (replaces staff/client)
   getAllPersons(): Promise<Person[]>;
   getPersonsByRoles(roleIds: number[]): Promise<Person[]>;
+  getPersonsByRolesAndBusiness(roleIds: number[], businessIds: number[]): Promise<Person[]>;
   getPerson(id: number): Promise<Person | undefined>;
   createPerson(person: InsertPerson): Promise<Person>;
   updatePerson(id: number, person: Partial<InsertPerson>): Promise<Person | undefined>;
@@ -163,6 +166,39 @@ class PostgresStorage implements IStorage {
     return result.rowCount > 0;
   }
 
+  async getUserWithRoleAndBusiness(userId: number): Promise<{user: User, roleId: number, businessIds: number[]} | undefined> {
+    const userResult = await this.db.select().from(users).where(eq(users.id, userId));
+    if (!userResult[0]) return undefined;
+
+    const roleResult = await this.db
+      .select({ roleId: users_roles.role_id })
+      .from(users_roles)
+      .where(eq(users_roles.user_id, userId));
+
+    const businessResult = await this.db
+      .select({ businessId: users_business.business_id })
+      .from(users_business)
+      .where(eq(users_business.user_id, userId));
+
+    return {
+      user: userResult[0],
+      roleId: roleResult[0]?.roleId || 0,
+      businessIds: businessResult.map(b => b.businessId)
+    };
+  }
+
+  async authenticateUser(email: string, password: string): Promise<{user: User, roleId: number, businessIds: number[]} | undefined> {
+    const userResult = await this.db
+      .select()
+      .from(users)
+      .where(and(eq(users.email, email), eq(users.password, password)));
+
+    if (!userResult[0]) return undefined;
+
+    const userData = await this.getUserWithRoleAndBusiness(userResult[0].id);
+    return userData;
+  }
+
   // Business methods
   async getAllBusinesses(): Promise<Business[]> {
     return await this.db.select().from(businesses);
@@ -244,6 +280,42 @@ class PostgresStorage implements IStorage {
       .innerJoin(users, eq(persons.user_id, users.id))
       .innerJoin(users_roles, eq(users.id, users_roles.user_id))
       .where(whereCondition);
+    
+    return result;
+  }
+
+  async getPersonsByRolesAndBusiness(roleIds: number[], businessIds: number[]): Promise<Person[]> {
+    // Build OR condition for multiple roles
+    const roleConditions = roleIds.map(roleId => eq(users_roles.role_id, roleId));
+    const roleWhereCondition = roleConditions.length === 1 
+      ? roleConditions[0] 
+      : or(...roleConditions);
+
+    // Build OR condition for multiple businesses
+    const businessConditions = businessIds.map(businessId => eq(users_business.business_id, businessId));
+    const businessWhereCondition = businessConditions.length === 1 
+      ? businessConditions[0] 
+      : or(...businessConditions);
+
+    const result = await this.db
+      .select({
+        id: persons.id,
+        first_name: persons.first_name,
+        last_name: persons.last_name,
+        phone: persons.phone,
+        tax_id: persons.tax_id,
+        hire_date: persons.hire_date,
+        salary: persons.salary,
+        created_at: persons.created_at,
+        updated_at: persons.updated_at,
+        deleted_at: persons.deleted_at,
+        user_id: persons.user_id,
+      })
+      .from(persons)
+      .innerJoin(users, eq(persons.user_id, users.id))
+      .innerJoin(users_roles, eq(users.id, users_roles.user_id))
+      .innerJoin(users_business, eq(users.id, users_business.user_id))
+      .where(and(roleWhereCondition, businessWhereCondition));
     
     return result;
   }
