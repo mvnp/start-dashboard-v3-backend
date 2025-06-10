@@ -89,25 +89,29 @@ export function registerRoutes(app: Express): void {
   // Business routes
   app.get("/api/businesses", async (req, res) => {
     try {
-      // For testing: Use User ID 1 (Super Admin) to see all system data
-      const testUserId = 1; // This should be replaced with proper session management
+      // Allow testing different users via query parameter: ?user=1 (Super Admin) or ?user=21 (Merchant)
+      const testUserId = req.query.user ? parseInt(req.query.user as string) : 1;
       const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
         return res.status(500).json({ error: "User not found" });
       }
       
       let businesses;
+      console.log(`DEBUG - User ${testUserId}: roleId=${userData.roleId}, businessIds=${JSON.stringify(userData.businessIds)}`);
       // Super Admin (role ID: 1) can see all businesses
       if (userData.roleId === 1) {
+        console.log("DEBUG - Super Admin: fetching ALL businesses");
         businesses = await storage.getAllBusinesses();
       } else {
         // Other users see only their associated businesses
+        console.log("DEBUG - Regular user: filtering by business IDs");
         businesses = [];
         for (const businessId of userData.businessIds) {
           const business = await storage.getBusiness(businessId);
           if (business) businesses.push(business);
         }
       }
+      console.log(`DEBUG - Final business count: ${businesses.length}`);
       res.json(businesses);
     } catch (error) {
       console.error("Business fetch error:", error);
@@ -178,8 +182,8 @@ export function registerRoutes(app: Express): void {
   // Staff routes (using persons table now) - roles 1,2,3 (super-admin, merchant, employee)
   app.get("/api/staff", async (req, res) => {
     try {
-      // For testing: Use User ID 1 (Super Admin) to see all system data
-      const testUserId = 1; // This should be replaced with proper session management
+      // Allow testing different users via query parameter: ?user=1 (Super Admin) or ?user=21 (Merchant)
+      const testUserId = req.query.user ? parseInt(req.query.user as string) : 1;
       const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
         return res.status(500).json({ error: "User not found" });
@@ -310,8 +314,8 @@ export function registerRoutes(app: Express): void {
   // Client routes (also using persons table) - role 4 (client)
   app.get("/api/clients", async (req, res) => {
     try {
-      // For testing: Use User ID 1 (Super Admin) to see all system data
-      const testUserId = 1; // This should be replaced with proper session management
+      // Allow testing different users via query parameter: ?user=1 (Super Admin) or ?user=21 (Merchant)
+      const testUserId = req.query.user ? parseInt(req.query.user as string) : 1;
       const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
         return res.status(500).json({ error: "User not found" });
