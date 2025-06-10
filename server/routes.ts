@@ -458,6 +458,5 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  // Don't create a new server here - let the main index.ts handle it
-  return {} as Server;
+  // Routes are now registered, no need to return anything
 }
