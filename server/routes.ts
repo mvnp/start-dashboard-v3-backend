@@ -1,6 +1,7 @@
 import { Express } from "express";
 import { z } from "zod";
 import storage from "./storage";
+import { requireAuth, getBusinessFilter } from "./middleware";
 import {
   insertUserSchema,
   insertBusinessSchema,
@@ -18,6 +19,72 @@ import {
 } from "@shared/schema";
 
 export function registerRoutes(app: Express): void {
+  
+  // Authentication routes
+  app.post("/api/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      const userData = await storage.authenticateUser(email, password);
+      
+      if (!userData) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      req.session.userId = userData.user.id;
+      req.session.userEmail = userData.user.email;
+      req.session.roleId = userData.roleId;
+      req.session.businessIds = userData.businessIds;
+      req.session.isAuthenticated = true;
+
+      res.json({
+        user: {
+          id: userData.user.id,
+          email: userData.user.email,
+          roleId: userData.roleId,
+          businessIds: userData.businessIds,
+          isSuperAdmin: userData.roleId === 1
+        }
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  app.post("/api/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ error: "Logout failed" });
+      }
+      res.json({ message: "Logged out successfully" });
+    });
+  });
+
+  app.get("/api/me", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    try {
+      const userData = await storage.getUserWithRoleAndBusiness(req.session.userId);
+      if (!userData) {
+        return res.status(401).json({ error: "User not found" });
+      }
+
+      res.json({
+        user: {
+          id: userData.user.id,
+          email: userData.user.email,
+          roleId: userData.roleId,
+          businessIds: userData.businessIds,
+          isSuperAdmin: userData.roleId === 1
+        }
+      });
+    } catch (error) {
+      console.error("User fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch user data" });
+    }
+  });
   
   // Business routes
   app.get("/api/businesses", async (req, res) => {
@@ -93,7 +160,25 @@ export function registerRoutes(app: Express): void {
   // Staff routes (using persons table now) - roles 1,2,3 (super-admin, merchant, employee)
   app.get("/api/staff", async (req, res) => {
     try {
-      const persons = await storage.getPersonsByRoles([1, 2, 3]);
+      // Check if user is authenticated and get their business filter
+      if (!req.session?.isAuthenticated || !req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const userData = await storage.getUserWithRoleAndBusiness(req.session.userId);
+      if (!userData) {
+        return res.status(401).json({ error: "User not found" });
+      }
+
+      let persons;
+      // Super Admin (role ID: 1) can see all staff across all businesses
+      if (userData.roleId === 1) {
+        persons = await storage.getPersonsByRoles([1, 2, 3]);
+      } else {
+        // Other users see only staff from their associated businesses
+        persons = await storage.getPersonsByRolesAndBusiness([1, 2, 3], userData.businessIds);
+      }
+      
       res.json(persons);
     } catch (error) {
       console.error("Staff fetch error:", error);
@@ -210,7 +295,25 @@ export function registerRoutes(app: Express): void {
   // Client routes (also using persons table) - role 4 (client)
   app.get("/api/clients", async (req, res) => {
     try {
-      const persons = await storage.getPersonsByRoles([4]);
+      // Check if user is authenticated and get their business filter
+      if (!req.session?.isAuthenticated || !req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const userData = await storage.getUserWithRoleAndBusiness(req.session.userId);
+      if (!userData) {
+        return res.status(401).json({ error: "User not found" });
+      }
+
+      let persons;
+      // Super Admin (role ID: 1) can see all clients across all businesses
+      if (userData.roleId === 1) {
+        persons = await storage.getPersonsByRoles([4]);
+      } else {
+        // Other users see only clients from their associated businesses
+        persons = await storage.getPersonsByRolesAndBusiness([4], userData.businessIds);
+      }
+      
       res.json(persons);
     } catch (error) {
       console.error("Client fetch error:", error);

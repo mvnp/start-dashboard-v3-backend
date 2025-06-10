@@ -183,7 +183,7 @@ class PostgresStorage implements IStorage {
     return {
       user: userResult[0],
       roleId: roleResult[0]?.roleId || 0,
-      businessIds: businessResult.map(b => b.businessId)
+      businessIds: businessResult.map(b => b.businessId).filter((id): id is number => id !== null)
     };
   }
 
