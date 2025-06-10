@@ -3,6 +3,7 @@ import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { navigationItems } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import UserSwitcher from "@/components/user-switcher";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -41,8 +42,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <span className="ml-3 text-xl font-bold text-slate-900">BarberPro</span>
           </div>
 
+          {/* User Switcher */}
+          <div className="px-4 py-4">
+            <UserSwitcher />
+          </div>
+
           {/* Navigation Menu */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
+          <nav className="flex-1 px-4 py-2 space-y-2">
             {navigationItems.map((item) => {
               const isActive = location === item.href;
               const Icon = item.icon;
