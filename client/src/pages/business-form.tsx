@@ -99,7 +99,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-2xl">
+    <div className="w-full p-6">
       <div className="mb-6">
         <Link href="/businesses">
           <Button variant="ghost" className="mb-4">
