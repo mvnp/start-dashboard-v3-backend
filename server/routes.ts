@@ -205,8 +205,6 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/clients", async (req, res) => {
     try {
-      console.log("Received client data:", req.body);
-      
       const { email, type, address, ...personData } = req.body;
       
       let userId = null;
@@ -217,16 +215,12 @@ export function registerRoutes(app: Express): void {
           // Generate a random password (8 characters)
           const generatedPassword = Math.random().toString(36).slice(-8);
           
-          console.log("Creating user with email:", email.trim(), "and password:", generatedPassword);
-          
           const userData = insertUserSchema.parse({ 
             email: email.trim(), 
             password: generatedPassword 
           });
           const user = await storage.createUser(userData);
           userId = user.id;
-          
-          console.log("User created successfully with ID:", userId);
         } catch (userError) {
           console.error("User creation error:", userError);
           return res.status(400).json({ error: "Failed to create user account", details: userError });
