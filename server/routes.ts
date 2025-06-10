@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertBusinessSchema, insertStaffSchema, insertClientSchema, insertBarberPlanSchema, insertServiceSchema, insertAppointmentSchema, insertPaymentGatewaySchema, insertAccountingTransactionSchema, insertSupportTicketSchema, insertFaqSchema, insertWhatsappInstanceSchema } from "@shared/schema";
+import { insertUserSchema, insertBusinessSchema, insertStaffSchema, insertClientSchema, insertBarberPlanSchema, insertServiceSchema, insertAppointmentSchema, insertPaymentGatewaySchema, insertAccountingTransactionSchema, insertSupportTicketSchema, insertFaqSchema, insertWhatsappInstanceSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -96,8 +96,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/staff", async (req, res) => {
     try {
-      const validatedData = insertStaffSchema.parse(req.body);
-      const staff = await storage.createStaff(validatedData);
+      const { username, password, ...staffData } = req.body;
+      
+      // First create the user if username and password are provided
+      let userId = null;
+      if (username && password) {
+        const userData = insertUserSchema.parse({ username, password });
+        const user = await storage.createUser(userData);
+        userId = user.id;
+      }
+      
+      // Create staff with the user ID
+      const validatedStaffData = insertStaffSchema.parse({
+        ...staffData,
+        user_id: userId
+      });
+      const staff = await storage.createStaff(validatedStaffData);
       res.status(201).json(staff);
     } catch (error) {
       if (error instanceof z.ZodError) {

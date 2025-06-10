@@ -18,6 +18,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Staff } from "@shared/schema";
 
 interface StaffFormData {
+  username: string;
+  password: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -26,6 +28,7 @@ interface StaffFormData {
   role: string;
   hire_date: string;
   salary: number;
+  business_id: number;
 }
 
 const roleOptions = [
@@ -43,6 +46,8 @@ export default function StaffForm() {
   const staffId = params.id ? parseInt(params.id) : null;
 
   const [formData, setFormData] = useState<StaffFormData>({
+    username: "",
+    password: "",
     first_name: "",
     last_name: "",
     email: "",
@@ -51,6 +56,7 @@ export default function StaffForm() {
     role: "",
     hire_date: "",
     salary: 0,
+    business_id: 1,
   });
 
   const { data: staffMember, isLoading } = useQuery({
@@ -101,6 +107,8 @@ export default function StaffForm() {
   useEffect(() => {
     if (staffMember && isEdit) {
       setFormData({
+        username: "", // Don't populate username/password for edit
+        password: "",
         first_name: staffMember.first_name,
         last_name: staffMember.last_name,
         email: staffMember.email,
@@ -109,6 +117,7 @@ export default function StaffForm() {
         role: staffMember.role,
         hire_date: staffMember.hire_date,
         salary: staffMember.salary,
+        business_id: staffMember.business_id || 1,
       });
     }
   }, [staffMember, isEdit]);
@@ -179,6 +188,31 @@ export default function StaffForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {!isEdit && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-blue-50 rounded-lg">
+                <div>
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    placeholder="Enter username"
+                    value={formData.username}
+                    onChange={(e) => handleInputChange('username', e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Enter password"
+                    value={formData.password}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="first_name">First Name</Label>
