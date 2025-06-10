@@ -1,17 +1,30 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, decimal, date, time, pgEnum } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Create ENUM types to match the database
+export const transactionTypeEnum = pgEnum('transaction_type', ['revenue', 'expense']);
+export const priorityLevelEnum = pgEnum('priority_level', ['Low', 'Medium', 'High', 'Urgent']);
+export const ticketStatusEnum = pgEnum('ticket_status', ['Open', 'In Progress', 'Resolved', 'Closed']);
+export const whatsappStatusEnum = pgEnum('whatsapp_status', ['Connected', 'Disconnected', 'Error']);
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
   password: text("password").notNull(),
-  active: boolean("active").notNull().default(true),
+  email: text("email").notNull().unique(),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+  deleted_at: timestamp("deleted_at"),
 });
 
-export const business = pgTable("business", {
+export const roles = pgTable("roles", {
   id: serial("id").primaryKey(),
-  user_id: integer("user_id").references(() => users.id),
+  type: text("type").notNull(),
+  description: text("description"),
+});
+
+export const businesses = pgTable("businesses", {
+  id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
   address: text("address"),
@@ -22,160 +35,198 @@ export const business = pgTable("business", {
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
-export const staff = pgTable("staff", {
+export const persons = pgTable("persons", {
   id: serial("id").primaryKey(),
-  user_id: integer("user_id").references(() => users.id),
-  business_id: integer("business_id").references(() => business.id),
   first_name: text("first_name").notNull(),
   last_name: text("last_name").notNull(),
-  email: text("email").notNull().unique(),
-  phone: text("phone").notNull(),
-  tax_id: text("tax_id").notNull(),
-  role: text("role").notNull(),
-  hire_date: text("hire_date").notNull(),
-  salary: integer("salary").notNull(),
+  phone: text("phone"),
+  tax_id: text("tax_id"),
+  hire_date: date("hire_date"),
+  salary: decimal("salary", { precision: 10, scale: 2 }),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
-});
-
-export const clients = pgTable("clients", {
-  id: serial("id").primaryKey(),
+  deleted_at: timestamp("deleted_at"),
   user_id: integer("user_id").references(() => users.id),
-  business_id: integer("business_id").references(() => business.id),
-  first_name: text("first_name").notNull(),
-  last_name: text("last_name").notNull(),
-  email: text("email").notNull().unique(),
-  phone: text("phone").notNull(),
-  tax_id: text("tax_id").notNull(),
-  type: text("type").notNull(),
-  address: text("address").notNull(),
-  created_at: timestamp("created_at").defaultNow(),
-  updated_at: timestamp("updated_at").defaultNow(),
 });
 
-export const barberPlans = pgTable("barber_plans", {
+export const users_business = pgTable("users_business", {
+  user_id: integer("user_id").references(() => users.id),
+  business_id: integer("business_id").references(() => businesses.id),
+});
+
+export const users_roles = pgTable("users_roles", {
+  user_id: integer("user_id").references(() => users.id),
+  role_id: integer("role_id").references(() => roles.id),
+});
+
+export const accounting_transaction_categories = pgTable("accounting_transaction_categories", {
   id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  subtitle: text("subtitle").notNull(),
-  benefits: text("benefits").array().notNull(),
-  image1: text("image1").notNull(),
-  image2: text("image2").notNull(),
-  price1m: integer("price1m").notNull(),
-  price3m: integer("price3m").notNull(),
-  price12m: integer("price12m").notNull(),
-  payment_link: text("payment_link").notNull(),
+  description: text("description").notNull(),
+  business_id: integer("business_id").references(() => businesses.id),
+});
+
+export const accounting_transactions = pgTable("accounting_transactions", {
+  id: serial("id").primaryKey(),
+  type: transactionTypeEnum("type").notNull(),
+  category: text("category"),
+  description: text("description"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  payment_method: text("payment_method"),
+  reference_number: text("reference_number"),
+  transaction_date: date("transaction_date").notNull(),
+  notes: text("notes"),
+  is_recurring: boolean("is_recurring").default(false),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
+  user_id: integer("user_id").references(() => users.id),
+  accounting_category_id: integer("accounting_category_id").references(() => accounting_transaction_categories.id),
 });
 
 export const services = pgTable("services", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  description: text("description").notNull(),
-  duration: integer("duration").notNull(), // in minutes
-  price: integer("price").notNull(), // in cents
-  staff_id: integer("staff_id").notNull(),
-  is_active: boolean("is_active").notNull().default(true),
+  description: text("description"),
+  duration: integer("duration"), // duration in minutes
+  price: decimal("price", { precision: 10, scale: 2 }),
+  is_active: boolean("is_active").default(true),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
+  business_id: integer("business_id").references(() => businesses.id),
 });
 
 export const appointments = pgTable("appointments", {
   id: serial("id").primaryKey(),
-  client_id: integer("client_id").notNull(),
-  staff_id: integer("staff_id").notNull(),
-  service_id: integer("service_id").notNull(),
-  appointment_date: text("appointment_date").notNull(),
-  appointment_time: text("appointment_time").notNull(),
-  status: text("status").notNull().default("scheduled"), // scheduled, confirmed, in_progress, completed, cancelled
+  appointment_date: date("appointment_date").notNull(),
+  appointment_time: time("appointment_time").notNull(),
+  status: text("status").default('Scheduled'),
   notes: text("notes"),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
+  deleted_at: timestamp("deleted_at"),
+  user_id: integer("user_id").references(() => users.id),
+  business_id: integer("business_id").references(() => businesses.id),
+  service_id: integer("service_id").references(() => services.id),
 });
 
-export const paymentGateways = pgTable("payment_gateways", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  type: text("type").notNull(), // Mercado Pago, Asaas, Pagbank
-  api_url: text("api_url").notNull(),
-  api_key: text("api_key").notNull(),
-  token: text("token").notNull(),
-  email: text("email").notNull(),
-  staff_id: integer("staff_id").notNull(),
-  is_active: boolean("is_active").notNull().default(true),
-  created_at: timestamp("created_at").defaultNow(),
-  updated_at: timestamp("updated_at").defaultNow(),
-});
-
-export const accountingTransactions = pgTable("accounting_transactions", {
-  id: serial("id").primaryKey(),
-  type: text("type").notNull(), // "revenue" or "expense"
-  category: text("category").notNull(),
-  description: text("description").notNull(),
-  amount: integer("amount").notNull(), // Amount in cents
-  payment_method: text("payment_method").notNull(),
-  reference_number: text("reference_number"),
-  client_id: integer("client_id"),
-  staff_id: integer("staff_id"),
-  transaction_date: text("transaction_date").notNull(),
-  notes: text("notes"),
-  is_recurring: boolean("is_recurring").notNull().default(false),
-  created_at: timestamp("created_at").defaultNow(),
-  updated_at: timestamp("updated_at").defaultNow(),
-});
-
-export const supportTickets = pgTable("support_tickets", {
+export const barber_plans = pgTable("barber_plans", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
-  description: text("description").notNull(),
-  priority: text("priority").notNull().default("medium"), // 'low', 'medium', 'high', 'urgent'
-  status: text("status").notNull().default("open"), // 'open', 'in_progress', 'resolved', 'closed'
-  category: text("category").notNull(),
-  client_email: text("client_email").notNull(),
-  client_name: text("client_name").notNull(),
-  assigned_staff_id: integer("assigned_staff_id"),
-  resolution_notes: text("resolution_notes"),
-  attachments: text("attachments").array().default([]), // Array of file URLs/paths
+  subtitle: text("subtitle"),
+  benefits: text("benefits").array(),
+  image1: text("image1"),
+  image2: text("image2"),
+  price1m: decimal("price1m", { precision: 10, scale: 2 }),
+  price3m: decimal("price3m", { precision: 10, scale: 2 }),
+  price12m: decimal("price12m", { precision: 10, scale: 2 }),
+  payment_link: text("payment_link"),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
-  resolved_at: timestamp("resolved_at"),
+  business_id: integer("business_id").references(() => businesses.id),
 });
 
 export const faqs = pgTable("faqs", {
   id: serial("id").primaryKey(),
   question: text("question").notNull(),
   answer: text("answer").notNull(),
-  category: text("category").notNull(),
-  is_published: boolean("is_published").notNull().default(true),
-  order_index: integer("order_index").notNull().default(0),
+  category: text("category"),
+  is_published: boolean("is_published").default(true),
+  order_index: integer("order_index").default(0),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export const payment_gateway_types = pgTable("payment_gateway_types", {
+  id: serial("id").primaryKey(),
+  description: text("description").notNull(),
 });
 
-export const insertBusinessSchema = createInsertSchema(business).omit({
+export const payment_gateways = pgTable("payment_gateways", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  api_url: text("api_url"),
+  api_key: text("api_key"),
+  token: text("token"),
+  email: text("email"),
+  is_active: boolean("is_active").default(true),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+  business_id: integer("business_id").references(() => businesses.id),
+  type_id: integer("type_id").references(() => payment_gateway_types.id),
+});
+
+export const support_ticket_categories = pgTable("support_ticket_categories", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+});
+
+export const support_tickets = pgTable("support_tickets", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  priority: priorityLevelEnum("priority").default('Medium'),
+  status: ticketStatusEnum("status").default('Open'),
+  category: text("category"),
+  client_email: text("client_email"),
+  client_name: text("client_name"),
+  resolution_notes: text("resolution_notes"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+  resolved_at: timestamp("resolved_at"),
+  deleted_at: timestamp("deleted_at"),
+  assigned_user_id: integer("assigned_user_id").references(() => users.id),
+  ticket_open_user_id: integer("ticket_open_user_id").references(() => users.id),
+  business_id: integer("business_id").references(() => businesses.id),
+});
+
+export const whatsapp_instances = pgTable("whatsapp_instances", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  phone_number: text("phone_number"),
+  status: whatsappStatusEnum("status").default('Disconnected'),
+  qr_code: text("qr_code"),
+  session_id: text("session_id"),
+  last_seen: timestamp("last_seen"),
+  webhook_url: text("webhook_url"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+  business_id: integer("business_id").references(() => businesses.id),
+});
+
+// Create insert schemas
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  deleted_at: true,
+});
+
+export const insertRoleSchema = createInsertSchema(roles).omit({
+  id: true,
+});
+
+export const insertBusinessSchema = createInsertSchema(businesses).omit({
   id: true,
   created_at: true,
   updated_at: true,
 });
 
-export const insertStaffSchema = createInsertSchema(staff).omit({
+export const insertPersonSchema = createInsertSchema(persons).omit({
   id: true,
   created_at: true,
   updated_at: true,
+  deleted_at: true,
 });
 
-export const insertClientSchema = createInsertSchema(clients).omit({
+export const insertUserBusinessSchema = createInsertSchema(users_business);
+
+export const insertUserRoleSchema = createInsertSchema(users_roles);
+
+export const insertAccountingTransactionCategorySchema = createInsertSchema(accounting_transaction_categories).omit({
   id: true,
-  created_at: true,
-  updated_at: true,
 });
 
-export const insertBarberPlanSchema = createInsertSchema(barberPlans).omit({
+export const insertAccountingTransactionSchema = createInsertSchema(accounting_transactions).omit({
   id: true,
   created_at: true,
   updated_at: true,
@@ -191,25 +242,13 @@ export const insertAppointmentSchema = createInsertSchema(appointments).omit({
   id: true,
   created_at: true,
   updated_at: true,
+  deleted_at: true,
 });
 
-export const insertPaymentGatewaySchema = createInsertSchema(paymentGateways).omit({
+export const insertBarberPlanSchema = createInsertSchema(barber_plans).omit({
   id: true,
   created_at: true,
   updated_at: true,
-});
-
-export const insertAccountingTransactionSchema = createInsertSchema(accountingTransactions).omit({
-  id: true,
-  created_at: true,
-  updated_at: true,
-});
-
-export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({
-  id: true,
-  created_at: true,
-  updated_at: true,
-  resolved_at: true,
 });
 
 export const insertFaqSchema = createInsertSchema(faqs).omit({
@@ -218,20 +257,29 @@ export const insertFaqSchema = createInsertSchema(faqs).omit({
   updated_at: true,
 });
 
-export const whatsappInstances = pgTable("whatsapp_instances", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  phone_number: text("phone_number").notNull(),
-  status: text("status").notNull().default("disconnected"), // disconnected, connecting, connected
-  qr_code: text("qr_code"),
-  session_id: text("session_id"),
-  last_seen: timestamp("last_seen"),
-  webhook_url: text("webhook_url"),
-  created_at: timestamp("created_at").defaultNow(),
-  updated_at: timestamp("updated_at").defaultNow()
+export const insertPaymentGatewayTypeSchema = createInsertSchema(payment_gateway_types).omit({
+  id: true,
 });
 
-export const insertWhatsappInstanceSchema = createInsertSchema(whatsappInstances).omit({
+export const insertPaymentGatewaySchema = createInsertSchema(payment_gateways).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export const insertSupportTicketCategorySchema = createInsertSchema(support_ticket_categories).omit({
+  id: true,
+});
+
+export const insertSupportTicketSchema = createInsertSchema(support_tickets).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  resolved_at: true,
+  deleted_at: true,
+});
+
+export const insertWhatsappInstanceSchema = createInsertSchema(whatsapp_instances).omit({
   id: true,
   created_at: true,
   updated_at: true,
@@ -240,27 +288,38 @@ export const insertWhatsappInstanceSchema = createInsertSchema(whatsappInstances
   last_seen: true,
 });
 
+// Export types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type InsertRole = z.infer<typeof insertRoleSchema>;
+export type Role = typeof roles.$inferSelect;
 export type InsertBusiness = z.infer<typeof insertBusinessSchema>;
-export type Business = typeof business.$inferSelect;
-export type InsertStaff = z.infer<typeof insertStaffSchema>;
-export type Staff = typeof staff.$inferSelect;
-export type InsertClient = z.infer<typeof insertClientSchema>;
-export type Client = typeof clients.$inferSelect;
-export type InsertBarberPlan = z.infer<typeof insertBarberPlanSchema>;
-export type BarberPlan = typeof barberPlans.$inferSelect;
+export type Business = typeof businesses.$inferSelect;
+export type InsertPerson = z.infer<typeof insertPersonSchema>;
+export type Person = typeof persons.$inferSelect;
+export type InsertUserBusiness = z.infer<typeof insertUserBusinessSchema>;
+export type UserBusiness = typeof users_business.$inferSelect;
+export type InsertUserRole = z.infer<typeof insertUserRoleSchema>;
+export type UserRole = typeof users_roles.$inferSelect;
+export type InsertAccountingTransactionCategory = z.infer<typeof insertAccountingTransactionCategorySchema>;
+export type AccountingTransactionCategory = typeof accounting_transaction_categories.$inferSelect;
+export type InsertAccountingTransaction = z.infer<typeof insertAccountingTransactionSchema>;
+export type AccountingTransaction = typeof accounting_transactions.$inferSelect;
 export type InsertService = z.infer<typeof insertServiceSchema>;
 export type Service = typeof services.$inferSelect;
 export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 export type Appointment = typeof appointments.$inferSelect;
-export type InsertPaymentGateway = z.infer<typeof insertPaymentGatewaySchema>;
-export type PaymentGateway = typeof paymentGateways.$inferSelect;
-export type InsertAccountingTransaction = z.infer<typeof insertAccountingTransactionSchema>;
-export type AccountingTransaction = typeof accountingTransactions.$inferSelect;
-export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
-export type SupportTicket = typeof supportTickets.$inferSelect;
+export type InsertBarberPlan = z.infer<typeof insertBarberPlanSchema>;
+export type BarberPlan = typeof barber_plans.$inferSelect;
 export type InsertFaq = z.infer<typeof insertFaqSchema>;
 export type Faq = typeof faqs.$inferSelect;
+export type InsertPaymentGatewayType = z.infer<typeof insertPaymentGatewayTypeSchema>;
+export type PaymentGatewayType = typeof payment_gateway_types.$inferSelect;
+export type InsertPaymentGateway = z.infer<typeof insertPaymentGatewaySchema>;
+export type PaymentGateway = typeof payment_gateways.$inferSelect;
+export type InsertSupportTicketCategory = z.infer<typeof insertSupportTicketCategorySchema>;
+export type SupportTicketCategory = typeof support_ticket_categories.$inferSelect;
+export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
+export type SupportTicket = typeof support_tickets.$inferSelect;
 export type InsertWhatsappInstance = z.infer<typeof insertWhatsappInstanceSchema>;
-export type WhatsappInstance = typeof whatsappInstances.$inferSelect;
+export type WhatsappInstance = typeof whatsapp_instances.$inferSelect;
