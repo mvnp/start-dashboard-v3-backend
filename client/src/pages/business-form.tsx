@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { Building2, ArrowLeft } from "lucide-react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -51,7 +52,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
   });
 
   // Update form when business data loads
-  React.useEffect(() => {
+  useEffect(() => {
     if (business && isEditing) {
       form.reset({
         user_id: business.user_id,
@@ -63,7 +64,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
         tax_id: business.tax_id || "",
       });
     }
-  }, [business, isEditing, form]);
+  }, [business, isEditing]);
 
   const mutation = useMutation({
     mutationFn: async (data: InsertBusiness) => {
