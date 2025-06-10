@@ -220,6 +220,12 @@ class PostgresStorage implements IStorage {
   }
 
   async getPersonsByRoles(roleIds: number[]): Promise<Person[]> {
+    // Build OR condition for multiple roles
+    const roleConditions = roleIds.map(roleId => eq(users_roles.role_id, roleId));
+    const whereCondition = roleConditions.length === 1 
+      ? roleConditions[0] 
+      : or(...roleConditions);
+
     const result = await this.db
       .select({
         id: persons.id,
@@ -237,21 +243,9 @@ class PostgresStorage implements IStorage {
       .from(persons)
       .innerJoin(users, eq(persons.user_id, users.id))
       .innerJoin(users_roles, eq(users.id, users_roles.user_id))
-      .where(inArray(users_roles.role_id, roleIds));
+      .where(whereCondition);
     
-    return result.map(row => ({
-      id: row.id,
-      first_name: row.first_name,
-      last_name: row.last_name,
-      phone: row.phone,
-      tax_id: row.tax_id,
-      hire_date: row.hire_date,
-      salary: row.salary,
-      created_at: row.created_at,
-      updated_at: row.updated_at,
-      deleted_at: row.deleted_at,
-      user_id: row.user_id,
-    }));
+    return result;
   }
 
   async getPerson(id: number): Promise<Person | undefined> {

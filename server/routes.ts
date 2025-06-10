@@ -90,10 +90,10 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  // Staff routes (using persons table now)
+  // Staff routes (using persons table now) - roles 1,2,3 (super-admin, merchant, employee)
   app.get("/api/staff", async (req, res) => {
     try {
-      const persons = await storage.getAllPersons();
+      const persons = await storage.getPersonsByRoles([1, 2, 3]);
       res.json(persons);
     } catch (error) {
       console.error("Staff fetch error:", error);
@@ -207,10 +207,10 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  // Client routes (also using persons table)
+  // Client routes (also using persons table) - role 4 (client)
   app.get("/api/clients", async (req, res) => {
     try {
-      const persons = await storage.getAllPersons();
+      const persons = await storage.getPersonsByRoles([4]);
       res.json(persons);
     } catch (error) {
       console.error("Client fetch error:", error);
