@@ -117,7 +117,7 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/staff", async (req, res) => {
     try {
-      const { email, password, ...personData } = req.body;
+      const { email, password, business_id, role, ...personData } = req.body;
       
       // Only create user if both email and password are provided and not empty
       let userId = null;
@@ -138,6 +138,37 @@ export function registerRoutes(app: Express): void {
         user_id: userId
       });
       const person = await storage.createPerson(validatedPersonData);
+      
+      // Create junction table relationships if user was created
+      if (userId && business_id) {
+        try {
+          const userBusinessData = insertUserBusinessSchema.parse({
+            user_id: userId,
+            business_id: typeof business_id === 'string' ? parseInt(business_id) : business_id
+          });
+          await storage.createUserBusiness(userBusinessData);
+        } catch (businessError) {
+          console.error("User-business relationship creation error:", businessError);
+        }
+      }
+      
+      if (userId && role) {
+        try {
+          // Find role by type to get role_id
+          const roles = await storage.getAllRoles();
+          const selectedRole = roles.find(r => r.type === role);
+          if (selectedRole) {
+            const userRoleData = insertUserRoleSchema.parse({
+              user_id: userId,
+              role_id: selectedRole.id
+            });
+            await storage.createUserRole(userRoleData);
+          }
+        } catch (roleError) {
+          console.error("User-role relationship creation error:", roleError);
+        }
+      }
+      
       res.status(201).json(person);
     } catch (error) {
       console.error("Staff creation error:", error);
