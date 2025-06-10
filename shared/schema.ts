@@ -216,6 +216,8 @@ export const insertPersonSchema = createInsertSchema(persons).omit({
   created_at: true,
   updated_at: true,
   deleted_at: true,
+}).extend({
+  salary: z.union([z.string(), z.number()]).optional().transform((val) => val ? String(val) : undefined),
 });
 
 export const insertUserBusinessSchema = createInsertSchema(users_business);

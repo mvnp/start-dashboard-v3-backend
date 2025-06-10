@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Client } from "@shared/schema";
+import { Person, Business, Role } from "@shared/schema";
 
 interface ClientFormData {
   first_name: string;
@@ -25,6 +25,8 @@ interface ClientFormData {
   tax_id: string;
   type: string;
   address: string;
+  business_id: string;
+  role_id: string;
 }
 
 export default function ClientForm() {
@@ -42,12 +44,14 @@ export default function ClientForm() {
     tax_id: "",
     type: "customer",
     address: "",
+    business_id: "",
+    role_id: "",
   });
 
   const { data: clientMember, isLoading } = useQuery({
     queryKey: ["/api/clients", clientId],
     enabled: isEdit && !!clientId,
-    select: (data: Client) => data,
+    select: (data: Person) => data,
   });
 
   const createClientMutation = useMutation({
