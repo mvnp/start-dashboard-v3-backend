@@ -127,16 +127,22 @@ export function registerRoutes(app: Express): void {
     try {
       // Use session-based authentication (defaults to Super Admin for now)
       const testUserId = req.session?.userId || 1;
+      console.log(`DEBUG - Session userId: ${req.session?.userId}, Using testUserId: ${testUserId}`);
+      
       const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
         return res.status(500).json({ error: "User not found" });
       }
       
+      console.log(`DEBUG - User ${testUserId}: roleId=${userData.roleId}, businessIds=${JSON.stringify(userData.businessIds)}`);
+      
       let businesses;
       // Super Admin (role ID: 1) can see all businesses
       if (userData.roleId === 1) {
+        console.log("DEBUG - Super Admin: fetching ALL businesses");
         businesses = await storage.getAllBusinesses();
       } else {
+        console.log("DEBUG - Regular user: filtering by business IDs");
         // Other users see only their associated businesses
         businesses = [];
         for (const businessId of userData.businessIds) {
@@ -144,6 +150,7 @@ export function registerRoutes(app: Express): void {
           if (business) businesses.push(business);
         }
       }
+      console.log(`DEBUG - Final business count: ${businesses.length}`);
       res.json(businesses);
     } catch (error) {
       console.error("Business fetch error:", error);
