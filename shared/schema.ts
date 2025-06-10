@@ -6,10 +6,12 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  role: text("role").notNull().default("client"), // super-admin, merchant, collaborator, client
 });
 
 export const staff = pgTable("staff", {
   id: serial("id").primaryKey(),
+  user_id: integer("user_id").references(() => users.id),
   first_name: text("first_name").notNull(),
   last_name: text("last_name").notNull(),
   email: text("email").notNull().unique(),
@@ -24,6 +26,7 @@ export const staff = pgTable("staff", {
 
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
+  user_id: integer("user_id").references(() => users.id),
   first_name: text("first_name").notNull(),
   last_name: text("last_name").notNull(),
   email: text("email").notNull().unique(),

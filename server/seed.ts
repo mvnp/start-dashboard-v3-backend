@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
-import { staff, clients, barberPlans, services, appointments, paymentGateways, accountingTransactions, supportTickets, faqs, whatsappInstances } from "@shared/schema";
+import { users, staff, clients, barberPlans, services, appointments, paymentGateways, accountingTransactions, supportTickets, faqs, whatsappInstances } from "@shared/schema";
 
 const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
@@ -8,33 +8,126 @@ const db = drizzle(sql);
 async function seedDatabase() {
   console.log("Starting database seeding...");
 
-  // Seed Staff
+  // First create users for staff (super-admin, merchant, collaborator)
+  const staffUsers = await db.insert(users).values([
+    { username: "admin", password: "admin123", role: "super-admin" },
+    { username: "john.martinez", password: "john123", role: "merchant" },
+    { username: "maria.rodriguez", password: "maria123", role: "collaborator" },
+    { username: "carlos.silva", password: "carlos123", role: "collaborator" },
+    { username: "ana.costa", password: "ana123", role: "collaborator" },
+    { username: "pedro.santos", password: "pedro123", role: "collaborator" },
+    { username: "lucia.oliveira", password: "lucia123", role: "collaborator" },
+    { username: "rafael.almeida", password: "rafael123", role: "collaborator" }
+  ]).returning();
+
+  // Create users for clients
+  const clientUsers = await db.insert(users).values([
+    { username: "david.wilson", password: "david123", role: "client" },
+    { username: "michael.johnson", password: "michael123", role: "client" },
+    { username: "sarah.brown", password: "sarah123", role: "client" },
+    { username: "james.davis", password: "james123", role: "client" },
+    { username: "emma.miller", password: "emma123", role: "client" },
+    { username: "robert.garcia", password: "robert123", role: "client" },
+    { username: "lisa.martinez", password: "lisa123", role: "client" },
+    { username: "william.anderson", password: "william123", role: "client" }
+  ]).returning();
+
+  // Create staff records linked to users
   const staffMembers = await db.insert(staff).values([
     {
+      user_id: staffUsers[0].id,
+      first_name: "Admin",
+      last_name: "Super",
+      email: "admin@barbershop.com",
+      phone: "+1234567890",
+      tax_id: "12345678901",
+      role: "Administrator",
+      hire_date: "2020-01-01",
+      salary: 8000
+    },
+    {
+      user_id: staffUsers[1].id,
       first_name: "John",
       last_name: "Martinez",
       email: "john@barbershop.com",
-      phone: "+1234567890",
-      tax_id: "12345678901",
+      phone: "+1234567891",
+      tax_id: "12345678902",
       role: "Senior Barber",
       hire_date: "2022-01-15",
       salary: 4500
     },
     {
+      user_id: staffUsers[2].id,
       first_name: "Maria",
       last_name: "Rodriguez",
       email: "maria@barbershop.com",
-      phone: "+1234567891",
-      tax_id: "10987654321",
+      phone: "+1234567892",
+      tax_id: "12345678903",
       role: "Master Barber",
       hire_date: "2021-08-20",
       salary: 5200
+    },
+    {
+      user_id: staffUsers[3].id,
+      first_name: "Carlos",
+      last_name: "Silva",
+      email: "carlos@barbershop.com",
+      phone: "+1234567893",
+      tax_id: "12345678904",
+      role: "Barber",
+      hire_date: "2023-03-10",
+      salary: 3800
+    },
+    {
+      user_id: staffUsers[4].id,
+      first_name: "Ana",
+      last_name: "Costa",
+      email: "ana@barbershop.com",
+      phone: "+1234567894",
+      tax_id: "12345678905",
+      role: "Stylist",
+      hire_date: "2022-11-05",
+      salary: 4200
+    },
+    {
+      user_id: staffUsers[5].id,
+      first_name: "Pedro",
+      last_name: "Santos",
+      email: "pedro@barbershop.com",
+      phone: "+1234567895",
+      tax_id: "12345678906",
+      role: "Junior Barber",
+      hire_date: "2023-06-20",
+      salary: 3200
+    },
+    {
+      user_id: staffUsers[6].id,
+      first_name: "Lucia",
+      last_name: "Oliveira",
+      email: "lucia@barbershop.com",
+      phone: "+1234567896",
+      tax_id: "12345678907",
+      role: "Receptionist",
+      hire_date: "2022-09-15",
+      salary: 2800
+    },
+    {
+      user_id: staffUsers[7].id,
+      first_name: "Rafael",
+      last_name: "Almeida",
+      email: "rafael@barbershop.com",
+      phone: "+1234567897",
+      tax_id: "12345678908",
+      role: "Assistant",
+      hire_date: "2023-04-01",
+      salary: 2500
     }
   ]).returning();
 
-  // Seed Clients
+  // Create client records linked to users
   const clientList = await db.insert(clients).values([
     {
+      user_id: clientUsers[0].id,
       first_name: "David",
       last_name: "Wilson",
       email: "david.wilson@email.com",
@@ -44,13 +137,74 @@ async function seedDatabase() {
       address: "123 Main St, City, State 12345"
     },
     {
+      user_id: clientUsers[1].id,
       first_name: "Michael",
       last_name: "Johnson",
       email: "m.johnson@email.com",
       phone: "+1555123457",
-      tax_id: "11223344556",
+      tax_id: "98765432101",
       type: "individual",
       address: "456 Oak Ave, City, State 12345"
+    },
+    {
+      user_id: clientUsers[2].id,
+      first_name: "Sarah",
+      last_name: "Brown",
+      email: "sarah.brown@email.com",
+      phone: "+1555123458",
+      tax_id: "98765432102",
+      type: "individual",
+      address: "789 Pine St, City, State 12345"
+    },
+    {
+      user_id: clientUsers[3].id,
+      first_name: "James",
+      last_name: "Davis",
+      email: "james.davis@email.com",
+      phone: "+1555123459",
+      tax_id: "98765432103",
+      type: "individual",
+      address: "321 Elm St, City, State 12345"
+    },
+    {
+      user_id: clientUsers[4].id,
+      first_name: "Emma",
+      last_name: "Miller",
+      email: "emma.miller@email.com",
+      phone: "+1555123460",
+      tax_id: "98765432104",
+      type: "individual",
+      address: "654 Maple Ave, City, State 12345"
+    },
+    {
+      user_id: clientUsers[5].id,
+      first_name: "Robert",
+      last_name: "Garcia",
+      email: "robert.garcia@email.com",
+      phone: "+1555123461",
+      tax_id: "98765432105",
+      type: "individual",
+      address: "987 Cedar Ln, City, State 12345"
+    },
+    {
+      user_id: clientUsers[6].id,
+      first_name: "Lisa",
+      last_name: "Martinez",
+      email: "lisa.martinez@email.com",
+      phone: "+1555123462",
+      tax_id: "98765432106",
+      type: "individual",
+      address: "147 Birch Dr, City, State 12345"
+    },
+    {
+      user_id: clientUsers[7].id,
+      first_name: "William",
+      last_name: "Anderson",
+      email: "william.anderson@email.com",
+      phone: "+1555123463",
+      tax_id: "98765432107",
+      type: "individual",
+      address: "258 Walnut St, City, State 12345"
     }
   ]).returning();
 
