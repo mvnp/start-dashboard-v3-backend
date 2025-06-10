@@ -15,11 +15,9 @@ import {
 } from "@/components/ui/select";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Staff, Business } from "@shared/schema";
+import { Person, Business } from "@shared/schema";
 
 interface StaffFormData {
-  username: string;
-  password: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -46,8 +44,6 @@ export default function StaffForm() {
   const staffId = params.id ? parseInt(params.id) : null;
 
   const [formData, setFormData] = useState<StaffFormData>({
-    username: "",
-    password: "",
     first_name: "",
     last_name: "",
     email: "",
@@ -62,7 +58,7 @@ export default function StaffForm() {
   const { data: staffMember, isLoading } = useQuery({
     queryKey: ["/api/staff", staffId],
     enabled: isEdit && !!staffId,
-    select: (data: Staff) => data,
+    select: (data: Person) => data,
   });
 
   const { data: businesses } = useQuery({
@@ -112,17 +108,15 @@ export default function StaffForm() {
   useEffect(() => {
     if (staffMember && isEdit) {
       setFormData({
-        username: "", // Don't populate username/password for edit
-        password: "",
         first_name: staffMember.first_name,
         last_name: staffMember.last_name,
-        email: staffMember.email,
-        phone: staffMember.phone,
-        tax_id: staffMember.tax_id,
-        role: staffMember.role,
-        hire_date: staffMember.hire_date,
-        salary: staffMember.salary,
-        business_id: staffMember.business_id || 0,
+        email: "",
+        phone: staffMember.phone || "",
+        tax_id: staffMember.tax_id || "",
+        role: "collaborator",
+        hire_date: staffMember.hire_date || "",
+        salary: Number(staffMember.salary) || 0,
+        business_id: 0,
       });
     }
   }, [staffMember, isEdit]);
@@ -205,31 +199,7 @@ export default function StaffForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {!isEdit && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-blue-50 rounded-lg">
-                <div>
-                  <Label htmlFor="username">Username</Label>
-                  <Input
-                    id="username"
-                    placeholder="Enter username"
-                    value={formData.username}
-                    onChange={(e) => handleInputChange('username', e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter password"
-                    value={formData.password}
-                    onChange={(e) => handleInputChange('password', e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="first_name">First Name</Label>
