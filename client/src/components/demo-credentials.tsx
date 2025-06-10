@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 
 interface DemoCredential {
   email: string;
@@ -10,35 +11,49 @@ interface DemoCredential {
   description: string;
 }
 
-const demoCredentials: DemoCredential[] = [
-  {
-    email: "mvnpereira@gmail.com",
-    password: "Marcos$1986",
-    role: "Super Admin",
-    description: "Full system access - can see all businesses and data"
-  },
-  {
-    email: "carlos.silva@axitech.com",
-    password: "carlos123",
-    role: "Merchant",
-    description: "Business owner - can manage their business data"
-  },
-  {
-    email: "marina.santos@axitech.com",
-    password: "marina123",
-    role: "Employee",
-    description: "Staff member - limited access to business operations"
-  },
-  {
-    email: "roberto.oliveira@axitech.com",
-    password: "roberto123",
-    role: "Employee",
-    description: "Staff member - limited access to business operations"
+const getRoleDescription = (roleType: string) => {
+  switch (roleType) {
+    case 'super-admin':
+      return 'Full system access - can see all businesses and data';
+    case 'merchant':
+      return 'Business owner - can manage their business data';
+    case 'employee':
+      return 'Staff member - limited access to business operations';
+    case 'client':
+      return 'Customer - can view and book services';
+    default:
+      return 'System user with specific permissions';
   }
-];
+};
+
+const getRoleDisplayName = (roleType: string) => {
+  switch (roleType) {
+    case 'super-admin':
+      return 'Super Admin';
+    case 'merchant':
+      return 'Merchant';
+    case 'employee':
+      return 'Employee';
+    case 'client':
+      return 'Client';
+    default:
+      return roleType;
+  }
+};
 
 export function DemoCredentials() {
   const { toast } = useToast();
+
+  const { data: usersByRole = [], isLoading } = useQuery({
+    queryKey: ['/api/users/by-role'],
+    queryFn: async () => {
+      const response = await fetch('/api/users/by-role');
+      if (!response.ok) {
+        throw new Error('Failed to fetch users by role');
+      }
+      return response.json();
+    },
+  });
 
   const copyCredentials = (email: string, password: string) => {
     navigator.clipboard.writeText(`${email}:${password}`);
@@ -47,6 +62,30 @@ export function DemoCredentials() {
       description: "Email and password copied to clipboard",
     });
   };
+
+  if (isLoading) {
+    return (
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-slate-900">Demo Credentials</CardTitle>
+          <p className="text-sm text-slate-600">Loading available test accounts...</p>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center p-8">
+            <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Create demo credentials from actual database users
+  const demoCredentials: DemoCredential[] = usersByRole.map((user: any) => ({
+    email: user.email,
+    password: getPasswordForRole(user.roleType),
+    role: getRoleDisplayName(user.roleType),
+    description: getRoleDescription(user.roleType)
+  }));
 
   return (
     <Card className="mt-6">
@@ -86,4 +125,20 @@ export function DemoCredentials() {
       </CardContent>
     </Card>
   );
+}
+
+// Helper function to get password based on role type
+function getPasswordForRole(roleType: string): string {
+  switch (roleType) {
+    case 'super-admin':
+      return 'Marcos$1986';
+    case 'merchant':
+      return 'merchant123';
+    case 'employee':
+      return 'marina123';
+    case 'client':
+      return 'client123';
+    default:
+      return 'password123';
+  }
 }
