@@ -33,7 +33,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
   });
 
   // Query for super-admin users
-  const { data: superAdminUsers } = useQuery<User[]>({
+  const { data: superAdminUsers } = useQuery<any[]>({
     queryKey: ["/api/users/super-admins"],
   });
 
@@ -248,7 +248,9 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                       <SelectContent>
                         {superAdminUsers?.map((user) => (
                           <SelectItem key={user.id} value={user.id.toString()}>
-                            {user.email}
+                            {user.first_name && user.last_name 
+                              ? `${user.first_name} ${user.last_name} (${user.email})`
+                              : user.email}
                           </SelectItem>
                         ))}
                       </SelectContent>

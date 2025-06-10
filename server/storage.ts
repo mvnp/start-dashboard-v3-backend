@@ -127,7 +127,7 @@ class PostgresStorage implements IStorage {
     return result[0];
   }
 
-  async getUsersByRole(roleType: string): Promise<User[]> {
+  async getUsersByRole(roleType: string): Promise<any[]> {
     const result = await this.db
       .select({
         id: users.id,
@@ -136,10 +136,13 @@ class PostgresStorage implements IStorage {
         created_at: users.created_at,
         updated_at: users.updated_at,
         deleted_at: users.deleted_at,
+        first_name: persons.first_name,
+        last_name: persons.last_name,
       })
       .from(users)
       .innerJoin(users_roles, eq(users.id, users_roles.user_id))
       .innerJoin(roles, eq(users_roles.role_id, roles.id))
+      .leftJoin(persons, eq(users.id, persons.user_id))
       .where(eq(roles.type, roleType));
     return result;
   }
