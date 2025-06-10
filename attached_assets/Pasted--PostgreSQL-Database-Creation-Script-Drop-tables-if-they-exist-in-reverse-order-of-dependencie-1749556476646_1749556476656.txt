@@ -1,0 +1,375 @@
+-- PostgreSQL Database Creation Script
+-- Drop tables if they exist (in reverse order of dependencies)
+DROP TABLE IF EXISTS users_business CASCADE;
+
+DROP TABLE IF EXISTS users_roles CASCADE;
+
+DROP TABLE IF EXISTS appointments CASCADE;
+
+DROP TABLE IF EXISTS accounting_transactions CASCADE;
+
+DROP TABLE IF EXISTS accounting_transaction_categories CASCADE;
+
+DROP TABLE IF EXISTS barber_plans CASCADE;
+
+DROP TABLE IF EXISTS payment_gateways CASCADE;
+
+DROP TABLE IF EXISTS payment_gateway_types CASCADE;
+
+DROP TABLE IF EXISTS services CASCADE;
+
+DROP TABLE IF EXISTS support_tickets CASCADE;
+
+DROP TABLE IF EXISTS support_ticket_categories CASCADE;
+
+DROP TABLE IF EXISTS whatsapp_instances CASCADE;
+
+DROP TABLE IF EXISTS persons CASCADE;
+
+DROP TABLE IF EXISTS businesses CASCADE;
+
+DROP TABLE IF EXISTS users CASCADE;
+
+DROP TABLE IF EXISTS roles CASCADE;
+
+DROP TABLE IF EXISTS faqs CASCADE;
+
+-- Create ENUM types
+CREATE TYPE transaction_type AS ENUM('revenue', 'expense');
+
+CREATE TYPE priority_level AS ENUM('Low', 'Medium', 'High', 'Urgent');
+
+CREATE TYPE ticket_status AS ENUM('Open', 'In Progress', 'Resolved', 'Closed');
+
+CREATE TYPE whatsapp_status AS ENUM('Connected', 'Disconnected', 'Error');
+
+-- Create tables
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  password VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL
+);
+
+CREATE TABLE roles (
+  id SERIAL PRIMARY KEY,
+  type VARCHAR(100) NOT NULL,
+  description TEXT
+);
+
+CREATE TABLE businesses (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  address TEXT,
+  phone VARCHAR(20),
+  email VARCHAR(255),
+  tax_id VARCHAR(50),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE persons (
+  id SERIAL PRIMARY KEY,
+  first_name VARCHAR(100) NOT NULL,
+  last_name VARCHAR(100) NOT NULL,
+  phone VARCHAR(20),
+  tax_id VARCHAR(50),
+  hire_date DATE,
+  salary DECIMAL(10, 2),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL,
+  user_id INTEGER REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE TABLE users_business (
+  user_id INTEGER REFERENCES users (id) ON DELETE CASCADE,
+  business_id INTEGER REFERENCES businesses (id) ON DELETE CASCADE,
+  PRIMARY KEY (user_id, business_id)
+);
+
+CREATE TABLE users_roles (
+  user_id INTEGER REFERENCES users (id) ON DELETE CASCADE,
+  role_id INTEGER REFERENCES roles (id) ON DELETE CASCADE,
+  PRIMARY KEY (user_id, role_id)
+);
+
+CREATE TABLE accounting_transaction_categories (
+  id SERIAL PRIMARY KEY,
+  description VARCHAR(255) NOT NULL,
+  business_id INTEGER REFERENCES businesses (id) ON DELETE CASCADE
+);
+
+CREATE TABLE accounting_transactions (
+  id SERIAL PRIMARY KEY,
+  type transaction_type NOT NULL,
+  category VARCHAR(255),
+  description TEXT,
+  amount DECIMAL(10, 2) NOT NULL,
+  payment_method VARCHAR(100),
+  reference_number VARCHAR(100),
+  transaction_date DATE NOT NULL,
+  notes TEXT,
+  is_recurring BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  user_id INTEGER REFERENCES users (id) ON DELETE CASCADE,
+  accounting_category_id INTEGER REFERENCES accounting_transaction_categories (id) ON DELETE SET NULL
+);
+
+CREATE TABLE services (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  duration INTEGER, -- duration in minutes
+  price DECIMAL(10, 2),
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  business_id INTEGER REFERENCES businesses (id) ON DELETE CASCADE
+);
+
+CREATE TABLE appointments (
+  id SERIAL PRIMARY KEY,
+  appointment_date DATE NOT NULL,
+  appointment_time TIME NOT NULL,
+  status VARCHAR(50) DEFAULT 'Scheduled',
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL,
+  user_id INTEGER REFERENCES users (id) ON DELETE CASCADE,
+  business_id INTEGER REFERENCES businesses (id) ON DELETE CASCADE,
+  service_id INTEGER REFERENCES services (id) ON DELETE SET NULL
+);
+
+CREATE TABLE barber_plans (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  subtitle VARCHAR(255),
+  benefits TEXT[],
+  image1 VARCHAR(500),
+  image2 VARCHAR(500),
+  price1m DECIMAL(10, 2),
+  price3m DECIMAL(10, 2),
+  price12m DECIMAL(10, 2),
+  payment_link VARCHAR(500),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  business_id INTEGER REFERENCES businesses (id) ON DELETE CASCADE
+);
+
+CREATE TABLE faqs (
+  id SERIAL PRIMARY KEY,
+  question TEXT NOT NULL,
+  answer TEXT NOT NULL,
+  category VARCHAR(100),
+  is_published BOOLEAN DEFAULT TRUE,
+  order_index INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE payment_gateway_types (
+  id SERIAL PRIMARY KEY,
+  description VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE payment_gateways (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  api_url VARCHAR(500),
+  api_key VARCHAR(500),
+  token VARCHAR(500),
+  email VARCHAR(255),
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  business_id INTEGER REFERENCES businesses (id) ON DELETE CASCADE,
+  type_id INTEGER REFERENCES payment_gateway_types (id) ON DELETE SET NULL
+);
+
+CREATE TABLE support_ticket_categories (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT
+);
+
+CREATE TABLE support_tickets (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL,
+  priority priority_level DEFAULT 'Medium',
+  status ticket_status DEFAULT 'Open',
+  category VARCHAR(100),
+  client_email VARCHAR(255),
+  client_name VARCHAR(255),
+  resolution_notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  resolved_at TIMESTAMP NULL,
+  deleted_at TIMESTAMP NULL,
+  assigned_user_id INTEGER REFERENCES users (id) ON DELETE SET NULL,
+  ticket_open_user_id INTEGER REFERENCES users (id) ON DELETE SET NULL,
+  business_id INTEGER REFERENCES businesses (id) ON DELETE CASCADE
+);
+
+CREATE TABLE whatsapp_instances (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(20),
+  status whatsapp_status DEFAULT 'Disconnected',
+  qr_code TEXT,
+  session_id VARCHAR(255),
+  last_seen TIMESTAMP,
+  webhook_url VARCHAR(500),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  business_id INTEGER REFERENCES businesses (id) ON DELETE CASCADE
+);
+
+-- Create indexes for better performance
+CREATE INDEX idx_users_email ON users (email);
+
+CREATE INDEX idx_users_deleted_at ON users (deleted_at);
+
+CREATE INDEX idx_persons_user_id ON persons (user_id);
+
+CREATE INDEX idx_persons_deleted_at ON persons (deleted_at);
+
+CREATE INDEX idx_accounting_transactions_user_id ON accounting_transactions (user_id);
+
+CREATE INDEX idx_accounting_transactions_category_id ON accounting_transactions (accounting_category_id);
+
+CREATE INDEX idx_accounting_transactions_date ON accounting_transactions (transaction_date);
+
+CREATE INDEX idx_appointments_user_id ON appointments (user_id);
+
+CREATE INDEX idx_appointments_business_id ON appointments (business_id);
+
+CREATE INDEX idx_appointments_service_id ON appointments (service_id);
+
+CREATE INDEX idx_appointments_date ON appointments (appointment_date);
+
+CREATE INDEX idx_appointments_deleted_at ON appointments (deleted_at);
+
+CREATE INDEX idx_services_business_id ON services (business_id);
+
+CREATE INDEX idx_barber_plans_business_id ON barber_plans (business_id);
+
+CREATE INDEX idx_payment_gateways_business_id ON payment_gateways (business_id);
+
+CREATE INDEX idx_support_tickets_assigned_user_id ON support_tickets (assigned_user_id);
+
+CREATE INDEX idx_support_tickets_ticket_open_user_id ON support_tickets (ticket_open_user_id);
+
+CREATE INDEX idx_support_tickets_business_id ON support_tickets (business_id);
+
+CREATE INDEX idx_support_tickets_status ON support_tickets (status);
+
+CREATE INDEX idx_support_tickets_deleted_at ON support_tickets (deleted_at);
+
+CREATE INDEX idx_whatsapp_instances_business_id ON whatsapp_instances (business_id);
+
+-- Create triggers for updated_at columns
+CREATE OR REPLACE FUNCTION update_updated_at_column () RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Apply triggers to tables with updated_at column
+CREATE TRIGGER update_users_updated_at BEFORE
+UPDATE ON users FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column ();
+
+CREATE TRIGGER update_businesses_updated_at BEFORE
+UPDATE ON businesses FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column ();
+
+CREATE TRIGGER update_persons_updated_at BEFORE
+UPDATE ON persons FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column ();
+
+CREATE TRIGGER update_accounting_transactions_updated_at BEFORE
+UPDATE ON accounting_transactions FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column ();
+
+CREATE TRIGGER update_appointments_updated_at BEFORE
+UPDATE ON appointments FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column ();
+
+CREATE TRIGGER update_services_updated_at BEFORE
+UPDATE ON services FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column ();
+
+CREATE TRIGGER update_barber_plans_updated_at BEFORE
+UPDATE ON barber_plans FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column ();
+
+CREATE TRIGGER update_faqs_updated_at BEFORE
+UPDATE ON faqs FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column ();
+
+CREATE TRIGGER update_payment_gateways_updated_at BEFORE
+UPDATE ON payment_gateways FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column ();
+
+CREATE TRIGGER update_support_tickets_updated_at BEFORE
+UPDATE ON support_tickets FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column ();
+
+CREATE TRIGGER update_whatsapp_instances_updated_at BEFORE
+UPDATE ON whatsapp_instances FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column ();
+
+-- Insert some basic data
+INSERT INTO
+  roles (type, description)
+VALUES
+  (
+    'super-admin',
+    'Super administrator with full system access'
+  ),
+  ('merchant', 'Business owner/merchant'),
+  ('employee', 'Business employee'),
+  ('client', 'Client user');
+
+INSERT INTO
+  payment_gateway_types (description)
+VALUES
+  ('PIX'),
+  ('Credit Card'),
+  ('PayPal'),
+  ('Stripe'),
+  ('PagSeguro'),
+  ('Mercado Pago');
+
+INSERT INTO
+  support_ticket_categories (title, description)
+VALUES
+  ('Technical', 'Technical support issues'),
+  ('Billing', 'Billing and payment related issues'),
+  ('General', 'General inquiries'),
+  ('Feature Request', 'New feature requests');
+
+-- Add comments to tables
+COMMENT ON TABLE users IS 'User accounts for the system';
+
+COMMENT ON TABLE businesses IS 'Business entities in the system';
+
+COMMENT ON TABLE persons IS 'Person details linked to users';
+
+COMMENT ON TABLE accounting_transactions IS 'Financial transactions for businesses';
+
+COMMENT ON TABLE appointments IS 'Scheduled appointments between clients and businesses';
+
+COMMENT ON TABLE services IS 'Services offered by businesses';
+
+COMMENT ON TABLE support_tickets IS 'Customer support tickets';
+
+COMMENT ON TABLE whatsapp_instances IS 'WhatsApp integration instances for businesses';
