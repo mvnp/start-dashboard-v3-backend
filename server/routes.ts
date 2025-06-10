@@ -97,15 +97,11 @@ export function registerRoutes(app: Express): void {
       }
       
       let businesses;
-      console.log("DEBUG - Business endpoint: userData.roleId =", userData.roleId, "businessIds =", userData.businessIds);
       // Super Admin (role ID: 1) can see all businesses
       if (userData.roleId === 1) {
-        console.log("DEBUG - Super Admin detected, fetching ALL businesses");
         businesses = await storage.getAllBusinesses();
-        console.log("DEBUG - All businesses fetched, count:", businesses.length);
       } else {
         // Other users see only their associated businesses
-        console.log("DEBUG - Regular user, filtering by business IDs");
         businesses = [];
         for (const businessId of userData.businessIds) {
           const business = await storage.getBusiness(businessId);
@@ -190,15 +186,11 @@ export function registerRoutes(app: Express): void {
       }
 
       let persons;
-      console.log("DEBUG - Staff endpoint: userData.roleId =", userData.roleId, "businessIds =", userData.businessIds);
       // Super Admin (role ID: 1) can see all staff across all businesses
       if (userData.roleId === 1) {
-        console.log("DEBUG - Super Admin detected, fetching ALL staff");
         persons = await storage.getPersonsByRoles([1, 2, 3]);
-        console.log("DEBUG - All staff fetched, count:", persons.length);
       } else {
         // Other users see only staff from their associated businesses
-        console.log("DEBUG - Regular user, filtering staff by business IDs");
         persons = await storage.getPersonsByRolesAndBusiness([1, 2, 3], userData.businessIds);
       }
       
@@ -326,15 +318,11 @@ export function registerRoutes(app: Express): void {
       }
 
       let persons;
-      console.log("DEBUG - Client endpoint: userData.roleId =", userData.roleId, "businessIds =", userData.businessIds);
       // Super Admin (role ID: 1) can see all clients across all businesses
       if (userData.roleId === 1) {
-        console.log("DEBUG - Super Admin detected, fetching ALL clients");
         persons = await storage.getPersonsByRoles([4]);
-        console.log("DEBUG - All clients fetched, count:", persons.length);
       } else {
         // Other users see only clients from their associated businesses
-        console.log("DEBUG - Regular user, filtering clients by business IDs");
         persons = await storage.getPersonsByRolesAndBusiness([4], userData.businessIds);
       }
       
