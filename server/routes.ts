@@ -97,21 +97,17 @@ export function registerRoutes(app: Express): void {
       }
       
       let businesses;
-      console.log(`DEBUG - User ${testUserId}: roleId=${userData.roleId}, businessIds=${JSON.stringify(userData.businessIds)}`);
       // Super Admin (role ID: 1) can see all businesses
       if (userData.roleId === 1) {
-        console.log("DEBUG - Super Admin: fetching ALL businesses");
         businesses = await storage.getAllBusinesses();
       } else {
         // Other users see only their associated businesses
-        console.log("DEBUG - Regular user: filtering by business IDs");
         businesses = [];
         for (const businessId of userData.businessIds) {
           const business = await storage.getBusiness(businessId);
           if (business) businesses.push(business);
         }
       }
-      console.log(`DEBUG - Final business count: ${businesses.length}`);
       res.json(businesses);
     } catch (error) {
       console.error("Business fetch error:", error);
