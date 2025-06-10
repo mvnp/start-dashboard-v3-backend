@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
-import { eq, and } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import { 
   users, businesses, persons, roles, users_business, users_roles,
   services, appointments, barber_plans, payment_gateways, payment_gateway_types,
@@ -43,6 +43,7 @@ export interface IStorage {
   
   // Person methods (replaces staff/client)
   getAllPersons(): Promise<Person[]>;
+  getPersonsByRoles(roleIds: number[]): Promise<Person[]>;
   getPerson(id: number): Promise<Person | undefined>;
   createPerson(person: InsertPerson): Promise<Person>;
   updatePerson(id: number, person: Partial<InsertPerson>): Promise<Person | undefined>;
@@ -216,6 +217,41 @@ class PostgresStorage implements IStorage {
   // Person methods (replaces staff/client)
   async getAllPersons(): Promise<Person[]> {
     return await this.db.select().from(persons);
+  }
+
+  async getPersonsByRoles(roleIds: number[]): Promise<Person[]> {
+    const result = await this.db
+      .select({
+        id: persons.id,
+        first_name: persons.first_name,
+        last_name: persons.last_name,
+        phone: persons.phone,
+        tax_id: persons.tax_id,
+        hire_date: persons.hire_date,
+        salary: persons.salary,
+        created_at: persons.created_at,
+        updated_at: persons.updated_at,
+        deleted_at: persons.deleted_at,
+        user_id: persons.user_id,
+      })
+      .from(persons)
+      .innerJoin(users, eq(persons.user_id, users.id))
+      .innerJoin(users_roles, eq(users.id, users_roles.user_id))
+      .where(inArray(users_roles.role_id, roleIds));
+    
+    return result.map(row => ({
+      id: row.id,
+      first_name: row.first_name,
+      last_name: row.last_name,
+      phone: row.phone,
+      tax_id: row.tax_id,
+      hire_date: row.hire_date,
+      salary: row.salary,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      deleted_at: row.deleted_at,
+      user_id: row.user_id,
+    }));
   }
 
   async getPerson(id: number): Promise<Person | undefined> {
