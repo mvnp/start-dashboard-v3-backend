@@ -23,7 +23,6 @@ interface ClientFormData {
   email: string;
   phone: string;
   tax_id: string;
-  type: string;
   address: string;
   business_id: string;
   role_id: string;
@@ -42,7 +41,6 @@ export default function ClientForm() {
     email: "",
     phone: "",
     tax_id: "",
-    type: "customer",
     address: "",
     business_id: "",
     role_id: "",
@@ -113,7 +111,6 @@ export default function ClientForm() {
         email: "",
         phone: clientMember.phone || "",
         tax_id: clientMember.tax_id || "",
-        type: "customer",
         address: "",
         business_id: "",
         role_id: "",
@@ -244,17 +241,7 @@ export default function ClientForm() {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="type">Client Type</Label>
-                <Select onValueChange={(value) => handleInputChange('type', value)} value={formData.type}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select client type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="customer">Customer</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+
 
               <div className="md:col-span-2">
                 <Label htmlFor="address">Address</Label>
