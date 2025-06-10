@@ -122,10 +122,20 @@ export default function StaffForm() {
         role: staffMember.role,
         hire_date: staffMember.hire_date,
         salary: staffMember.salary,
-        business_id: staffMember.business_id || 1,
+        business_id: staffMember.business_id || 0,
       });
     }
   }, [staffMember, isEdit]);
+
+  // Set default business when businesses are loaded and form is for creation
+  useEffect(() => {
+    if (!isEdit && businesses && businesses.length > 0 && formData.business_id === 0) {
+      setFormData(prev => ({
+        ...prev,
+        business_id: businesses[0].id
+      }));
+    }
+  }, [businesses, isEdit, formData.business_id]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
