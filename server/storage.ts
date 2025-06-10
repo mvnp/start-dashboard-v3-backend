@@ -1,4 +1,7 @@
-import { users, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService, type Appointment, type InsertAppointment, type PaymentGateway, type InsertPaymentGateway, type AccountingTransaction, type InsertAccountingTransaction, type SupportTicket, type InsertSupportTicket, type Faq, type InsertFaq, type WhatsappInstance, type InsertWhatsappInstance } from "@shared/schema";
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
+import { eq } from "drizzle-orm";
+import { users, staff, clients, barberPlans, services, appointments, paymentGateways, accountingTransactions, supportTickets, faqs, whatsappInstances, type User, type InsertUser, type Staff, type InsertStaff, type Client, type InsertClient, type BarberPlan, type InsertBarberPlan, type Service, type InsertService, type Appointment, type InsertAppointment, type PaymentGateway, type InsertPaymentGateway, type AccountingTransaction, type InsertAccountingTransaction, type SupportTicket, type InsertSupportTicket, type Faq, type InsertFaq, type WhatsappInstance, type InsertWhatsappInstance } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -1090,4 +1093,306 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Database connection setup
+const sql = neon(process.env.DATABASE_URL!);
+const db = drizzle(sql);
+
+export class PostgresStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, id));
+    return result[0];
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.username, username));
+    return result[0];
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const result = await db.insert(users).values(insertUser).returning();
+    return result[0];
+  }
+
+  // Staff methods
+  async getAllStaff(): Promise<Staff[]> {
+    return await db.select().from(staff);
+  }
+
+  async getStaff(id: number): Promise<Staff | undefined> {
+    const result = await db.select().from(staff).where(eq(staff.id, id));
+    return result[0];
+  }
+
+  async createStaff(insertStaff: InsertStaff): Promise<Staff> {
+    const result = await db.insert(staff).values(insertStaff).returning();
+    return result[0];
+  }
+
+  async updateStaff(id: number, updateData: Partial<InsertStaff>): Promise<Staff | undefined> {
+    const result = await db.update(staff).set(updateData).where(eq(staff.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteStaff(id: number): Promise<boolean> {
+    const result = await db.delete(staff).where(eq(staff.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Client methods
+  async getAllClients(): Promise<Client[]> {
+    return await db.select().from(clients);
+  }
+
+  async getClient(id: number): Promise<Client | undefined> {
+    const result = await db.select().from(clients).where(eq(clients.id, id));
+    return result[0];
+  }
+
+  async createClient(insertClient: InsertClient): Promise<Client> {
+    const result = await db.insert(clients).values(insertClient).returning();
+    return result[0];
+  }
+
+  async updateClient(id: number, updateData: Partial<InsertClient>): Promise<Client | undefined> {
+    const result = await db.update(clients).set(updateData).where(eq(clients.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteClient(id: number): Promise<boolean> {
+    const result = await db.delete(clients).where(eq(clients.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Barber Plan methods
+  async getAllBarberPlans(): Promise<BarberPlan[]> {
+    return await db.select().from(barberPlans);
+  }
+
+  async getBarberPlan(id: number): Promise<BarberPlan | undefined> {
+    const result = await db.select().from(barberPlans).where(eq(barberPlans.id, id));
+    return result[0];
+  }
+
+  async createBarberPlan(insertPlan: InsertBarberPlan): Promise<BarberPlan> {
+    const result = await db.insert(barberPlans).values(insertPlan).returning();
+    return result[0];
+  }
+
+  async updateBarberPlan(id: number, updateData: Partial<InsertBarberPlan>): Promise<BarberPlan | undefined> {
+    const result = await db.update(barberPlans).set(updateData).where(eq(barberPlans.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteBarberPlan(id: number): Promise<boolean> {
+    const result = await db.delete(barberPlans).where(eq(barberPlans.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Service methods
+  async getAllServices(): Promise<Service[]> {
+    return await db.select().from(services);
+  }
+
+  async getService(id: number): Promise<Service | undefined> {
+    const result = await db.select().from(services).where(eq(services.id, id));
+    return result[0];
+  }
+
+  async createService(insertService: InsertService): Promise<Service> {
+    const result = await db.insert(services).values(insertService).returning();
+    return result[0];
+  }
+
+  async updateService(id: number, updateData: Partial<InsertService>): Promise<Service | undefined> {
+    const result = await db.update(services).set(updateData).where(eq(services.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteService(id: number): Promise<boolean> {
+    const result = await db.delete(services).where(eq(services.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Appointment methods
+  async getAllAppointments(): Promise<Appointment[]> {
+    return await db.select().from(appointments);
+  }
+
+  async getAppointment(id: number): Promise<Appointment | undefined> {
+    const result = await db.select().from(appointments).where(eq(appointments.id, id));
+    return result[0];
+  }
+
+  async createAppointment(insertAppointment: InsertAppointment): Promise<Appointment> {
+    const result = await db.insert(appointments).values(insertAppointment).returning();
+    return result[0];
+  }
+
+  async updateAppointment(id: number, updateData: Partial<InsertAppointment>): Promise<Appointment | undefined> {
+    const result = await db.update(appointments).set(updateData).where(eq(appointments.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteAppointment(id: number): Promise<boolean> {
+    const result = await db.delete(appointments).where(eq(appointments.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Payment Gateway methods
+  async getAllPaymentGateways(): Promise<PaymentGateway[]> {
+    return await db.select().from(paymentGateways);
+  }
+
+  async getPaymentGateway(id: number): Promise<PaymentGateway | undefined> {
+    const result = await db.select().from(paymentGateways).where(eq(paymentGateways.id, id));
+    return result[0];
+  }
+
+  async createPaymentGateway(insertGateway: InsertPaymentGateway): Promise<PaymentGateway> {
+    const result = await db.insert(paymentGateways).values(insertGateway).returning();
+    return result[0];
+  }
+
+  async updatePaymentGateway(id: number, updateData: Partial<InsertPaymentGateway>): Promise<PaymentGateway | undefined> {
+    const result = await db.update(paymentGateways).set(updateData).where(eq(paymentGateways.id, id)).returning();
+    return result[0];
+  }
+
+  async deletePaymentGateway(id: number): Promise<boolean> {
+    const result = await db.delete(paymentGateways).where(eq(paymentGateways.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Accounting Transaction methods
+  async getAllAccountingTransactions(): Promise<AccountingTransaction[]> {
+    return await db.select().from(accountingTransactions);
+  }
+
+  async getAccountingTransaction(id: number): Promise<AccountingTransaction | undefined> {
+    const result = await db.select().from(accountingTransactions).where(eq(accountingTransactions.id, id));
+    return result[0];
+  }
+
+  async createAccountingTransaction(insertTransaction: InsertAccountingTransaction): Promise<AccountingTransaction> {
+    const result = await db.insert(accountingTransactions).values(insertTransaction).returning();
+    return result[0];
+  }
+
+  async updateAccountingTransaction(id: number, updateData: Partial<InsertAccountingTransaction>): Promise<AccountingTransaction | undefined> {
+    const result = await db.update(accountingTransactions).set(updateData).where(eq(accountingTransactions.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteAccountingTransaction(id: number): Promise<boolean> {
+    const result = await db.delete(accountingTransactions).where(eq(accountingTransactions.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Support Ticket methods
+  async getAllSupportTickets(): Promise<SupportTicket[]> {
+    return await db.select().from(supportTickets);
+  }
+
+  async getSupportTicket(id: number): Promise<SupportTicket | undefined> {
+    const result = await db.select().from(supportTickets).where(eq(supportTickets.id, id));
+    return result[0];
+  }
+
+  async createSupportTicket(insertTicket: InsertSupportTicket): Promise<SupportTicket> {
+    const result = await db.insert(supportTickets).values(insertTicket).returning();
+    return result[0];
+  }
+
+  async updateSupportTicket(id: number, updateData: Partial<InsertSupportTicket>): Promise<SupportTicket | undefined> {
+    const result = await db.update(supportTickets).set(updateData).where(eq(supportTickets.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteSupportTicket(id: number): Promise<boolean> {
+    const result = await db.delete(supportTickets).where(eq(supportTickets.id, id));
+    return result.rowCount > 0;
+  }
+
+  // FAQ methods
+  async getAllFaqs(): Promise<Faq[]> {
+    return await db.select().from(faqs);
+  }
+
+  async getFaq(id: number): Promise<Faq | undefined> {
+    const result = await db.select().from(faqs).where(eq(faqs.id, id));
+    return result[0];
+  }
+
+  async createFaq(insertFaq: InsertFaq): Promise<Faq> {
+    const result = await db.insert(faqs).values(insertFaq).returning();
+    return result[0];
+  }
+
+  async updateFaq(id: number, updateData: Partial<InsertFaq>): Promise<Faq | undefined> {
+    const result = await db.update(faqs).set(updateData).where(eq(faqs.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteFaq(id: number): Promise<boolean> {
+    const result = await db.delete(faqs).where(eq(faqs.id, id));
+    return result.rowCount > 0;
+  }
+
+  // WhatsApp Instance methods
+  async getAllWhatsappInstances(): Promise<WhatsappInstance[]> {
+    return await db.select().from(whatsappInstances);
+  }
+
+  async getWhatsappInstance(id: number): Promise<WhatsappInstance | undefined> {
+    const result = await db.select().from(whatsappInstances).where(eq(whatsappInstances.id, id));
+    return result[0];
+  }
+
+  async createWhatsappInstance(insertInstance: InsertWhatsappInstance): Promise<WhatsappInstance> {
+    const result = await db.insert(whatsappInstances).values(insertInstance).returning();
+    return result[0];
+  }
+
+  async updateWhatsappInstance(id: number, updateData: Partial<InsertWhatsappInstance>): Promise<WhatsappInstance | undefined> {
+    const result = await db.update(whatsappInstances).set(updateData).where(eq(whatsappInstances.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteWhatsappInstance(id: number): Promise<boolean> {
+    const result = await db.delete(whatsappInstances).where(eq(whatsappInstances.id, id));
+    return result.rowCount > 0;
+  }
+
+  async generateQrCode(id: number): Promise<string | null> {
+    const instance = await this.getWhatsappInstance(id);
+    if (!instance) return null;
+
+    const qrCodeData = `whatsapp://qr/${instance.phone_number}_${Date.now()}`;
+    
+    await db.update(whatsappInstances).set({
+      status: "connecting",
+      qr_code: qrCodeData,
+      updated_at: new Date()
+    }).where(eq(whatsappInstances.id, id));
+    
+    return qrCodeData;
+  }
+
+  async connectInstance(id: number, sessionId: string): Promise<boolean> {
+    const instance = await this.getWhatsappInstance(id);
+    if (!instance) return false;
+
+    await db.update(whatsappInstances).set({
+      status: "connected",
+      session_id: sessionId,
+      qr_code: null,
+      last_seen: new Date(),
+      updated_at: new Date()
+    }).where(eq(whatsappInstances.id, id));
+
+    return true;
+  }
+}
+
+// Use PostgreSQL storage instead of memory storage
+export const storage = new PostgresStorage();
