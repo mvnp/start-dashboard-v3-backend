@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Staff } from "@shared/schema";
+import { Staff, Business } from "@shared/schema";
 
 interface StaffFormData {
   username: string;
@@ -56,13 +56,18 @@ export default function StaffForm() {
     role: "",
     hire_date: "",
     salary: 0,
-    business_id: 1,
+    business_id: 0,
   });
 
   const { data: staffMember, isLoading } = useQuery({
     queryKey: ["/api/staff", staffId],
     enabled: isEdit && !!staffId,
     select: (data: Staff) => data,
+  });
+
+  const { data: businesses } = useQuery({
+    queryKey: ["/api/businesses"],
+    select: (data: Business[]) => data,
   });
 
   const createStaffMutation = useMutation({
@@ -268,6 +273,22 @@ export default function StaffForm() {
                   onChange={(e) => handleInputChange('tax_id', e.target.value)}
                   required
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="business_id">Business</Label>
+                <Select onValueChange={(value) => handleInputChange('business_id', parseInt(value))} value={formData.business_id.toString()}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select business" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {businesses?.map((business) => (
+                      <SelectItem key={business.id} value={business.id.toString()}>
+                        {business.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
