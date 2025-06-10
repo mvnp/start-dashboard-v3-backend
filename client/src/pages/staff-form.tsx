@@ -23,7 +23,7 @@ interface StaffFormData {
   email: string;
   phone: string;
   tax_id: string;
-  role: string;
+  role_id: number;
   hire_date: string;
   salary: number;
   business_id: number;
@@ -44,7 +44,7 @@ export default function StaffForm() {
     email: "",
     phone: "",
     tax_id: "",
-    role: "",
+    role_id: 0,
     hire_date: "",
     salary: 0,
     business_id: 0,
@@ -113,7 +113,7 @@ export default function StaffForm() {
         email: "",
         phone: staffMember.phone || "",
         tax_id: staffMember.tax_id || "",
-        role: "collaborator",
+        role_id: 3, // Default to employee role
         hire_date: staffMember.hire_date || "",
         salary: Number(staffMember.salary) || 0,
         business_id: 0,
@@ -143,7 +143,7 @@ export default function StaffForm() {
   const handleInputChange = (field: keyof StaffFormData, value: string | number) => {
     setFormData(prev => ({
       ...prev,
-      [field]: field === 'salary' || field === 'business_id' 
+      [field]: field === 'salary' || field === 'business_id' || field === 'role_id'
         ? (typeof value === 'string' ? parseInt(value) || 0 : value)
         : value
     }));
@@ -274,14 +274,14 @@ export default function StaffForm() {
               </div>
 
               <div>
-                <Label htmlFor="role">Role</Label>
-                <Select onValueChange={(value) => handleInputChange('role', value)} value={formData.role}>
+                <Label htmlFor="role_id">Role</Label>
+                <Select onValueChange={(value) => handleInputChange('role_id', Number(value))} value={formData.role_id?.toString()}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select staff role" />
                   </SelectTrigger>
                   <SelectContent>
                     {roles?.map((role) => (
-                      <SelectItem key={role.id} value={role.type}>
+                      <SelectItem key={role.id} value={role.id.toString()}>
                         {role.type.charAt(0).toUpperCase() + role.type.slice(1).replace('-', ' ')}
                       </SelectItem>
                     ))}
