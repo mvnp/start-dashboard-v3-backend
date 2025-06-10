@@ -15,36 +15,20 @@ async function seedDatabase() {
       last_name: "Martinez",
       email: "john@barbershop.com",
       phone: "+1234567890",
-      position: "Senior Barber",
+      tax_id: "12345678901",
+      role: "Senior Barber",
       hire_date: "2022-01-15",
-      is_active: true,
-      schedule: JSON.stringify({
-        monday: ["09:00", "17:00"],
-        tuesday: ["09:00", "17:00"],
-        wednesday: ["09:00", "17:00"],
-        thursday: ["09:00", "17:00"],
-        friday: ["09:00", "17:00"],
-        saturday: ["08:00", "16:00"]
-      }),
-      commission_rate: 0.60
+      salary: 4500
     },
     {
       first_name: "Maria",
       last_name: "Rodriguez",
       email: "maria@barbershop.com",
       phone: "+1234567891",
-      position: "Master Barber",
+      tax_id: "10987654321",
+      role: "Master Barber",
       hire_date: "2021-08-20",
-      is_active: true,
-      schedule: JSON.stringify({
-        tuesday: ["10:00", "18:00"],
-        wednesday: ["10:00", "18:00"],
-        thursday: ["10:00", "18:00"],
-        friday: ["10:00", "18:00"],
-        saturday: ["09:00", "17:00"],
-        sunday: ["10:00", "16:00"]
-      }),
-      commission_rate: 0.65
+      salary: 5200
     }
   ]).returning();
 
@@ -55,28 +39,18 @@ async function seedDatabase() {
       last_name: "Wilson",
       email: "david.wilson@email.com",
       phone: "+1555123456",
-      date_of_birth: "1985-03-15",
-      address: "123 Main St, City, State 12345",
-      preferences: JSON.stringify({
-        preferred_barber: "John Martinez",
-        hair_type: "thick",
-        preferred_time: "morning"
-      }),
-      notes: "Regular customer, prefers classic cuts"
+      tax_id: "98765432100",
+      type: "individual",
+      address: "123 Main St, City, State 12345"
     },
     {
       first_name: "Michael",
       last_name: "Johnson",
       email: "m.johnson@email.com",
       phone: "+1555123457",
-      date_of_birth: "1990-07-22",
-      address: "456 Oak Ave, City, State 12345",
-      preferences: JSON.stringify({
-        preferred_barber: "Maria Rodriguez",
-        hair_type: "curly",
-        preferred_time: "afternoon"
-      }),
-      notes: "Likes modern styles"
+      tax_id: "11223344556",
+      type: "individual",
+      address: "456 Oak Ave, City, State 12345"
     }
   ]).returning();
 
@@ -86,25 +60,22 @@ async function seedDatabase() {
       name: "Classic Haircut",
       description: "Traditional men's haircut with scissors and clipper",
       duration: 30,
-      price: 25.00,
-      staff_id: staffMembers[0].id,
-      is_active: true
+      price: 2500, // Price in cents
+      staff_id: staffMembers[0].id
     },
     {
       name: "Beard Trim",
       description: "Professional beard trimming and shaping",
       duration: 20,
-      price: 15.00,
-      staff_id: staffMembers[0].id,
-      is_active: true
+      price: 1500, // Price in cents
+      staff_id: staffMembers[0].id
     },
     {
       name: "Hot Towel Shave",
       description: "Traditional hot towel shave with straight razor",
       duration: 45,
-      price: 35.00,
-      staff_id: staffMembers[1].id,
-      is_active: true
+      price: 3500, // Price in cents
+      staff_id: staffMembers[1].id
     }
   ]).returning();
 
@@ -135,37 +106,24 @@ async function seedDatabase() {
     {
       title: "Basic Plan",
       subtitle: "Perfect for new barbers",
-      description: "Essential tools and training for starting your barbering career",
-      price: 99.99,
-      billing_cycle: "monthly",
-      features: JSON.stringify([
-        "Basic training materials",
-        "Essential tools included",
-        "Email support",
-        "Monthly progress tracking"
-      ]),
-      is_popular: false,
-      max_clients: 50,
-      includes_tools: true,
-      training_hours: 20
+      benefits: ["Basic training materials", "Essential tools included", "Email support"],
+      image1: "/images/basic-plan.jpg",
+      image2: "/images/basic-tools.jpg",
+      price1m: 9999,
+      price3m: 27999,
+      price12m: 99999,
+      payment_link: "https://payment.example.com/basic"
     },
     {
       title: "Professional Plan",
       subtitle: "For experienced barbers",
-      description: "Advanced training and premium tools for professional barbers",
-      price: 199.99,
-      billing_cycle: "monthly",
-      features: JSON.stringify([
-        "Advanced training modules",
-        "Premium tool set",
-        "Priority support",
-        "Unlimited clients",
-        "Business management tools"
-      ]),
-      is_popular: true,
-      max_clients: 200,
-      includes_tools: true,
-      training_hours: 50
+      benefits: ["Advanced training modules", "Premium tool set", "Priority support", "Business management tools"],
+      image1: "/images/pro-plan.jpg",
+      image2: "/images/pro-tools.jpg",
+      price1m: 19999,
+      price3m: 54999,
+      price12m: 199999,
+      payment_link: "https://payment.example.com/professional"
     }
   ]);
 
@@ -199,28 +157,26 @@ async function seedDatabase() {
       type: "revenue",
       category: "Haircut Services",
       description: "Classic haircut service payment",
-      amount: 25.00,
+      amount: 2500,
       payment_method: "cash",
       transaction_date: "2024-06-10",
       staff_id: staffMembers[0].id,
       client_id: clientList[0].id,
       notes: "Cash payment received",
-      reference_id: "TXN001",
-      tax_amount: 2.25,
+      reference_number: "TXN001",
       is_recurring: false
     },
     {
       type: "expense",
       category: "Supplies",
       description: "Hair cutting tools and supplies",
-      amount: 150.00,
+      amount: 15000,
       payment_method: "credit_card",
       transaction_date: "2024-06-05",
       staff_id: staffMembers[1].id,
       client_id: null,
       notes: "Monthly supply purchase",
-      reference_id: "EXP001",
-      tax_amount: 13.50,
+      reference_number: "EXP001",
       is_recurring: true
     }
   ]);
@@ -231,25 +187,25 @@ async function seedDatabase() {
       title: "Unable to book appointment",
       description: "Customer experiencing issues with the online booking system",
       category: "Technical",
-      status: "open",
       priority: "medium",
+      status: "open",
       client_email: "customer@email.com",
       client_name: "Jane Smith",
       assigned_staff_id: staffMembers[0].id,
       resolution_notes: null,
-      attachments: null
+      attachments: []
     },
     {
       title: "Payment processing error",
       description: "Credit card payment failed during checkout",
       category: "Payment",
-      status: "resolved",
       priority: "high",
+      status: "resolved",
       client_email: "john.doe@email.com",
       client_name: "John Doe",
       assigned_staff_id: staffMembers[1].id,
       resolution_notes: "Payment gateway issue resolved, customer charged successfully",
-      attachments: JSON.stringify(["payment_log.txt"])
+      attachments: ["payment_log.txt"]
     }
   ]);
 
@@ -311,7 +267,7 @@ async function seedDatabase() {
 }
 
 // Run seeding if this file is executed directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   seedDatabase().catch(console.error);
 }
 
