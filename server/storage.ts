@@ -285,6 +285,8 @@ class PostgresStorage implements IStorage {
   }
 
   async getPersonsByRolesAndBusiness(roleIds: number[], businessIds: number[]): Promise<Person[]> {
+    console.log("DEBUG - getPersonsByRolesAndBusiness called with roles:", roleIds, "businesses:", businessIds);
+    
     // Build OR condition for multiple roles
     const roleConditions = roleIds.map(roleId => eq(users_roles.role_id, roleId));
     const roleWhereCondition = roleConditions.length === 1 
@@ -317,6 +319,7 @@ class PostgresStorage implements IStorage {
       .innerJoin(users_business, eq(users.id, users_business.user_id))
       .where(and(roleWhereCondition, businessWhereCondition));
     
+    console.log("DEBUG - getPersonsByRolesAndBusiness result count:", result.length);
     return result;
   }
 

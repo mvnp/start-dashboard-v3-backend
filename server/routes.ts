@@ -186,13 +186,17 @@ export function registerRoutes(app: Express): void {
       }
 
       let persons;
+      console.log("DEBUG - Staff route: userData.roleId =", userData.roleId, "businessIds =", userData.businessIds);
       // Super Admin (role ID: 1) can see all staff across all businesses
       if (userData.roleId === 1) {
+        console.log("DEBUG - Calling getPersonsByRoles for Super Admin");
         persons = await storage.getPersonsByRoles([1, 2, 3]);
       } else {
         // Other users see only staff from their associated businesses
+        console.log("DEBUG - Calling getPersonsByRolesAndBusiness for regular user");
         persons = await storage.getPersonsByRolesAndBusiness([1, 2, 3], userData.businessIds);
       }
+      console.log("DEBUG - Staff route final result count:", persons.length);
       
       res.json(persons);
     } catch (error) {
