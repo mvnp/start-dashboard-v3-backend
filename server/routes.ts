@@ -117,19 +117,25 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/staff", async (req, res) => {
     try {
-      const { email, password, business_id, role, ...personData } = req.body;
+      const { email, business_id, role_id, ...personData } = req.body;
+      console.log("Staff creation request:", { email, business_id, role_id, personData });
       
-      // Only create user if both email and password are provided and not empty
+      // Generate a random password if email is provided
       let userId = null;
-      if (email && email.trim() && password && password.trim()) {
+      if (email && email.trim()) {
         try {
+          const password = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+          console.log("Creating user with email:", email.trim());
           const userData = insertUserSchema.parse({ email: email.trim(), password });
           const user = await storage.createUser(userData);
           userId = user.id;
+          console.log("User created with ID:", userId);
         } catch (userError) {
           console.error("User creation error:", userError);
           return res.status(400).json({ error: "Failed to create user account", details: userError });
         }
+      } else {
+        console.log("No email provided, skipping user creation");
       }
       
       // Create person record with or without user_id
@@ -152,18 +158,13 @@ export function registerRoutes(app: Express): void {
         }
       }
       
-      if (userId && role) {
+      if (userId && role_id) {
         try {
-          // Find role by type to get role_id
-          const roles = await storage.getAllRoles();
-          const selectedRole = roles.find(r => r.type === role);
-          if (selectedRole) {
-            const userRoleData = insertUserRoleSchema.parse({
-              user_id: userId,
-              role_id: selectedRole.id
-            });
-            await storage.createUserRole(userRoleData);
-          }
+          const userRoleData = insertUserRoleSchema.parse({
+            user_id: userId,
+            role_id: typeof role_id === 'string' ? parseInt(role_id) : role_id
+          });
+          await storage.createUserRole(userRoleData);
         } catch (roleError) {
           console.error("User-role relationship creation error:", roleError);
         }
