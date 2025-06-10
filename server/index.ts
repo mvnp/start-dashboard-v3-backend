@@ -21,8 +21,8 @@ app.use(session({
 
 // Auto-login middleware for development (sets session to Super Admin by default)
 app.use(async (req, res, next) => {
-  if (!req.session.userId) {
-    // Set default session to Super Admin (User ID: 1) for development
+  if (!req.session.userId && !req.session.isAuthenticated) {
+    // Set default session to Super Admin (User ID: 1) for development only on first visit
     req.session.userId = 1;
     req.session.userEmail = 'admin@system.com';
     req.session.roleId = 1;
