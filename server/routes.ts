@@ -89,8 +89,8 @@ export function registerRoutes(app: Express): void {
   // Business routes
   app.get("/api/businesses", async (req, res) => {
     try {
-      // Allow testing different users via query parameter: ?user=1 (Super Admin) or ?user=21 (Merchant)
-      const testUserId = req.query.user ? parseInt(req.query.user as string) : 1;
+      // Use session-based authentication (defaults to Super Admin for now)
+      const testUserId = req.session?.userId || 1;
       const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
         return res.status(500).json({ error: "User not found" });
@@ -178,8 +178,8 @@ export function registerRoutes(app: Express): void {
   // Staff routes (using persons table now) - roles 1,2,3 (super-admin, merchant, employee)
   app.get("/api/staff", async (req, res) => {
     try {
-      // Allow testing different users via query parameter: ?user=1 (Super Admin) or ?user=21 (Merchant)
-      const testUserId = req.query.user ? parseInt(req.query.user as string) : 1;
+      // Use session-based authentication (defaults to Super Admin for now)
+      const testUserId = req.session?.userId || 1;
       const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
         return res.status(500).json({ error: "User not found" });
@@ -310,8 +310,8 @@ export function registerRoutes(app: Express): void {
   // Client routes (also using persons table) - role 4 (client)
   app.get("/api/clients", async (req, res) => {
     try {
-      // Allow testing different users via query parameter: ?user=1 (Super Admin) or ?user=21 (Merchant)
-      const testUserId = req.query.user ? parseInt(req.query.user as string) : 1;
+      // Use session-based authentication (defaults to Super Admin for now)
+      const testUserId = req.session?.userId || 1;
       const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
         return res.status(500).json({ error: "User not found" });
@@ -451,6 +451,15 @@ export function registerRoutes(app: Express): void {
   // Service routes
   app.get("/api/services", async (req, res) => {
     try {
+      // Use session-based authentication (defaults to Super Admin for now)
+      const testUserId = req.session?.userId || 1;
+      const userData = await storage.getUserWithRoleAndBusiness(testUserId);
+      if (!userData) {
+        return res.status(500).json({ error: "User not found" });
+      }
+
+      // For now, all authenticated users can see all services
+      // In future iterations, this could be filtered by business
       const services = await storage.getAllServices();
       res.json(services);
     } catch (error) {
