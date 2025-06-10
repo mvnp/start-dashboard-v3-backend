@@ -89,7 +89,29 @@ export function registerRoutes(app: Express): void {
   // Business routes
   app.get("/api/businesses", async (req, res) => {
     try {
-      const businesses = await storage.getAllBusinesses();
+      // Check if user is authenticated and get their business filter
+      if (!req.session?.isAuthenticated || !req.session?.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const userData = await storage.getUserWithRoleAndBusiness(req.session.userId);
+      if (!userData) {
+        return res.status(401).json({ error: "User not found" });
+      }
+
+      let businesses;
+      // Super Admin (role ID: 1) can see all businesses
+      if (userData.roleId === 1) {
+        businesses = await storage.getAllBusinesses();
+      } else {
+        // Other users see only their associated businesses
+        businesses = [];
+        for (const businessId of userData.businessIds) {
+          const business = await storage.getBusiness(businessId);
+          if (business) businesses.push(business);
+        }
+      }
+      
       res.json(businesses);
     } catch (error) {
       console.error("Business fetch error:", error);
