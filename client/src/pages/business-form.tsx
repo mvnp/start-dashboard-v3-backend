@@ -51,17 +51,19 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
   });
 
   // Update form when business data loads
-  if (business && isEditing) {
-    form.reset({
-      user_id: business.user_id,
-      name: business.name,
-      description: business.description || "",
-      address: business.address || "",
-      phone: business.phone || "",
-      email: business.email || "",
-      tax_id: business.tax_id || "",
-    });
-  }
+  React.useEffect(() => {
+    if (business && isEditing) {
+      form.reset({
+        user_id: business.user_id,
+        name: business.name,
+        description: business.description || "",
+        address: business.address || "",
+        phone: business.phone || "",
+        email: business.email || "",
+        tax_id: business.tax_id || "",
+      });
+    }
+  }, [business, isEditing, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: InsertBusiness) => {
