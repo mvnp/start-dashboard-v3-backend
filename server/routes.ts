@@ -117,15 +117,20 @@ export function registerRoutes(app: Express): void {
     try {
       const { email, password, ...personData } = req.body;
       
-      // Create user first if email and password provided
+      // Only create user if both email and password are provided and not empty
       let userId = null;
-      if (email && password) {
-        const userData = insertUserSchema.parse({ email, password });
-        const user = await storage.createUser(userData);
-        userId = user.id;
+      if (email && email.trim() && password && password.trim()) {
+        try {
+          const userData = insertUserSchema.parse({ email: email.trim(), password });
+          const user = await storage.createUser(userData);
+          userId = user.id;
+        } catch (userError) {
+          console.error("User creation error:", userError);
+          return res.status(400).json({ error: "Failed to create user account", details: userError });
+        }
       }
       
-      // Create person record
+      // Create person record with or without user_id
       const validatedPersonData = insertPersonSchema.parse({
         ...personData,
         user_id: userId
@@ -202,15 +207,20 @@ export function registerRoutes(app: Express): void {
     try {
       const { email, password, ...personData } = req.body;
       
-      // Create user first if email and password provided
+      // Only create user if both email and password are provided and not empty
       let userId = null;
-      if (email && password) {
-        const userData = insertUserSchema.parse({ email, password });
-        const user = await storage.createUser(userData);
-        userId = user.id;
+      if (email && email.trim() && password && password.trim()) {
+        try {
+          const userData = insertUserSchema.parse({ email: email.trim(), password });
+          const user = await storage.createUser(userData);
+          userId = user.id;
+        } catch (userError) {
+          console.error("User creation error:", userError);
+          return res.status(400).json({ error: "Failed to create user account", details: userError });
+        }
       }
       
-      // Create person record
+      // Create person record with or without user_id
       const validatedPersonData = insertPersonSchema.parse({
         ...personData,
         user_id: userId
