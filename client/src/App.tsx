@@ -134,11 +134,9 @@ function Router() {
         </Layout>
       </Route>
       <Route path="/businesses/:id/edit">
-        {(params) => (
-          <Layout>
-            <BusinessForm businessId={parseInt(params.id)} />
-          </Layout>
-        )}
+        <Layout>
+          <BusinessForm />
+        </Layout>
       </Route>
 
       <Route path="/plans">

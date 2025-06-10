@@ -16,7 +16,8 @@ import {
   HelpCircle,
   FileText,
   Calculator,
-  HeadphonesIcon
+  HeadphonesIcon,
+  Building2
 } from "lucide-react";
 
 export const navigationItems = [
@@ -25,6 +26,12 @@ export const navigationItems = [
     href: "/",
     icon: Home,
     current: true,
+  },
+  {
+    name: "Businesses",
+    href: "/businesses",
+    icon: Building2,
+    current: false,
   },
   {
     name: "Staff",

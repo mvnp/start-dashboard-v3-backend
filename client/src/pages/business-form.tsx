@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useLocation, useRoute } from "wouter";
 import { Building2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,10 +20,14 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const isEditing = Boolean(businessId);
+  
+  // Extract ID from URL parameters if not passed as prop
+  const [match, params] = useRoute("/businesses/:id/edit");
+  const actualBusinessId = businessId || (params?.id ? parseInt(params.id) : undefined);
+  const isEditing = Boolean(actualBusinessId);
 
   const { data: business } = useQuery<Business>({
-    queryKey: ["/api/businesses", businessId],
+    queryKey: ["/api/businesses", actualBusinessId],
     enabled: isEditing,
   });
 
