@@ -40,7 +40,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
   const form = useForm<InsertBusiness>({
     resolver: zodResolver(insertBusinessSchema),
     defaultValues: {
-      user_id: 1, // Default to first user, should be dynamic based on current user
+      user_id: undefined,
       name: "",
       description: "",
       address: "",
@@ -238,15 +238,21 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                 name="user_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Owner User ID</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="Enter user ID"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    </FormControl>
+                    <FormLabel>Owner (Super Admin)</FormLabel>
+                    <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select super admin owner" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {superAdminUsers?.map((user) => (
+                          <SelectItem key={user.id} value={user.id.toString()}>
+                            {user.email}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
