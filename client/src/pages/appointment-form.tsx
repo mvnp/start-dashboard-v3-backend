@@ -10,11 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Appointment, Staff, Service, Client } from "@shared/schema";
+import { Appointment, Service, Person } from "@shared/schema";
 
 interface AppointmentFormData {
   client_id: number;
-  staff_id: number;
+  user_id: number;
   service_id: number;
   appointment_date: string;
   appointment_time: string;
@@ -31,11 +31,11 @@ export default function AppointmentForm() {
 
   const [formData, setFormData] = useState<AppointmentFormData>({
     client_id: 0,
-    staff_id: 0,
+    user_id: 0,
     service_id: 0,
     appointment_date: "",
     appointment_time: "",
-    status: "scheduled",
+    status: "Scheduled",
     notes: "",
   });
 
@@ -47,7 +47,7 @@ export default function AppointmentForm() {
 
   const { data: staff = [] } = useQuery({
     queryKey: ["/api/staff"],
-    select: (data: Staff[]) => data,
+    select: (data: Person[]) => data,
   });
 
   const { data: services = [] } = useQuery({
@@ -57,7 +57,7 @@ export default function AppointmentForm() {
 
   const { data: clients = [] } = useQuery({
     queryKey: ["/api/clients"],
-    select: (data: Client[]) => data,
+    select: (data: Person[]) => data,
   });
 
   const createMutation = useMutation({
@@ -102,12 +102,12 @@ export default function AppointmentForm() {
   useEffect(() => {
     if (appointmentData && isEdit) {
       setFormData({
-        client_id: appointmentData.client_id,
-        staff_id: appointmentData.staff_id,
-        service_id: appointmentData.service_id,
+        client_id: appointmentData.client_id || 0,
+        user_id: appointmentData.user_id || 0,
+        service_id: appointmentData.service_id || 0,
         appointment_date: appointmentData.appointment_date,
         appointment_time: appointmentData.appointment_time,
-        status: appointmentData.status,
+        status: appointmentData.status || "Scheduled",
         notes: appointmentData.notes || "",
       });
     }
@@ -125,7 +125,7 @@ export default function AppointmentForm() {
       return;
     }
 
-    if (formData.staff_id === 0) {
+    if (formData.user_id === 0) {
       toast({
         title: "Error",
         description: "Please select a staff member",
