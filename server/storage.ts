@@ -30,7 +30,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUsersByRole(roleType: string): Promise<User[]>;
-  getUserWithRoleAndBusiness(userId: number): Promise<{user: User, roleId: number, businessIds: number[]} | undefined>;
+  getUserWithRoleAndBusiness(userId: number): Promise<{user: User, roleId: number, businessIds: number[], isSuperAdmin: boolean} | undefined>;
   authenticateUser(email: string, password: string): Promise<{user: User, roleId: number, businessIds: number[]} | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
@@ -167,7 +167,7 @@ class PostgresStorage implements IStorage {
     return result.rowCount > 0;
   }
 
-  async getUserWithRoleAndBusiness(userId: number): Promise<{user: User, roleId: number, businessIds: number[]} | undefined> {
+  async getUserWithRoleAndBusiness(userId: number): Promise<{user: User, roleId: number, businessIds: number[], isSuperAdmin: boolean} | undefined> {
     const userResult = await this.db.select().from(users).where(eq(users.id, userId));
     if (!userResult[0]) return undefined;
 
@@ -181,10 +181,13 @@ class PostgresStorage implements IStorage {
       .from(users_business)
       .where(eq(users_business.user_id, userId));
 
+    const roleId = roleResult[0]?.roleId || 0;
+    
     return {
       user: userResult[0],
-      roleId: roleResult[0]?.roleId || 0,
-      businessIds: businessResult.map(b => b.businessId).filter((id): id is number => id !== null)
+      roleId,
+      businessIds: businessResult.map(b => b.businessId).filter((id): id is number => id !== null),
+      isSuperAdmin: roleId === 1
     };
   }
 
