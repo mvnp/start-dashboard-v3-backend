@@ -459,73 +459,84 @@ export function registerRoutes(app: Express): void {
       if (!person) {
         return res.status(404).json({ error: "Client not found" });
       }
-      res.json(person);
+
+      // Get associated user email if exists
+      let userEmail = null;
+      if (person.user_id) {
+        const user = await storage.getUser(person.user_id);
+        userEmail = user?.email || null;
+      }
+
+      res.json({
+        ...person,
+        user: userEmail ? { email: userEmail } : null
+      });
     } catch (error) {
       console.error("Client fetch error:", error);
       res.status(500).json({ error: "Failed to fetch client" });
     }
   });
 
-  app.post("/api/clients", async (req, res) => {
+  app.post("/api/clients", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { email, address, business_id, role_id, ...personData } = req.body;
+      const { email, first_name, last_name, phone, tax_id, address } = req.body;
       
-      let userId = null;
-      
-      // If email is provided, create user account with generated password
-      if (email && email.trim()) {
-        try {
-          // Generate a random password (8 characters)
-          const generatedPassword = Math.random().toString(36).slice(-8);
-          
-          const userData = insertUserSchema.parse({ 
-            email: email.trim(), 
-            password: generatedPassword 
-          });
-          const user = await storage.createUser(userData);
-          userId = user.id;
-        } catch (userError) {
-          console.error("User creation error:", userError);
-          return res.status(400).json({ error: "Failed to create user account", details: userError });
-        }
+      // Validate required fields
+      if (!first_name || !last_name || !email || !phone) {
+        return res.status(400).json({ 
+          error: "Missing required fields",
+          details: [
+            { path: ["first_name"], message: "First name is required" },
+            { path: ["last_name"], message: "Last name is required" },
+            { path: ["email"], message: "Email is required" },
+            { path: ["phone"], message: "Phone is required" }
+          ].filter(err => !req.body[err.path[0]])
+        });
       }
+
+      // Check email uniqueness
+      const existingUser = await storage.getUserByEmail(email.trim());
+      if (existingUser) {
+        return res.status(400).json({
+          error: "Email already exists",
+          details: [{ path: ["email"], message: "This email address is already registered" }]
+        });
+      }
+
+      // Get user's business context
+      const businessId = req.user?.businessIds?.[0] || 1;
       
-      // Filter out fields that don't exist in the new schema and create person record
+      // Create user account
+      const generatedPassword = Math.random().toString(36).slice(-8);
+      const userData = insertUserSchema.parse({ 
+        email: email.trim(), 
+        password: generatedPassword 
+      });
+      const user = await storage.createUser(userData);
+
+      // Create person record with address
       const validatedPersonData = insertPersonSchema.parse({
-        first_name: personData.first_name,
-        last_name: personData.last_name,
-        phone: personData.phone,
-        tax_id: personData.tax_id,
-        user_id: userId
+        first_name: first_name.trim(),
+        last_name: last_name.trim(),
+        phone: phone.trim(),
+        tax_id: tax_id?.trim() || null,
+        address: address?.trim() || null,
+        user_id: user.id
       });
       const person = await storage.createPerson(validatedPersonData);
-      
-      // Create junction table relationships if user was created and business/role selected
-      if (userId && business_id) {
-        try {
-          const userBusinessData = insertUserBusinessSchema.parse({
-            user_id: userId,
-            business_id: parseInt(business_id)
-          });
-          await storage.createUserBusiness(userBusinessData);
-        } catch (businessError) {
-          console.error("User-business relationship creation error:", businessError);
-        }
-      }
-      
-      if (userId && role_id) {
-        try {
-          const userRoleData = insertUserRoleSchema.parse({
-            user_id: userId,
-            role_id: parseInt(role_id)
-          });
-          await storage.createUserRole(userRoleData);
-        } catch (roleError) {
-          console.error("User-role relationship creation error:", roleError);
-        }
-      }
-      
-      res.status(201).json(person);
+
+      // Create user-business relationship (assign to client role - role 4)
+      await storage.createUserBusiness(insertUserBusinessSchema.parse({
+        user_id: user.id,
+        business_id: businessId
+      }));
+
+      await storage.createUserRole(insertUserRoleSchema.parse({
+        user_id: user.id,
+        role_id: 4 // Client role
+      }));
+
+      res.status(201).json({ ...person, user: { email: user.email } });
     } catch (error) {
       console.error("Client creation error:", error);
       if (error instanceof z.ZodError) {
@@ -535,15 +546,58 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/clients/:id", async (req, res) => {
+  app.put("/api/clients/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const validatedData = insertPersonSchema.partial().parse(req.body);
-      const person = await storage.updatePerson(id, validatedData);
-      if (!person) {
+      const { email, first_name, last_name, phone, tax_id, address } = req.body;
+
+      // Get existing client data
+      const existingClient = await storage.getPerson(id);
+      if (!existingClient) {
         return res.status(404).json({ error: "Client not found" });
       }
-      res.json(person);
+
+      // Validate required fields
+      if (!first_name || !last_name || !email || !phone) {
+        return res.status(400).json({ 
+          error: "Missing required fields",
+          details: [
+            { path: ["first_name"], message: "First name is required" },
+            { path: ["last_name"], message: "Last name is required" },
+            { path: ["email"], message: "Email is required" },
+            { path: ["phone"], message: "Phone is required" }
+          ].filter(err => !req.body[err.path[0]])
+        });
+      }
+
+      // Check email uniqueness (exclude current user)
+      const existingUserWithEmail = await storage.getUserByEmail(email.trim());
+      if (existingUserWithEmail && existingUserWithEmail.id !== existingClient.user_id) {
+        return res.status(400).json({
+          error: "Email already exists",
+          details: [{ path: ["email"], message: "This email address is already registered" }]
+        });
+      }
+
+      // Update person record
+      const validatedPersonData = insertPersonSchema.partial().parse({
+        first_name: first_name.trim(),
+        last_name: last_name.trim(),
+        phone: phone.trim(),
+        tax_id: tax_id?.trim() || null,
+        address: address?.trim() || null,
+      });
+      const updatedPerson = await storage.updatePerson(id, validatedPersonData);
+
+      // Update user email if user exists and email changed
+      if (existingClient.user_id && (!existingUserWithEmail || existingUserWithEmail.email !== email.trim())) {
+        await storage.updateUser(existingClient.user_id, { email: email.trim() });
+      }
+
+      res.json({ 
+        ...updatedPerson, 
+        user: { email: email.trim() }
+      });
     } catch (error) {
       console.error("Client update error:", error);
       if (error instanceof z.ZodError) {
