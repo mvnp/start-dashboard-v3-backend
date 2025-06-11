@@ -21,15 +21,6 @@ export default function WhatsappList() {
     queryKey: ["/api/whatsapp-instances"],
   });
 
-  if (error) {
-    return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4 text-red-600">Error Loading WhatsApp Instances</h1>
-        <p>{JSON.stringify(error)}</p>
-      </div>
-    );
-  }
-
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/whatsapp-instances/${id}`),
     onSuccess: () => {
@@ -69,7 +60,7 @@ export default function WhatsappList() {
   const filteredInstances = (instances || []).filter((instance: WhatsappInstance) => {
     const matchesSearch = 
       instance.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      instance.phone_number.toLowerCase().includes(searchTerm.toLowerCase());
+      (instance.phone_number || '').toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === "all" || instance.status === statusFilter;
     
@@ -113,6 +104,15 @@ export default function WhatsappList() {
 
   const stats = getInstanceStats();
 
+  if (error) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-4 text-red-600">Error Loading WhatsApp Instances</h1>
+        <p>{JSON.stringify(error)}</p>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="p-6">
@@ -124,8 +124,6 @@ export default function WhatsappList() {
       </div>
     );
   }
-
-
 
   return (
     <div className="p-6 w-full">
