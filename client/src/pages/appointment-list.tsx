@@ -263,7 +263,8 @@ export default function AppointmentList() {
                 type="date"
                 value={endDate}
                 onChange={(e) => {
-                  setEndDate(e.target.value);
+                  const selectedDate = e.target.value;
+                  setEndDate(selectedDate);
                   setTodayFilter(false);
                   setCurrentPage(1);
                 }}
