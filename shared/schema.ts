@@ -42,6 +42,7 @@ export const persons = pgTable("persons", {
   last_name: text("last_name").notNull(),
   phone: text("phone"),
   tax_id: text("tax_id"),
+  address: text("address"),
   hire_date: date("hire_date"),
   salary: decimal("salary", { precision: 10, scale: 2 }),
   created_at: timestamp("created_at").defaultNow(),

@@ -113,49 +113,18 @@ export default function ClientForm() {
       setFormData({
         first_name: clientMember.first_name || "",
         last_name: clientMember.last_name || "",
-        email: clientMember.user?.email || "",
+        email: "",
         phone: clientMember.phone || "",
         tax_id: clientMember.tax_id || "",
-        address: clientMember.address || "",
+        address: "",
+        business_id: "",
+        role_id: "",
       });
     }
   }, [clientMember, isEdit]);
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-    
-    // Required fields validation
-    if (!formData.first_name.trim()) {
-      newErrors.first_name = "First name is required";
-    }
-    if (!formData.last_name.trim()) {
-      newErrors.last_name = "Last name is required";
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else {
-      // Email format validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        newErrors.email = "Please enter a valid email address";
-      }
-    }
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone is required";
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setErrors({});
-    
-    if (!validateForm()) {
-      return;
-    }
-    
     if (isEdit) {
       updateClientMutation.mutate(formData);
     } else {
@@ -168,14 +137,6 @@ export default function ClientForm() {
       ...prev,
       [field]: value
     }));
-    
-    // Clear error for this field when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ""
-      }));
-    }
   };
 
   const isSubmitting = createClientMutation.isPending || updateClientMutation.isPending;
@@ -230,82 +191,105 @@ export default function ClientForm() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="first_name">First Name *</Label>
+                <Label htmlFor="first_name">First Name</Label>
                 <Input
                   id="first_name"
                   placeholder="Enter first name"
                   value={formData.first_name}
                   onChange={(e) => handleInputChange('first_name', e.target.value)}
-                  className={errors.first_name ? "border-red-500" : ""}
+                  required
                 />
-                {errors.first_name && (
-                  <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>
-                )}
               </div>
 
               <div>
-                <Label htmlFor="last_name">Last Name *</Label>
+                <Label htmlFor="last_name">Last Name</Label>
                 <Input
                   id="last_name"
                   placeholder="Enter last name"
                   value={formData.last_name}
                   onChange={(e) => handleInputChange('last_name', e.target.value)}
-                  className={errors.last_name ? "border-red-500" : ""}
+                  required
                 />
-                {errors.last_name && (
-                  <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>
-                )}
               </div>
 
               <div>
-                <Label htmlFor="email">Email Address *</Label>
+                <Label htmlFor="email">Email Address</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="Enter email address"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={errors.email ? "border-red-500" : ""}
+                  required
                 />
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                )}
               </div>
 
               <div>
-                <Label htmlFor="phone">Phone Number *</Label>
+                <Label htmlFor="phone">Phone Number</Label>
                 <Input
                   id="phone"
                   placeholder="Enter phone number"
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
-                  className={errors.phone ? "border-red-500" : ""}
+                  required
                 />
-                {errors.phone && (
-                  <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-                )}
               </div>
 
               <div>
                 <Label htmlFor="tax_id">Tax ID</Label>
                 <Input
                   id="tax_id"
-                  placeholder="Enter tax identification number (optional)"
-                  value={formData.tax_id || ""}
+                  placeholder="Enter tax identification number"
+                  value={formData.tax_id}
                   onChange={(e) => handleInputChange('tax_id', e.target.value)}
+                  required
+                />
+              </div>
+
+
+
+              <div className="md:col-span-2">
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  placeholder="Enter full address"
+                  value={formData.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  required
                 />
               </div>
 
               <div>
-                <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  placeholder="Enter address (optional)"
-                  value={formData.address || ""}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                />
+                <Label htmlFor="business">Business</Label>
+                <Select onValueChange={(value) => handleInputChange('business_id', value)} value={formData.business_id}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select business" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {businesses?.map((business) => (
+                      <SelectItem key={business.id} value={business.id.toString()}>
+                        {business.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
+              <div>
+                <Label htmlFor="role">Role</Label>
+                <Select onValueChange={(value) => handleInputChange('role_id', value)} value={formData.role_id}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles?.map((role) => (
+                      <SelectItem key={role.id} value={role.id.toString()}>
+                        {role.type.charAt(0).toUpperCase() + role.type.slice(1).replace('-', ' ')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="flex justify-end space-x-4 pt-6 border-t">
