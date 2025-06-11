@@ -211,7 +211,7 @@ export default function AppointmentList() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Status Filter */}
             <div className="space-y-2">
               <Label>Status</Label>
@@ -242,7 +242,7 @@ export default function AppointmentList() {
               </Button>
             </div>
 
-            {/* Date Range */}
+            {/* Start Date */}
             <div className="space-y-2">
               <Label>Start Date</Label>
               <Input
@@ -257,6 +257,7 @@ export default function AppointmentList() {
               />
             </div>
 
+            {/* End Date */}
             <div className="space-y-2">
               <Label>End Date</Label>
               <Input
@@ -270,12 +271,14 @@ export default function AppointmentList() {
                 }}
               />
             </div>
-          </div>
 
-          <div className="flex gap-2 mt-4">
-            <Button variant="outline" onClick={resetFilters}>
-              Clear Filters
-            </Button>
+            {/* Clear Filters */}
+            <div className="space-y-2">
+              <Label className="invisible">Clear</Label>
+              <Button variant="outline" onClick={resetFilters} className="w-full">
+                Clear Filters
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
