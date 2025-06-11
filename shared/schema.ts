@@ -104,7 +104,7 @@ export const appointments = pgTable("appointments", {
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
   deleted_at: timestamp("deleted_at"),
-  employee_id: integer("employee_id").references(() => users.id),
+  user: integer("user").references(() => users.id),
   client_id: integer("client_id").references(() => users.id),
   business_id: integer("business_id").references(() => businesses.id),
   service_id: integer("service_id").references(() => services.id),

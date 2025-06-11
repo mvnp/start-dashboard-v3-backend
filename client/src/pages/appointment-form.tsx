@@ -14,7 +14,7 @@ import { Appointment, Service, Person } from "@shared/schema";
 
 interface AppointmentFormData {
   client_id: number;
-  employee_id: number;
+  user: number;
   service_id: number;
   appointment_date: string;
   appointment_time: string;
@@ -31,7 +31,7 @@ export default function AppointmentForm() {
 
   const [formData, setFormData] = useState<AppointmentFormData>({
     client_id: 0,
-    employee_id: 0,
+    user: 0,
     service_id: 0,
     appointment_date: "",
     appointment_time: "",
@@ -103,7 +103,7 @@ export default function AppointmentForm() {
     if (appointmentData && isEdit) {
       setFormData({
         client_id: appointmentData.client_id || 0,
-        employee_id: appointmentData.employee_id || 0,
+        user: appointmentData.user || 0,
         service_id: appointmentData.service_id || 0,
         appointment_date: appointmentData.appointment_date,
         appointment_time: appointmentData.appointment_time,
