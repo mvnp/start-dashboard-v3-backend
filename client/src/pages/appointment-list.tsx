@@ -65,9 +65,9 @@ export default function AppointmentList() {
     },
   });
 
-  const getStaffName = (userId: number | null) => {
-    if (!userId) return 'Unknown Staff';
-    const staffMember = staff.find(s => s.user_id === userId);
+  const getStaffName = (employeeId: number | null) => {
+    if (!employeeId) return 'Unknown Staff';
+    const staffMember = staff.find(s => s.user_id === employeeId);
     return staffMember ? `${staffMember.first_name} ${staffMember.last_name}` : 'Unknown Staff';
   };
 

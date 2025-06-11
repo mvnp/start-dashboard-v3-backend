@@ -14,7 +14,7 @@ import { Appointment, Service, Person } from "@shared/schema";
 
 interface AppointmentFormData {
   client_id: number;
-  user_id: number;
+  employee_id: number;
   service_id: number;
   appointment_date: string;
   appointment_time: string;
@@ -31,7 +31,7 @@ export default function AppointmentForm() {
 
   const [formData, setFormData] = useState<AppointmentFormData>({
     client_id: 0,
-    user_id: 0,
+    employee_id: 0,
     service_id: 0,
     appointment_date: "",
     appointment_time: "",
@@ -103,7 +103,7 @@ export default function AppointmentForm() {
     if (appointmentData && isEdit) {
       setFormData({
         client_id: appointmentData.client_id || 0,
-        user_id: appointmentData.user_id || 0,
+        employee_id: appointmentData.employee_id || 0,
         service_id: appointmentData.service_id || 0,
         appointment_date: appointmentData.appointment_date,
         appointment_time: appointmentData.appointment_time,
@@ -125,7 +125,7 @@ export default function AppointmentForm() {
       return;
     }
 
-    if (formData.user_id === 0) {
+    if (formData.employee_id === 0) {
       toast({
         title: "Error",
         description: "Please select a staff member",
@@ -221,10 +221,10 @@ export default function AppointmentForm() {
               </div>
 
               <div>
-                <Label htmlFor="user_id">Staff Member</Label>
+                <Label htmlFor="employee_id">Staff Member</Label>
                 <Select 
-                  value={formData.user_id ? formData.user_id.toString() : ""} 
-                  onValueChange={(value) => handleInputChange('user_id', parseInt(value))}
+                  value={formData.employee_id ? formData.employee_id.toString() : ""} 
+                  onValueChange={(value) => handleInputChange('employee_id', parseInt(value))}
                   required
                 >
                   <SelectTrigger>
