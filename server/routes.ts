@@ -573,9 +573,14 @@ export function registerRoutes(app: Express): void {
         return res.status(500).json({ error: "User not found" });
       }
 
-      // For now, all authenticated users can see all services
-      // In future iterations, this could be filtered by business
-      const services = await storage.getAllServices();
+      let services;
+      // Super Admin (role ID: 1) can see all services
+      if (userData.roleId === 1) {
+        services = await storage.getAllServices();
+      } else {
+        // Other users see services from their associated businesses + global services
+        services = await storage.getServicesByBusinessIds(userData.businessIds);
+      }
       res.json(services);
     } catch (error) {
       console.error("Service fetch error:", error);
