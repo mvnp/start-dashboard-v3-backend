@@ -185,7 +185,7 @@ export default function AppointmentList() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-purple-600" />
-                  <span className="text-sm text-slate-600">{getStaffName(appointment.user)}</span>
+                  <span className="text-sm text-slate-600">{getStaffName(appointment.user_id)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Settings className="w-4 h-4 text-blue-600" />
