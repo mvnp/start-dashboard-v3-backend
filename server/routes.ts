@@ -338,6 +338,14 @@ export function registerRoutes(app: Express): void {
     try {
       const { email, business_id, role_id, ...personData } = req.body;
       
+      // Check for email uniqueness if email is provided
+      if (email && email.trim()) {
+        const existingUser = await storage.getUserByEmail(email.trim());
+        if (existingUser) {
+          return res.status(400).json({ error: "Email exists on database" });
+        }
+      }
+      
       // Generate a random password if email is provided
       let userId = null;
       if (email && email.trim()) {
@@ -397,7 +405,25 @@ export function registerRoutes(app: Express): void {
   app.put("/api/staff/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const validatedData = insertPersonSchema.partial().parse(req.body);
+      const { email, business_id, role_id, ...personData } = req.body;
+      
+      // Check for email uniqueness if email is being updated
+      if (email && email.trim()) {
+        const existingUser = await storage.getUserByEmail(email.trim());
+        const currentPerson = await storage.getPerson(id);
+        
+        // If email exists and it's not the current person's email, return error
+        if (existingUser && currentPerson && existingUser.id !== currentPerson.user_id) {
+          return res.status(400).json({ error: "Email exists on database" });
+        }
+        
+        // Update user email if person has a user account
+        if (currentPerson && currentPerson.user_id && existingUser) {
+          await storage.updateUser(currentPerson.user_id, { email: email.trim() });
+        }
+      }
+      
+      const validatedData = insertPersonSchema.partial().parse(personData);
       const person = await storage.updatePerson(id, validatedData);
       if (!person) {
         return res.status(404).json({ error: "Staff member not found" });

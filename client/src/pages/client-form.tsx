@@ -99,22 +99,40 @@ export default function ClientForm() {
       });
       setLocation("/clients");
     },
-    onError: (error: any) => {
-      const errorMessage = error?.response?.data?.error || "Failed to create client";
+    onError: async (error: any) => {
+      // Try to extract error from response
+      let errorData = null;
+      try {
+        const response = await error;
+        if (response && !response.ok) {
+          errorData = await response.json();
+        }
+      } catch (e) {
+        // If error parsing fails, handle generic error
+      }
+      
+      // Handle email exists error specifically
+      if (errorData?.error === "Email already exists" || errorData?.error === "Email exists on database") {
+        setErrors({ email: "Email exists on database" });
+        return;
+      }
+      
+      // Handle other validation errors
+      if (errorData?.details) {
+        const validationErrors: Record<string, string> = {};
+        errorData.details.forEach((err: any) => {
+          validationErrors[err.path[0]] = err.message;
+        });
+        setErrors(validationErrors);
+        return;
+      }
+      
+      const errorMessage = errorData?.error || "Failed to create client";
       toast({
         title: "Error",
         description: errorMessage,
         variant: "destructive",
       });
-      
-      // Handle validation errors
-      if (error?.response?.data?.details) {
-        const validationErrors: Record<string, string> = {};
-        error.response.data.details.forEach((err: any) => {
-          validationErrors[err.path[0]] = err.message;
-        });
-        setErrors(validationErrors);
-      }
     },
   });
 
@@ -129,22 +147,40 @@ export default function ClientForm() {
       });
       setLocation("/clients");
     },
-    onError: (error: any) => {
-      const errorMessage = error?.response?.data?.error || "Failed to update client";
+    onError: async (error: any) => {
+      // Try to extract error from response
+      let errorData = null;
+      try {
+        const response = await error;
+        if (response && !response.ok) {
+          errorData = await response.json();
+        }
+      } catch (e) {
+        // If error parsing fails, handle generic error
+      }
+      
+      // Handle email exists error specifically
+      if (errorData?.error === "Email already exists" || errorData?.error === "Email exists on database") {
+        setErrors({ email: "Email exists on database" });
+        return;
+      }
+      
+      // Handle other validation errors
+      if (errorData?.details) {
+        const validationErrors: Record<string, string> = {};
+        errorData.details.forEach((err: any) => {
+          validationErrors[err.path[0]] = err.message;
+        });
+        setErrors(validationErrors);
+        return;
+      }
+      
+      const errorMessage = errorData?.error || "Failed to update client";
       toast({
         title: "Error",
         description: errorMessage,
         variant: "destructive",
       });
-      
-      // Handle validation errors
-      if (error?.response?.data?.details) {
-        const validationErrors: Record<string, string> = {};
-        error.response.data.details.forEach((err: any) => {
-          validationErrors[err.path[0]] = err.message;
-        });
-        setErrors(validationErrors);
-      }
     },
   });
 
