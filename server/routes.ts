@@ -817,6 +817,16 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  app.get("/api/whatsapp-instances", async (req, res) => {
+    try {
+      const instances = await storage.getAllWhatsappInstances();
+      res.json(instances);
+    } catch (error) {
+      console.error("WhatsApp instance fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch WhatsApp instances" });
+    }
+  });
+
   app.post("/api/whatsapp", async (req, res) => {
     try {
       const validatedData = insertWhatsappInstanceSchema.parse(req.body);
