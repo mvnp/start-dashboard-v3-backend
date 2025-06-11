@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
-import { eq, and, or } from "drizzle-orm";
+import { eq, and, or, isNull, inArray } from "drizzle-orm";
 import { 
   users, businesses, persons, roles, users_business, users_roles,
   services, appointments, barber_plans, payment_gateways, payment_gateway_types,
@@ -63,6 +63,7 @@ export interface IStorage {
   // Service methods
   getAllServices(): Promise<Service[]>;
   getService(id: number): Promise<Service | undefined>;
+  getServicesByBusinessIds(businessIds: number[]): Promise<Service[]>;
   createService(service: InsertService): Promise<Service>;
   updateService(id: number, service: Partial<InsertService>): Promise<Service | undefined>;
   deleteService(id: number): Promise<boolean>;
@@ -358,6 +359,14 @@ class PostgresStorage implements IStorage {
   async getService(id: number): Promise<Service | undefined> {
     const result = await this.db.select().from(services).where(eq(services.id, id));
     return result[0];
+  }
+
+  async getServicesByBusinessIds(businessIds: number[]): Promise<Service[]> {
+    // Get all services and filter by business IDs or null business_id (global services)
+    const allServices = await this.db.select().from(services);
+    return allServices.filter(service => 
+      service.business_id === null || (service.business_id && businessIds.includes(service.business_id))
+    );
   }
 
   async createService(insertService: InsertService): Promise<Service> {
