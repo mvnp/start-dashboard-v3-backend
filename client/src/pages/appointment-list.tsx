@@ -95,7 +95,7 @@ export default function AppointmentList() {
   };
 
   const filteredAppointments = appointments.filter(appointment => {
-    const staffName = getStaffName(appointment.user).toLowerCase();
+    const staffName = getStaffName(appointment.user_id).toLowerCase();
     const clientName = getClientName(appointment.client_id).toLowerCase();
     const serviceName = getServiceName(appointment.service_id).toLowerCase();
     const searchLower = searchTerm.toLowerCase();
