@@ -379,9 +379,9 @@ export default function StaffForm() {
               </div>
 
               <div>
-                <Label htmlFor="business_id">Business</Label>
+                <Label htmlFor="business_id">Business *</Label>
                 <Select onValueChange={(value) => handleInputChange('business_id', value)} value={formData.business_id > 0 ? formData.business_id.toString() : ""}>
-                  <SelectTrigger>
+                  <SelectTrigger className={errors.business_id ? "border-red-500" : ""}>
                     <SelectValue placeholder="Select business" />
                   </SelectTrigger>
                   <SelectContent>
@@ -392,12 +392,15 @@ export default function StaffForm() {
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.business_id && (
+                  <p className="text-red-500 text-sm mt-1">{errors.business_id}</p>
+                )}
               </div>
 
               <div>
-                <Label htmlFor="role_id">Role</Label>
+                <Label htmlFor="role_id">Role *</Label>
                 <Select onValueChange={(value) => handleInputChange('role_id', Number(value))} value={formData.role_id?.toString()}>
-                  <SelectTrigger>
+                  <SelectTrigger className={errors.role_id ? "border-red-500" : ""}>
                     <SelectValue placeholder="Select staff role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -408,21 +411,27 @@ export default function StaffForm() {
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.role_id && (
+                  <p className="text-red-500 text-sm mt-1">{errors.role_id}</p>
+                )}
               </div>
 
               <div>
-                <Label htmlFor="hire_date">Hire Date</Label>
+                <Label htmlFor="hire_date">Hire Date *</Label>
                 <Input
                   id="hire_date"
                   type="date"
                   value={formData.hire_date}
                   onChange={(e) => handleInputChange('hire_date', e.target.value)}
-                  required
+                  className={errors.hire_date ? "border-red-500" : ""}
                 />
+                {errors.hire_date && (
+                  <p className="text-red-500 text-sm mt-1">{errors.hire_date}</p>
+                )}
               </div>
 
               <div className="md:col-span-2">
-                <Label htmlFor="salary">Annual Salary (USD)</Label>
+                <Label htmlFor="salary">Annual Salary (USD) *</Label>
                 <Input
                   id="salary"
                   type="number"
@@ -431,8 +440,11 @@ export default function StaffForm() {
                   step="1000"
                   value={formData.salary}
                   onChange={(e) => handleInputChange('salary', e.target.value)}
-                  required
+                  className={errors.salary ? "border-red-500" : ""}
                 />
+                {errors.salary && (
+                  <p className="text-red-500 text-sm mt-1">{errors.salary}</p>
+                )}
               </div>
             </div>
 
