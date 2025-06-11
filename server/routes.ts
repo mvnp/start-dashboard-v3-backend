@@ -607,7 +607,22 @@ export function registerRoutes(app: Express): void {
   // Appointment routes
   app.get("/api/appointments", async (req, res) => {
     try {
-      const appointments = await storage.getAllAppointments();
+      // Allow testing with query parameter or use session
+      const testUserId = req.query.user ? parseInt(req.query.user as string) : (req.session?.userId || 1);
+      
+      const userData = await storage.getUserWithRoleAndBusiness(testUserId);
+      if (!userData) {
+        return res.status(500).json({ error: "User not found" });
+      }
+      
+      let appointments;
+      // Super Admin (role ID: 1) can see all appointments
+      if (userData.roleId === 1) {
+        appointments = await storage.getAllAppointments();
+      } else {
+        // Other users see only appointments from their associated businesses
+        appointments = await storage.getAppointmentsByBusinessIds(userData.businessIds);
+      }
       res.json(appointments);
     } catch (error) {
       console.error("Appointment fetch error:", error);

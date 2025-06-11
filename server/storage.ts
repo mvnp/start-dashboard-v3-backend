@@ -403,6 +403,11 @@ class PostgresStorage implements IStorage {
     return result[0];
   }
 
+  async getAppointmentsByBusinessIds(businessIds: number[]): Promise<Appointment[]> {
+    if (businessIds.length === 0) return [];
+    return await this.db.select().from(appointments).where(inArray(appointments.business_id, businessIds));
+  }
+
   async createAppointment(insertAppointment: InsertAppointment): Promise<Appointment> {
     const result = await this.db.insert(appointments).values(insertAppointment).returning();
     return result[0];
