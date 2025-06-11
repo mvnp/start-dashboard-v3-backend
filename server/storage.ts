@@ -461,12 +461,14 @@ class PostgresStorage implements IStorage {
     // Combine all conditions
     const whereCondition = conditions.length > 0 ? and(...conditions) : undefined;
     
-    // Get total count
-    const totalResult = await this.db
-      .select({ count: count() })
+    // Get total count using raw SQL
+    const totalQuery = this.db
+      .select()
       .from(appointments)
       .where(whereCondition);
-    const total = Number(totalResult[0].count);
+    
+    const allResults = await totalQuery;
+    const total = allResults.length;
     
     // Calculate pagination
     const offset = (page - 1) * limit;

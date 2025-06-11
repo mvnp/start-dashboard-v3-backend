@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -15,36 +17,84 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Search, Edit, Trash2, Calendar, Clock, User, Settings, Users } from "lucide-react";
+import { 
+  Plus, 
+  Search, 
+  Edit, 
+  Trash2, 
+  Calendar, 
+  Clock, 
+  User, 
+  Settings, 
+  Users,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  CalendarDays
+} from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Appointment, Service, Person } from "@shared/schema";
 
+const statusOptions = [
+  { value: "", label: "All Statuses" },
+  { value: "Scheduled", label: "Scheduled" },
+  { value: "Confirmed", label: "Confirmed" },
+  { value: "In Progress", label: "In Progress" },
+  { value: "Completed", label: "Completed" },
+  { value: "Canceled", label: "Canceled" }
+];
+
 export default function AppointmentList() {
   const [, setLocation] = useLocation();
-  const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { toast } = useToast();
 
-  const { data: appointments = [], isLoading } = useQuery({
-    queryKey: ["/api/appointments"],
-    select: (data: Appointment[]) => data,
-  });
+  // Filter and pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [todayFilter, setTodayFilter] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
-  const { data: staff = [] } = useQuery({
-    queryKey: ["/api/staff"],
-    select: (data: Person[]) => data,
+  // Build query parameters
+  const buildQueryParams = useCallback(() => {
+    const params = new URLSearchParams();
+    params.set('page', currentPage.toString());
+    params.set('limit', '25');
+    
+    if (statusFilter) params.set('status', statusFilter);
+    if (todayFilter) params.set('today', 'true');
+    if (startDate) params.set('startDate', startDate);
+    if (endDate) params.set('endDate', endDate);
+    
+    return params.toString();
+  }, [currentPage, statusFilter, todayFilter, startDate, endDate]);
+
+  const { data: appointmentData, isLoading } = useQuery({
+    queryKey: ["/api/appointments", buildQueryParams()],
+    queryFn: async () => {
+      const response = await fetch(`/api/appointments?${buildQueryParams()}`);
+      if (!response.ok) throw new Error('Failed to fetch appointments');
+      return response.json();
+    },
   });
 
   const { data: services = [] } = useQuery({
     queryKey: ["/api/services"],
-    select: (data: Service[]) => data,
+  });
+
+  const { data: staff = [] } = useQuery({
+    queryKey: ["/api/staff"],
   });
 
   const { data: clients = [] } = useQuery({
     queryKey: ["/api/clients"],
-    select: (data: Person[]) => data,
   });
+
+  const appointments = appointmentData?.appointments || [];
+  const totalPages = appointmentData?.totalPages || 1;
+  const total = appointmentData?.total || 0;
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/appointments/${id}`),
@@ -65,189 +115,296 @@ export default function AppointmentList() {
     },
   });
 
-  const getStaffName = (employeeId: number | null) => {
-    if (!employeeId) return 'Unknown Staff';
-    const staffMember = staff.find(s => s.user_id === employeeId);
-    return staffMember ? `${staffMember.first_name} ${staffMember.last_name}` : 'Unknown Staff';
-  };
-
   const getServiceName = (serviceId: number | null) => {
     if (!serviceId) return 'Unknown Service';
-    const service = services.find(s => s.id === serviceId);
+    const service = services.find((s: Service) => s.id === serviceId);
     return service ? service.name : 'Unknown Service';
+  };
+
+  const getStaffName = (userId: number | null) => {
+    if (!userId) return 'Unknown Staff';
+    const staffMember = staff.find((s: Person) => s.user_id === userId);
+    return staffMember ? `${staffMember.first_name} ${staffMember.last_name}` : 'Unknown Staff';
   };
 
   const getClientName = (clientId: number | null) => {
     if (!clientId) return 'Unknown Client';
-    const client = clients.find(c => c.user_id === clientId);
+    const client = clients.find((c: Person) => c.id === clientId);
     return client ? `${client.first_name} ${client.last_name}` : 'Unknown Client';
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | null) => {
     switch (status) {
-      case 'scheduled': return 'bg-blue-100 text-blue-800';
-      case 'confirmed': return 'bg-green-100 text-green-800';
-      case 'in_progress': return 'bg-yellow-100 text-yellow-800';
-      case 'completed': return 'bg-gray-100 text-gray-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'Scheduled': return 'bg-blue-100 text-blue-800';
+      case 'Confirmed': return 'bg-green-100 text-green-800';
+      case 'In Progress': return 'bg-yellow-100 text-yellow-800';
+      case 'Completed': return 'bg-emerald-100 text-emerald-800';
+      case 'Canceled': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const filteredAppointments = appointments.filter(appointment => {
-    const staffName = getStaffName(appointment.user_id).toLowerCase();
-    const clientName = getClientName(appointment.client_id).toLowerCase();
-    const serviceName = getServiceName(appointment.service_id).toLowerCase();
-    const searchLower = searchTerm.toLowerCase();
-    
-    return staffName.includes(searchLower) || 
-           clientName.includes(searchLower) || 
-           serviceName.includes(searchLower) ||
-           appointment.appointment_date.includes(searchLower);
-  });
-
   const handleDelete = (id: number) => {
-    setDeleteId(id);
+    deleteMutation.mutate(id);
   };
 
-  const confirmDelete = () => {
-    if (deleteId) {
-      deleteMutation.mutate(deleteId);
-    }
+  const resetFilters = () => {
+    setStatusFilter("");
+    setTodayFilter(false);
+    setStartDate("");
+    setEndDate("");
+    setCurrentPage(1);
+  };
+
+  const applyTodayFilter = () => {
+    setTodayFilter(true);
+    setStartDate("");
+    setEndDate("");
+    setCurrentPage(1);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const formatTime = (timeString: string) => {
+    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
   };
 
   if (isLoading) {
     return (
-      <div className="w-full p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">Appointments</h1>
-            <p className="text-slate-600 mt-2">Manage barbershop appointments</p>
-          </div>
-        </div>
+      <div className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-10 bg-gray-200 rounded"></div>
-          <div className="h-32 bg-gray-200 rounded"></div>
-          <div className="h-32 bg-gray-200 rounded"></div>
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Appointments</h1>
-          <p className="text-slate-600 mt-2">Manage barbershop appointments</p>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Calendar className="w-8 h-8 text-blue-600" />
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
+            <p className="text-gray-600">Manage customer appointments</p>
+          </div>
         </div>
-        <Button
-          onClick={() => setLocation("/appointments/new")}
-          className="bg-amber-600 hover:bg-amber-700 text-white"
-        >
-          <Plus className="w-4 h-4 mr-2" />
+        
+        <Button onClick={() => setLocation("/appointments/new")} className="gap-2">
+          <Plus className="w-4 h-4" />
           New Appointment
         </Button>
       </div>
 
-      <div className="flex gap-4 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            placeholder="Search appointments..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
+      {/* Filters Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="w-5 h-5" />
+            Filters
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Status Filter */}
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Today Filter */}
+            <div className="space-y-2">
+              <Label>Quick Filters</Label>
+              <Button 
+                variant={todayFilter ? "default" : "outline"} 
+                onClick={applyTodayFilter}
+                className="w-full gap-2"
+              >
+                <CalendarDays className="w-4 h-4" />
+                Today's Appointments
+              </Button>
+            </div>
+
+            {/* Date Range */}
+            <div className="space-y-2">
+              <Label>Start Date</Label>
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setTodayFilter(false);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>End Date</Label>
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setTodayFilter(false);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2 mt-4">
+            <Button variant="outline" onClick={resetFilters}>
+              Clear Filters
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Results Summary */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-gray-600">
+          Showing {appointments.length} of {total} appointments
+        </p>
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          Page {currentPage} of {totalPages}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredAppointments.map((appointment) => (
-          <Card key={appointment.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-amber-600" />
-                  <Badge variant="secondary" className="text-xs">
-                    ID: {appointment.id}
-                  </Badge>
-                </div>
-                <Badge className={getStatusColor(appointment.status || 'Scheduled')}>
-                  {(appointment.status || 'Scheduled').replace('_', ' ')}
-                </Badge>
-              </div>
-              <CardTitle className="text-lg font-semibold text-slate-900">
-                {getClientName(appointment.client_id)}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-purple-600" />
-                  <span className="text-sm text-slate-600">{getStaffName(appointment.user_id)}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Settings className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm text-slate-600">{getServiceName(appointment.service_id)}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-green-600" />
-                  <span className="text-sm text-slate-600">{appointment.appointment_date}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-orange-600" />
-                  <span className="text-sm text-slate-600">{appointment.appointment_time}</span>
-                </div>
-              </div>
-
-              {appointment.notes && (
-                <div className="bg-slate-50 p-3 rounded-md">
-                  <p className="text-xs text-slate-600">{appointment.notes}</p>
-                </div>
-              )}
-
-              <div className="flex gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setLocation(`/appointments/${appointment.id}/edit`)}
-                  className="flex-1"
-                >
-                  <Edit className="w-4 h-4 mr-1" />
-                  Edit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDelete(appointment.id)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
+      {/* Appointments Grid */}
+      <div className="grid gap-4">
+        {appointments.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-8">
+              <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">No appointments found matching your criteria</p>
             </CardContent>
           </Card>
-        ))}
+        ) : (
+          appointments.map((appointment: Appointment) => (
+            <Card key={appointment.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-blue-600" />
+                        <span className="font-medium">{formatDate(appointment.appointment_date)}</span>
+                        <Clock className="w-4 h-4 text-gray-500 ml-2" />
+                        <span className="text-gray-600">{formatTime(appointment.appointment_time)}</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <div className="flex items-center gap-1">
+                          <Users className="w-4 h-4" />
+                          <span>{getClientName(appointment.client_id)}</span>
+                        </div>
+                        
+                        <div className="flex items-center gap-1">
+                          <User className="w-4 h-4" />
+                          <span>{getStaffName(appointment.user_id)}</span>
+                        </div>
+                        
+                        <div className="flex items-center gap-1">
+                          <Settings className="w-4 h-4" />
+                          <span>{getServiceName(appointment.service_id)}</span>
+                        </div>
+                      </div>
+                      
+                      {appointment.notes && (
+                        <p className="text-sm text-gray-500 mt-2">{appointment.notes}</p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <Badge className={getStatusColor(appointment.status)}>
+                      {appointment.status}
+                    </Badge>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setLocation(`/appointments/${appointment.id}/edit`)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDeleteId(appointment.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
-      {filteredAppointments.length === 0 && !isLoading && (
-        <div className="text-center py-12">
-          <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No appointments found</h3>
-          <p className="text-gray-600 mb-4">
-            {searchTerm ? "No appointments match your search criteria." : "Get started by creating your first appointment."}
-          </p>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
           <Button
-            onClick={() => setLocation("/appointments/new")}
-            className="bg-amber-600 hover:bg-amber-700 text-white"
+            variant="outline"
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Create New Appointment
+            <ChevronLeft className="w-4 h-4" />
+            Previous
+          </Button>
+          
+          <div className="flex gap-1">
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              const page = i + 1;
+              return (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </Button>
+              );
+            })}
+          </div>
+          
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+            <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
       )}
 
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -259,11 +416,10 @@ export default function AppointmentList() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmDelete}
+              onClick={() => deleteId && handleDelete(deleteId)}
               className="bg-red-600 hover:bg-red-700"
-              disabled={deleteMutation.isPending}
             >
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
