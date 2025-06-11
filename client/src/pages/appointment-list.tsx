@@ -18,7 +18,7 @@ import {
 import { Plus, Search, Edit, Trash2, Calendar, Clock, User, Settings, Users } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Appointment, Staff, Service, Client } from "@shared/schema";
+import { Appointment, Service, Person } from "@shared/schema";
 
 export default function AppointmentList() {
   const [, setLocation] = useLocation();
@@ -33,7 +33,7 @@ export default function AppointmentList() {
 
   const { data: staff = [] } = useQuery({
     queryKey: ["/api/staff"],
-    select: (data: Staff[]) => data,
+    select: (data: Person[]) => data,
   });
 
   const { data: services = [] } = useQuery({
@@ -43,7 +43,7 @@ export default function AppointmentList() {
 
   const { data: clients = [] } = useQuery({
     queryKey: ["/api/clients"],
-    select: (data: Client[]) => data,
+    select: (data: Person[]) => data,
   });
 
   const deleteMutation = useMutation({
@@ -65,18 +65,21 @@ export default function AppointmentList() {
     },
   });
 
-  const getStaffName = (staffId: number) => {
-    const staffMember = staff.find(s => s.id === staffId);
+  const getStaffName = (userId: number | null) => {
+    if (!userId) return 'Unknown Staff';
+    const staffMember = staff.find(s => s.user_id === userId);
     return staffMember ? `${staffMember.first_name} ${staffMember.last_name}` : 'Unknown Staff';
   };
 
-  const getServiceName = (serviceId: number) => {
+  const getServiceName = (serviceId: number | null) => {
+    if (!serviceId) return 'Unknown Service';
     const service = services.find(s => s.id === serviceId);
     return service ? service.name : 'Unknown Service';
   };
 
-  const getClientName = (clientId: number) => {
-    const client = clients.find(c => c.id === clientId);
+  const getClientName = (clientId: number | null) => {
+    if (!clientId) return 'Unknown Client';
+    const client = clients.find(c => c.user_id === clientId);
     return client ? `${client.first_name} ${client.last_name}` : 'Unknown Client';
   };
 

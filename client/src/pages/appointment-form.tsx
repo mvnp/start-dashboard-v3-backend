@@ -212,8 +212,8 @@ export default function AppointmentForm() {
                   </SelectTrigger>
                   <SelectContent>
                     {clients.map((client) => (
-                      <SelectItem key={client.id} value={client.id.toString()}>
-                        {client.first_name} {client.last_name} - {client.email}
+                      <SelectItem key={client.id} value={client.user_id?.toString() || ""}>
+                        {client.first_name} {client.last_name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -221,10 +221,10 @@ export default function AppointmentForm() {
               </div>
 
               <div>
-                <Label htmlFor="staff_id">Staff Member</Label>
+                <Label htmlFor="user_id">Staff Member</Label>
                 <Select 
-                  value={formData.staff_id ? formData.staff_id.toString() : ""} 
-                  onValueChange={(value) => handleInputChange('staff_id', parseInt(value))}
+                  value={formData.user_id ? formData.user_id.toString() : ""} 
+                  onValueChange={(value) => handleInputChange('user_id', parseInt(value))}
                   required
                 >
                   <SelectTrigger>
@@ -232,8 +232,8 @@ export default function AppointmentForm() {
                   </SelectTrigger>
                   <SelectContent>
                     {staff.map((staffMember) => (
-                      <SelectItem key={staffMember.id} value={staffMember.id.toString()}>
-                        {staffMember.first_name} {staffMember.last_name} - {staffMember.role}
+                      <SelectItem key={staffMember.id} value={staffMember.user_id?.toString() || ""}>
+                        {staffMember.first_name} {staffMember.last_name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -253,7 +253,7 @@ export default function AppointmentForm() {
                   <SelectContent>
                     {services.filter(service => service.is_active).map((service) => (
                       <SelectItem key={service.id} value={service.id.toString()}>
-                        {service.name} - ${(service.price / 100).toFixed(2)} ({service.duration}min)
+                        {service.name} - ${service.price ? (parseFloat(service.price) / 100).toFixed(2) : '0.00'} ({service.duration}min)
                       </SelectItem>
                     ))}
                   </SelectContent>
