@@ -575,7 +575,7 @@ export function registerRoutes(app: Express): void {
 
       let services;
       // Super Admin (role ID: 1) can see all services
-      if (userData.roleId === 1) {
+      if (userData.roleId === 1 || userData.isSuperAdmin) {
         services = await storage.getAllServices();
       } else {
         // Other users see services from their associated businesses + global services
