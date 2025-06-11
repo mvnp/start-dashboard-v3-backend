@@ -362,11 +362,16 @@ class PostgresStorage implements IStorage {
   }
 
   async getServicesByBusinessIds(businessIds: number[]): Promise<Service[]> {
-    // Get all services and filter by business IDs or null business_id (global services)
-    const allServices = await this.db.select().from(services);
-    return allServices.filter(service => 
-      service.business_id === null || (service.business_id && businessIds.includes(service.business_id))
-    );
+    // Use SQL to efficiently filter services by business IDs or null business_id (global services)
+    return await this.db
+      .select()
+      .from(services)
+      .where(
+        or(
+          isNull(services.business_id),
+          inArray(services.business_id, businessIds)
+        )
+      );
   }
 
   async createService(insertService: InsertService): Promise<Service> {
