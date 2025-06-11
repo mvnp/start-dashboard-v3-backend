@@ -45,10 +45,19 @@ export default function ClientForm() {
   
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { data: clientMember, isLoading } = useQuery({
+  const { data: clientMember, isLoading, error } = useQuery({
     queryKey: ["/api/clients", clientId],
     enabled: isEdit && !!clientId,
     select: (data: ClientWithUser) => data,
+  });
+
+  console.log("Query state:", { 
+    isEdit, 
+    clientId, 
+    enabled: isEdit && !!clientId,
+    isLoading, 
+    error,
+    hasData: !!clientMember 
   });
 
   const createClientMutation = useMutation({
@@ -111,7 +120,9 @@ export default function ClientForm() {
   });
 
   useEffect(() => {
+    console.log("Client form debug:", { isEdit, clientId, clientMember, match, params });
     if (clientMember && isEdit) {
+      console.log("Loading client data:", clientMember);
       setFormData({
         first_name: clientMember.first_name || "",
         last_name: clientMember.last_name || "",
@@ -121,7 +132,7 @@ export default function ClientForm() {
         address: clientMember.address || "",
       });
     }
-  }, [clientMember, isEdit]);
+  }, [clientMember, isEdit, clientId, match, params]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -183,6 +194,7 @@ export default function ClientForm() {
   const isSubmitting = createClientMutation.isPending || updateClientMutation.isPending;
 
   if (isEdit && isLoading) {
+    console.log("Showing loading state for client edit");
     return (
       <div className="p-6">
         <div className="animate-pulse">
@@ -193,6 +205,22 @@ export default function ClientForm() {
               <div key={i} className="h-12 bg-gray-200 rounded"></div>
             ))}
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isEdit && !isLoading && !clientMember) {
+    console.log("No client member data found");
+    return (
+      <div className="p-6">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-red-600 mb-2">Client Not Found</h2>
+          <p className="text-gray-600 mb-4">The client you're trying to edit could not be found.</p>
+          <Button onClick={() => setLocation("/clients")}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Clients
+          </Button>
         </div>
       </div>
     );
