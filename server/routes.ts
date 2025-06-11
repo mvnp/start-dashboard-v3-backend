@@ -2,6 +2,17 @@ import { Express, Request, Response } from "express";
 import { z } from "zod";
 import storage from "./storage";
 import { requireAuth, getBusinessFilter } from "./middleware";
+
+interface AuthenticatedRequest extends Request {
+  session: any;
+  user?: {
+    id: number;
+    email: string;
+    roleId: number;
+    businessIds: number[];
+    isSuperAdmin: boolean;
+  };
+}
 import {
   insertUserSchema,
   insertBusinessSchema,
@@ -817,9 +828,19 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/whatsapp-instances", async (req, res) => {
+  app.get("/api/whatsapp-instances", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const instances = await storage.getAllWhatsappInstances();
+      // Get all instances first
+      const allInstances = await storage.getAllWhatsappInstances();
+      
+      // Filter by business access unless super admin
+      let instances = allInstances;
+      if (!req.user?.isSuperAdmin) {
+        instances = allInstances.filter(instance => 
+          req.user?.businessIds?.includes(instance.business_id!)
+        );
+      }
+      
       res.json(instances);
     } catch (error) {
       console.error("WhatsApp instance fetch error:", error);
@@ -841,7 +862,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/whatsapp-instances", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/whatsapp-instances", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const validatedData = insertWhatsappInstanceSchema.parse(req.body);
       
@@ -864,7 +885,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/whatsapp-instances/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.put("/api/whatsapp-instances/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const validatedData = insertWhatsappInstanceSchema.partial().parse(req.body);
@@ -891,9 +912,21 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/whatsapp-instances/:id", async (req, res) => {
+  app.delete("/api/whatsapp-instances/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      
+      // Verify the instance exists and user has access
+      const existingInstance = await storage.getWhatsappInstance(id);
+      if (!existingInstance) {
+        return res.status(404).json({ error: "WhatsApp instance not found" });
+      }
+      
+      // Check business access unless super admin
+      if (!req.user?.isSuperAdmin && !req.user?.businessIds?.includes(existingInstance.business_id!)) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
       const success = await storage.deleteWhatsappInstance(id);
       if (!success) {
         return res.status(404).json({ error: "WhatsApp instance not found" });
