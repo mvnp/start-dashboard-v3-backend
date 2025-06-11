@@ -50,10 +50,38 @@ export default function StaffForm() {
     business_id: 0,
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const formatPhoneNumber = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 10) {
+      return numbers.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    } else {
+      return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    }
+  };
+
+  const formatTaxId = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else {
+      return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3.$4/$5');
+    }
+  };
+
   const { data: staffMember, isLoading } = useQuery({
-    queryKey: ["/api/staff", staffId],
+    queryKey: [`/api/staff/${staffId}`] as const,
+    queryFn: async () => {
+      const response = await fetch(`/api/staff/${staffId}`, {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch staff: ${response.statusText}`);
+      }
+      return response.json();
+    },
     enabled: isEdit && !!staffId,
-    select: (data: Person) => data,
   });
 
   const { data: businesses } = useQuery({
@@ -108,15 +136,15 @@ export default function StaffForm() {
   useEffect(() => {
     if (staffMember && isEdit) {
       setFormData({
-        first_name: staffMember.first_name,
-        last_name: staffMember.last_name,
-        email: "",
-        phone: staffMember.phone || "",
-        tax_id: staffMember.tax_id || "",
-        role_id: 3, // Default to employee role
+        first_name: staffMember.first_name || "",
+        last_name: staffMember.last_name || "",
+        email: staffMember.user?.email || "",
+        phone: staffMember.phone ? formatPhoneNumber(staffMember.phone) : "",
+        tax_id: staffMember.tax_id ? formatTaxId(staffMember.tax_id) : "",
+        role_id: staffMember.role_id || 3,
         hire_date: staffMember.hire_date || "",
         salary: Number(staffMember.salary) || 0,
-        business_id: 0,
+        business_id: staffMember.business_id || 0,
       });
     }
   }, [staffMember, isEdit]);
@@ -131,22 +159,100 @@ export default function StaffForm() {
     }
   }, [businesses, isEdit, formData.business_id]);
 
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.first_name.trim()) {
+      newErrors.first_name = "First name is required";
+    }
+    
+    if (!formData.last_name.trim()) {
+      newErrors.last_name = "Last name is required";
+    }
+    
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+    
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    }
+    
+    if (!formData.tax_id.trim()) {
+      newErrors.tax_id = "Tax ID is required";
+    }
+    
+    if (!formData.role_id || formData.role_id === 0) {
+      newErrors.role_id = "Role is required";
+    }
+    
+    if (!formData.hire_date.trim()) {
+      newErrors.hire_date = "Hire date is required";
+    }
+    
+    if (!formData.salary || formData.salary <= 0) {
+      newErrors.salary = "Salary must be greater than 0";
+    }
+    
+    if (!formData.business_id || formData.business_id === 0) {
+      newErrors.business_id = "Business is required";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const stripFormatting = (value: string) => {
+    return value.replace(/\D/g, '');
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+    
+    if (!validateForm()) {
+      return;
+    }
+    
+    // Prepare data for submission by removing formatting from phone and tax_id
+    const submitData = {
+      ...formData,
+      phone: stripFormatting(formData.phone),
+      tax_id: formData.tax_id ? stripFormatting(formData.tax_id) : "",
+    };
+    
     if (isEdit) {
-      updateStaffMutation.mutate(formData);
+      updateStaffMutation.mutate(submitData);
     } else {
-      createStaffMutation.mutate(formData);
+      createStaffMutation.mutate(submitData);
     }
   };
 
   const handleInputChange = (field: keyof StaffFormData, value: string | number) => {
+    let formattedValue = value;
+    
+    if (field === 'phone' && typeof value === 'string') {
+      formattedValue = formatPhoneNumber(value);
+    } else if (field === 'tax_id' && typeof value === 'string') {
+      formattedValue = formatTaxId(value);
+    }
+    
     setFormData(prev => ({
       ...prev,
       [field]: field === 'salary' || field === 'business_id' || field === 'role_id'
-        ? (typeof value === 'string' ? parseInt(value) || 0 : value)
-        : value
+        ? (typeof formattedValue === 'string' ? parseInt(formattedValue) || 0 : formattedValue)
+        : formattedValue
     }));
+    
+    // Clear error for this field when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ""
+      }));
+    }
   };
 
   const isSubmitting = createStaffMutation.isPending || updateStaffMutation.isPending;
@@ -202,59 +308,74 @@ export default function StaffForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="first_name">First Name</Label>
+                <Label htmlFor="first_name">First Name *</Label>
                 <Input
                   id="first_name"
                   placeholder="Enter first name"
                   value={formData.first_name}
                   onChange={(e) => handleInputChange('first_name', e.target.value)}
-                  required
+                  className={errors.first_name ? "border-red-500" : ""}
                 />
+                {errors.first_name && (
+                  <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>
+                )}
               </div>
 
               <div>
-                <Label htmlFor="last_name">Last Name</Label>
+                <Label htmlFor="last_name">Last Name *</Label>
                 <Input
                   id="last_name"
                   placeholder="Enter last name"
                   value={formData.last_name}
                   onChange={(e) => handleInputChange('last_name', e.target.value)}
-                  required
+                  className={errors.last_name ? "border-red-500" : ""}
                 />
+                {errors.last_name && (
+                  <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>
+                )}
               </div>
 
               <div>
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">Email Address *</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="Enter email address"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  required
+                  className={errors.email ? "border-red-500" : ""}
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                )}
               </div>
 
               <div>
-                <Label htmlFor="phone">Phone Number</Label>
+                <Label htmlFor="phone">Phone Number *</Label>
                 <Input
                   id="phone"
-                  placeholder="Enter phone number"
+                  placeholder="(48) 99189-3313"
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
-                  required
+                  className={errors.phone ? "border-red-500" : ""}
                 />
+                {errors.phone && (
+                  <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                )}
               </div>
 
               <div>
-                <Label htmlFor="tax_id">Tax ID</Label>
+                <Label htmlFor="tax_id">Tax ID *</Label>
                 <Input
                   id="tax_id"
-                  placeholder="Enter tax identification number"
+                  placeholder="020.393.261-70 or 33.240.999.0001/03"
                   value={formData.tax_id}
                   onChange={(e) => handleInputChange('tax_id', e.target.value)}
-                  required
+                  className={errors.tax_id ? "border-red-500" : ""}
                 />
+                {errors.tax_id && (
+                  <p className="text-red-500 text-sm mt-1">{errors.tax_id}</p>
+                )}
               </div>
 
               <div>
