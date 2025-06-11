@@ -573,25 +573,14 @@ export function registerRoutes(app: Express): void {
         return res.status(500).json({ error: "User not found" });
       }
 
-      console.log("Service route - User data:", { 
-        userId: testUserId, 
-        roleId: userData.roleId, 
-        isSuperAdmin: userData.isSuperAdmin,
-        businessIds: userData.businessIds 
-      });
-
       let services;
       // Super Admin (role ID: 1) can see all services
       if (userData.roleId === 1 || userData.isSuperAdmin) {
-        console.log("Fetching ALL services for Super Admin");
         services = await storage.getAllServices();
       } else {
-        console.log("Fetching filtered services for business IDs:", userData.businessIds);
         // Other users see services from their associated businesses + global services
         services = await storage.getServicesByBusinessIds(userData.businessIds);
       }
-      
-      console.log("Returning", services.length, "services");
       res.json(services);
     } catch (error) {
       console.error("Service fetch error:", error);
