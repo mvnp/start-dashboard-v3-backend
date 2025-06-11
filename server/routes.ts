@@ -1,4 +1,4 @@
-import { Express } from "express";
+import { Express, Request, Response } from "express";
 import { z } from "zod";
 import storage from "./storage";
 import { requireAuth, getBusinessFilter } from "./middleware";
@@ -838,6 +838,70 @@ export function registerRoutes(app: Express): void {
         return res.status(400).json({ error: "Invalid data", details: error.errors });
       }
       res.status(500).json({ error: "Failed to create WhatsApp instance" });
+    }
+  });
+
+  app.post("/api/whatsapp-instances", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const validatedData = insertWhatsappInstanceSchema.parse(req.body);
+      
+      // Add business_id from user's first business (or default to business 1 for super admin)
+      const businessId = req.user?.businessIds?.[0] || 1;
+      const instanceData = {
+        ...validatedData,
+        business_id: businessId,
+        status: 'Disconnected' as const
+      };
+      
+      const instance = await storage.createWhatsappInstance(instanceData);
+      res.status(201).json(instance);
+    } catch (error) {
+      console.error("WhatsApp instance creation error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create WhatsApp instance" });
+    }
+  });
+
+  app.put("/api/whatsapp-instances/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertWhatsappInstanceSchema.partial().parse(req.body);
+      
+      // Verify the instance exists and user has access
+      const existingInstance = await storage.getWhatsappInstance(id);
+      if (!existingInstance) {
+        return res.status(404).json({ error: "WhatsApp instance not found" });
+      }
+      
+      // Check business access unless super admin
+      if (!req.user?.isSuperAdmin && !req.user?.businessIds?.includes(existingInstance.business_id!)) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
+      const instance = await storage.updateWhatsappInstance(id, validatedData);
+      res.json(instance);
+    } catch (error) {
+      console.error("WhatsApp instance update error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update WhatsApp instance" });
+    }
+  });
+
+  app.delete("/api/whatsapp-instances/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteWhatsappInstance(id);
+      if (!success) {
+        return res.status(404).json({ error: "WhatsApp instance not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error("WhatsApp instance deletion error:", error);
+      res.status(500).json({ error: "Failed to delete WhatsApp instance" });
     }
   });
 
