@@ -246,7 +246,7 @@ export default function WhatsappList() {
                     </div>
                     <div className="space-y-2 mb-4">
                       <p className="text-slate-600">
-                        <strong>Phone:</strong> {instance.phone_number}
+                        <strong>Phone:</strong> {instance.phone_number || 'Not specified'}
                       </p>
                       {instance.webhook_url && (
                         <p className="text-slate-600">
