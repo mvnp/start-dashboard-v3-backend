@@ -61,8 +61,8 @@ export default function UserSwitcher() {
         throw new Error('Failed to fetch users by role');
       }
       const allUsers = await response.json() as RoleUser[];
-      // Filter to show only merchants and super admin
-      return allUsers.filter(user => user.roleType === 'merchant' || user.roleType === 'super-admin');
+      // Backend now filters to show only merchants (role ID: 2) and super admin (role ID: 1)
+      return allUsers;
     },
   });
 

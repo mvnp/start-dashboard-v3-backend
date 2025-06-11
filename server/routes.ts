@@ -143,17 +143,19 @@ export function registerRoutes(app: Express): void {
       const usersByRole = [];
 
       for (const role of roles) {
-        const users = await storage.getUsersByRole(role.type);
-        if (users.length > 0) {
-          // Get the first user for this role
-          const firstUser = users[0];
-          usersByRole.push({
-            id: firstUser.id,
-            email: firstUser.email,
-            roleId: role.id,
-            roleType: role.type,
-            roleName: role.description || role.type,
-          });
+        // Only include super-admin (role ID 1) and merchant (role ID 2) users
+        if (role.id === 1 || role.id === 2) {
+          const users = await storage.getUsersByRole(role.type);
+          // Add all users for this role, not just the first one
+          for (const user of users) {
+            usersByRole.push({
+              id: user.id,
+              email: user.email,
+              roleId: role.id,
+              roleType: role.type,
+              roleName: role.description || role.type,
+            });
+          }
         }
       }
 
