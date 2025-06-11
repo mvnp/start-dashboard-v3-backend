@@ -47,24 +47,22 @@ export default function ClientForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { data: clientMember, isLoading, error } = useQuery({
-    queryKey: ["/api/clients", clientId],
+    queryKey: [`/api/clients/${clientId}`] as const,
+    queryFn: async () => {
+      const response = await fetch(`/api/clients/${clientId}`, {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch client: ${response.statusText}`);
+      }
+      return response.json();
+    },
     enabled: isEdit && !!clientId,
-    select: (data: ClientWithUser) => data,
+    staleTime: 0,
+    cacheTime: 0,
   });
 
-  console.log("Route debug:", { 
-    editMatch, 
-    params, 
-    createMatch,
-    isEdit, 
-    isCreating,
-    clientId, 
-    enabled: isEdit && !!clientId,
-    isLoading, 
-    error,
-    hasData: !!clientMember,
-    queryKey: ["/api/clients", clientId]
-  });
+
 
   const createClientMutation = useMutation({
     mutationFn: (data: ClientFormData) => apiRequest("POST", "/api/clients", data),
@@ -126,9 +124,7 @@ export default function ClientForm() {
   });
 
   useEffect(() => {
-    console.log("Client form debug:", { isEdit, clientId, clientMember, editMatch, params });
     if (clientMember && isEdit) {
-      console.log("Loading client data:", clientMember);
       setFormData({
         first_name: clientMember.first_name || "",
         last_name: clientMember.last_name || "",
@@ -138,7 +134,7 @@ export default function ClientForm() {
         address: clientMember.address || "",
       });
     }
-  }, [clientMember, isEdit, clientId, editMatch, params]);
+  }, [clientMember, isEdit, clientId]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
