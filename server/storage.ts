@@ -408,6 +408,86 @@ class PostgresStorage implements IStorage {
     return await this.db.select().from(appointments).where(inArray(appointments.business_id, businessIds));
   }
 
+  async getFilteredAppointments(filters: {
+    page: number;
+    limit: number;
+    status?: string;
+    today?: boolean;
+    startDate?: string;
+    endDate?: string;
+    businessIds?: number[] | null;
+  }): Promise<{ appointments: Appointment[]; total: number; totalPages: number; currentPage: number }> {
+    const { page, limit, status, today, startDate, endDate, businessIds } = filters;
+    
+    // Build where conditions
+    const conditions = [];
+    
+    // Business filtering for non-super admin users
+    if (businessIds && businessIds.length > 0) {
+      conditions.push(inArray(appointments.business_id, businessIds));
+    }
+    
+    // Status filtering
+    if (status) {
+      conditions.push(eq(appointments.status, status));
+    }
+    
+    // Date filtering
+    if (today) {
+      const todayDate = new Date().toISOString().split('T')[0];
+      conditions.push(eq(appointments.appointment_date, todayDate));
+    } else if (startDate && endDate) {
+      conditions.push(
+        and(
+          gte(appointments.appointment_date, startDate),
+          lte(appointments.appointment_date, endDate)
+        )
+      );
+    } else if (startDate) {
+      conditions.push(gte(appointments.appointment_date, startDate));
+    } else if (endDate) {
+      conditions.push(lte(appointments.appointment_date, endDate));
+    }
+    
+    // Combine all conditions
+    const whereCondition = conditions.length > 0 ? and(...conditions) : undefined;
+    
+    // Get total count
+    const totalResult = await this.db
+      .select({ count: sql<number>`count(*)` })
+      .from(appointments)
+      .where(whereCondition);
+    const total = totalResult[0].count;
+    
+    // Calculate pagination
+    const offset = (page - 1) * limit;
+    const totalPages = Math.ceil(total / limit);
+    
+    // Determine order by clause
+    let orderBy;
+    if (today) {
+      orderBy = [asc(appointments.appointment_time)];
+    } else {
+      orderBy = [desc(appointments.appointment_date), desc(appointments.appointment_time)];
+    }
+    
+    // Get filtered and paginated appointments
+    const appointmentsList = await this.db
+      .select()
+      .from(appointments)
+      .where(whereCondition)
+      .orderBy(...orderBy)
+      .limit(limit)
+      .offset(offset);
+    
+    return {
+      appointments: appointmentsList,
+      total,
+      totalPages,
+      currentPage: page
+    };
+  }
+
   async createAppointment(insertAppointment: InsertAppointment): Promise<Appointment> {
     const result = await this.db.insert(appointments).values(insertAppointment).returning();
     return result[0];

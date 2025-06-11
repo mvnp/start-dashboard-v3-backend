@@ -615,13 +615,37 @@ export function registerRoutes(app: Express): void {
         return res.status(500).json({ error: "User not found" });
       }
       
+      // Extract query parameters for filtering and pagination
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 25;
+      const status = req.query.status as string;
+      const today = req.query.today === 'true';
+      const startDate = req.query.startDate as string;
+      const endDate = req.query.endDate as string;
+      
       let appointments;
       // Super Admin (role ID: 1) can see all appointments
       if (userData.roleId === 1) {
-        appointments = await storage.getAllAppointments();
+        appointments = await storage.getFilteredAppointments({
+          page,
+          limit,
+          status,
+          today,
+          startDate,
+          endDate,
+          businessIds: null
+        });
       } else {
         // Other users see only appointments from their associated businesses
-        appointments = await storage.getAppointmentsByBusinessIds(userData.businessIds);
+        appointments = await storage.getFilteredAppointments({
+          page,
+          limit,
+          status,
+          today,
+          startDate,
+          endDate,
+          businessIds: userData.businessIds
+        });
       }
       res.json(appointments);
     } catch (error) {
