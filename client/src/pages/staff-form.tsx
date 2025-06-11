@@ -142,10 +142,28 @@ export default function StaffForm() {
       });
       setLocation("/staff");
     },
-    onError: () => {
+    onError: async (error: any) => {
+      // Try to extract error from response
+      let errorData = null;
+      try {
+        const response = await error;
+        if (response && !response.ok) {
+          errorData = await response.json();
+        }
+      } catch (e) {
+        // If error parsing fails, handle generic error
+      }
+      
+      // Handle email exists error specifically
+      if (errorData?.error === "Email exists on database") {
+        setErrors({ email: "Email exists on database" });
+        return;
+      }
+      
+      const errorMessage = errorData?.error || "Failed to update staff member";
       toast({
         title: "Error",
-        description: "Failed to update staff member. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     },
