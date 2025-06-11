@@ -60,7 +60,9 @@ export default function UserSwitcher() {
       if (!response.ok) {
         throw new Error('Failed to fetch users by role');
       }
-      return response.json() as Promise<RoleUser[]>;
+      const allUsers = await response.json() as RoleUser[];
+      // Filter to show only merchants and super admin
+      return allUsers.filter(user => user.roleType === 'merchant' || user.roleType === 'super-admin');
     },
   });
 
