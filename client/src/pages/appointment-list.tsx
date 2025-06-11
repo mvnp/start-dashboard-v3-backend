@@ -37,7 +37,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Appointment, Service, Person } from "@shared/schema";
 
 const statusOptions = [
-  { value: "", label: "All Statuses" },
+  { value: "all", label: "All Statuses" },
   { value: "Scheduled", label: "Scheduled" },
   { value: "Confirmed", label: "Confirmed" },
   { value: "In Progress", label: "In Progress" },
@@ -52,7 +52,7 @@ export default function AppointmentList() {
 
   // Filter and pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [todayFilter, setTodayFilter] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -63,7 +63,7 @@ export default function AppointmentList() {
     params.set('page', currentPage.toString());
     params.set('limit', '25');
     
-    if (statusFilter) params.set('status', statusFilter);
+    if (statusFilter && statusFilter !== 'all') params.set('status', statusFilter);
     if (todayFilter) params.set('today', 'true');
     if (startDate) params.set('startDate', startDate);
     if (endDate) params.set('endDate', endDate);
@@ -80,15 +80,15 @@ export default function AppointmentList() {
     },
   });
 
-  const { data: services = [] } = useQuery({
+  const { data: services = [] } = useQuery<Service[]>({
     queryKey: ["/api/services"],
   });
 
-  const { data: staff = [] } = useQuery({
+  const { data: staff = [] } = useQuery<Person[]>({
     queryKey: ["/api/staff"],
   });
 
-  const { data: clients = [] } = useQuery({
+  const { data: clients = [] } = useQuery<Person[]>({
     queryKey: ["/api/clients"],
   });
 
@@ -117,19 +117,19 @@ export default function AppointmentList() {
 
   const getServiceName = (serviceId: number | null) => {
     if (!serviceId) return 'Unknown Service';
-    const service = services.find((s: Service) => s.id === serviceId);
+    const service = (services as Service[]).find((s: Service) => s.id === serviceId);
     return service ? service.name : 'Unknown Service';
   };
 
   const getStaffName = (userId: number | null) => {
     if (!userId) return 'Unknown Staff';
-    const staffMember = staff.find((s: Person) => s.user_id === userId);
+    const staffMember = (staff as Person[]).find((s: Person) => s.user_id === userId);
     return staffMember ? `${staffMember.first_name} ${staffMember.last_name}` : 'Unknown Staff';
   };
 
   const getClientName = (clientId: number | null) => {
     if (!clientId) return 'Unknown Client';
-    const client = clients.find((c: Person) => c.id === clientId);
+    const client = (clients as Person[]).find((c: Person) => c.id === clientId);
     return client ? `${client.first_name} ${client.last_name}` : 'Unknown Client';
   };
 
