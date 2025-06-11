@@ -69,33 +69,33 @@ export default function WhatsappList() {
 
   const getInstanceStats = () => {
     const total = (instances || []).length;
-    const connected = (instances || []).filter((i: WhatsappInstance) => i.status === "connected").length;
-    const connecting = (instances || []).filter((i: WhatsappInstance) => i.status === "connecting").length;
-    const disconnected = (instances || []).filter((i: WhatsappInstance) => i.status === "disconnected").length;
+    const connected = (instances || []).filter((i: WhatsappInstance) => i.status === "Connected").length;
+    const error = (instances || []).filter((i: WhatsappInstance) => i.status === "Error").length;
+    const disconnected = (instances || []).filter((i: WhatsappInstance) => i.status === "Disconnected").length;
     
-    return { total, connected, connecting, disconnected };
+    return { total, connected, error, disconnected };
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: string | null) => {
     switch (status) {
-      case "connected":
+      case "Connected":
         return <Wifi className="w-4 h-4 text-green-500" />;
-      case "connecting":
+      case "Error":
         return <QrCode className="w-4 h-4 text-yellow-500" />;
-      case "disconnected":
+      case "Disconnected":
         return <WifiOff className="w-4 h-4 text-red-500" />;
       default:
         return <WifiOff className="w-4 h-4 text-gray-500" />;
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | null) => {
     switch (status) {
-      case "connected":
+      case "Connected":
         return <Badge className="bg-green-100 text-green-800">Connected</Badge>;
-      case "connecting":
-        return <Badge className="bg-yellow-100 text-yellow-800">Connecting</Badge>;
-      case "disconnected":
+      case "Error":
+        return <Badge className="bg-yellow-100 text-yellow-800">Error</Badge>;
+      case "Disconnected":
         return <Badge className="bg-red-100 text-red-800">Disconnected</Badge>;
       default:
         return <Badge variant="secondary">Unknown</Badge>;
@@ -174,8 +174,8 @@ export default function WhatsappList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Connecting</p>
-                  <p className="text-2xl font-bold text-yellow-600">{stats.connecting}</p>
+                  <p className="text-sm font-medium text-slate-600">Error</p>
+                  <p className="text-2xl font-bold text-yellow-600">{stats.error}</p>
                 </div>
                 <QrCode className="w-8 h-8 text-yellow-400" />
               </div>
@@ -262,7 +262,7 @@ export default function WhatsappList() {
                         <strong>Created:</strong> {new Date(instance.created_at!).toLocaleDateString()}
                       </p>
                     </div>
-                    {instance.status === "connecting" && instance.qr_code && (
+                    {instance.status === "Error" && instance.qr_code && (
                       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
                         <div className="flex items-center gap-2 mb-2">
                           <QrCode className="w-5 h-5 text-yellow-600" />
@@ -281,7 +281,7 @@ export default function WhatsappList() {
                     )}
                   </div>
                   <div className="flex items-center gap-2 ml-4">
-                    {instance.status === "disconnected" && (
+                    {instance.status === "Disconnected" && (
                       <Button
                         variant="outline"
                         size="sm"
