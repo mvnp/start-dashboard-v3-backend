@@ -125,7 +125,7 @@ export default function AppointmentForm() {
       return;
     }
 
-    if (formData.employee_id === 0) {
+    if (formData.user === 0) {
       toast({
         title: "Error",
         description: "Please select a staff member",
@@ -221,10 +221,10 @@ export default function AppointmentForm() {
               </div>
 
               <div>
-                <Label htmlFor="employee_id">Staff Member</Label>
+                <Label htmlFor="user">Staff Member</Label>
                 <Select 
-                  value={formData.employee_id ? formData.employee_id.toString() : ""} 
-                  onValueChange={(value) => handleInputChange('employee_id', parseInt(value))}
+                  value={formData.user ? formData.user.toString() : ""} 
+                  onValueChange={(value) => handleInputChange('user', parseInt(value))}
                   required
                 >
                   <SelectTrigger>
