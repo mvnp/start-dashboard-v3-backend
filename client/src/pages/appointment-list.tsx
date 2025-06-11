@@ -95,7 +95,7 @@ export default function AppointmentList() {
   };
 
   const filteredAppointments = appointments.filter(appointment => {
-    const staffName = getStaffName(appointment.user_id).toLowerCase();
+    const staffName = getStaffName(appointment.employee_id).toLowerCase();
     const clientName = getClientName(appointment.client_id).toLowerCase();
     const serviceName = getServiceName(appointment.service_id).toLowerCase();
     const searchLower = searchTerm.toLowerCase();
@@ -185,7 +185,7 @@ export default function AppointmentList() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-purple-600" />
-                  <span className="text-sm text-slate-600">{getStaffName(appointment.user_id)}</span>
+                  <span className="text-sm text-slate-600">{getStaffName(appointment.employee_id)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Settings className="w-4 h-4 text-blue-600" />
