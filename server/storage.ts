@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
-import { eq, and, or, isNull, inArray } from "drizzle-orm";
+import { eq, and, or, isNull, inArray, gte, lte, desc, asc, sql, count as countFn } from "drizzle-orm";
 import { 
   users, businesses, persons, roles, users_business, users_roles,
   services, appointments, barber_plans, payment_gateways, payment_gateway_types,
@@ -72,6 +72,15 @@ export interface IStorage {
   getAllAppointments(): Promise<Appointment[]>;
   getAppointment(id: number): Promise<Appointment | undefined>;
   getAppointmentsByBusinessIds(businessIds: number[]): Promise<Appointment[]>;
+  getFilteredAppointments(filters: {
+    page: number;
+    limit: number;
+    status?: string;
+    today?: boolean;
+    startDate?: string;
+    endDate?: string;
+    businessIds?: number[] | null;
+  }): Promise<{ appointments: Appointment[]; total: number; totalPages: number; currentPage: number }>;
   createAppointment(appointment: InsertAppointment): Promise<Appointment>;
   updateAppointment(id: number, appointment: Partial<InsertAppointment>): Promise<Appointment | undefined>;
   deleteAppointment(id: number): Promise<boolean>;
@@ -454,10 +463,10 @@ class PostgresStorage implements IStorage {
     
     // Get total count
     const totalResult = await this.db
-      .select({ count: sql<number>`count(*)` })
+      .select({ count: count() })
       .from(appointments)
       .where(whereCondition);
-    const total = totalResult[0].count;
+    const total = Number(totalResult[0].count);
     
     // Calculate pagination
     const offset = (page - 1) * limit;
