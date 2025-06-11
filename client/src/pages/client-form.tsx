@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useLocation, useRoute } from "wouter";
+import { useLocation, useRoute, useParams } from "wouter";
 import { ArrowLeft, Save, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,12 +27,13 @@ interface ClientWithUser extends Person {
 
 export default function ClientForm() {
   const [, setLocation] = useLocation();
-  const [match, params] = useRoute("/clients/edit/:id");
+  const params = useParams();
+  const [editMatch] = useRoute("/clients/edit/:id");
   const [createMatch] = useRoute("/clients/new");
   const { toast } = useToast();
-  const isEdit = !!match;
+  const isEdit = !!editMatch;
   const isCreating = !!createMatch;
-  const clientId = params?.id ? parseInt(params.id) : null;
+  const clientId = isEdit && params.id ? parseInt(params.id) : null;
 
   const [formData, setFormData] = useState<ClientFormData>({
     first_name: "",
@@ -51,13 +52,18 @@ export default function ClientForm() {
     select: (data: ClientWithUser) => data,
   });
 
-  console.log("Query state:", { 
+  console.log("Route debug:", { 
+    editMatch, 
+    params, 
+    createMatch,
     isEdit, 
+    isCreating,
     clientId, 
     enabled: isEdit && !!clientId,
     isLoading, 
     error,
-    hasData: !!clientMember 
+    hasData: !!clientMember,
+    queryKey: ["/api/clients", clientId]
   });
 
   const createClientMutation = useMutation({
@@ -120,7 +126,7 @@ export default function ClientForm() {
   });
 
   useEffect(() => {
-    console.log("Client form debug:", { isEdit, clientId, clientMember, match, params });
+    console.log("Client form debug:", { isEdit, clientId, clientMember, editMatch, params });
     if (clientMember && isEdit) {
       console.log("Loading client data:", clientMember);
       setFormData({
@@ -132,7 +138,7 @@ export default function ClientForm() {
         address: clientMember.address || "",
       });
     }
-  }, [clientMember, isEdit, clientId, match, params]);
+  }, [clientMember, isEdit, clientId, editMatch, params]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
