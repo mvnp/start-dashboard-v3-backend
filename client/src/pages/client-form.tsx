@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useLocation, useParams } from "wouter";
+import { useLocation, useRoute } from "wouter";
 import { ArrowLeft, Save, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,10 +27,12 @@ interface ClientWithUser extends Person {
 
 export default function ClientForm() {
   const [, setLocation] = useLocation();
-  const params = useParams();
+  const [match, params] = useRoute("/clients/edit/:id");
+  const [createMatch] = useRoute("/clients/new");
   const { toast } = useToast();
-  const isEdit = !!params.id;
-  const clientId = params.id ? parseInt(params.id) : null;
+  const isEdit = !!match;
+  const isCreating = !!createMatch;
+  const clientId = params?.id ? parseInt(params.id) : null;
 
   const [formData, setFormData] = useState<ClientFormData>({
     first_name: "",
