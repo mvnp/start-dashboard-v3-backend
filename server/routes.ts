@@ -86,30 +86,19 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  // Login endpoint
-  app.post("/api/login", async (req, res) => {
+  app.get("/api/user", async (req, res) => {
     try {
-      const { email, password } = req.body;
-      
-      if (!email || !password) {
-        return res.status(400).json({ error: "Email and password are required" });
+      // Check if session exists and has user data
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: "Not authenticated" });
       }
 
-      // Authenticate user with email and password
-      const userData = await storage.authenticateUser(email, password);
+      const userData = await storage.getUserWithRoleAndBusiness(req.session.userId);
       if (!userData) {
-        return res.status(401).json({ error: "Invalid email or password" });
+        return res.status(401).json({ error: "User not found" });
       }
-
-      // Set session data
-      req.session.userId = userData.user.id;
-      req.session.userEmail = userData.user.email;
-      req.session.roleId = userData.roleId;
-      req.session.businessIds = userData.businessIds;
-      req.session.isAuthenticated = true;
 
       res.json({
-        message: "Login successful",
         user: {
           id: userData.user.id,
           email: userData.user.email,
@@ -119,10 +108,12 @@ export function registerRoutes(app: Express): void {
         }
       });
     } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ error: "Login failed" });
+      console.error("User fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch user data" });
     }
   });
+
+
 
   // Logout endpoint
   app.post("/api/logout", (req, res) => {
