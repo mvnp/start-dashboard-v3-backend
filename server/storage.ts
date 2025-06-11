@@ -446,16 +446,21 @@ class PostgresStorage implements IStorage {
       const todayDate = new Date().toISOString().split('T')[0];
       conditions.push(eq(appointments.appointment_date, todayDate));
     } else if (startDate && endDate) {
+      // Ensure dates are in YYYY-MM-DD format for proper comparison
+      const formattedStartDate = new Date(startDate + 'T00:00:00').toISOString().split('T')[0];
+      const formattedEndDate = new Date(endDate + 'T23:59:59').toISOString().split('T')[0];
       conditions.push(
         and(
-          gte(appointments.appointment_date, startDate),
-          lte(appointments.appointment_date, endDate)
+          gte(appointments.appointment_date, formattedStartDate),
+          lte(appointments.appointment_date, formattedEndDate)
         )
       );
     } else if (startDate) {
-      conditions.push(gte(appointments.appointment_date, startDate));
+      const formattedStartDate = new Date(startDate + 'T00:00:00').toISOString().split('T')[0];
+      conditions.push(gte(appointments.appointment_date, formattedStartDate));
     } else if (endDate) {
-      conditions.push(lte(appointments.appointment_date, endDate));
+      const formattedEndDate = new Date(endDate + 'T23:59:59').toISOString().split('T')[0];
+      conditions.push(lte(appointments.appointment_date, formattedEndDate));
     }
     
     // Combine all conditions
