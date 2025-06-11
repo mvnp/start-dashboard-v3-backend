@@ -46,6 +46,33 @@ export default function ClientForm() {
   
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const formatPhoneNumber = (value: string) => {
+    // Remove all non-numeric characters
+    const numbers = value.replace(/\D/g, '');
+    
+    // Apply mask based on length
+    if (numbers.length <= 10) {
+      // Format: (48) 9189-3313
+      return numbers.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    } else {
+      // Format: (48) 99189-3313
+      return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    }
+  };
+
+  const formatTaxId = (value: string) => {
+    // Remove all non-numeric characters
+    const numbers = value.replace(/\D/g, '');
+    
+    if (numbers.length <= 11) {
+      // CPF format: 020.393.261-70
+      return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else {
+      // CNPJ format: 33.240.999.0001/03
+      return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3.$4/$5');
+    }
+  };
+
   const { data: clientMember, isLoading, error } = useQuery({
     queryKey: [`/api/clients/${clientId}`] as const,
     queryFn: async () => {
@@ -58,8 +85,6 @@ export default function ClientForm() {
       return response.json();
     },
     enabled: isEdit && !!clientId,
-    staleTime: 0,
-    cacheTime: 0,
   });
 
 
@@ -129,8 +154,8 @@ export default function ClientForm() {
         first_name: clientMember.first_name || "",
         last_name: clientMember.last_name || "",
         email: clientMember.user?.email || "",
-        phone: clientMember.phone || "",
-        tax_id: clientMember.tax_id || "",
+        phone: clientMember.phone ? formatPhoneNumber(clientMember.phone) : "",
+        tax_id: clientMember.tax_id ? formatTaxId(clientMember.tax_id) : "",
         address: clientMember.address || "",
       });
     }
@@ -163,6 +188,10 @@ export default function ClientForm() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const stripFormatting = (value: string) => {
+    return value.replace(/\D/g, '');
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
@@ -171,17 +200,32 @@ export default function ClientForm() {
       return;
     }
     
+    // Prepare data for submission by removing formatting from phone and tax_id
+    const submitData = {
+      ...formData,
+      phone: stripFormatting(formData.phone),
+      tax_id: formData.tax_id ? stripFormatting(formData.tax_id) : "",
+    };
+    
     if (isEdit) {
-      updateClientMutation.mutate(formData);
+      updateClientMutation.mutate(submitData);
     } else {
-      createClientMutation.mutate(formData);
+      createClientMutation.mutate(submitData);
     }
   };
 
   const handleInputChange = (field: keyof ClientFormData, value: string) => {
+    let formattedValue = value;
+    
+    if (field === 'phone') {
+      formattedValue = formatPhoneNumber(value);
+    } else if (field === 'tax_id') {
+      formattedValue = formatTaxId(value);
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: formattedValue
     }));
     
     // Clear error for this field when user starts typing
@@ -196,7 +240,6 @@ export default function ClientForm() {
   const isSubmitting = createClientMutation.isPending || updateClientMutation.isPending;
 
   if (isEdit && isLoading) {
-    console.log("Showing loading state for client edit");
     return (
       <div className="p-6">
         <div className="animate-pulse">
