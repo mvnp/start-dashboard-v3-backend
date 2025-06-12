@@ -42,9 +42,19 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
   const actualBusinessId = businessId || (params?.id ? parseInt(params.id) : undefined);
   const isEditing = Boolean(actualBusinessId);
 
-  const { data: business } = useQuery<Business>({
+  const { data: business, isLoading: businessLoading } = useQuery<Business>({
     queryKey: ["/api/businesses", actualBusinessId],
-    enabled: isEditing,
+    queryFn: async () => {
+      if (!actualBusinessId) throw new Error("No business ID");
+      const response = await fetch(`/api/businesses/${actualBusinessId}`, {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch business: ${response.statusText}`);
+      }
+      return response.json();
+    },
+    enabled: isEditing && !!actualBusinessId,
   });
 
   // Query for merchant users (role_id = 2)
@@ -101,19 +111,27 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
 
   // Update form when business data loads
   useEffect(() => {
-    if (business && isEditing && merchantUsers?.length) {
-      // Find first merchant user of this business as default
-      const firstMerchant = merchantUsers.find(user => user.id === business.user_id) || merchantUsers[0];
+    console.log("Form loading effect:", { business, isEditing, merchantUsersLength: merchantUsers?.length });
+    
+    if (business && isEditing) {
+      console.log("Loading business data into form:", business);
       
-      form.reset({
-        user_id: firstMerchant?.id || 0,
+      // Find first merchant user of this business as default, or use business owner
+      const businessOwner = merchantUsers?.find(user => user.id === business.user_id);
+      const firstMerchant = businessOwner || merchantUsers?.[0];
+      
+      const formData = {
+        user_id: firstMerchant?.id || business.user_id || 0,
         name: business.name,
         description: business.description || "",
         address: business.address || "",
         phone: formatPhoneNumber(business.phone || ""),
         email: business.email || "",
         tax_id: formatTaxId(business.tax_id || ""),
-      });
+      };
+      
+      console.log("Setting form data:", formData);
+      form.reset(formData);
     }
   }, [business, isEditing, merchantUsers, form]);
 
