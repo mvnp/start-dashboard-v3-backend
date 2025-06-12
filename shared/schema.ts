@@ -70,18 +70,19 @@ export const accounting_transaction_categories = pgTable("accounting_transaction
 export const accounting_transactions = pgTable("accounting_transactions", {
   id: serial("id").primaryKey(),
   type: transactionTypeEnum("type").notNull(),
-  category: text("category"),
-  description: text("description"),
+  category: text("category").notNull(),
+  description: text("description").notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  payment_method: text("payment_method"),
-  reference_number: text("reference_number"),
+  payment_method: text("payment_method").notNull(),
+  reference_number: text("reference_number").notNull(),
   transaction_date: date("transaction_date").notNull(),
   notes: text("notes"),
   is_recurring: boolean("is_recurring").default(false),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
-  user_id: integer("user_id").references(() => users.id),
-  accounting_category_id: integer("accounting_category_id").references(() => accounting_transaction_categories.id),
+  client_id: integer("client_id").references(() => users.id), // Role ID: 4
+  staff_id: integer("staff_id").references(() => users.id), // Role ID: 3
+  business_id: integer("business_id").references(() => businesses.id),
 });
 
 export const services = pgTable("services", {
@@ -235,6 +236,22 @@ export const insertAccountingTransactionSchema = createInsertSchema(accounting_t
   id: true,
   created_at: true,
   updated_at: true,
+}).extend({
+  type: z.enum(["revenue", "expense"], { required_error: "Transaction type is required" }),
+  category: z.string().min(1, "Category is required"),
+  description: z.string().min(1, "Description is required"),
+  amount: z.string().refine((val) => {
+    const num = parseFloat(val);
+    return !isNaN(num) && num > 0;
+  }, "Amount must be greater than 0"),
+  payment_method: z.string().min(1, "Payment method is required"),
+  reference_number: z.string().min(1, "Reference number is required"),
+  transaction_date: z.string().min(1, "Transaction date is required"),
+  client_id: z.number().optional().nullable(),
+  staff_id: z.number().optional().nullable(),
+  notes: z.string().optional(),
+  is_recurring: z.boolean().default(false),
+  business_id: z.number().optional(),
 });
 
 export const insertServiceSchema = createInsertSchema(services).omit({

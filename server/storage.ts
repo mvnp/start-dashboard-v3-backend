@@ -581,6 +581,13 @@ class PostgresStorage implements IStorage {
     return result[0];
   }
 
+  async getAccountingTransactionsByBusinessIds(businessIds: number[] | null): Promise<AccountingTransaction[]> {
+    if (businessIds === null) {
+      return await this.db.select().from(accounting_transactions);
+    }
+    return await this.db.select().from(accounting_transactions).where(inArray(accounting_transactions.business_id, businessIds));
+  }
+
   async createAccountingTransaction(insertAccountingTransaction: InsertAccountingTransaction): Promise<AccountingTransaction> {
     const result = await this.db.insert(accounting_transactions).values(insertAccountingTransaction).returning();
     return result[0];

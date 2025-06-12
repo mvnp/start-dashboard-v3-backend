@@ -862,9 +862,42 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/accounting", async (req, res) => {
+  // Accounting Transaction routes
+  app.get("/api/accounting-transactions", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const validatedData = insertAccountingTransactionSchema.parse(req.body);
+      const businessIds = getBusinessFilter(req.user);
+      const transactions = await storage.getAccountingTransactionsByBusinessIds(businessIds);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Accounting transactions fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch accounting transactions" });
+    }
+  });
+
+  app.get("/api/accounting-transactions/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const transaction = await storage.getAccountingTransaction(id);
+      if (!transaction) {
+        return res.status(404).json({ error: "Transaction not found" });
+      }
+      res.json(transaction);
+    } catch (error) {
+      console.error("Accounting transaction fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch transaction" });
+    }
+  });
+
+  app.post("/api/accounting-transactions", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const businessIds = getBusinessFilter(req.user);
+      const businessId = businessIds?.[0] || req.body.business_id;
+      
+      const validatedData = insertAccountingTransactionSchema.parse({
+        ...req.body,
+        business_id: businessId
+      });
+      
       const transaction = await storage.createAccountingTransaction(validatedData);
       res.status(201).json(transaction);
     } catch (error) {
@@ -873,6 +906,39 @@ export function registerRoutes(app: Express): void {
         return res.status(400).json({ error: "Invalid data", details: error.errors });
       }
       res.status(500).json({ error: "Failed to create accounting transaction" });
+    }
+  });
+
+  app.put("/api/accounting-transactions/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertAccountingTransactionSchema.partial().parse(req.body);
+      
+      const transaction = await storage.updateAccountingTransaction(id, validatedData);
+      if (!transaction) {
+        return res.status(404).json({ error: "Transaction not found" });
+      }
+      res.json(transaction);
+    } catch (error) {
+      console.error("Accounting transaction update error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update accounting transaction" });
+    }
+  });
+
+  app.delete("/api/accounting-transactions/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteAccountingTransaction(id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Transaction not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error("Accounting transaction deletion error:", error);
+      res.status(500).json({ error: "Failed to delete accounting transaction" });
     }
   });
 
