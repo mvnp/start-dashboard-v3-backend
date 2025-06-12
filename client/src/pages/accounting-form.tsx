@@ -68,7 +68,7 @@ export default function AccountingForm() {
 
   // Fetch transaction data for editing
   const { data: transaction, isLoading: isLoadingTransaction } = useQuery<AccountingTransaction>({
-    queryKey: ["/api/accounting-transactions", transactionId],
+    queryKey: [`/api/accounting-transactions/${transactionId}`],
     enabled: !!transactionId && isEdit,
   });
 
