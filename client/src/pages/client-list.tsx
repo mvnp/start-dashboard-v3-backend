@@ -66,6 +66,9 @@ export default function ClientList() {
 
   const formatDate = (dateString: string | Date | null) => {
     if (!dateString) return "N/A";
+    if (typeof dateString === 'string') {
+      return new Date(dateString + 'T12:00:00').toLocaleDateString();
+    }
     return new Date(dateString).toLocaleDateString();
   };
 

@@ -450,24 +450,25 @@ class PostgresStorage implements IStorage {
     
     // Date filtering
     if (today) {
-      const todayDate = new Date().toISOString().split('T')[0];
-      conditions.push(eq(appointments.appointment_date, todayDate));
+      // Get today's date in local timezone as YYYY-MM-DD string
+      const todayDate = new Date();
+      const year = todayDate.getFullYear();
+      const month = String(todayDate.getMonth() + 1).padStart(2, '0');
+      const day = String(todayDate.getDate()).padStart(2, '0');
+      const todayString = `${year}-${month}-${day}`;
+      conditions.push(eq(appointments.appointment_date, todayString));
     } else if (startDate && endDate) {
-      // Ensure dates are in YYYY-MM-DD format for proper comparison
-      const formattedStartDate = new Date(startDate + 'T00:00:00').toISOString().split('T')[0];
-      const formattedEndDate = new Date(endDate + 'T23:59:59').toISOString().split('T')[0];
+      // Use dates directly as strings without timezone conversion
       conditions.push(
         and(
-          gte(appointments.appointment_date, formattedStartDate),
-          lte(appointments.appointment_date, formattedEndDate)
+          gte(appointments.appointment_date, startDate),
+          lte(appointments.appointment_date, endDate)
         )
       );
     } else if (startDate) {
-      const formattedStartDate = new Date(startDate + 'T00:00:00').toISOString().split('T')[0];
-      conditions.push(gte(appointments.appointment_date, formattedStartDate));
+      conditions.push(gte(appointments.appointment_date, startDate));
     } else if (endDate) {
-      const formattedEndDate = new Date(endDate + 'T23:59:59').toISOString().split('T')[0];
-      conditions.push(lte(appointments.appointment_date, formattedEndDate));
+      conditions.push(lte(appointments.appointment_date, endDate));
     }
     
     // Combine all conditions

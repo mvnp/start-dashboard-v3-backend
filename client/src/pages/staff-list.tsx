@@ -94,7 +94,7 @@ export default function StaffList() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+    return new Date(dateString + 'T12:00:00').toLocaleDateString();
   };
 
   if (isLoading) {

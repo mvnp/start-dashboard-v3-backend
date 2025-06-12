@@ -164,7 +164,7 @@ export default function AppointmentList() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+    return new Date(dateString + 'T12:00:00').toLocaleDateString();
   };
 
   const formatTime = (timeString: string) => {
