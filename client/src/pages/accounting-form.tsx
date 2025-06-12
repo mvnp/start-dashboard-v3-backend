@@ -96,7 +96,7 @@ export default function AccountingForm() {
         description: transaction.description,
         amount: transaction.amount,
         payment_method: transaction.payment_method,
-        transaction_date: format(new Date(transaction.transaction_date), "yyyy-MM-dd"),
+        transaction_date: transaction.transaction_date ? format(new Date(transaction.transaction_date), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
         reference_number: transaction.reference_number,
         client_id: transaction.client_id || undefined,
         staff_id: transaction.staff_id || undefined,
@@ -167,11 +167,11 @@ export default function AccountingForm() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="min-h-screen w-full p-6">
       <div className="flex items-center gap-4 mb-6">
         <Button
           variant="outline"
-          onClick={() => setLocation("/accounting")}
+          onClick={() => setLocation("/accounting-list")}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Transactions
@@ -181,7 +181,7 @@ export default function AccountingForm() {
         </h1>
       </div>
 
-      <Card className="max-w-2xl">
+      <Card className="w-full max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle>Transaction Details</CardTitle>
         </CardHeader>
