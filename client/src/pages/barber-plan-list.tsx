@@ -93,9 +93,14 @@ export default function BarberPlanList() {
   return (
     <div className="w-full p-6">
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Barber Plans</h1>
-          <p className="text-slate-600 mt-2">Manage subscription plans for barbershops</p>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-barber-primary rounded-xl flex items-center justify-center">
+            <Crown className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Barber Plans</h1>
+            <p className="text-slate-600 mt-2">Manage subscription plans for barbershops</p>
+          </div>
         </div>
         <Button
           onClick={() => setLocation("/plans/new")}

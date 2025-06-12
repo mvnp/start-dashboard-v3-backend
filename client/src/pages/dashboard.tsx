@@ -1,4 +1,4 @@
-import { Calendar, DollarSign, Users, CheckCircle, Plus, UserPlus, CreditCard } from "lucide-react";
+import { Calendar, DollarSign, Users, CheckCircle, Plus, UserPlus, CreditCard, Home } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -112,8 +112,15 @@ export default function Dashboard() {
     <div className="p-6">
       {/* Dashboard Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Dashboard</h1>
-        <p className="text-slate-600">Welcome back! Here's what's happening at your barbershop today.</p>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-12 h-12 bg-barber-primary rounded-xl flex items-center justify-center">
+            <Home className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
+            <p className="text-slate-600">Welcome back! Here's what's happening at your barbershop today.</p>
+          </div>
+        </div>
       </div>
 
       {/* Stats Cards */}

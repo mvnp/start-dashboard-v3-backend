@@ -110,9 +110,14 @@ export default function PaymentGatewayList() {
   return (
     <div className="w-full p-6">
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Payment Gateways</h1>
-          <p className="text-slate-600 mt-2">Manage payment processing systems</p>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-barber-primary rounded-xl flex items-center justify-center">
+            <CreditCard className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Payment Gateways</h1>
+            <p className="text-slate-600 mt-2">Manage payment processing systems</p>
+          </div>
         </div>
         <Button
           onClick={() => setLocation("/payment-gateways/new")}
