@@ -67,9 +67,11 @@ export default function AccountingForm() {
   });
 
   // Fetch transaction data for editing
-  const { data: transaction, isLoading: isLoadingTransaction } = useQuery<AccountingTransaction>({
+  const { data: transaction, isLoading: isLoadingTransaction, error: transactionError } = useQuery<AccountingTransaction>({
     queryKey: [`/api/accounting-transactions/${transactionId}`],
     enabled: !!transactionId && isEdit,
+    retry: 3,
+    staleTime: 0, // Always fetch fresh data
   });
 
   // Fetch clients (role ID 4)
@@ -89,30 +91,43 @@ export default function AccountingForm() {
 
   // Set form values when editing
   useEffect(() => {
-    if (transaction && isEdit && !isLoadingTransaction) {
-      const formData = {
-        type: transaction.type as "revenue" | "expense",
-        category_id: transaction.category_id || undefined,
-        description: transaction.description,
-        amount: transaction.amount,
-        payment_method: transaction.payment_method,
-        transaction_date: transaction.transaction_date ? format(new Date(transaction.transaction_date), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
-        reference_number: transaction.reference_number,
-        client_id: transaction.client_id || undefined,
-        staff_id: transaction.staff_id || undefined,
-        notes: transaction.notes || "",
-        is_recurring: transaction.is_recurring || false,
-      };
-      
-      // Reset form with transaction data
-      form.reset(formData);
-      
-      // Force update the form values
-      Object.entries(formData).forEach(([key, value]) => {
-        form.setValue(key as keyof FormData, value);
-      });
+    if (transaction && isEdit && !isLoadingTransaction && categories.length > 0) {
+      // Add a small delay to ensure form is fully initialized
+      const timer = setTimeout(() => {
+        const formData = {
+          type: transaction.type as "revenue" | "expense",
+          category_id: transaction.category_id ?? undefined,
+          description: transaction.description,
+          amount: transaction.amount,
+          payment_method: transaction.payment_method,
+          transaction_date: transaction.transaction_date ? format(new Date(transaction.transaction_date), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
+          reference_number: transaction.reference_number,
+          client_id: transaction.client_id ?? undefined,
+          staff_id: transaction.staff_id ?? undefined,
+          notes: transaction.notes || "",
+          is_recurring: transaction.is_recurring || false,
+        };
+        
+        // Reset form with transaction data
+        form.reset(formData);
+        
+        // Force update each field value to ensure UI reflects the data
+        form.setValue("type", formData.type);
+        if (formData.category_id) form.setValue("category_id", formData.category_id);
+        form.setValue("description", formData.description);
+        form.setValue("amount", formData.amount);
+        form.setValue("payment_method", formData.payment_method);
+        form.setValue("transaction_date", formData.transaction_date);
+        form.setValue("reference_number", formData.reference_number);
+        if (formData.client_id) form.setValue("client_id", formData.client_id);
+        if (formData.staff_id) form.setValue("staff_id", formData.staff_id);
+        form.setValue("notes", formData.notes);
+        form.setValue("is_recurring", formData.is_recurring);
+      }, 100);
+
+      return () => clearTimeout(timer);
     }
-  }, [transaction, isEdit, isLoadingTransaction, form]);
+  }, [transaction, isEdit, isLoadingTransaction, categories, form]);
 
   const createMutation = useMutation({
     mutationFn: (data: FormData) => 
@@ -164,11 +179,29 @@ export default function AccountingForm() {
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
-  if (isEdit && isLoadingTransaction) {
+  if (isEdit && (isLoadingTransaction || !transaction)) {
     return (
       <div className="min-h-screen w-full p-6">
         <div className="flex justify-center items-center h-64">
-          <div className="text-lg">Loading transaction...</div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <div className="text-lg">Loading transaction data...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (transactionError) {
+    return (
+      <div className="min-h-screen w-full p-6">
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">Failed to load transaction data</p>
+            <Button onClick={() => setLocation("/accounting")}>
+              Back to Transactions
+            </Button>
+          </div>
         </div>
       </div>
     );
