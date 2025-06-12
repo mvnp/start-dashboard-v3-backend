@@ -233,6 +233,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                         placeholder="Describe your business"
                         className="min-h-[100px]"
                         {...field}
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -289,15 +290,19 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email *</FormLabel>
                       <FormControl>
                         <Input 
                           type="email" 
                           placeholder="contact@business.com" 
-                          {...field} 
+                          {...field}
+                          value={field.value || ""}
                         />
                       </FormControl>
                       <FormMessage />
+                      {errors.email && (
+                        <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                      )}
                     </FormItem>
                   )}
                 />
@@ -308,11 +313,22 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                 name="tax_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tax ID</FormLabel>
+                    <FormLabel>Tax ID *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter tax identification number" {...field} />
+                      <Input 
+                        placeholder="000.000.000-00 or 00.000.000/0000-00"
+                        {...field}
+                        value={field.value || ""}
+                        onChange={(e) => {
+                          const formatted = formatTaxId(e.target.value);
+                          field.onChange(formatted);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
+                    {errors.tax_id && (
+                      <p className="text-red-500 text-sm mt-1">{errors.tax_id}</p>
+                    )}
                   </FormItem>
                 )}
               />
@@ -322,24 +338,25 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                 name="user_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Owner (Super Admin)</FormLabel>
+                    <FormLabel>Owner *</FormLabel>
                     <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select super admin owner" />
+                          <SelectValue placeholder="Select merchant owner" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {superAdminUsers?.map((user) => (
+                        {merchantUsers?.map((user: User) => (
                           <SelectItem key={user.id} value={user.id.toString()}>
-                            {user.first_name && user.last_name 
-                              ? `${user.first_name} ${user.last_name} (${user.email})`
-                              : user.email}
+                            {user.email}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
+                    {errors.user_id && (
+                      <p className="text-red-500 text-sm mt-1">{errors.user_id}</p>
+                    )}
                   </FormItem>
                 )}
               />
