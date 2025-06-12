@@ -862,6 +862,18 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  // Accounting Transaction Category routes
+  app.get("/api/accounting-transaction-categories", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const businessIds = getBusinessFilter(req.user);
+      const categories = await storage.getAccountingTransactionCategoriesByBusinessIds(businessIds);
+      res.json(categories);
+    } catch (error) {
+      console.error("Accounting transaction categories fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch accounting transaction categories" });
+    }
+  });
+
   // Accounting Transaction routes
   app.get("/api/accounting-transactions", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {

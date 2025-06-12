@@ -103,11 +103,7 @@ export default function AccountingForm() {
 
   const createMutation = useMutation({
     mutationFn: (data: FormData) => 
-      apiRequest("/api/accounting-transactions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      }),
+      apiRequest("POST", "/api/accounting-transactions", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions"] });
       toast({
@@ -127,11 +123,7 @@ export default function AccountingForm() {
 
   const updateMutation = useMutation({
     mutationFn: (data: FormData) =>
-      apiRequest(`/api/accounting-transactions/${transactionId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      }),
+      apiRequest("PUT", `/api/accounting-transactions/${transactionId}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions"] });
       toast({

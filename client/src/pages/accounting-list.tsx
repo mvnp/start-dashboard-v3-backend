@@ -19,9 +19,7 @@ export default function AccountingList() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/accounting-transactions/${id}`, {
-      method: "DELETE"
-    }),
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/accounting-transactions/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions"] });
       toast({

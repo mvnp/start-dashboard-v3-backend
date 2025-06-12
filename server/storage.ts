@@ -101,6 +101,10 @@ export interface IStorage {
   updatePaymentGateway(id: number, gateway: Partial<InsertPaymentGateway>): Promise<PaymentGateway | undefined>;
   deletePaymentGateway(id: number): Promise<boolean>;
   
+  // Accounting Transaction Category methods
+  getAllAccountingTransactionCategories(): Promise<AccountingTransactionCategory[]>;
+  getAccountingTransactionCategoriesByBusinessIds(businessIds: number[] | null): Promise<AccountingTransactionCategory[]>;
+  
   // Accounting Transaction methods
   getAllAccountingTransactions(): Promise<AccountingTransaction[]>;
   getAccountingTransaction(id: number): Promise<AccountingTransaction | undefined>;
@@ -570,6 +574,18 @@ class PostgresStorage implements IStorage {
   async deletePaymentGateway(id: number): Promise<boolean> {
     const result = await this.db.delete(payment_gateways).where(eq(payment_gateways.id, id));
     return result.rowCount > 0;
+  }
+
+  // Accounting Transaction Category methods
+  async getAllAccountingTransactionCategories(): Promise<AccountingTransactionCategory[]> {
+    return await this.db.select().from(accounting_transaction_categories);
+  }
+
+  async getAccountingTransactionCategoriesByBusinessIds(businessIds: number[] | null): Promise<AccountingTransactionCategory[]> {
+    if (businessIds === null) {
+      return await this.db.select().from(accounting_transaction_categories);
+    }
+    return await this.db.select().from(accounting_transaction_categories).where(inArray(accounting_transaction_categories.business_id, businessIds));
   }
 
   // Accounting Transaction methods
