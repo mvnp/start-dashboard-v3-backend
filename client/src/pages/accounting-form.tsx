@@ -89,9 +89,11 @@ export default function AccountingForm() {
 
   // Set form values when editing
   useEffect(() => {
-    if (transaction && isEdit) {
-      form.reset({
-        type: transaction.type,
+    if (transaction && isEdit && !isLoadingTransaction) {
+      console.log("Loading transaction data:", transaction);
+      
+      const formData = {
+        type: transaction.type as "revenue" | "expense",
         category_id: transaction.category_id || undefined,
         description: transaction.description,
         amount: transaction.amount,
@@ -102,9 +104,19 @@ export default function AccountingForm() {
         staff_id: transaction.staff_id || undefined,
         notes: transaction.notes || "",
         is_recurring: transaction.is_recurring || false,
+      };
+      
+      console.log("Setting form data:", formData);
+      
+      // Reset form with transaction data
+      form.reset(formData);
+      
+      // Force update the form values
+      Object.entries(formData).forEach(([key, value]) => {
+        form.setValue(key as keyof FormData, value);
       });
     }
-  }, [transaction, isEdit, form]);
+  }, [transaction, isEdit, isLoadingTransaction, form]);
 
   const createMutation = useMutation({
     mutationFn: (data: FormData) => 
