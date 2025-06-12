@@ -171,6 +171,7 @@ export default function StaffForm() {
 
   useEffect(() => {
     if (staffMember && isEdit) {
+      console.log("Setting form data with staff member:", staffMember);
       setFormData({
         first_name: staffMember.first_name || "",
         last_name: staffMember.last_name || "",
@@ -182,6 +183,8 @@ export default function StaffForm() {
         salary: Number(staffMember.salary) || 0,
         business_id: staffMember.business_id || 0,
       });
+      // Clear any previous errors when loading new data
+      setErrors({});
     }
   }, [staffMember, isEdit]);
 
@@ -416,7 +419,11 @@ export default function StaffForm() {
 
               <div>
                 <Label htmlFor="business_id">Business *</Label>
-                <Select onValueChange={(value) => handleInputChange('business_id', value)} value={formData.business_id > 0 ? formData.business_id.toString() : ""}>
+                <Select 
+                  key={`business-${formData.business_id}-${isEdit ? staffId : 'new'}`}
+                  onValueChange={(value) => handleInputChange('business_id', Number(value))} 
+                  value={formData.business_id > 0 ? formData.business_id.toString() : ""}
+                >
                   <SelectTrigger className={errors.business_id ? "border-red-500" : ""}>
                     <SelectValue placeholder="Select business" />
                   </SelectTrigger>
@@ -435,7 +442,11 @@ export default function StaffForm() {
 
               <div>
                 <Label htmlFor="role_id">Role *</Label>
-                <Select onValueChange={(value) => handleInputChange('role_id', Number(value))} value={formData.role_id?.toString()}>
+                <Select 
+                  key={`role-${formData.role_id}-${isEdit ? staffId : 'new'}`}
+                  onValueChange={(value) => handleInputChange('role_id', Number(value))} 
+                  value={formData.role_id?.toString()}
+                >
                   <SelectTrigger className={errors.role_id ? "border-red-500" : ""}>
                     <SelectValue placeholder="Select staff role" />
                   </SelectTrigger>
