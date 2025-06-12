@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { Building2, ArrowLeft } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,15 +13,29 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import { insertBusinessSchema, type InsertBusiness, type Business, type User } from "@shared/schema";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { z } from "zod";
+import { apiRequest } from "@/lib/queryClient";
 
 interface BusinessFormProps {
   businessId?: number;
 }
 
+// Create validation schema with required fields
+const businessFormSchema = insertBusinessSchema.extend({
+  name: z.string().min(1, "Business name is required"),
+  phone: z.string().min(1, "Phone number is required"),
+  email: z.string().email("Valid email is required").min(1, "Email is required"),
+  tax_id: z.string().min(1, "Tax ID is required"),
+  user_id: z.number().min(1, "Owner is required"),
+});
+
+type BusinessFormData = z.infer<typeof businessFormSchema>;
+
 export default function BusinessForm({ businessId }: BusinessFormProps) {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [errors, setErrors] = useState<Record<string, string>>({});
   
   // Extract ID from URL parameters if not passed as prop
   const [match, params] = useRoute("/businesses/:id/edit");
@@ -33,15 +47,24 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
     enabled: isEditing,
   });
 
-  // Query for super-admin users
-  const { data: superAdminUsers } = useQuery<any[]>({
-    queryKey: ["/api/users/super-admins"],
+  // Query for merchant users (role_id = 2)
+  const { data: merchantUsers } = useQuery<User[]>({
+    queryKey: ["/api/users/by-role"],
+    queryFn: async () => {
+      const response = await fetch("/api/users/by-role?role=merchant", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch merchant users: ${response.statusText}`);
+      }
+      return response.json();
+    },
   });
 
-  const form = useForm<InsertBusiness>({
-    resolver: zodResolver(insertBusinessSchema),
+  const form = useForm<BusinessFormData>({
+    resolver: zodResolver(businessFormSchema),
     defaultValues: {
-      user_id: undefined,
+      user_id: 0,
       name: "",
       description: "",
       address: "",
@@ -51,42 +74,66 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
     },
   });
 
+  // Formatting functions
+  const formatPhoneNumber = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 10) {
+      return numbers.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    } else {
+      return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    }
+  };
+
+  const formatTaxId = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      // CPF format: 020.393.261-70
+      return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else {
+      // CNPJ format: 33.240.999.0001/03
+      return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3.$4/$5');
+    }
+  };
+
+  const stripFormatting = (value: string) => {
+    return value.replace(/\D/g, '');
+  };
+
   // Update form when business data loads
   useEffect(() => {
-    if (business && isEditing) {
+    if (business && isEditing && merchantUsers?.length) {
+      // Find first merchant user of this business as default
+      const firstMerchant = merchantUsers.find(user => user.id === business.user_id) || merchantUsers[0];
+      
       form.reset({
-        user_id: business.user_id,
+        user_id: firstMerchant?.id || 0,
         name: business.name,
         description: business.description || "",
         address: business.address || "",
-        phone: business.phone || "",
+        phone: formatPhoneNumber(business.phone || ""),
         email: business.email || "",
-        tax_id: business.tax_id || "",
+        tax_id: formatTaxId(business.tax_id || ""),
       });
     }
-  }, [business, isEditing]);
+  }, [business, isEditing, merchantUsers, form]);
 
   const mutation = useMutation({
-    mutationFn: async (data: InsertBusiness) => {
-      const url = isEditing ? `/api/businesses/${businessId}` : "/api/businesses";
+    mutationFn: async (data: BusinessFormData) => {
+      // Strip formatting from phone and tax_id before sending
+      const submitData = {
+        ...data,
+        phone: stripFormatting(data.phone),
+        tax_id: stripFormatting(data.tax_id),
+      };
+
+      const url = isEditing ? `/api/businesses/${actualBusinessId}` : "/api/businesses";
       const method = isEditing ? "PUT" : "POST";
-      
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to ${isEditing ? "update" : "create"} business`);
-      }
-      
-      return response.json();
+      return apiRequest(method, url, submitData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/businesses"] });
       if (isEditing) {
-        queryClient.invalidateQueries({ queryKey: ["/api/businesses", businessId] });
+        queryClient.invalidateQueries({ queryKey: ["/api/businesses", actualBusinessId] });
       }
       toast({
         title: "Success",
@@ -94,16 +141,38 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
       });
       navigate("/businesses");
     },
-    onError: () => {
+    onError: async (error: any) => {
+      // Handle email uniqueness error
+      let errorData = null;
+      try {
+        const response = await error;
+        if (response && !response.ok) {
+          errorData = await response.json();
+        }
+      } catch (e) {
+        // If error parsing fails, handle generic error
+      }
+      
+      if (errorData?.error === "Email exists on database") {
+        setErrors({ email: "Email already exists" });
+        form.setError("email", { 
+          type: "manual", 
+          message: "Email already exists" 
+        });
+        return;
+      }
+      
+      const errorMessage = errorData?.error || `Failed to ${isEditing ? "update" : "create"} business`;
       toast({
         title: "Error",
-        description: `Failed to ${isEditing ? "update" : "create"} business`,
+        description: errorMessage,
         variant: "destructive",
       });
     },
   });
 
-  const onSubmit = (data: InsertBusiness) => {
+  const onSubmit = (data: BusinessFormData) => {
+    setErrors({});
     mutation.mutate(data);
   };
 
@@ -178,9 +247,10 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                   <FormItem>
                     <FormLabel>Address</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Input 
                         placeholder="Enter business address"
                         {...field}
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -194,11 +264,22 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
+                      <FormLabel>Phone Number *</FormLabel>
                       <FormControl>
-                        <Input placeholder="+1234567890" {...field} />
+                        <Input 
+                          placeholder="(11) 99999-9999"
+                          {...field}
+                          value={field.value || ""}
+                          onChange={(e) => {
+                            const formatted = formatPhoneNumber(e.target.value);
+                            field.onChange(formatted);
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
+                      {errors.phone && (
+                        <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                      )}
                     </FormItem>
                   )}
                 />
