@@ -90,8 +90,6 @@ export default function AccountingForm() {
   // Set form values when editing
   useEffect(() => {
     if (transaction && isEdit && !isLoadingTransaction) {
-      console.log("Loading transaction data:", transaction);
-      
       const formData = {
         type: transaction.type as "revenue" | "expense",
         category_id: transaction.category_id || undefined,
@@ -105,8 +103,6 @@ export default function AccountingForm() {
         notes: transaction.notes || "",
         is_recurring: transaction.is_recurring || false,
       };
-      
-      console.log("Setting form data:", formData);
       
       // Reset form with transaction data
       form.reset(formData);
@@ -207,7 +203,7 @@ export default function AccountingForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Type *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select transaction type" />
@@ -290,7 +286,7 @@ export default function AccountingForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Payment Method *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select payment method" />
