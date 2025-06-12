@@ -95,8 +95,12 @@ export default function StaffForm() {
   });
 
   const createStaffMutation = useMutation({
-    mutationFn: (data: StaffFormData) => apiRequest("POST", "/api/staff", data),
+    mutationFn: (data: StaffFormData) => {
+      console.log("Creating staff with data:", data);
+      return apiRequest("POST", "/api/staff", data);
+    },
     onSuccess: () => {
+      console.log("Staff creation successful");
       queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
       toast({
         title: "Staff member created",
@@ -105,6 +109,7 @@ export default function StaffForm() {
       setLocation("/staff");
     },
     onError: async (error: any) => {
+      console.log("Staff creation error:", error);
       // Try to extract error from response
       let errorData = null;
       try {
@@ -115,6 +120,8 @@ export default function StaffForm() {
       } catch (e) {
         // If error parsing fails, handle generic error
       }
+      
+      console.log("Error data:", errorData);
       
       // Handle email exists error specifically
       if (errorData?.error === "Email exists on database") {
@@ -258,7 +265,10 @@ export default function StaffForm() {
     e.preventDefault();
     setErrors({});
     
+    console.log("Form submitted - isEdit:", isEdit, "formData:", formData);
+    
     if (!validateForm()) {
+      console.log("Form validation failed");
       return;
     }
     
@@ -268,6 +278,8 @@ export default function StaffForm() {
       phone: stripFormatting(formData.phone),
       tax_id: formData.tax_id ? stripFormatting(formData.tax_id) : "",
     };
+    
+    console.log("Submit data prepared:", submitData);
     
     if (isEdit) {
       updateStaffMutation.mutate(submitData);
