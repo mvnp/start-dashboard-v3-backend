@@ -51,6 +51,11 @@ export default {
           "4": "var(--chart-4)",
           "5": "var(--chart-5)",
         },
+        barber: {
+          primary: "var(--barber-primary)",
+          secondary: "var(--barber-secondary)",
+          accent: "var(--barber-accent)",
+        },
         sidebar: {
           DEFAULT: "var(--sidebar-background)",
           foreground: "var(--sidebar-foreground)",

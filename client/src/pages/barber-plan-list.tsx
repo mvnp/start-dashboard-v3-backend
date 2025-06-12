@@ -94,7 +94,7 @@ export default function BarberPlanList() {
     <div className="w-full p-6">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-barber-primary rounded-xl flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{backgroundColor: 'var(--barber-primary)'}}>
             <Crown className="w-6 h-6 text-white" />
           </div>
           <div>

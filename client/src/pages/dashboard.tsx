@@ -93,17 +93,20 @@ const quickActions = [
   {
     name: "New Appointment",
     icon: Plus,
-    color: "bg-barber-primary hover:bg-barber-secondary text-white",
+    style: { backgroundColor: 'var(--barber-primary)', color: 'white' },
+    hoverStyle: { backgroundColor: 'var(--barber-secondary)' },
   },
   {
     name: "Add Client",
     icon: UserPlus,
-    color: "bg-slate-100 hover:bg-slate-200 text-slate-700",
+    style: { backgroundColor: 'var(--barber-primary)', color: 'white' },
+    hoverStyle: { backgroundColor: 'var(--barber-secondary)' },
   },
   {
     name: "Process Payment",
     icon: CreditCard,
-    color: "bg-slate-100 hover:bg-slate-200 text-slate-700",
+    style: { backgroundColor: 'var(--barber-primary)', color: 'white' },
+    hoverStyle: { backgroundColor: 'var(--barber-secondary)' },
   },
 ];
 
@@ -113,7 +116,7 @@ export default function Dashboard() {
       {/* Dashboard Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-12 h-12 bg-barber-primary rounded-xl flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{backgroundColor: 'var(--barber-primary)'}}>
             <Home className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -198,8 +201,11 @@ export default function Dashboard() {
                   return (
                     <Button 
                       key={index}
-                      className={`w-full justify-center ${action.color} transition-colors`}
+                      className="w-full justify-center transition-colors"
+                      style={action.style}
                       size="lg"
+                      onMouseEnter={(e) => Object.assign(e.currentTarget.style, action.hoverStyle)}
+                      onMouseLeave={(e) => Object.assign(e.currentTarget.style, action.style)}
                     >
                       <Icon className="w-5 h-5 mr-2" />
                       {action.name}
