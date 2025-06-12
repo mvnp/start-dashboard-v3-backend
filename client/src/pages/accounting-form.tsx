@@ -100,7 +100,7 @@ export default function AccountingForm() {
           description: transaction.description,
           amount: transaction.amount,
           payment_method: transaction.payment_method,
-          transaction_date: transaction.transaction_date ? format(new Date(transaction.transaction_date), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
+          transaction_date: transaction.transaction_date ? transaction.transaction_date.split('T')[0] : format(new Date(), "yyyy-MM-dd"),
           reference_number: transaction.reference_number,
           client_id: transaction.client_id ?? undefined,
           staff_id: transaction.staff_id ?? undefined,

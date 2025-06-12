@@ -173,11 +173,11 @@ export default function AccountingList() {
                 </thead>
                 <tbody>
                   {transactions
-                    .sort((a, b) => new Date(b.transaction_date).getTime() - new Date(a.transaction_date).getTime())
+                    .sort((a, b) => new Date(b.transaction_date + 'T12:00:00').getTime() - new Date(a.transaction_date + 'T12:00:00').getTime())
                     .map((transaction) => (
                     <tr key={transaction.id} className="border-b hover:bg-muted/50">
                       <td className="p-2">
-                        {format(new Date(transaction.transaction_date), 'MMM dd, yyyy')}
+                        {format(new Date(transaction.transaction_date + 'T12:00:00'), 'MMM dd, yyyy')}
                       </td>
                       <td className="p-2">
                         <Badge variant={transaction.type === 'revenue' ? 'default' : 'destructive'}>
