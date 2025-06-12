@@ -462,6 +462,18 @@ export function registerRoutes(app: Express): void {
         }
       }
       
+      // Update business relationship if business_id is provided and person has user_id
+      if (business_id && currentPerson.user_id) {
+        const businessIdNumber = typeof business_id === 'string' ? parseInt(business_id) : business_id;
+        await storage.updateUserBusiness(currentPerson.user_id, businessIdNumber);
+      }
+
+      // Update role relationship if role_id is provided and person has user_id
+      if (role_id && currentPerson.user_id) {
+        const roleIdNumber = typeof role_id === 'string' ? parseInt(role_id) : role_id;
+        await storage.updateUserRole(currentPerson.user_id, roleIdNumber);
+      }
+
       const validatedData = insertPersonSchema.partial().parse(personData);
       const person = await storage.updatePerson(id, validatedData);
       if (!person) {

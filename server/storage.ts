@@ -59,6 +59,8 @@ export interface IStorage {
   // Junction table methods
   createUserBusiness(insertUserBusiness: InsertUserBusiness): Promise<UserBusiness>;
   createUserRole(insertUserRole: InsertUserRole): Promise<UserRole>;
+  updateUserBusiness(userId: number, businessId: number): Promise<void>;
+  updateUserRole(userId: number, roleId: number): Promise<void>;
   
   // Service methods
   getAllServices(): Promise<Service[]>;
@@ -678,6 +680,28 @@ class PostgresStorage implements IStorage {
   async createUserRole(insertUserRole: InsertUserRole): Promise<UserRole> {
     const result = await this.db.insert(users_roles).values(insertUserRole).returning();
     return result[0];
+  }
+
+  async updateUserBusiness(userId: number, businessId: number): Promise<void> {
+    // Delete existing business relationship
+    await this.db.delete(users_business).where(eq(users_business.user_id, userId));
+    
+    // Create new business relationship
+    await this.db.insert(users_business).values({
+      user_id: userId,
+      business_id: businessId
+    });
+  }
+
+  async updateUserRole(userId: number, roleId: number): Promise<void> {
+    // Delete existing role relationship
+    await this.db.delete(users_roles).where(eq(users_roles.user_id, userId));
+    
+    // Create new role relationship
+    await this.db.insert(users_roles).values({
+      user_id: userId,
+      role_id: roleId
+    });
   }
 }
 
