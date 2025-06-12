@@ -175,12 +175,12 @@ function Router() {
           <AccountingList />
         </Layout>
       </Route>
-      <Route path="/accounting/new">
+      <Route path="/accounting-form">
         <Layout>
           <AccountingForm />
         </Layout>
       </Route>
-      <Route path="/accounting/:id/edit">
+      <Route path="/accounting-form/:id">
         <Layout>
           <AccountingForm />
         </Layout>
@@ -248,22 +248,7 @@ function Router() {
           <WhatsappForm />
         </Layout>
       </Route>
-      <Route path="/accounting">
-        <Layout>
-          <div className="p-6">
-            <h1 className="text-3xl font-bold text-slate-900">Accounting</h1>
-            <p className="text-slate-600 mt-2">Financial reporting and accounting coming soon...</p>
-          </div>
-        </Layout>
-      </Route>
-      <Route path="/support">
-        <Layout>
-          <div className="p-6">
-            <h1 className="text-3xl font-bold text-slate-900">Support</h1>
-            <p className="text-slate-600 mt-2">Customer support tools coming soon...</p>
-          </div>
-        </Layout>
-      </Route>
+
       <Route component={NotFound} />
     </Switch>
   );

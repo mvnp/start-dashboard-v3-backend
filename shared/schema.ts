@@ -236,22 +236,6 @@ export const insertAccountingTransactionSchema = createInsertSchema(accounting_t
   id: true,
   created_at: true,
   updated_at: true,
-}).extend({
-  type: z.enum(["revenue", "expense"], { required_error: "Transaction type is required" }),
-  category: z.string().min(1, "Category is required"),
-  description: z.string().min(1, "Description is required"),
-  amount: z.string().refine((val) => {
-    const num = parseFloat(val);
-    return !isNaN(num) && num > 0;
-  }, "Amount must be greater than 0"),
-  payment_method: z.string().min(1, "Payment method is required"),
-  reference_number: z.string().min(1, "Reference number is required"),
-  transaction_date: z.string().min(1, "Transaction date is required"),
-  client_id: z.number().optional().nullable(),
-  staff_id: z.number().optional().nullable(),
-  notes: z.string().optional(),
-  is_recurring: z.boolean().default(false),
-  business_id: z.number().optional(),
 });
 
 export const insertServiceSchema = createInsertSchema(services).omit({

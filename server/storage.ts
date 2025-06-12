@@ -104,6 +104,7 @@ export interface IStorage {
   // Accounting Transaction methods
   getAllAccountingTransactions(): Promise<AccountingTransaction[]>;
   getAccountingTransaction(id: number): Promise<AccountingTransaction | undefined>;
+  getAccountingTransactionsByBusinessIds(businessIds: number[] | null): Promise<AccountingTransaction[]>;
   createAccountingTransaction(transaction: InsertAccountingTransaction): Promise<AccountingTransaction>;
   updateAccountingTransaction(id: number, transaction: Partial<InsertAccountingTransaction>): Promise<AccountingTransaction | undefined>;
   deleteAccountingTransaction(id: number): Promise<boolean>;
