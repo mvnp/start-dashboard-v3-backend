@@ -55,12 +55,24 @@ export default function BusinessList() {
   return (
     <div className="min-h-screen w-full p-6">
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Business Management</h1>
-          <p className="text-muted-foreground">Manage your business locations and details</p>
+        <div className="flex items-center gap-4">
+          <div 
+            className="w-12 h-12 rounded-lg flex items-center justify-center"
+            style={{backgroundColor: 'var(--barber-primary)'}}
+          >
+            <Building2 className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Business Management</h1>
+            <p className="text-slate-600 mt-2">Manage your business locations and details</p>
+          </div>
         </div>
         <Link href="/businesses/new">
-          <Button>
+          <Button
+            style={{backgroundColor: 'var(--barber-primary)', color: 'white'}}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-secondary)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-primary)'}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Add Business
           </Button>
