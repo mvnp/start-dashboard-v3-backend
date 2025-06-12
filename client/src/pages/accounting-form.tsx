@@ -11,19 +11,25 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CalendarIcon, ArrowLeft } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { insertAccountingTransactionSchema, AccountingTransaction, AccountingTransactionCategory, Person } from "@shared/schema";
+import { AccountingTransaction, Person } from "@shared/schema";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 
-const formSchema = insertAccountingTransactionSchema.extend({
-  transaction_date: z.string().min(1, "Transaction date is required"),
+const formSchema = z.object({
+  type: z.enum(["revenue", "expense"]),
+  category: z.string().min(1, "Category is required"),
+  description: z.string().min(1, "Description is required"),
   amount: z.string().min(1, "Amount is required").regex(/^\d+(\.\d{1,2})?$/, "Invalid amount format"),
-}).omit({ id: true, business_id: true, created_at: true, updated_at: true, deleted_at: true });
+  payment_method: z.string().min(1, "Payment method is required"),
+  transaction_date: z.string().min(1, "Transaction date is required"),
+  reference_number: z.string().min(1, "Reference number is required"),
+  client_id: z.number().optional().nullable(),
+  staff_id: z.number().optional().nullable(),
+  notes: z.string().optional(),
+  is_recurring: z.boolean().default(false),
+});
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -47,16 +53,16 @@ export default function AccountingForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       type: "revenue",
+      category: "",
       description: "",
       amount: "",
       payment_method: "",
       transaction_date: format(new Date(), "yyyy-MM-dd"),
       reference_number: "",
-      category_id: undefined,
       client_id: undefined,
       staff_id: undefined,
       notes: "",
-      recurring: false,
+      is_recurring: false,
     },
   });
 
@@ -64,11 +70,6 @@ export default function AccountingForm() {
   const { data: transaction, isLoading: isLoadingTransaction } = useQuery<AccountingTransaction>({
     queryKey: ["/api/accounting-transactions", transactionId],
     enabled: !!transactionId && isEdit,
-  });
-
-  // Fetch categories
-  const { data: categories = [] } = useQuery<AccountingTransactionCategory[]>({
-    queryKey: ["/api/accounting-transaction-categories"],
   });
 
   // Fetch clients (role ID 4)
@@ -86,16 +87,16 @@ export default function AccountingForm() {
     if (transaction && isEdit) {
       form.reset({
         type: transaction.type,
+        category: transaction.category,
         description: transaction.description,
         amount: transaction.amount,
         payment_method: transaction.payment_method,
         transaction_date: format(new Date(transaction.transaction_date), "yyyy-MM-dd"),
         reference_number: transaction.reference_number,
-        category_id: transaction.category_id || undefined,
         client_id: transaction.client_id || undefined,
         staff_id: transaction.staff_id || undefined,
         notes: transaction.notes || "",
-        recurring: transaction.recurring || false,
+        is_recurring: transaction.is_recurring || false,
       });
     }
   }, [transaction, isEdit, form]);
@@ -104,6 +105,7 @@ export default function AccountingForm() {
     mutationFn: (data: FormData) => 
       apiRequest("/api/accounting-transactions", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       }),
     onSuccess: () => {
@@ -127,6 +129,7 @@ export default function AccountingForm() {
     mutationFn: (data: FormData) =>
       apiRequest(`/api/accounting-transactions/${transactionId}`, {
         method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       }),
     onSuccess: () => {
@@ -249,22 +252,25 @@ export default function AccountingForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="category_id"
+                  name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
+                      <FormLabel>Category *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select category" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.id.toString()}>
-                              {category.name}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value="services">Services</SelectItem>
+                          <SelectItem value="products">Products</SelectItem>
+                          <SelectItem value="supplies">Supplies</SelectItem>
+                          <SelectItem value="utilities">Utilities</SelectItem>
+                          <SelectItem value="rent">Rent</SelectItem>
+                          <SelectItem value="marketing">Marketing</SelectItem>
+                          <SelectItem value="equipment">Equipment</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -404,7 +410,7 @@ export default function AccountingForm() {
 
               <FormField
                 control={form.control}
-                name="recurring"
+                name="is_recurring"
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                     <FormControl>

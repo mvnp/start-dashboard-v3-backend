@@ -177,7 +177,7 @@ export default function AccountingList() {
                         </Badge>
                       </td>
                       <td className="p-2">{transaction.description}</td>
-                      <td className="p-2">{transaction.category_id}</td>
+                      <td className="p-2">{transaction.category}</td>
                       <td className="p-2">
                         <span className={transaction.type === 'revenue' ? 'text-green-600' : 'text-red-600'}>
                           {transaction.type === 'revenue' ? '+' : '-'}{formatCurrency(transaction.amount)}
