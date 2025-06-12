@@ -75,7 +75,7 @@ export default function AccountingList() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="min-h-screen w-full p-6">
         <div className="flex justify-center items-center h-64">
           <div className="text-lg">Loading transactions...</div>
         </div>

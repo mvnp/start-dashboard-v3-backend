@@ -158,7 +158,7 @@ export default function AccountingForm() {
 
   if (isEdit && isLoadingTransaction) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="min-h-screen w-full p-6">
         <div className="flex justify-center items-center h-64">
           <div className="text-lg">Loading transaction...</div>
         </div>
@@ -171,7 +171,7 @@ export default function AccountingForm() {
       <div className="flex items-center gap-4 mb-6">
         <Button
           variant="outline"
-          onClick={() => setLocation("/accounting-list")}
+          onClick={() => setLocation("/accounting")}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Transactions
@@ -181,7 +181,7 @@ export default function AccountingForm() {
         </h1>
       </div>
 
-      <Card className="w-full max-w-4xl mx-auto">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Transaction Details</CardTitle>
         </CardHeader>
