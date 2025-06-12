@@ -331,13 +331,18 @@ export default function StaffForm() {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Staff
         </Button>
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">
-            {isEdit ? "Edit Staff Member" : "Add New Staff Member"}
-          </h1>
-          <p className="text-slate-600 mt-2">
-            {isEdit ? "Update staff member information" : "Enter details for the new team member"}
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-barber-primary rounded-xl flex items-center justify-center">
+            <User className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">
+              {isEdit ? "Edit Staff Member" : "Add New Staff Member"}
+            </h1>
+            <p className="text-slate-600 mt-2">
+              {isEdit ? "Update staff member information" : "Enter details for the new team member"}
+            </p>
+          </div>
         </div>
       </div>
 

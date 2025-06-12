@@ -7,6 +7,7 @@ import {
   Trash2, 
   Search,
   User,
+  UserCheck,
   MapPin,
   Mail,
   Phone
@@ -92,9 +93,14 @@ export default function ClientList() {
     <div className="p-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Client Management</h1>
-          <p className="text-slate-600 mt-2">Manage your barbershop clients</p>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-barber-primary rounded-xl flex items-center justify-center">
+            <UserCheck className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Client Management</h1>
+            <p className="text-slate-600 mt-2">Manage your barbershop clients</p>
+          </div>
         </div>
         <Link href="/clients/new">
           <Button className="mt-4 sm:mt-0 bg-barber-primary hover:bg-barber-secondary">

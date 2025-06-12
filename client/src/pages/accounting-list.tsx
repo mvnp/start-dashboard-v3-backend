@@ -86,7 +86,15 @@ export default function AccountingList() {
   return (
     <div className="min-h-screen w-full p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Accounting Transactions</h1>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-barber-primary rounded-xl flex items-center justify-center">
+            <DollarSign className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">Accounting Transactions</h1>
+            <p className="text-slate-600">Manage revenues and expenses</p>
+          </div>
+        </div>
         <Button onClick={() => setLocation("/accounting-form")}>
           <Plus className="h-4 w-4 mr-2" />
           Add Transaction
