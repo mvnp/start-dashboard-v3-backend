@@ -327,7 +327,41 @@ export function registerRoutes(app: Express): void {
       if (!person) {
         return res.status(404).json({ error: "Staff member not found" });
       }
-      res.json(person);
+
+      // Get associated user email and business if exists
+      let userEmail = null;
+      let businessInfo = null;
+      let roleId = null;
+      let businessId = null;
+      
+      if (person.user_id) {
+        const user = await storage.getUser(person.user_id);
+        if (user) {
+          userEmail = user.email;
+        }
+
+        // Get user's business and role information
+        const userBusinessRole = await storage.getUserWithRoleAndBusiness(person.user_id);
+        if (userBusinessRole) {
+          roleId = userBusinessRole.roleId;
+          if (userBusinessRole.businessIds && userBusinessRole.businessIds.length > 0) {
+            businessId = userBusinessRole.businessIds[0];
+            const business = await storage.getBusiness(businessId);
+            if (business) {
+              businessInfo = business;
+            }
+          }
+        }
+      }
+
+      // Return person data with email, business info, and role
+      res.json({
+        ...person,
+        email: userEmail,
+        business: businessInfo,
+        business_id: businessId,
+        role_id: roleId
+      });
     } catch (error) {
       console.error("Staff fetch error:", error);
       res.status(500).json({ error: "Failed to fetch staff member" });

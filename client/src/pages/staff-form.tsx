@@ -174,7 +174,7 @@ export default function StaffForm() {
       setFormData({
         first_name: staffMember.first_name || "",
         last_name: staffMember.last_name || "",
-        email: staffMember.user?.email || "",
+        email: staffMember.email || "",
         phone: staffMember.phone ? formatPhoneNumber(staffMember.phone) : "",
         tax_id: staffMember.tax_id ? formatTaxId(staffMember.tax_id) : "",
         role_id: staffMember.role_id || 3,
