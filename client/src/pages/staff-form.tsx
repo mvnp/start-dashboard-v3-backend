@@ -170,9 +170,14 @@ export default function StaffForm() {
   });
 
   useEffect(() => {
+    console.log("useEffect triggered - staffMember:", staffMember, "isEdit:", isEdit);
     if (staffMember && isEdit) {
-      console.log("Setting form data with staff member:", staffMember);
-      setFormData({
+      console.log("Setting form data with staff member:", {
+        email: staffMember.email,
+        business_id: staffMember.business_id,
+        role_id: staffMember.role_id
+      });
+      const newFormData = {
         first_name: staffMember.first_name || "",
         last_name: staffMember.last_name || "",
         email: staffMember.email || "",
@@ -182,7 +187,9 @@ export default function StaffForm() {
         hire_date: staffMember.hire_date || "",
         salary: Number(staffMember.salary) || 0,
         business_id: staffMember.business_id || 0,
-      });
+      };
+      console.log("New form data being set:", newFormData);
+      setFormData(newFormData);
       // Clear any previous errors when loading new data
       setErrors({});
     }
@@ -419,9 +426,13 @@ export default function StaffForm() {
 
               <div>
                 <Label htmlFor="business_id">Business *</Label>
+                {console.log("Business Select - formData.business_id:", formData.business_id, "businesses:", businesses)}
                 <Select 
                   key={`business-${formData.business_id}-${isEdit ? staffId : 'new'}`}
-                  onValueChange={(value) => handleInputChange('business_id', Number(value))} 
+                  onValueChange={(value) => {
+                    console.log("Business select changed to:", value);
+                    handleInputChange('business_id', Number(value));
+                  }} 
                   value={formData.business_id > 0 ? formData.business_id.toString() : ""}
                 >
                   <SelectTrigger className={errors.business_id ? "border-red-500" : ""}>
