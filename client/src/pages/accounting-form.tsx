@@ -14,12 +14,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { AccountingTransaction, Person } from "@shared/schema";
+import { AccountingTransaction, AccountingTransactionCategory, Person } from "@shared/schema";
 import { format } from "date-fns";
 
 const formSchema = z.object({
   type: z.enum(["revenue", "expense"]),
-  category: z.string().min(1, "Category is required"),
+  category_id: z.number().min(1, "Category is required"),
   description: z.string().min(1, "Description is required"),
   amount: z.string().min(1, "Amount is required").regex(/^\d+(\.\d{1,2})?$/, "Invalid amount format"),
   payment_method: z.string().min(1, "Payment method is required"),
@@ -53,7 +53,7 @@ export default function AccountingForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       type: "revenue",
-      category: "",
+      category_id: undefined,
       description: "",
       amount: "",
       payment_method: "",
@@ -82,12 +82,17 @@ export default function AccountingForm() {
     queryKey: ["/api/staff"],
   });
 
+  // Fetch categories
+  const { data: categories = [] } = useQuery<AccountingTransactionCategory[]>({
+    queryKey: ["/api/accounting-transaction-categories"],
+  });
+
   // Set form values when editing
   useEffect(() => {
     if (transaction && isEdit) {
       form.reset({
         type: transaction.type,
-        category: transaction.category,
+        category_id: transaction.category_id || undefined,
         description: transaction.description,
         amount: transaction.amount,
         payment_method: transaction.payment_method,
@@ -244,25 +249,22 @@ export default function AccountingForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="category"
+                  name="category_id"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Category *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select category" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="services">Services</SelectItem>
-                          <SelectItem value="products">Products</SelectItem>
-                          <SelectItem value="supplies">Supplies</SelectItem>
-                          <SelectItem value="utilities">Utilities</SelectItem>
-                          <SelectItem value="rent">Rent</SelectItem>
-                          <SelectItem value="marketing">Marketing</SelectItem>
-                          <SelectItem value="equipment">Equipment</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
+                          {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id.toString()}>
+                              {category.description}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
