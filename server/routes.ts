@@ -441,18 +441,23 @@ export function registerRoutes(app: Express): void {
       const id = parseInt(req.params.id);
       const { email, business_id, role_id, ...personData } = req.body;
       
+      // Get current person data
+      const currentPerson = await storage.getPerson(id);
+      if (!currentPerson) {
+        return res.status(404).json({ error: "Staff member not found" });
+      }
+
       // Check for email uniqueness if email is being updated
       if (email && email.trim()) {
         const existingUser = await storage.getUserByEmail(email.trim());
-        const currentPerson = await storage.getPerson(id);
         
         // If email exists and it's not the current person's email, return error
-        if (existingUser && currentPerson && existingUser.id !== currentPerson.user_id) {
+        if (existingUser && existingUser.id !== currentPerson.user_id) {
           return res.status(400).json({ error: "Email exists on database" });
         }
         
         // Update user email if person has a user account
-        if (currentPerson && currentPerson.user_id && existingUser) {
+        if (currentPerson.user_id) {
           await storage.updateUser(currentPerson.user_id, { email: email.trim() });
         }
       }

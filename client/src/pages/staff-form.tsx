@@ -426,7 +426,6 @@ export default function StaffForm() {
 
               <div>
                 <Label htmlFor="business_id">Business *</Label>
-                {console.log("Business Select - formData.business_id:", formData.business_id, "businesses:", businesses)}
                 <Select 
                   key={`business-${formData.business_id}-${isEdit ? staffId : 'new'}`}
                   onValueChange={(value) => {
