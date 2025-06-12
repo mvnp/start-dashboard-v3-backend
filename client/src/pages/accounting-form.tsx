@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { AccountingTransaction, AccountingTransactionCategory, Person } from "@shared/schema";
@@ -217,9 +217,19 @@ export default function AccountingForm() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Transactions
         </Button>
-        <h1 className="text-3xl font-bold">
-          {isEdit ? "Edit Transaction" : "Add New Transaction"}
-        </h1>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-barber-primary rounded-xl flex items-center justify-center">
+            <DollarSign className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">
+              {isEdit ? "Edit Transaction" : "Add New Transaction"}
+            </h1>
+            <p className="text-slate-600">
+              {isEdit ? "Update transaction details" : "Enter new transaction details"}
+            </p>
+          </div>
+        </div>
       </div>
 
       <Card className="w-full">

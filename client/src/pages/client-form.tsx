@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation, useRoute, useParams } from "wouter";
-import { ArrowLeft, Save, User } from "lucide-react";
+import { ArrowLeft, Save, User, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -319,13 +319,18 @@ export default function ClientForm() {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Clients
         </Button>
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">
-            {isEdit ? "Edit Client" : "Add New Client"}
-          </h1>
-          <p className="text-slate-600 mt-2">
-            {isEdit ? "Update client information" : "Enter details for the new client"}
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-barber-primary rounded-xl flex items-center justify-center">
+            <UserCheck className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">
+              {isEdit ? "Edit Client" : "Add New Client"}
+            </h1>
+            <p className="text-slate-600 mt-2">
+              {isEdit ? "Update client information" : "Enter details for the new client"}
+            </p>
+          </div>
         </div>
       </div>
 
