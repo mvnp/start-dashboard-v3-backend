@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { AccountingTransaction } from "@shared/schema";
+import { AccountingTransaction, AccountingTransactionCategory } from "@shared/schema";
 import { format } from "date-fns";
 
 export default function AccountingList() {
@@ -16,6 +16,10 @@ export default function AccountingList() {
 
   const { data: transactions = [], isLoading } = useQuery<AccountingTransaction[]>({
     queryKey: ["/api/accounting-transactions"],
+  });
+
+  const { data: categories = [] } = useQuery<AccountingTransactionCategory[]>({
+    queryKey: ["/api/accounting-transaction-categories"],
   });
 
   const deleteMutation = useMutation({
@@ -47,6 +51,12 @@ export default function AccountingList() {
       style: 'currency',
       currency: 'USD'
     }).format(parseFloat(amount));
+  };
+
+  const getCategoryName = (categoryId: number | null) => {
+    if (!categoryId) return 'N/A';
+    const category = categories.find(cat => cat.id === categoryId);
+    return category?.description || 'Unknown';
   };
 
   const getTotalsByType = () => {
@@ -175,7 +185,7 @@ export default function AccountingList() {
                         </Badge>
                       </td>
                       <td className="p-2">{transaction.description}</td>
-                      <td className="p-2">{transaction.category}</td>
+                      <td className="p-2">{getCategoryName(transaction.category_id)}</td>
                       <td className="p-2">
                         <span className={transaction.type === 'revenue' ? 'text-green-600' : 'text-red-600'}>
                           {transaction.type === 'revenue' ? '+' : '-'}{formatCurrency(transaction.amount)}

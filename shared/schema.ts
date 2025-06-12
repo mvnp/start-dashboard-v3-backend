@@ -70,7 +70,7 @@ export const accounting_transaction_categories = pgTable("accounting_transaction
 export const accounting_transactions = pgTable("accounting_transactions", {
   id: serial("id").primaryKey(),
   type: transactionTypeEnum("type").notNull(),
-  category: text("category").notNull(),
+  category_id: integer("category_id").references(() => accounting_transaction_categories.id),
   description: text("description").notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   payment_method: text("payment_method").notNull(),
