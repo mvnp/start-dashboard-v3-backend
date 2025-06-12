@@ -104,7 +104,9 @@ export default function BarberPlanList() {
         </div>
         <Button
           onClick={() => setLocation("/plans/new")}
-          className="bg-amber-600 hover:bg-amber-700 text-white"
+          style={{backgroundColor: 'var(--barber-primary)', color: 'white'}}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-secondary)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-primary)'}
         >
           <Plus className="w-4 h-4 mr-2" />
           New Plan

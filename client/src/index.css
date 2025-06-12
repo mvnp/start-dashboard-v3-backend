@@ -100,6 +100,47 @@
   --tw-ring-color: var(--barber-primary);
 }
 
+/* Override button primary colors to use barber-primary */
+.btn-primary {
+  background-color: var(--barber-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--barber-secondary);
+}
+
+/* Icon color utilities */
+.icon-barber-primary {
+  color: var(--barber-primary);
+}
+
+.icon-container-barber {
+  background-color: var(--barber-primary);
+  color: white;
+}
+
+/* Card icon styling */
+.card-icon-amber {
+  color: var(--barber-primary);
+}
+
+.card-icon-blue {
+  color: var(--barber-primary);
+}
+
+.card-icon-green {
+  color: var(--barber-primary);
+}
+
+.card-icon-purple {
+  color: var(--barber-primary);
+}
+
+.card-icon-orange {
+  color: var(--barber-primary);
+}
+
 .focus\:border-barber-primary:focus {
   border-color: var(--barber-primary);
 }

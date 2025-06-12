@@ -198,7 +198,13 @@ export default function AppointmentList() {
           </div>
         </div>
         
-        <Button onClick={() => setLocation("/appointments/new")} className="gap-2">
+        <Button 
+          onClick={() => setLocation("/appointments/new")} 
+          className="gap-2"
+          style={{backgroundColor: 'var(--barber-primary)', color: 'white'}}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-secondary)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-primary)'}
+        >
           <Plus className="w-4 h-4" />
           New Appointment
         </Button>
