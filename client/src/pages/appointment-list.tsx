@@ -189,7 +189,9 @@ export default function AppointmentList() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Calendar className="w-8 h-8 text-blue-600" />
+          <div className="w-12 h-12 bg-barber-primary rounded-xl flex items-center justify-center">
+            <Calendar className="w-6 h-6 text-white" />
+          </div>
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
             <p className="text-gray-600">Manage customer appointments</p>
