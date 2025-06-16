@@ -38,7 +38,7 @@ export default function ServiceForm() {
   });
 
   const { data: serviceData, isLoading } = useQuery({
-    queryKey: ["/api/services", serviceId],
+    queryKey: [`/api/services/${serviceId}`],
     enabled: isEdit && !!serviceId,
     select: (data: Service) => data,
   });
@@ -68,7 +68,7 @@ export default function ServiceForm() {
     mutationFn: (data: ServiceFormData) => apiRequest("PUT", `/api/services/${serviceId}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/services"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/services", serviceId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/services/${serviceId}`] });
       toast({
         title: "Success",
         description: "Service updated successfully",
