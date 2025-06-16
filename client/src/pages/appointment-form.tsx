@@ -39,6 +39,23 @@ export default function AppointmentForm() {
     notes: "",
   });
 
+  // Load all dependent data first
+  const { data: staff = [], isSuccess: staffLoaded } = useQuery({
+    queryKey: ["/api/staff"],
+    select: (data: Person[]) => data,
+  });
+
+  const { data: services = [], isSuccess: servicesLoaded } = useQuery({
+    queryKey: ["/api/services"],
+    select: (data: Service[]) => data,
+  });
+
+  const { data: clients = [], isSuccess: clientsLoaded } = useQuery({
+    queryKey: ["/api/clients"],
+    select: (data: Person[]) => data,
+  });
+
+  // Only load appointment data after all dependencies are available
   const { data: appointmentData, isLoading, isSuccess } = useQuery({
     queryKey: ["/api/appointments", appointmentId],
     queryFn: async () => {
@@ -47,25 +64,10 @@ export default function AppointmentForm() {
       if (!response.ok) throw new Error('Failed to fetch appointment');
       return response.json();
     },
-    enabled: isEdit && !!appointmentId,
+    enabled: isEdit && !!appointmentId && staffLoaded && servicesLoaded && clientsLoaded,
     staleTime: 0,
     refetchOnMount: true,
     select: (data: Appointment) => data,
-  });
-
-  const { data: staff = [] } = useQuery({
-    queryKey: ["/api/staff"],
-    select: (data: Person[]) => data,
-  });
-
-  const { data: services = [] } = useQuery({
-    queryKey: ["/api/services"],
-    select: (data: Service[]) => data,
-  });
-
-  const { data: clients = [] } = useQuery({
-    queryKey: ["/api/clients"],
-    select: (data: Person[]) => data,
   });
 
   const createMutation = useMutation({
@@ -108,7 +110,7 @@ export default function AppointmentForm() {
   });
 
   useEffect(() => {
-    if (appointmentData && isEdit && isSuccess) {
+    if (appointmentData && isEdit && isSuccess && staffLoaded && servicesLoaded && clientsLoaded) {
       // Format time to HH:MM format for input field
       const formattedTime = appointmentData.appointment_time 
         ? appointmentData.appointment_time.substring(0, 5) 
@@ -130,7 +132,7 @@ export default function AppointmentForm() {
         notes: appointmentData.notes || "",
       });
     }
-  }, [appointmentData, isEdit, isSuccess]);
+  }, [appointmentData, isEdit, isSuccess, staffLoaded, servicesLoaded, clientsLoaded]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,7 +206,7 @@ export default function AppointmentForm() {
     }));
   };
 
-  if (isLoading) {
+  if (isLoading || !staffLoaded || !servicesLoaded || !clientsLoaded) {
     return (
       <div className="w-full p-6">
         <div className="flex items-center gap-4 mb-6">
