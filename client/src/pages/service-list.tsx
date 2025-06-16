@@ -174,10 +174,9 @@ export default function ServiceList() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-purple-600" />
-                <span className="text-sm text-slate-600">{getStaffName(service.staff_id)}</span>
-              </div>
+              <p className="text-sm text-slate-600 mt-2">
+                {service.description || "No description available"}
+              </p>
 
               <div className="flex gap-2 pt-2">
                 <Button
@@ -212,7 +211,9 @@ export default function ServiceList() {
           </p>
           <Button
             onClick={() => setLocation("/services/new")}
-            className="bg-amber-600 hover:bg-amber-700 text-white"
+            style={{backgroundColor: 'var(--barber-primary)', color: 'white'}}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-secondary)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-primary)'}
           >
             <Plus className="w-4 h-4 mr-2" />
             Create New Service
