@@ -723,9 +723,31 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/services", async (req, res) => {
+  app.get("/api/services/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const validatedData = insertServiceSchema.parse(req.body);
+      const id = parseInt(req.params.id);
+      const service = await storage.getService(id);
+      if (!service) {
+        return res.status(404).json({ error: "Service not found" });
+      }
+      res.json(service);
+    } catch (error) {
+      console.error("Service fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch service" });
+    }
+  });
+
+  app.post("/api/services", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      // Get user's business context
+      const businessId = req.user?.businessIds?.[0] || 1;
+      
+      const serviceData = {
+        ...req.body,
+        business_id: businessId
+      };
+      
+      const validatedData = insertServiceSchema.parse(serviceData);
       const service = await storage.createService(validatedData);
       res.status(201).json(service);
     } catch (error) {
@@ -734,6 +756,38 @@ export function registerRoutes(app: Express): void {
         return res.status(400).json({ error: "Invalid data", details: error.errors });
       }
       res.status(500).json({ error: "Failed to create service" });
+    }
+  });
+
+  app.put("/api/services/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertServiceSchema.partial().parse(req.body);
+      const service = await storage.updateService(id, validatedData);
+      if (!service) {
+        return res.status(404).json({ error: "Service not found" });
+      }
+      res.json(service);
+    } catch (error) {
+      console.error("Service update error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update service" });
+    }
+  });
+
+  app.delete("/api/services/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteService(id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Service not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error("Service deletion error:", error);
+      res.status(500).json({ error: "Failed to delete service" });
     }
   });
 

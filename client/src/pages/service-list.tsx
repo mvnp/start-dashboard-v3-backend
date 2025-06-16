@@ -18,7 +18,7 @@ import {
 import { Plus, Search, Edit, Trash2, Settings, Clock, DollarSign, User } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Service, Staff } from "@shared/schema";
+import { Service } from "@shared/schema";
 
 export default function ServiceList() {
   const [, setLocation] = useLocation();
@@ -31,10 +31,7 @@ export default function ServiceList() {
     select: (data: Service[]) => data,
   });
 
-  const { data: staff = [] } = useQuery({
-    queryKey: ["/api/staff"],
-    select: (data: Staff[]) => data,
-  });
+
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/services/${id}`),
@@ -57,28 +54,26 @@ export default function ServiceList() {
 
   const filteredServices = services.filter(service =>
     service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.description.toLowerCase().includes(searchTerm.toLowerCase())
+    (service.description && service.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const formatPrice = (cents: number) => {
+  const formatPrice = (price: string | null) => {
+    if (!price) return "$0.00";
+    const numPrice = parseFloat(price);
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-    }).format(cents / 100);
+    }).format(numPrice);
   };
 
-  const formatDuration = (minutes: number) => {
+  const formatDuration = (minutes: number | null) => {
+    if (!minutes) return "0min";
     if (minutes < 60) {
       return `${minutes}min`;
     }
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
     return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}min` : `${hours}h`;
-  };
-
-  const getStaffName = (staffId: number) => {
-    const staffMember = staff.find(s => s.id === staffId);
-    return staffMember ? `${staffMember.first_name} ${staffMember.last_name}` : 'Unknown Staff';
   };
 
   const handleDelete = (id: number) => {

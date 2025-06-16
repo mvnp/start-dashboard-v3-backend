@@ -195,20 +195,6 @@ export default function ServiceForm() {
                   required
                 />
               </div>
-
-              <div>
-                <Label htmlFor="price">Price ($)</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  step="0.01"
-                  placeholder="Enter price in dollars"
-                  value={formatPrice(formData.price)}
-                  onChange={(e) => handleInputChange('price', parsePrice(e.target.value))}
-                  min="0"
-                  required
-                />
-              </div>
             </div>
 
             <div>
@@ -238,7 +224,9 @@ export default function ServiceForm() {
               <Button
                 type="submit"
                 disabled={createMutation.isPending || updateMutation.isPending}
-                className="bg-amber-600 hover:bg-amber-700 text-white"
+                style={{backgroundColor: 'var(--barber-primary)', color: 'white'}}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-secondary)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-primary)'}
               >
                 {createMutation.isPending || updateMutation.isPending ? (
                   "Saving..."
