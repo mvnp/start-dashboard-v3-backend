@@ -258,6 +258,14 @@ export const insertAppointmentSchema = createInsertSchema(appointments).omit({
   created_at: true,
   updated_at: true,
   deleted_at: true,
+}).extend({
+  appointment_date: z.string().min(1, "Appointment date is required"),
+  appointment_time: z.string().min(1, "Appointment time is required"),
+  status: z.string().min(1, "Status is required"),
+  user_id: z.number().min(1, "Staff member is required"),
+  client_id: z.number().min(1, "Client is required"),
+  service_id: z.number().min(1, "Service is required"),
+  business_id: z.number().optional(),
 });
 
 export const insertBarberPlanSchema = createInsertSchema(barber_plans).omit({

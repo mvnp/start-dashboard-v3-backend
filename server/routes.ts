@@ -886,17 +886,155 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/appointments", async (req, res) => {
+  app.get("/api/appointments/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const validatedData = insertAppointmentSchema.parse(req.body);
+      const id = parseInt(req.params.id);
+      const appointment = await storage.getAppointment(id);
+      if (!appointment) {
+        return res.status(404).json({ error: "Appointment not found" });
+      }
+      res.json(appointment);
+    } catch (error) {
+      console.error("Appointment fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch appointment" });
+    }
+  });
+
+  app.post("/api/appointments", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      // Get user's business context
+      const businessId = req.user?.businessIds?.[0] || 1;
+      
+      const appointmentData = {
+        ...req.body,
+        business_id: businessId
+      };
+      
+      // Validate required fields
+      if (!appointmentData.appointment_date || !appointmentData.appointment_date.trim()) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["appointment_date"], message: "Appointment date is required" }]
+        });
+      }
+      
+      if (!appointmentData.appointment_time || !appointmentData.appointment_time.trim()) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["appointment_time"], message: "Appointment time is required" }]
+        });
+      }
+      
+      if (!appointmentData.status || !appointmentData.status.trim()) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["status"], message: "Status is required" }]
+        });
+      }
+      
+      if (!appointmentData.user_id || appointmentData.user_id < 1) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["user_id"], message: "Staff member is required" }]
+        });
+      }
+      
+      if (!appointmentData.client_id || appointmentData.client_id < 1) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["client_id"], message: "Client is required" }]
+        });
+      }
+      
+      if (!appointmentData.service_id || appointmentData.service_id < 1) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["service_id"], message: "Service is required" }]
+        });
+      }
+      
+      const validatedData = insertAppointmentSchema.parse(appointmentData);
       const appointment = await storage.createAppointment(validatedData);
       res.status(201).json(appointment);
     } catch (error) {
       console.error("Appointment creation error:", error);
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: "Invalid data", details: error.errors });
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
       }
       res.status(500).json({ error: "Failed to create appointment" });
+    }
+  });
+
+  app.put("/api/appointments/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Validate required fields for updates
+      if (req.body.appointment_date !== undefined && (!req.body.appointment_date || !req.body.appointment_date.trim())) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["appointment_date"], message: "Appointment date is required" }]
+        });
+      }
+      
+      if (req.body.appointment_time !== undefined && (!req.body.appointment_time || !req.body.appointment_time.trim())) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["appointment_time"], message: "Appointment time is required" }]
+        });
+      }
+      
+      if (req.body.status !== undefined && (!req.body.status || !req.body.status.trim())) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["status"], message: "Status is required" }]
+        });
+      }
+      
+      if (req.body.user_id !== undefined && (!req.body.user_id || req.body.user_id < 1)) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["user_id"], message: "Staff member is required" }]
+        });
+      }
+      
+      if (req.body.client_id !== undefined && (!req.body.client_id || req.body.client_id < 1)) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["client_id"], message: "Client is required" }]
+        });
+      }
+      
+      if (req.body.service_id !== undefined && (!req.body.service_id || req.body.service_id < 1)) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["service_id"], message: "Service is required" }]
+        });
+      }
+      
+      const validatedData = insertAppointmentSchema.partial().parse(req.body);
+      const appointment = await storage.updateAppointment(id, validatedData);
+      if (!appointment) {
+        return res.status(404).json({ error: "Appointment not found" });
+      }
+      res.json(appointment);
+    } catch (error) {
+      console.error("Appointment update error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update appointment" });
+    }
+  });
+
+  app.delete("/api/appointments/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteAppointment(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Appointment deletion error:", error);
+      res.status(500).json({ error: "Failed to delete appointment" });
     }
   });
 

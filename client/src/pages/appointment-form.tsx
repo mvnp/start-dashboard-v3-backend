@@ -116,6 +116,34 @@ export default function AppointmentForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate required fields
+    if (!formData.appointment_date.trim()) {
+      toast({
+        title: "Error",
+        description: "Appointment date is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.appointment_time.trim()) {
+      toast({
+        title: "Error",
+        description: "Appointment time is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.status.trim()) {
+      toast({
+        title: "Error",
+        description: "Status is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (formData.client_id === 0) {
       toast({
         title: "Error",
