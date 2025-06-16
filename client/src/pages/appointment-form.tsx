@@ -112,13 +112,19 @@ export default function AppointmentForm() {
         ? appointmentData.appointment_time.substring(0, 5) 
         : "";
       
+      // Normalize status to proper case for dropdown matching
+      const normalizeStatus = (status: string) => {
+        if (!status) return "Scheduled";
+        return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+      };
+      
       setFormData({
         client_id: appointmentData.client_id || 0,
         user_id: appointmentData.user_id || 0,
         service_id: appointmentData.service_id || 0,
         appointment_date: appointmentData.appointment_date || "",
         appointment_time: formattedTime,
-        status: appointmentData.status || "Scheduled",
+        status: normalizeStatus(appointmentData.status),
         notes: appointmentData.notes || "",
       });
     }
@@ -251,7 +257,7 @@ export default function AppointmentForm() {
                   </SelectTrigger>
                   <SelectContent>
                     {clients.map((client) => (
-                      <SelectItem key={client.id} value={client.user_id?.toString() || ""}>
+                      <SelectItem key={client.id} value={client.id.toString()}>
                         {client.first_name} {client.last_name}
                       </SelectItem>
                     ))}
