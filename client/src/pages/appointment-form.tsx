@@ -41,6 +41,12 @@ export default function AppointmentForm() {
 
   const { data: appointmentData, isLoading } = useQuery({
     queryKey: ["/api/appointments", appointmentId],
+    queryFn: async () => {
+      if (!appointmentId) return null;
+      const response = await fetch(`/api/appointments/${appointmentId}`);
+      if (!response.ok) throw new Error('Failed to fetch appointment');
+      return response.json();
+    },
     enabled: isEdit && !!appointmentId,
     select: (data: Appointment) => data,
   });
@@ -101,12 +107,17 @@ export default function AppointmentForm() {
 
   useEffect(() => {
     if (appointmentData && isEdit) {
+      // Format time to HH:MM format for input field
+      const formattedTime = appointmentData.appointment_time 
+        ? appointmentData.appointment_time.substring(0, 5) 
+        : "";
+      
       setFormData({
         client_id: appointmentData.client_id || 0,
         user_id: appointmentData.user_id || 0,
         service_id: appointmentData.service_id || 0,
-        appointment_date: appointmentData.appointment_date,
-        appointment_time: appointmentData.appointment_time,
+        appointment_date: appointmentData.appointment_date || "",
+        appointment_time: formattedTime,
         status: appointmentData.status || "Scheduled",
         notes: appointmentData.notes || "",
       });
