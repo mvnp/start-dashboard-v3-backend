@@ -39,7 +39,7 @@ export default function AppointmentForm() {
     notes: "",
   });
 
-  const { data: appointmentData, isLoading } = useQuery({
+  const { data: appointmentData, isLoading, isSuccess } = useQuery({
     queryKey: ["/api/appointments", appointmentId],
     queryFn: async () => {
       if (!appointmentId) return null;
@@ -48,6 +48,8 @@ export default function AppointmentForm() {
       return response.json();
     },
     enabled: isEdit && !!appointmentId,
+    staleTime: 0,
+    refetchOnMount: true,
     select: (data: Appointment) => data,
   });
 
@@ -106,14 +108,14 @@ export default function AppointmentForm() {
   });
 
   useEffect(() => {
-    if (appointmentData && isEdit) {
+    if (appointmentData && isEdit && isSuccess) {
       // Format time to HH:MM format for input field
       const formattedTime = appointmentData.appointment_time 
         ? appointmentData.appointment_time.substring(0, 5) 
         : "";
       
       // Normalize status to proper case for dropdown matching
-      const normalizeStatus = (status: string) => {
+      const normalizeStatus = (status: string | null) => {
         if (!status) return "Scheduled";
         return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
       };
@@ -124,11 +126,11 @@ export default function AppointmentForm() {
         service_id: appointmentData.service_id || 0,
         appointment_date: appointmentData.appointment_date || "",
         appointment_time: formattedTime,
-        status: normalizeStatus(appointmentData.status),
+        status: normalizeStatus(appointmentData.status || ""),
         notes: appointmentData.notes || "",
       });
     }
-  }, [appointmentData, isEdit]);
+  }, [appointmentData, isEdit, isSuccess]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -248,7 +250,7 @@ export default function AppointmentForm() {
               <div>
                 <Label htmlFor="client_id">Client</Label>
                 <Select 
-                  value={formData.client_id ? formData.client_id.toString() : ""} 
+                  value={formData.client_id && formData.client_id > 0 ? formData.client_id.toString() : ""} 
                   onValueChange={(value) => handleInputChange('client_id', parseInt(value))}
                   required
                 >
@@ -268,7 +270,7 @@ export default function AppointmentForm() {
               <div>
                 <Label htmlFor="user_id">Staff Member</Label>
                 <Select 
-                  value={formData.user_id ? formData.user_id.toString() : ""} 
+                  value={formData.user_id && formData.user_id > 0 ? formData.user_id.toString() : ""} 
                   onValueChange={(value) => handleInputChange('user_id', parseInt(value))}
                   required
                 >
@@ -288,7 +290,7 @@ export default function AppointmentForm() {
               <div>
                 <Label htmlFor="service_id">Service</Label>
                 <Select 
-                  value={formData.service_id ? formData.service_id.toString() : ""} 
+                  value={formData.service_id && formData.service_id > 0 ? formData.service_id.toString() : ""} 
                   onValueChange={(value) => handleInputChange('service_id', parseInt(value))}
                   required
                 >
