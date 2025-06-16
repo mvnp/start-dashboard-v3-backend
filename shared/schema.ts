@@ -242,6 +242,15 @@ export const insertServiceSchema = createInsertSchema(services).omit({
   id: true,
   created_at: true,
   updated_at: true,
+}).extend({
+  name: z.string().min(1, "Service name is required"),
+  duration: z.number().min(1, "Duration must be at least 1 minute"),
+  price: z.string().min(1, "Price is required").refine((val) => {
+    const num = parseFloat(val);
+    return !isNaN(num) && num > 0;
+  }, "Price must be a valid number greater than 0"),
+  is_active: z.boolean(),
+  business_id: z.number().optional(),
 });
 
 export const insertAppointmentSchema = createInsertSchema(appointments).omit({

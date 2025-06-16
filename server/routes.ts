@@ -747,13 +747,35 @@ export function registerRoutes(app: Express): void {
         business_id: businessId
       };
       
+      // Validate required fields
+      if (!serviceData.name || !serviceData.name.trim()) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["name"], message: "Service name is required" }]
+        });
+      }
+      
+      if (!serviceData.price || serviceData.price.trim() === "" || parseFloat(serviceData.price) <= 0) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["price"], message: "Price must be a valid number greater than 0" }]
+        });
+      }
+      
+      if (!serviceData.duration || serviceData.duration < 1) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["duration"], message: "Duration must be at least 1 minute" }]
+        });
+      }
+      
       const validatedData = insertServiceSchema.parse(serviceData);
       const service = await storage.createService(validatedData);
       res.status(201).json(service);
     } catch (error) {
       console.error("Service creation error:", error);
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: "Invalid data", details: error.errors });
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
       }
       res.status(500).json({ error: "Failed to create service" });
     }
@@ -762,6 +784,29 @@ export function registerRoutes(app: Express): void {
   app.put("/api/services/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      
+      // Validate required fields for updates
+      if (req.body.name !== undefined && (!req.body.name || !req.body.name.trim())) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["name"], message: "Service name is required" }]
+        });
+      }
+      
+      if (req.body.price !== undefined && (!req.body.price || req.body.price.trim() === "" || parseFloat(req.body.price) <= 0)) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["price"], message: "Price must be a valid number greater than 0" }]
+        });
+      }
+      
+      if (req.body.duration !== undefined && (!req.body.duration || req.body.duration < 1)) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["duration"], message: "Duration must be at least 1 minute" }]
+        });
+      }
+      
       const validatedData = insertServiceSchema.partial().parse(req.body);
       const service = await storage.updateService(id, validatedData);
       if (!service) {
@@ -771,7 +816,7 @@ export function registerRoutes(app: Express): void {
     } catch (error) {
       console.error("Service update error:", error);
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: "Invalid data", details: error.errors });
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
       }
       res.status(500).json({ error: "Failed to update service" });
     }

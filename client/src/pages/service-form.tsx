@@ -99,6 +99,34 @@ export default function ServiceForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Client-side validation
+    if (!formData.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Service name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      toast({
+        title: "Error",
+        description: "Price must be greater than 0",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.duration || formData.duration < 1) {
+      toast({
+        title: "Error",
+        description: "Duration must be at least 1 minute",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (isEdit) {
       updateMutation.mutate(formData);
     } else {
@@ -198,14 +226,13 @@ export default function ServiceForm() {
             </div>
 
             <div>
-              <Label htmlFor="description">Service Description</Label>
+              <Label htmlFor="description">Service Description (Optional)</Label>
               <Textarea
                 id="description"
-                placeholder="Enter service description"
+                placeholder="Enter service description (optional)"
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 rows={4}
-                required
               />
             </div>
 
