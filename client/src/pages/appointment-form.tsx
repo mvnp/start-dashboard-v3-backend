@@ -310,7 +310,7 @@ export default function AppointmentForm() {
               <div>
                 <Label htmlFor="status">Status</Label>
                 <Select 
-                  value={formData.status} 
+                  value={formData.status || ""} 
                   onValueChange={(value) => handleInputChange('status', value)}
                   required
                 >
