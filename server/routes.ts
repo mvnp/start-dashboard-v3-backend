@@ -522,7 +522,24 @@ export function registerRoutes(app: Express): void {
         persons = await storage.getPersonsByRolesAndBusiness([4], userData.businessIds);
       }
       
-      res.json(persons);
+      // Enrich each person with their user email if they have a user_id
+      const enrichedPersons = await Promise.all(
+        persons.map(async (person) => {
+          if (person.user_id) {
+            const user = await storage.getUser(person.user_id);
+            return {
+              ...person,
+              email: user?.email || null
+            };
+          }
+          return {
+            ...person,
+            email: null
+          };
+        })
+      );
+      
+      res.json(enrichedPersons);
     } catch (error) {
       console.error("Client fetch error:", error);
       res.status(500).json({ error: "Failed to fetch clients" });

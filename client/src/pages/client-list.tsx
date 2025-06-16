@@ -171,16 +171,16 @@ export default function ClientList() {
                         <div className="flex items-center space-x-4 mt-1 text-sm text-slate-600">
                           <div className="flex items-center">
                             <Mail className="w-4 h-4 mr-1" />
-                            {client.email}
+                            {client.email || "No email"}
                           </div>
                           <div className="flex items-center">
                             <Phone className="w-4 h-4 mr-1" />
-                            {client.phone}
+                            {client.phone || "No phone"}
                           </div>
                         </div>
                         <div className="flex items-center mt-1 text-sm text-slate-500">
                           <MapPin className="w-4 h-4 mr-1" />
-                          {client.address}
+                          {client.address || "No address"}
                         </div>
                       </div>
                     </div>
