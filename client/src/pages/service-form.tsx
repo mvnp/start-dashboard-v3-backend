@@ -11,15 +11,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Service, Staff } from "@shared/schema";
+import { Service } from "@shared/schema";
 
 interface ServiceFormData {
   name: string;
   description: string;
   duration: number;
-  price: number;
-  staff_id: number;
+  price: string;
   is_active: boolean;
+  business_id?: number;
 }
 
 export default function ServiceForm() {
@@ -33,8 +33,7 @@ export default function ServiceForm() {
     name: "",
     description: "",
     duration: 30,
-    price: 0,
-    staff_id: 0,
+    price: "0.00",
     is_active: true,
   });
 
@@ -44,10 +43,7 @@ export default function ServiceForm() {
     select: (data: Service) => data,
   });
 
-  const { data: staff = [] } = useQuery({
-    queryKey: ["/api/staff"],
-    select: (data: Staff[]) => data,
-  });
+
 
   const createMutation = useMutation({
     mutationFn: (data: ServiceFormData) => apiRequest("POST", "/api/services", data),
@@ -91,27 +87,17 @@ export default function ServiceForm() {
   useEffect(() => {
     if (serviceData && isEdit) {
       setFormData({
-        name: serviceData.name,
-        description: serviceData.description,
-        duration: serviceData.duration,
-        price: serviceData.price,
-        staff_id: serviceData.staff_id,
-        is_active: serviceData.is_active,
+        name: serviceData.name || "",
+        description: serviceData.description || "",
+        duration: serviceData.duration || 30,
+        price: serviceData.price || "0.00",
+        is_active: serviceData.is_active ?? true,
       });
     }
   }, [serviceData, isEdit]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (formData.staff_id === 0) {
-      toast({
-        title: "Error",
-        description: "Please select a staff member",
-        variant: "destructive",
-      });
-      return;
-    }
 
     if (isEdit) {
       updateMutation.mutate(formData);
@@ -127,13 +113,7 @@ export default function ServiceForm() {
     }));
   };
 
-  const formatPrice = (cents: number) => {
-    return (cents / 100).toFixed(2);
-  };
 
-  const parsePrice = (dollars: string) => {
-    return Math.round(parseFloat(dollars) * 100);
-  };
 
   if (isLoading) {
     return (
@@ -190,23 +170,17 @@ export default function ServiceForm() {
               </div>
 
               <div>
-                <Label htmlFor="staff_id">Assigned Staff</Label>
-                <Select 
-                  value={formData.staff_id ? formData.staff_id.toString() : ""} 
-                  onValueChange={(value) => handleInputChange('staff_id', parseInt(value))}
+                <Label htmlFor="price">Price ($)</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  placeholder="Enter price in dollars"
+                  value={formData.price}
+                  onChange={(e) => handleInputChange('price', e.target.value)}
+                  min="0"
                   required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select staff member" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {staff.map((staffMember) => (
-                      <SelectItem key={staffMember.id} value={staffMember.id.toString()}>
-                        {staffMember.first_name} {staffMember.last_name} - {staffMember.role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                />
               </div>
 
               <div>
