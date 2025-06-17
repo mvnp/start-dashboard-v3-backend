@@ -393,13 +393,15 @@ export function registerRoutes(app: Express): void {
   app.get("/api/staff", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
       const user = req.user!;
+      const businessIds = getBusinessFilter(user, req);
 
       let persons;
-      // Super Admin can see all staff across all businesses
-      if (user.isSuperAdmin) {
+      // Filter staff by selected business or user's business access
+      if (businessIds && businessIds.length > 0) {
+        persons = await storage.getPersonsByRolesAndBusiness([1, 2, 3], businessIds);
+      } else if (user.isSuperAdmin) {
         persons = await storage.getPersonsByRoles([1, 2, 3]);
       } else {
-        // Other users see only staff from their associated businesses
         persons = await storage.getPersonsByRolesAndBusiness([1, 2, 3], user.businessIds);
       }
       
@@ -882,13 +884,15 @@ export function registerRoutes(app: Express): void {
   app.get("/api/services", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
       const user = req.user!;
+      const businessIds = getBusinessFilter(user, req);
 
       let services;
-      // Super Admin can see all services
-      if (user.isSuperAdmin) {
+      // Filter services by selected business or user's business access
+      if (businessIds && businessIds.length > 0) {
+        services = await storage.getServicesByBusinessIds(businessIds);
+      } else if (user.isSuperAdmin) {
         services = await storage.getAllServices();
       } else {
-        // Other users see services from their associated businesses
         services = await storage.getServicesByBusinessIds(user.businessIds);
       }
       res.json(services);
