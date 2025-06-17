@@ -278,9 +278,21 @@ export const insertBarberPlanSchema = createInsertSchema(barber_plans).omit({
   benefits: z.array(z.string()).min(1, "At least one benefit is required"),
   image1: z.string().optional(),
   image2: z.string().optional(),
-  price1m: z.string().transform((val) => val?.replace(',', '.') || '0'),
-  price3m: z.string().transform((val) => val?.replace(',', '.') || '0'),
-  price12m: z.string().transform((val) => val?.replace(',', '.') || '0'),
+  price1m: z.union([z.string(), z.number()]).transform((val) => {
+    if (typeof val === 'number') return val.toString();
+    if (typeof val === 'string') return val.replace(',', '.');
+    return '0';
+  }),
+  price3m: z.union([z.string(), z.number()]).transform((val) => {
+    if (typeof val === 'number') return val.toString();
+    if (typeof val === 'string') return val.replace(',', '.');
+    return '0';
+  }),
+  price12m: z.union([z.string(), z.number()]).transform((val) => {
+    if (typeof val === 'number') return val.toString();
+    if (typeof val === 'string') return val.replace(',', '.');
+    return '0';
+  }),
   payment_link: z.string().optional(),
   business_id: z.number().optional(),
 });
