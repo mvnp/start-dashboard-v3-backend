@@ -163,14 +163,14 @@ export default function BarberPlanList() {
               <div>
                 <h4 className="font-medium text-sm mb-2">Benefits:</h4>
                 <ul className="text-xs text-slate-600 space-y-1">
-                  {plan.benefits.slice(0, 3).map((benefit, index) => (
+                  {(plan.benefits || []).slice(0, 3).map((benefit, index) => (
                     <li key={index} className="flex items-start gap-1">
                       <span className="text-amber-600 mt-0.5">•</span>
                       {benefit}
                     </li>
                   ))}
-                  {plan.benefits.length > 3 && (
-                    <li className="text-slate-400">+{plan.benefits.length - 3} more</li>
+                  {(plan.benefits || []).length > 3 && (
+                    <li className="text-slate-400">+{(plan.benefits || []).length - 3} more</li>
                   )}
                 </ul>
               </div>
@@ -178,15 +178,15 @@ export default function BarberPlanList() {
               <div className="grid grid-cols-3 gap-2 text-center">
                 <div className="bg-slate-50 p-2 rounded">
                   <div className="text-xs text-slate-500">1 Month</div>
-                  <div className="font-semibold text-sm">{formatPrice(plan.price1m)}</div>
+                  <div className="font-semibold text-sm">{plan.price1m ? `$${plan.price1m}` : 'N/A'}</div>
                 </div>
                 <div className="bg-slate-50 p-2 rounded">
                   <div className="text-xs text-slate-500">3 Months</div>
-                  <div className="font-semibold text-sm">{formatPrice(plan.price3m)}</div>
+                  <div className="font-semibold text-sm">{plan.price3m ? `$${plan.price3m}` : 'N/A'}</div>
                 </div>
                 <div className="bg-slate-50 p-2 rounded">
                   <div className="text-xs text-slate-500">12 Months</div>
-                  <div className="font-semibold text-sm">{formatPrice(plan.price12m)}</div>
+                  <div className="font-semibold text-sm">{plan.price12m ? `$${plan.price12m}` : 'N/A'}</div>
                 </div>
               </div>
 
@@ -203,8 +203,13 @@ export default function BarberPlanList() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.open(plan.payment_link, '_blank')}
+                  onClick={() => {
+                    if (plan.payment_link) {
+                      window.open(plan.payment_link, '_blank');
+                    }
+                  }}
                   className="flex-1"
+                  disabled={!plan.payment_link}
                 >
                   <ExternalLink className="w-4 h-4 mr-1" />
                   Pay
