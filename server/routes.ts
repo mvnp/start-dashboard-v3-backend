@@ -1610,21 +1610,12 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/barber-plans", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
-      console.log('Barber plan request received');
-      console.log('Request body:', JSON.stringify(req.body, null, 2));
-      console.log('Request headers x-selected-business-id:', req.headers['x-selected-business-id']);
-      
       // Get business ID from header (frontend) or body (direct API calls)
       const headerBusinessId = req.headers['x-selected-business-id'] ? parseInt(req.headers['x-selected-business-id'] as string) : null;
       const bodyBusinessId = req.body.business_id ? parseInt(req.body.business_id) : null;
       const selectedBusinessId = headerBusinessId || bodyBusinessId;
 
-      console.log('Debug - headerBusinessId:', headerBusinessId);
-      console.log('Debug - bodyBusinessId:', bodyBusinessId);
-      console.log('Debug - selectedBusinessId:', selectedBusinessId);
-
       if (!selectedBusinessId) {
-        console.log('Business selection failed - no business ID found');
         return res.status(400).json({ error: "Business selection required. Provide business_id in request body or X-Selected-Business-Id header" });
       }
 
