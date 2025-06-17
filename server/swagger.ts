@@ -60,11 +60,17 @@ Comprehensive barbershop management system with role-based access control and mu
     ],
     components: {
       securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: 'JWT Bearer token authentication. Login to get your token, then use it in the Authorization header.'
+        },
         cookieAuth: {
           type: 'apiKey',
           in: 'cookie',
           name: 'connect.sid',
-          description: 'Session-based authentication using cookies'
+          description: 'Session-based authentication using cookies (legacy)'
         }
       },
       schemas: {

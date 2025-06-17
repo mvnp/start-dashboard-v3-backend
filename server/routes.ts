@@ -2,8 +2,14 @@ import { Express, Request, Response } from "express";
 import { z } from "zod";
 import storage from "./storage";
 import { requireAuth, getBusinessFilter } from "./middleware";
+import { 
+  authenticateJWT, 
+  authenticateUser as jwtAuthenticateUser, 
+  refreshAccessToken,
+  AuthenticatedRequest 
+} from "./auth";
 
-interface AuthenticatedRequest extends Request {
+interface SessionAuthenticatedRequest extends Request {
   session: any;
   user?: {
     id: number;
