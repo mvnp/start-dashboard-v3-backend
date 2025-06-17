@@ -102,7 +102,7 @@ export default function AppointmentList() {
   });
 
   const { data: services = [] } = useQuery<Service[]>({
-    queryKey: ["/api/services"],
+    queryKey: ["/api/services", selectedBusinessId],
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
@@ -110,7 +110,7 @@ export default function AppointmentList() {
   });
 
   const { data: staff = [] } = useQuery<Person[]>({
-    queryKey: ["/api/staff"],
+    queryKey: ["/api/staff", selectedBusinessId],
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
@@ -118,7 +118,7 @@ export default function AppointmentList() {
   });
 
   const { data: clients = [] } = useQuery<Person[]>({
-    queryKey: ["/api/clients"],
+    queryKey: ["/api/clients", selectedBusinessId],
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
@@ -132,7 +132,7 @@ export default function AppointmentList() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/appointments/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/appointments", buildQueryParams(), selectedBusinessId] });
       toast({
         title: "Success",
         description: "Appointment deleted successfully",
