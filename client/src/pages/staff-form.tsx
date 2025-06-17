@@ -29,6 +29,14 @@ interface StaffFormData {
   business_id: number;
 }
 
+interface StaffMember extends Person {
+  email: string;
+  business_id: number;
+  role_id: number;
+  hire_date: string;
+  salary: number;
+}
+
 
 
 export default function StaffForm() {
@@ -70,7 +78,7 @@ export default function StaffForm() {
     }
   };
 
-  const { data: staffMember, isLoading } = useQuery({
+  const { data: staffMember, isLoading } = useQuery<StaffMember>({
     queryKey: [`/api/staff/${staffId}`] as const,
     enabled: isEdit && !!staffId,
   });

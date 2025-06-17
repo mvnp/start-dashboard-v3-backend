@@ -75,7 +75,7 @@ export default function ClientForm() {
     }
   };
 
-  const { data: clientMember, isLoading, error } = useQuery({
+  const { data: clientMember, isLoading, error } = useQuery<ClientWithUser>({
     queryKey: [`/api/clients/${clientId}`, selectedBusinessId] as const,
     enabled: isEdit && !!clientId && !!selectedBusinessId,
   });
@@ -179,7 +179,7 @@ export default function ClientForm() {
   });
 
   useEffect(() => {
-    if (clientMember && isEdit) {
+    if (clientMember && isEdit && 'first_name' in clientMember) {
       setFormData({
         first_name: clientMember.first_name || "",
         last_name: clientMember.last_name || "",
