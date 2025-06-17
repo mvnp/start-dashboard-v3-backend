@@ -150,6 +150,7 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 17, 2025. Fixed barber plan validation to accept both string and number price formats with proper transformation (numbers → strings, commas → dots)
 - June 17, 2025. Applied comprehensive business ID context filtering to Barber Plans CRUD operations - all endpoints now enforce proper business-scoped data access
 - June 17, 2025. Fixed barber plan price validation to handle comma-separated decimal values (99,90 → 99.90) and implemented complete business context filtering
 - June 17, 2025. Updated barber plan frontend operations to include selected business ID in queries and mutations for complete business isolation

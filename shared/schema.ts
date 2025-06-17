@@ -268,11 +268,7 @@ export const insertAppointmentSchema = createInsertSchema(appointments).omit({
   business_id: z.number().optional(),
 });
 
-export const insertBarberPlanSchema = createInsertSchema(barber_plans).omit({
-  id: true,
-  created_at: true,
-  updated_at: true,
-}).extend({
+export const insertBarberPlanSchema = z.object({
   title: z.string().min(1, "Title is required"),
   subtitle: z.string().optional(),
   benefits: z.array(z.string()).min(1, "At least one benefit is required"),
