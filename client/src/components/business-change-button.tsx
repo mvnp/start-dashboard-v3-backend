@@ -7,8 +7,8 @@ export default function BusinessChangeButton() {
   const { user } = useAuth();
   const { selectedBusiness, userBusinesses, changeBusiness } = useBusinessContext();
 
-  // Don't show button for Super Admin or if user has only one business
-  if (!user || user.isSuperAdmin || userBusinesses.length <= 1) {
+  // Don't show button if user has no businesses
+  if (!user || userBusinesses.length === 0) {
     return null;
   }
 
