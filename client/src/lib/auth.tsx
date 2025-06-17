@@ -27,6 +27,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const getCurrentUser = async () => {
     try {
+      // Check if localStorage is available
+      if (typeof Storage === "undefined" || !window.localStorage) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
       const token = localStorage.getItem('accessToken');
       if (!token) {
         setUser(null);

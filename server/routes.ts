@@ -1302,6 +1302,15 @@ export function registerRoutes(app: Express): void {
           details: [{ path: ["user_id"], message: "Invalid staff member selected" }]
         });
       }
+
+      // Verify client_id exists in persons table - client_id should already be a person ID
+      const clientPerson = await storage.getPerson(appointmentData.client_id);
+      if (!clientPerson) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["client_id"], message: "Invalid client selected" }]
+        });
+      }
       
       // Create appointment data with correct person ID for staff
       const appointmentDataWithPersonId = {
@@ -1398,6 +1407,17 @@ export function registerRoutes(app: Express): void {
         }
         
         updateData.user_id = staffMember.id; // Use person ID instead of user ID
+      }
+
+      // Verify client_id exists in persons table if client_id is being updated
+      if (updateData.client_id !== undefined) {
+        const clientPerson = await storage.getPerson(updateData.client_id);
+        if (!clientPerson) {
+          return res.status(400).json({ 
+            error: "Validation failed", 
+            details: [{ path: ["client_id"], message: "Invalid client selected" }]
+          });
+        }
       }
       
       const validatedData = insertAppointmentSchema.partial().parse(updateData);

@@ -150,6 +150,9 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 17, 2025. Fixed appointment creation/update foreign key constraint errors by implementing proper user_id to person_id mapping
+- June 17, 2025. Added localStorage error handling to prevent crashes when storage is disabled in certain contexts
+- June 17, 2025. Fixed business-based data filtering by adding selected business ID to React Query cache keys
 - June 17, 2025. Fixed data refresh issue - updated React Query global configuration for automatic data refresh on list page access
 - June 17, 2025. Fixed client CRUD operations to respect selected business ID filtering with proper user-business relationship validation
 - June 17, 2025. Implemented mandatory business selection system with session storage and context-based filtering
