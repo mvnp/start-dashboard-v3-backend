@@ -18,9 +18,9 @@ interface BarberPlanFormData {
   benefits: string[];
   image1: string;
   image2: string;
-  price1m: number;
-  price3m: number;
-  price12m: number;
+  price1m: string;
+  price3m: string;
+  price12m: string;
   payment_link: string;
 }
 
@@ -38,9 +38,9 @@ export default function BarberPlanForm() {
     benefits: [""],
     image1: "",
     image2: "",
-    price1m: 0,
-    price3m: 0,
-    price12m: 0,
+    price1m: "0",
+    price3m: "0",
+    price12m: "0",
     payment_link: "",
   });
 
@@ -98,21 +98,35 @@ export default function BarberPlanForm() {
   useEffect(() => {
     if (planData && isEdit) {
       setFormData({
-        title: planData.title,
-        subtitle: planData.subtitle,
-        benefits: planData.benefits,
-        image1: planData.image1,
-        image2: planData.image2,
-        price1m: planData.price1m,
-        price3m: planData.price3m,
-        price12m: planData.price12m,
-        payment_link: planData.payment_link,
+        title: planData.title || "",
+        subtitle: planData.subtitle || "",
+        benefits: planData.benefits || [""],
+        image1: planData.image1 || "",
+        image2: planData.image2 || "",
+        price1m: planData.price1m || "0",
+        price3m: planData.price3m || "0",
+        price12m: planData.price12m || "0",
+        payment_link: planData.payment_link || "",
       });
     }
   }, [planData, isEdit]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Debug logging
+    console.log('Form submission - selectedBusinessId:', selectedBusinessId);
+    console.log('Form submission - sessionStorage selectedBusinessId:', sessionStorage.getItem('selectedBusinessId'));
+    
+    if (!selectedBusinessId) {
+      toast({
+        title: "Error",
+        description: "Please select a business first",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (isEdit) {
       updateMutation.mutate(formData);
     } else {
