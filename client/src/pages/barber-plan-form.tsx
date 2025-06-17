@@ -45,7 +45,7 @@ export default function BarberPlanForm() {
   });
 
   const { data: planData, isLoading } = useQuery({
-    queryKey: ["/api/barber-plans", planId, selectedBusinessId],
+    queryKey: [`/api/barber-plans/${planId}`, selectedBusinessId],
     enabled: isEdit && !!planId,
     select: (data: BarberPlan) => data,
   });
@@ -79,7 +79,7 @@ export default function BarberPlanForm() {
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", selectedBusinessId] });
-      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", planId, selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/barber-plans/${planId}`, selectedBusinessId] });
       toast({
         title: "Success",
         description: "Barber plan updated successfully",
