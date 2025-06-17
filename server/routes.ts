@@ -1462,8 +1462,9 @@ export function registerRoutes(app: Express): void {
       
       // Convert user_id to person_id for staff member if user_id is being updated
       if (updateData.user_id !== undefined) {
-        const staffPerson = await storage.getPersonsByRoles([3]); // Role 3 = Employee/Staff
-        const staffMember = staffPerson.find(person => person.user_id === updateData.user_id);
+        // Include all staff roles: 1=super-admin, 2=merchant, 3=employee
+        const staffPersons = await storage.getPersonsByRoles([1, 2, 3]);
+        const staffMember = staffPersons.find(person => person.user_id === updateData.user_id);
         
         if (!staffMember) {
           return res.status(400).json({ 
