@@ -764,9 +764,12 @@ class PostgresStorage implements IStorage {
         : `SELECT COALESCE(SUM(CAST(amount AS DECIMAL)), 0) as total FROM accounting_transactions WHERE type = 'revenue' AND transaction_date = '${yesterdayStr}'`;
       const yesterdayRevenueResult = await this.db.execute(sql.raw(yesterdayRevenueQuery));
 
-      // Get total clients (persons with business_id filter)
+      // Get total clients (persons linked through users_business table)
       const clientsQuery = businessIds && businessIds.length > 0
-        ? `SELECT COUNT(*) as count FROM persons WHERE business_id = ANY(ARRAY[${businessIds.join(',')}])`
+        ? `SELECT COUNT(DISTINCT p.id) as count FROM persons p 
+           JOIN users u ON p.user_id = u.id 
+           JOIN users_business ub ON u.id = ub.user_id 
+           WHERE ub.business_id = ANY(ARRAY[${businessIds.join(',')}])`
         : `SELECT COUNT(*) as count FROM persons`;
       const clientsResult = await this.db.execute(sql.raw(clientsQuery));
 

@@ -66,6 +66,11 @@ function Router() {
           <Dashboard />
         </Layout>
       </Route>
+      <Route path="/dashboard">
+        <Layout>
+          <Dashboard />
+        </Layout>
+      </Route>
       <Route path="/appointments">
         <Layout>
           <AppointmentList />
