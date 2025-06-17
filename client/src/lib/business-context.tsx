@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Business } from "@shared/schema";
 import { useAuth } from "@/lib/auth";
 import BusinessSelectorModal from "@/components/business-selector-modal";
+import { safeGetSessionStorage, safeSetSessionStorage, safeRemoveSessionStorage } from "./safe-storage";
 
 interface BusinessContextType {
   selectedBusinessId: number | null;

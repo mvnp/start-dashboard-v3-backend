@@ -72,15 +72,6 @@ export default function StaffForm() {
 
   const { data: staffMember, isLoading } = useQuery({
     queryKey: [`/api/staff/${staffId}`] as const,
-    queryFn: async () => {
-      const response = await fetch(`/api/staff/${staffId}`, {
-        credentials: "include",
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to fetch staff: ${response.statusText}`);
-      }
-      return response.json();
-    },
     enabled: isEdit && !!staffId,
   });
 
