@@ -1368,7 +1368,82 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  // Accounting Transaction routes
+  /**
+   * @swagger
+   * /api/accounting-transactions:
+   *   get:
+   *     summary: Get all accounting transactions
+   *     description: Retrieve all accounting transactions with business-based filtering. Super Admin sees all transactions, others see only transactions from their businesses.
+   *     tags: [Accounting Management]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: List of accounting transactions
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/AccountingTransaction'
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       500:
+   *         description: Server error
+   *   post:
+   *     summary: Create a new accounting transaction
+   *     description: Create a new accounting transaction for the user's business
+   *     tags: [Accounting Management]
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - type
+   *               - category_id
+   *               - amount
+   *               - description
+   *               - transaction_date
+   *             properties:
+   *               type: 
+   *                 type: string
+   *                 enum: [revenue, expense]
+   *                 example: "revenue"
+   *               category_id: 
+   *                 type: integer
+   *                 example: 1
+   *               amount: 
+   *                 type: number
+   *                 format: decimal
+   *                 example: 150.00
+   *               description: 
+   *                 type: string
+   *                 example: "Haircut service payment"
+   *               transaction_date: 
+   *                 type: string
+   *                 format: date
+   *                 example: "2025-06-17"
+   *               notes: 
+   *                 type: string
+   *                 example: "Cash payment from client"
+   *     responses:
+   *       201:
+   *         description: Transaction created successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/AccountingTransaction'
+   *       400:
+   *         description: Invalid input data
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       500:
+   *         description: Server error
+   */
   app.get("/api/accounting-transactions", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const businessIds = getBusinessFilter(req.user);
@@ -1380,13 +1455,51 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  /**
+   * @swagger
+   * /api/accounting-transactions/{id}:
+   *   get:
+   *     summary: Get a specific accounting transaction
+   *     description: Retrieve a specific accounting transaction by ID with business access validation
+   *     tags: [Accounting Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: Transaction ID
+   *     responses:
+   *       200:
+   *         description: Transaction details
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/AccountingTransaction'
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       404:
+   *         description: Transaction not found
+   *       500:
+   *         description: Server error
+   */
   app.get("/api/accounting-transactions/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      const businessIds = getBusinessFilter(req.user);
       const transaction = await storage.getAccountingTransaction(id);
+      
       if (!transaction) {
         return res.status(404).json({ error: "Transaction not found" });
       }
+
+      // Verify user has access to this transaction's business
+      if (businessIds && transaction.business_id !== null && !businessIds.includes(transaction.business_id)) {
+        return res.status(403).json({ error: "Access denied to this transaction" });
+      }
+      
       res.json(transaction);
     } catch (error) {
       console.error("Accounting transaction fetch error:", error);
@@ -1415,15 +1528,87 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  /**
+   * @swagger
+   * /api/accounting-transactions/{id}:
+   *   put:
+   *     summary: Update an accounting transaction
+   *     description: Update an existing accounting transaction with business access validation
+   *     tags: [Accounting Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: Transaction ID
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               type: 
+   *                 type: string
+   *                 enum: [revenue, expense]
+   *                 example: "expense"
+   *               category_id: 
+   *                 type: integer
+   *                 example: 2
+   *               amount: 
+   *                 type: number
+   *                 format: decimal
+   *                 example: 75.50
+   *               description: 
+   *                 type: string
+   *                 example: "Office supplies purchase"
+   *               transaction_date: 
+   *                 type: string
+   *                 format: date
+   *                 example: "2025-06-17"
+   *               notes: 
+   *                 type: string
+   *                 example: "Monthly office supply order"
+   *     responses:
+   *       200:
+   *         description: Transaction updated successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/AccountingTransaction'
+   *       400:
+   *         description: Invalid input data
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to this transaction
+   *       404:
+   *         description: Transaction not found
+   *       500:
+   *         description: Server error
+   */
   app.put("/api/accounting-transactions/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const validatedData = insertAccountingTransactionSchema.partial().parse(req.body);
+      const businessIds = getBusinessFilter(req.user);
       
-      const transaction = await storage.updateAccountingTransaction(id, validatedData);
-      if (!transaction) {
+      // First check if transaction exists and user has access
+      const existingTransaction = await storage.getAccountingTransaction(id);
+      if (!existingTransaction) {
         return res.status(404).json({ error: "Transaction not found" });
       }
+
+      // Verify user has access to this transaction's business
+      if (businessIds && existingTransaction.business_id !== null && !businessIds.includes(existingTransaction.business_id)) {
+        return res.status(403).json({ error: "Access denied to this transaction" });
+      }
+      
+      const validatedData = insertAccountingTransactionSchema.partial().parse(req.body);
+      const transaction = await storage.updateAccountingTransaction(id, validatedData);
+      
       res.json(transaction);
     } catch (error) {
       console.error("Accounting transaction update error:", error);
@@ -1434,9 +1619,50 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  /**
+   * @swagger
+   * /api/accounting-transactions/{id}:
+   *   delete:
+   *     summary: Delete an accounting transaction
+   *     description: Delete an existing accounting transaction with business access validation
+   *     tags: [Accounting Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: Transaction ID
+   *     responses:
+   *       204:
+   *         description: Transaction deleted successfully
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to this transaction
+   *       404:
+   *         description: Transaction not found
+   *       500:
+   *         description: Server error
+   */
   app.delete("/api/accounting-transactions/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      const businessIds = getBusinessFilter(req.user);
+      
+      // First check if transaction exists and user has access
+      const existingTransaction = await storage.getAccountingTransaction(id);
+      if (!existingTransaction) {
+        return res.status(404).json({ error: "Transaction not found" });
+      }
+
+      // Verify user has access to this transaction's business
+      if (businessIds && existingTransaction.business_id !== null && !businessIds.includes(existingTransaction.business_id)) {
+        return res.status(403).json({ error: "Access denied to this transaction" });
+      }
+      
       const deleted = await storage.deleteAccountingTransaction(id);
       if (!deleted) {
         return res.status(404).json({ error: "Transaction not found" });
