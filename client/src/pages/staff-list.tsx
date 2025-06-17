@@ -60,6 +60,10 @@ export default function StaffList() {
   const { data: staff = [], isLoading } = useQuery({
     queryKey: ["/api/staff"],
     select: (data: Staff[]) => data,
+    staleTime: 0, // Data is immediately stale
+    gcTime: 0, // Don't keep in cache
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 
   const deleteStaffMutation = useMutation({

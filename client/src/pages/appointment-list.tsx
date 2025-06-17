@@ -92,18 +92,34 @@ export default function AppointmentList() {
       if (!response.ok) throw new Error('Failed to fetch appointments');
       return response.json();
     },
+    staleTime: 0, // Data is immediately stale
+    gcTime: 0, // Don't keep in cache
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 
   const { data: services = [] } = useQuery<Service[]>({
     queryKey: ["/api/services"],
+    staleTime: 0, // Data is immediately stale
+    gcTime: 0, // Don't keep in cache
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 
   const { data: staff = [] } = useQuery<Person[]>({
     queryKey: ["/api/staff"],
+    staleTime: 0, // Data is immediately stale
+    gcTime: 0, // Don't keep in cache
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 
   const { data: clients = [] } = useQuery<Person[]>({
     queryKey: ["/api/clients"],
+    staleTime: 0, // Data is immediately stale
+    gcTime: 0, // Don't keep in cache
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 
   const appointments = appointmentData?.appointments || [];

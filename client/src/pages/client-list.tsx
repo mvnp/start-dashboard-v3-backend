@@ -29,7 +29,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Client } from "@shared/schema";
+import { Person } from "@shared/schema";
+
+interface Client extends Person {
+  email?: string;
+}
 
 export default function ClientList() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,6 +42,10 @@ export default function ClientList() {
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ["/api/clients"],
     select: (data: Client[]) => data,
+    staleTime: 0, // Data is immediately stale
+    gcTime: 0, // Don't keep in cache
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 
   const deleteClientMutation = useMutation({
