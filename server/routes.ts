@@ -1496,7 +1496,7 @@ export function registerRoutes(app: Express): void {
       }
 
       // Verify user has access to this transaction's business
-      if (businessIds && transaction.business_id !== null && !businessIds.includes(transaction.business_id)) {
+      if (businessIds && transaction.business_id && !businessIds.includes(transaction.business_id)) {
         return res.status(403).json({ error: "Access denied to this transaction" });
       }
       
@@ -1602,7 +1602,7 @@ export function registerRoutes(app: Express): void {
       }
 
       // Verify user has access to this transaction's business
-      if (businessIds && existingTransaction.business_id !== null && !businessIds.includes(existingTransaction.business_id)) {
+      if (businessIds && existingTransaction.business_id && !businessIds.includes(existingTransaction.business_id)) {
         return res.status(403).json({ error: "Access denied to this transaction" });
       }
       
@@ -1659,7 +1659,7 @@ export function registerRoutes(app: Express): void {
       }
 
       // Verify user has access to this transaction's business
-      if (businessIds && existingTransaction.business_id !== null && !businessIds.includes(existingTransaction.business_id)) {
+      if (businessIds && existingTransaction.business_id && !businessIds.includes(existingTransaction.business_id)) {
         return res.status(403).json({ error: "Access denied to this transaction" });
       }
       
