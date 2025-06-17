@@ -74,7 +74,21 @@ export default function AppointmentList() {
   const { data: appointmentData, isLoading } = useQuery({
     queryKey: ["/api/appointments", buildQueryParams()],
     queryFn: async () => {
-      const response = await fetch(`/api/appointments?${buildQueryParams()}`);
+      const token = localStorage.getItem('accessToken');
+      const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
+      const headers: Record<string, string> = {};
+      
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      
+      if (selectedBusinessId) {
+        headers["X-Selected-Business-Id"] = selectedBusinessId;
+      }
+
+      const response = await fetch(`/api/appointments?${buildQueryParams()}`, {
+        headers,
+      });
       if (!response.ok) throw new Error('Failed to fetch appointments');
       return response.json();
     },
