@@ -1210,6 +1210,28 @@ export function registerRoutes(app: Express): void {
           businessIds: businessIds
         });
       }
+
+      // Map person IDs back to user IDs for staff members in all appointments
+      if (appointments.appointments && appointments.appointments.length > 0) {
+        const appointmentsWithUserIds = await Promise.all(
+          appointments.appointments.map(async (appointment) => {
+            let staffUserId = appointment.user_id;
+            if (appointment.user_id) {
+              const staffPerson = await storage.getPerson(appointment.user_id);
+              if (staffPerson && staffPerson.user_id) {
+                staffUserId = staffPerson.user_id;
+              }
+            }
+            return {
+              ...appointment,
+              user_id: staffUserId
+            };
+          })
+        );
+        
+        appointments.appointments = appointmentsWithUserIds;
+      }
+
       res.json(appointments);
     } catch (error) {
       console.error("Appointment fetch error:", error);
@@ -1224,7 +1246,23 @@ export function registerRoutes(app: Express): void {
       if (!appointment) {
         return res.status(404).json({ error: "Appointment not found" });
       }
-      res.json(appointment);
+
+      // Map person ID back to user ID for staff member dropdown
+      let staffUserId = appointment.user_id;
+      if (appointment.user_id) {
+        const staffPerson = await storage.getPerson(appointment.user_id);
+        if (staffPerson && staffPerson.user_id) {
+          staffUserId = staffPerson.user_id;
+        }
+      }
+
+      // Return appointment with corrected user_id for frontend display
+      const appointmentResponse = {
+        ...appointment,
+        user_id: staffUserId
+      };
+
+      res.json(appointmentResponse);
     } catch (error) {
       console.error("Appointment fetch error:", error);
       res.status(500).json({ error: "Failed to fetch appointment" });

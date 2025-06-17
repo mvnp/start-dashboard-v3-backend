@@ -150,6 +150,9 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 17, 2025. Fixed appointment form display by implementing bidirectional user_id/person_id mapping in appointment GET endpoints for proper dropdown selection
+- June 17, 2025. Added JWT authentication middleware to all staff API endpoints to resolve authentication errors
+- June 17, 2025. Implemented comprehensive safe storage utilities for localStorage/sessionStorage to prevent data URL context errors
 - June 17, 2025. Fixed appointment creation/update foreign key constraint errors by implementing proper user_id to person_id mapping
 - June 17, 2025. Added localStorage error handling to prevent crashes when storage is disabled in certain contexts
 - June 17, 2025. Fixed business-based data filtering by adding selected business ID to React Query cache keys
