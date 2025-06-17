@@ -1,5 +1,4 @@
 import express, { type Request, Response, NextFunction } from "express";
-import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { setupSwagger } from "./swagger";
@@ -23,30 +22,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Session configuration
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'barber-shop-secret-key',
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    secure: false, // Set to true in production with HTTPS
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
-}));
-
-// Auto-login middleware for development (sets session to Super Admin by default)
-app.use(async (req, res, next) => {
-  if (!req.session.userId && !req.session.isAuthenticated) {
-    // Set default session to Super Admin (User ID: 1) for development only on first visit
-    req.session.userId = 1;
-    req.session.userEmail = 'admin@system.com';
-    req.session.roleId = 1;
-    req.session.businessIds = [1];
-    req.session.isAuthenticated = true;
-  }
-  next();
-});
+// JWT-only authentication - no session middleware needed
 
 app.use((req, res, next) => {
   const start = Date.now();

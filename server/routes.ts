@@ -6,20 +6,11 @@ import {
   authenticateJWT, 
   authenticateUser as jwtAuthenticateUser, 
   refreshAccessToken,
-  AuthenticatedRequest as JWTAuthenticatedRequest 
+  AuthenticatedRequest
 } from "./auth";
 import { getBusinessFilter } from "./middleware";
 
-interface JWTAuthenticatedRequest extends Request {
-  session: any;
-  user?: {
-    id: number;
-    email: string;
-    roleId: number;
-    businessIds: number[];
-    isSuperAdmin: boolean;
-  };
-}
+
 import {
   insertUserSchema,
   insertBusinessSchema,
@@ -228,7 +219,7 @@ export function registerRoutes(app: Express): void {
    *       500:
    *         description: Server error
    */
-  app.get("/api/auth/me", authenticateJWT, async (req: JWTAuthenticatedRequest, res) => {
+  app.get("/api/auth/me", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
       res.json({
         user: req.user
@@ -713,7 +704,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/clients", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.post("/api/clients", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { email, first_name, last_name, phone, tax_id, address } = req.body;
       
@@ -782,7 +773,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/clients/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.put("/api/clients/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const { email, first_name, last_name, phone, tax_id, address } = req.body;
@@ -932,7 +923,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/services/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.get("/api/services/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const service = await storage.getService(id);
@@ -946,7 +937,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/services", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.post("/api/services", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       // Get user's business context
       const businessId = req.user?.businessIds?.[0] || 1;
@@ -990,7 +981,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/services/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.put("/api/services/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       
@@ -1031,7 +1022,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/services/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.delete("/api/services/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteService(id);
@@ -1193,7 +1184,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/appointments/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.get("/api/appointments/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const appointment = await storage.getAppointment(id);
@@ -1207,7 +1198,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/appointments", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.post("/api/appointments", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       // Get user's business context
       const businessId = req.user?.businessIds?.[0] || 1;
@@ -1272,7 +1263,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/appointments/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.put("/api/appointments/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       
@@ -1334,7 +1325,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/appointments/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.delete("/api/appointments/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteAppointment(id);
@@ -1407,7 +1398,7 @@ export function registerRoutes(app: Express): void {
   });
 
   // Accounting Transaction Category routes
-  app.get("/api/accounting-transaction-categories", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.get("/api/accounting-transaction-categories", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const businessIds = getBusinessFilter(req.user);
       const categories = await storage.getAccountingTransactionCategoriesByBusinessIds(businessIds);
@@ -1419,7 +1410,7 @@ export function registerRoutes(app: Express): void {
   });
 
   // Accounting Transaction routes
-  app.get("/api/accounting-transactions", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.get("/api/accounting-transactions", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const businessIds = getBusinessFilter(req.user);
       const transactions = await storage.getAccountingTransactionsByBusinessIds(businessIds);
@@ -1430,7 +1421,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/accounting-transactions/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.get("/api/accounting-transactions/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const transaction = await storage.getAccountingTransaction(id);
@@ -1444,7 +1435,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/accounting-transactions", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.post("/api/accounting-transactions", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const businessIds = getBusinessFilter(req.user);
       const businessId = businessIds?.[0] || req.body.business_id;
@@ -1465,7 +1456,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/accounting-transactions/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.put("/api/accounting-transactions/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const validatedData = insertAccountingTransactionSchema.partial().parse(req.body);
@@ -1484,7 +1475,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/accounting-transactions/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.delete("/api/accounting-transactions/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteAccountingTransaction(id);
@@ -1581,7 +1572,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/whatsapp-instances", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.get("/api/whatsapp-instances", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       // Get all instances first
       const allInstances = await storage.getAllWhatsappInstances();
@@ -1615,7 +1606,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/whatsapp-instances", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.post("/api/whatsapp-instances", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const validatedData = insertWhatsappInstanceSchema.parse(req.body);
       
@@ -1638,7 +1629,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/whatsapp-instances/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.put("/api/whatsapp-instances/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const validatedData = insertWhatsappInstanceSchema.partial().parse(req.body);
@@ -1665,7 +1656,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/whatsapp-instances/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
+  app.delete("/api/whatsapp-instances/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       
