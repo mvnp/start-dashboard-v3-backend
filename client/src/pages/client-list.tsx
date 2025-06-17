@@ -38,9 +38,12 @@ interface Client extends Person {
 export default function ClientList() {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  
+  // Get selected business ID to include in cache key
+  const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
 
   const { data: clients = [], isLoading } = useQuery({
-    queryKey: ["/api/clients"],
+    queryKey: ["/api/clients", selectedBusinessId],
     select: (data: Client[]) => data,
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
@@ -51,7 +54,7 @@ export default function ClientList() {
   const deleteClientMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/clients/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/clients", selectedBusinessId] });
       toast({
         title: "Client deleted",
         description: "The client has been successfully removed.",

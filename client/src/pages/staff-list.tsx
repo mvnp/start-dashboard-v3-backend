@@ -61,9 +61,12 @@ const roleConfig = {
 export default function StaffList() {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  
+  // Get selected business ID to include in cache key
+  const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
 
   const { data: staff = [], isLoading } = useQuery({
-    queryKey: ["/api/staff"],
+    queryKey: ["/api/staff", selectedBusinessId],
     select: (data: Staff[]) => data,
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache

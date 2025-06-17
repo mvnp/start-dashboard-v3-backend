@@ -26,8 +26,11 @@ export default function ServiceList() {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { toast } = useToast();
 
+  // Get selected business ID to include in cache key
+  const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
+
   const { data: services = [], isLoading } = useQuery({
-    queryKey: ["/api/services"],
+    queryKey: ["/api/services", selectedBusinessId],
     select: (data: Service[]) => data,
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache

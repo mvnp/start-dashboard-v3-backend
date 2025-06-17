@@ -71,8 +71,11 @@ export default function AppointmentList() {
     return params.toString();
   }, [currentPage, statusFilter, todayFilter, startDate, endDate]);
 
+  // Get selected business ID to include in cache key
+  const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
+
   const { data: appointmentData, isLoading } = useQuery({
-    queryKey: ["/api/appointments", buildQueryParams()],
+    queryKey: ["/api/appointments", buildQueryParams(), selectedBusinessId],
     queryFn: async () => {
       const token = localStorage.getItem('accessToken');
       const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
