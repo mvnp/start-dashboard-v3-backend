@@ -19,7 +19,7 @@ Comprehensive barbershop management system with role-based access control and mu
 
 1. **Login first**: Use the \`/api/login\` endpoint with valid credentials:
    - Email: \`mvnpereira@gmail.com\`
-   - Password: \`123456\`
+   - Password: \`admin123\`
 
 2. **After successful login**: The session cookie will be automatically set in your browser
 
