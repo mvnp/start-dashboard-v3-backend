@@ -54,13 +54,48 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
 
   // Show modal when user logs in and has multiple businesses
   useEffect(() => {
-    if (!isLoading && user && !user.isSuperAdmin && userBusinesses.length > 1) {
+    if (!isLoading && user && !user.isSuperAdmin) {
       const savedBusinessId = sessionStorage.getItem("selectedBusinessId");
-      if (!savedBusinessId) {
+      
+      // If user has multiple businesses and no saved business, show modal immediately
+      if (userBusinesses.length > 1 && !savedBusinessId) {
+        console.log('Showing business selection modal for user with multiple businesses');
         setShowBusinessModal(true);
+      }
+      
+      // If user has businesses but no valid saved business, show modal
+      if (userBusinesses.length > 1 && savedBusinessId) {
+        const savedId = parseInt(savedBusinessId);
+        const businessExists = userBusinesses.some(b => b.id === savedId);
+        if (!businessExists) {
+          sessionStorage.removeItem("selectedBusinessId");
+          setSelectedBusinessIdState(null);
+          setShowBusinessModal(true);
+        }
       }
     }
   }, [user, userBusinesses, isLoading]);
+
+  // Clear business selection when user changes (logout/login)
+  useEffect(() => {
+    if (!user) {
+      setSelectedBusinessIdState(null);
+      setShowBusinessModal(false);
+      sessionStorage.removeItem("selectedBusinessId");
+    } else {
+      // When user logs in, clear any previous business selection to force new selection
+      const currentUserId = user.id;
+      const lastUserId = sessionStorage.getItem("lastUserId");
+      
+      if (lastUserId && lastUserId !== currentUserId.toString()) {
+        // Different user logged in, clear previous business selection
+        sessionStorage.removeItem("selectedBusinessId");
+        setSelectedBusinessIdState(null);
+      }
+      
+      sessionStorage.setItem("lastUserId", currentUserId.toString());
+    }
+  }, [user]);
 
   // Auto-select business if user has only one
   useEffect(() => {
