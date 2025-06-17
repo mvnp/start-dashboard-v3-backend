@@ -16,6 +16,7 @@ interface AuthContextType {
   switchUser: (userId: number) => Promise<void>;
   getCurrentUser: () => Promise<void>;
   refreshData: () => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -104,6 +105,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryClient.invalidateQueries();
   };
 
+  const logout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    sessionStorage.removeItem('selectedBusinessId');
+    setUser(null);
+    queryClient.clear();
+    window.location.href = '/login';
+  };
+
   // Enhanced setUser that also refreshes data
   const setUserAndRefresh = (newUser: User | null) => {
     setUser(newUser);
@@ -126,7 +136,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser: setUserAndRefresh, 
       switchUser, 
       getCurrentUser, 
-      refreshData 
+      refreshData,
+      logout
     }}>
       {children}
     </AuthContext.Provider>
