@@ -1,15 +1,16 @@
 import { Express, Request, Response } from "express";
 import { z } from "zod";
 import storage from "./storage";
-import { requireAuth, getBusinessFilter } from "./middleware";
+
 import { 
   authenticateJWT, 
   authenticateUser as jwtAuthenticateUser, 
   refreshAccessToken,
   AuthenticatedRequest as JWTAuthenticatedRequest 
 } from "./auth";
+import { getBusinessFilter } from "./middleware";
 
-interface SessionAuthenticatedRequest extends Request {
+interface JWTAuthenticatedRequest extends Request {
   session: any;
   user?: {
     id: number;
@@ -241,222 +242,11 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  /**
-   * @swagger
-   * /api/login:
-   *   post:
-   *     summary: Legacy session authentication
-   *     description: Authenticate user with email and password, creates session cookie. Note - In Swagger UI, login first, then refresh the page to use authenticated endpoints.
-   *     tags: [Legacy Authentication]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - email
-   *               - password
-   *             properties:
-   *               email:
-   *                 type: string
-   *                 format: email
-   *                 example: "mvnpereira@gmail.com"
-   *               password:
-   *                 type: string
-   *                 example: "123456"
-   *     responses:
-   *       200:
-   *         description: Login successful - Session cookie is set automatically
-   *         headers:
-   *           Set-Cookie:
-   *             description: Session cookie for authentication
-   *             schema:
-   *               type: string
-   *               example: "connect.sid=s%3A..."
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 user:
-   *                   type: object
-   *                   properties:
-   *                     id: { type: integer, example: 1 }
-   *                     email: { type: string, example: "mvnpereira@gmail.com" }
-   *                     roleId: { type: integer, example: 1 }
-   *                     businessIds: { type: array, items: { type: integer }, example: [1] }
-   *                     isSuperAdmin: { type: boolean, example: true }
-   *       401:
-   *         description: Invalid credentials
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/Error'
-   *       500:
-   *         description: Server error
-   */
-  app.post("/api/login", async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      
-      // Special handling for Swagger testing with pre-configured credentials
-      if (email === "test@swagger.com" && password === "swagger123") {
-        req.session.userId = 1;
-        req.session.userEmail = "test@swagger.com";
-        req.session.roleId = 1;
-        req.session.businessIds = [1];
-        req.session.isAuthenticated = true;
 
-        return res.json({
-          user: {
-            id: 1,
-            email: "test@swagger.com",
-            roleId: 1,
-            businessIds: [1],
-            isSuperAdmin: true
-          }
-        });
-      }
 
-      // For demo purposes, allow the existing admin user with simple password
-      if (email === "mvnpereira@gmail.com" && password === "admin123") {
-        req.session.userId = 1;
-        req.session.userEmail = "mvnpereira@gmail.com";
-        req.session.roleId = 1;
-        req.session.businessIds = [1];
-        req.session.isAuthenticated = true;
 
-        return res.json({
-          user: {
-            id: 1,
-            email: "mvnpereira@gmail.com",
-            roleId: 1,
-            businessIds: [1],
-            isSuperAdmin: true
-          }
-        });
-      }
-      
-      // Try database authentication for other users
-      try {
-        const userData = await storage.authenticateUser(email, password);
-        
-        if (userData) {
-          req.session.userId = userData.user.id;
-          req.session.userEmail = userData.user.email;
-          req.session.roleId = userData.roleId;
-          req.session.businessIds = userData.businessIds;
-          req.session.isAuthenticated = true;
 
-          return res.json({
-            user: {
-              id: userData.user.id,
-              email: userData.user.email,
-              roleId: userData.roleId,
-              businessIds: userData.businessIds,
-              isSuperAdmin: userData.roleId === 1
-            }
-          });
-        }
-      } catch (authError) {
-        console.log("Database authentication failed, trying fallback");
-      }
-      
-      return res.status(401).json({ error: "Invalid credentials" });
-    } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ error: "Login failed" });
-    }
-  });
 
-  app.post("/api/logout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ error: "Logout failed" });
-      }
-      res.json({ message: "Logged out successfully" });
-    });
-  });
-
-  app.get("/api/me", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-
-    try {
-      const userData = await storage.getUserWithRoleAndBusiness(req.session.userId);
-      if (!userData) {
-        return res.status(401).json({ error: "User not found" });
-      }
-
-      res.json({
-        user: {
-          id: userData.user.id,
-          email: userData.user.email,
-          roleId: userData.roleId,
-          businessIds: userData.businessIds,
-          isSuperAdmin: userData.roleId === 1
-        }
-      });
-    } catch (error) {
-      console.error("User fetch error:", error);
-      res.status(500).json({ error: "Failed to fetch user data" });
-    }
-  });
-
-  /**
-   * @swagger
-   * /api/user:
-   *   get:
-   *     summary: Get current authenticated user
-   *     description: Returns the current user's session information including role and business access
-   *     tags: [Authentication]
-   *     responses:
-   *       200:
-   *         description: Current user information
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 user:
-   *                   type: object
-   *                   properties:
-   *                     id: { type: integer, example: 1 }
-   *                     email: { type: string, example: "admin@system.com" }
-   *                     roleId: { type: integer, example: 1 }
-   *                     businessIds: { type: array, items: { type: integer }, example: [1] }
-   *                     isSuperAdmin: { type: boolean, example: true }
-   *       500:
-   *         description: Server error
-   */
-  app.get("/api/user", async (req, res) => {
-    try {
-      // Check if session exists and has user data
-      if (!req.session?.userId) {
-        return res.status(401).json({ error: "Not authenticated" });
-      }
-
-      const userData = await storage.getUserWithRoleAndBusiness(req.session.userId);
-      if (!userData) {
-        return res.status(401).json({ error: "User not found" });
-      }
-
-      res.json({
-        user: {
-          id: userData.user.id,
-          email: userData.user.email,
-          roleId: userData.roleId,
-          businessIds: userData.businessIds,
-          isSuperAdmin: userData.roleId === 1
-        }
-      });
-    } catch (error) {
-      console.error("User fetch error:", error);
-      res.status(500).json({ error: "Failed to fetch user data" });
-    }
-  });
 
 
 
@@ -923,7 +713,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/clients", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.post("/api/clients", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const { email, first_name, last_name, phone, tax_id, address } = req.body;
       
@@ -992,7 +782,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/clients/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.put("/api/clients/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const { email, first_name, last_name, phone, tax_id, address } = req.body;
@@ -1142,7 +932,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/services/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.get("/api/services/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const service = await storage.getService(id);
@@ -1156,7 +946,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/services", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.post("/api/services", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       // Get user's business context
       const businessId = req.user?.businessIds?.[0] || 1;
@@ -1200,7 +990,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/services/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.put("/api/services/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       
@@ -1241,7 +1031,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/services/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.delete("/api/services/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteService(id);
@@ -1403,7 +1193,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/appointments/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.get("/api/appointments/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const appointment = await storage.getAppointment(id);
@@ -1417,7 +1207,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/appointments", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.post("/api/appointments", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       // Get user's business context
       const businessId = req.user?.businessIds?.[0] || 1;
@@ -1482,7 +1272,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/appointments/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.put("/api/appointments/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       
@@ -1544,7 +1334,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/appointments/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.delete("/api/appointments/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteAppointment(id);
@@ -1617,7 +1407,7 @@ export function registerRoutes(app: Express): void {
   });
 
   // Accounting Transaction Category routes
-  app.get("/api/accounting-transaction-categories", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.get("/api/accounting-transaction-categories", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const businessIds = getBusinessFilter(req.user);
       const categories = await storage.getAccountingTransactionCategoriesByBusinessIds(businessIds);
@@ -1629,7 +1419,7 @@ export function registerRoutes(app: Express): void {
   });
 
   // Accounting Transaction routes
-  app.get("/api/accounting-transactions", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.get("/api/accounting-transactions", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const businessIds = getBusinessFilter(req.user);
       const transactions = await storage.getAccountingTransactionsByBusinessIds(businessIds);
@@ -1640,7 +1430,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/accounting-transactions/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.get("/api/accounting-transactions/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const transaction = await storage.getAccountingTransaction(id);
@@ -1654,7 +1444,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/accounting-transactions", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.post("/api/accounting-transactions", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const businessIds = getBusinessFilter(req.user);
       const businessId = businessIds?.[0] || req.body.business_id;
@@ -1675,7 +1465,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/accounting-transactions/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.put("/api/accounting-transactions/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const validatedData = insertAccountingTransactionSchema.partial().parse(req.body);
@@ -1694,7 +1484,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/accounting-transactions/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.delete("/api/accounting-transactions/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteAccountingTransaction(id);
@@ -1791,7 +1581,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/whatsapp-instances", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.get("/api/whatsapp-instances", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       // Get all instances first
       const allInstances = await storage.getAllWhatsappInstances();
@@ -1825,7 +1615,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/whatsapp-instances", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.post("/api/whatsapp-instances", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const validatedData = insertWhatsappInstanceSchema.parse(req.body);
       
@@ -1848,7 +1638,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/whatsapp-instances/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.put("/api/whatsapp-instances/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const validatedData = insertWhatsappInstanceSchema.partial().parse(req.body);
@@ -1875,7 +1665,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/whatsapp-instances/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
+  app.delete("/api/whatsapp-instances/:id", authenticateJWT, async (req: JWTAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       
