@@ -1661,7 +1661,7 @@ export function registerRoutes(app: Express): void {
   app.put("/api/accounting-transactions/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const businessIds = getBusinessFilter(req.user);
+      const businessIds = getBusinessFilter(req.user, req);
       
       // First check if transaction exists and user has access
       const existingTransaction = await storage.getAccountingTransaction(id);
@@ -1718,7 +1718,7 @@ export function registerRoutes(app: Express): void {
   app.delete("/api/accounting-transactions/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const businessIds = getBusinessFilter(req.user);
+      const businessIds = getBusinessFilter(req.user, req);
       
       // First check if transaction exists and user has access
       const existingTransaction = await storage.getAccountingTransaction(id);
