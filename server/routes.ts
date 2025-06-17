@@ -1255,50 +1255,67 @@ export function registerRoutes(app: Express): void {
     try {
       const id = parseInt(req.params.id);
       
+      // Get business context from selected business or request body
+      const businessIds = getBusinessFilter(req.user, req);
+      const businessId = businessIds?.[0] || req.body.business_id;
+      
+      if (!businessId) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["business_id"], message: "Business context is required" }]
+        });
+      }
+      
+      // Include business_id in update data
+      const updateData = {
+        ...req.body,
+        business_id: businessId
+      };
+      
       // Validate required fields for updates
-      if (req.body.appointment_date !== undefined && (!req.body.appointment_date || !req.body.appointment_date.trim())) {
+      if (updateData.appointment_date !== undefined && (!updateData.appointment_date || !updateData.appointment_date.trim())) {
         return res.status(400).json({ 
           error: "Validation failed", 
           details: [{ path: ["appointment_date"], message: "Appointment date is required" }]
         });
       }
       
-      if (req.body.appointment_time !== undefined && (!req.body.appointment_time || !req.body.appointment_time.trim())) {
+      if (updateData.appointment_time !== undefined && (!updateData.appointment_time || !updateData.appointment_time.trim())) {
         return res.status(400).json({ 
           error: "Validation failed", 
           details: [{ path: ["appointment_time"], message: "Appointment time is required" }]
         });
       }
       
-      if (req.body.status !== undefined && (!req.body.status || !req.body.status.trim())) {
+      if (updateData.status !== undefined && (!updateData.status || !updateData.status.trim())) {
         return res.status(400).json({ 
           error: "Validation failed", 
           details: [{ path: ["status"], message: "Status is required" }]
         });
       }
       
-      if (req.body.user_id !== undefined && (!req.body.user_id || req.body.user_id < 1)) {
+      if (updateData.user_id !== undefined && (!updateData.user_id || updateData.user_id < 1)) {
         return res.status(400).json({ 
           error: "Validation failed", 
           details: [{ path: ["user_id"], message: "Staff member is required" }]
         });
       }
       
-      if (req.body.client_id !== undefined && (!req.body.client_id || req.body.client_id < 1)) {
+      if (updateData.client_id !== undefined && (!updateData.client_id || updateData.client_id < 1)) {
         return res.status(400).json({ 
           error: "Validation failed", 
           details: [{ path: ["client_id"], message: "Client is required" }]
         });
       }
       
-      if (req.body.service_id !== undefined && (!req.body.service_id || req.body.service_id < 1)) {
+      if (updateData.service_id !== undefined && (!updateData.service_id || updateData.service_id < 1)) {
         return res.status(400).json({ 
           error: "Validation failed", 
           details: [{ path: ["service_id"], message: "Service is required" }]
         });
       }
       
-      const validatedData = insertAppointmentSchema.partial().parse(req.body);
+      const validatedData = insertAppointmentSchema.partial().parse(updateData);
       const appointment = await storage.updateAppointment(id, validatedData);
       if (!appointment) {
         return res.status(404).json({ error: "Appointment not found" });
