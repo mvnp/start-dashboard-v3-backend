@@ -39,6 +39,7 @@ export interface IStorage {
   // Business methods
   getAllBusinesses(): Promise<Business[]>;
   getBusiness(id: number): Promise<Business | undefined>;
+  getBusinessesByIds(businessIds: number[]): Promise<Business[]>;
   createBusiness(business: InsertBusiness): Promise<Business>;
   updateBusiness(id: number, business: Partial<InsertBusiness>): Promise<Business | undefined>;
   deleteBusiness(id: number): Promise<boolean>;
@@ -228,6 +229,10 @@ class PostgresStorage implements IStorage {
   async getBusiness(id: number): Promise<Business | undefined> {
     const result = await this.db.select().from(businesses).where(eq(businesses.id, id));
     return result[0];
+  }
+
+  async getBusinessesByIds(businessIds: number[]): Promise<Business[]> {
+    return await this.db.select().from(businesses).where(inArray(businesses.id, businessIds));
   }
 
   async createBusiness(insertBusiness: InsertBusiness): Promise<Business> {

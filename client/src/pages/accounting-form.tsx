@@ -14,11 +14,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { AccountingTransaction, AccountingTransactionCategory, Person } from "@shared/schema";
+import { AccountingTransaction, AccountingTransactionCategory, Person, Business } from "@shared/schema";
 import { format } from "date-fns";
 
 const formSchema = z.object({
   type: z.enum(["revenue", "expense"]),
+  business_id: z.number().min(1, "Business is required"),
   category_id: z.number().min(1, "Category is required"),
   description: z.string().min(1, "Description is required"),
   amount: z.string().min(1, "Amount is required").regex(/^\d+(\.\d{1,2})?$/, "Invalid amount format"),

@@ -1368,6 +1368,53 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  // User Businesses route
+  /**
+   * @swagger
+   * /api/user-businesses:
+   *   get:
+   *     summary: Get businesses accessible to the current user
+   *     tags: [User]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: List of businesses user has access to
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   id:
+   *                     type: integer
+   *                   name:
+   *                     type: string
+   *                   address:
+   *                     type: string
+   *       401:
+   *         description: Unauthorized
+   */
+  app.get("/api/user-businesses", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const businessIds = getBusinessFilter(req.user);
+      
+      if (!businessIds) {
+        // Super admin gets all businesses
+        const businesses = await storage.getAllBusinesses();
+        res.json(businesses);
+      } else {
+        // Regular users get only their businesses
+        const businesses = await storage.getBusinessesByIds(businessIds);
+        res.json(businesses);
+      }
+    } catch (error) {
+      console.error("User businesses fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch user businesses" });
+    }
+  });
+
   /**
    * @swagger
    * /api/accounting-transactions:
