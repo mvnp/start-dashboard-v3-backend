@@ -712,6 +712,123 @@ class PostgresStorage implements IStorage {
     return false;
   }
 
+  // Dashboard Statistics methods
+  async getDashboardStats(businessIds?: number[] | null): Promise<{
+    todayAppointments: number;
+    yesterdayAppointments: number;
+    appointmentChange: string;
+    todayRevenue: number;
+    yesterdayRevenue: number;
+    revenueChange: string;
+    totalClients: number;
+    completedServices: number;
+  }> {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const todayStr = today.toISOString().split('T')[0];
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    try {
+      // Use raw SQL queries for better control and compatibility
+      let businessFilter = '';
+      const businessParams: string[] = [];
+      
+      if (businessIds !== null && businessIds && businessIds.length > 0) {
+        businessFilter = ` AND business_id = ANY($${businessParams.length + 1})`;
+        businessParams.push(`{${businessIds.join(',')}}`);
+      }
+
+      // Get today's appointments count
+      const todayAppointmentsQuery = businessIds && businessIds.length > 0 
+        ? `SELECT COUNT(*) as count FROM appointments WHERE appointment_date = '${todayStr}' AND business_id = ANY(ARRAY[${businessIds.join(',')}])`
+        : `SELECT COUNT(*) as count FROM appointments WHERE appointment_date = '${todayStr}'`;
+      const todayAppointmentsResult = await this.db.execute(sql.raw(todayAppointmentsQuery));
+
+      // Get yesterday's appointments count
+      const yesterdayAppointmentsQuery = businessIds && businessIds.length > 0 
+        ? `SELECT COUNT(*) as count FROM appointments WHERE appointment_date = '${yesterdayStr}' AND business_id = ANY(ARRAY[${businessIds.join(',')}])`
+        : `SELECT COUNT(*) as count FROM appointments WHERE appointment_date = '${yesterdayStr}'`;
+      const yesterdayAppointmentsResult = await this.db.execute(sql.raw(yesterdayAppointmentsQuery));
+
+      // Get today's revenue
+      const todayRevenueQuery = businessIds && businessIds.length > 0
+        ? `SELECT COALESCE(SUM(CAST(amount AS DECIMAL)), 0) as total FROM accounting_transactions WHERE type = 'revenue' AND transaction_date = '${todayStr}' AND business_id = ANY(ARRAY[${businessIds.join(',')}])`
+        : `SELECT COALESCE(SUM(CAST(amount AS DECIMAL)), 0) as total FROM accounting_transactions WHERE type = 'revenue' AND transaction_date = '${todayStr}'`;
+      const todayRevenueResult = await this.db.execute(sql.raw(todayRevenueQuery));
+
+      // Get yesterday's revenue
+      const yesterdayRevenueQuery = businessIds && businessIds.length > 0
+        ? `SELECT COALESCE(SUM(CAST(amount AS DECIMAL)), 0) as total FROM accounting_transactions WHERE type = 'revenue' AND transaction_date = '${yesterdayStr}' AND business_id = ANY(ARRAY[${businessIds.join(',')}])`
+        : `SELECT COALESCE(SUM(CAST(amount AS DECIMAL)), 0) as total FROM accounting_transactions WHERE type = 'revenue' AND transaction_date = '${yesterdayStr}'`;
+      const yesterdayRevenueResult = await this.db.execute(sql.raw(yesterdayRevenueQuery));
+
+      // Get total clients (persons with business_id filter)
+      const clientsQuery = businessIds && businessIds.length > 0
+        ? `SELECT COUNT(*) as count FROM persons WHERE business_id = ANY(ARRAY[${businessIds.join(',')}])`
+        : `SELECT COUNT(*) as count FROM persons`;
+      const clientsResult = await this.db.execute(sql.raw(clientsQuery));
+
+      // Get completed services count
+      const completedQuery = businessIds && businessIds.length > 0
+        ? `SELECT COUNT(*) as count FROM appointments WHERE status = 'completed' AND business_id = ANY(ARRAY[${businessIds.join(',')}])`
+        : `SELECT COUNT(*) as count FROM appointments WHERE status = 'completed'`;
+      const completedResult = await this.db.execute(sql.raw(completedQuery));
+
+      const todayAppointments = Number(todayAppointmentsResult.rows[0]?.count || 0);
+      const yesterdayAppointments = Number(yesterdayAppointmentsResult.rows[0]?.count || 0);
+      const todayRevenue = Number(todayRevenueResult.rows[0]?.total || 0);
+      const yesterdayRevenue = Number(yesterdayRevenueResult.rows[0]?.total || 0);
+      const totalClients = Number(clientsResult.rows[0]?.count || 0);
+      const completedServices = Number(completedResult.rows[0]?.count || 0);
+
+      // Calculate appointment change
+      const appointmentDiff = todayAppointments - yesterdayAppointments;
+      const appointmentChange = appointmentDiff > 0 
+        ? `+${appointmentDiff} from yesterday`
+        : appointmentDiff < 0 
+          ? `${appointmentDiff} from yesterday`
+          : 'Same as yesterday';
+
+      // Calculate revenue change
+      const revenueDiff = todayRevenue - yesterdayRevenue;
+      const revenueChangePercent = yesterdayRevenue > 0 
+        ? Math.round((revenueDiff / yesterdayRevenue) * 100)
+        : todayRevenue > 0 ? 100 : 0;
+      
+      const revenueChange = revenueChangePercent > 0 
+        ? `+${revenueChangePercent}% from yesterday`
+        : revenueChangePercent < 0 
+          ? `${revenueChangePercent}% from yesterday`
+          : 'Same as yesterday';
+
+      return {
+        todayAppointments,
+        yesterdayAppointments,
+        appointmentChange,
+        todayRevenue,
+        yesterdayRevenue,
+        revenueChange,
+        totalClients,
+        completedServices,
+      };
+    } catch (error) {
+      console.error('Dashboard stats error:', error);
+      // Return zero values if queries fail
+      return {
+        todayAppointments: 0,
+        yesterdayAppointments: 0,
+        appointmentChange: 'No data',
+        todayRevenue: 0,
+        yesterdayRevenue: 0,
+        revenueChange: 'No data',
+        totalClients: 0,
+        completedServices: 0,
+      };
+    }
+  }
+
   // Support Ticket methods
   async getAllSupportTickets(): Promise<SupportTicket[]> {
     return await this.db.select().from(support_tickets);

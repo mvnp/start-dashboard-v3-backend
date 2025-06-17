@@ -2,41 +2,20 @@ import { Calendar, DollarSign, Users, CheckCircle, Plus, UserPlus, CreditCard, H
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { useBusinessContext } from "@/lib/business-context";
+import { Appointment } from "@shared/schema";
 
-const statsCards = [
-  {
-    title: "Today's Appointments",
-    value: "12",
-    change: "+2 from yesterday",
-    icon: Calendar,
-    iconColor: "text-blue-600",
-    iconBg: "bg-blue-100",
-  },
-  {
-    title: "Daily Revenue",
-    value: "$847",
-    change: "+12% from yesterday",
-    icon: DollarSign,
-    iconColor: "text-green-600",
-    iconBg: "bg-green-100",
-  },
-  {
-    title: "Active Clients",
-    value: "248",
-    change: "+5 new this week",
-    icon: Users,
-    iconColor: "text-purple-600",
-    iconBg: "bg-purple-100",
-  },
-  {
-    title: "Services Completed",
-    value: "89",
-    change: "+8% from last week",
-    icon: CheckCircle,
-    iconColor: "text-orange-600",
-    iconBg: "bg-orange-100",
-  },
-];
+interface DashboardStats {
+  todayAppointments: number;
+  yesterdayAppointments: number;
+  appointmentChange: string;
+  todayRevenue: number;
+  yesterdayRevenue: number;
+  revenueChange: string;
+  totalClients: number;
+  completedServices: number;
+}
 
 const recentAppointments = [
   {
@@ -111,6 +90,63 @@ const quickActions = [
 ];
 
 export default function Dashboard() {
+  const { selectedBusinessId } = useBusinessContext();
+
+  // Fetch dashboard statistics
+  const { data: stats, isLoading: isLoadingStats } = useQuery<DashboardStats>({
+    queryKey: ["/api/dashboard/stats", selectedBusinessId],
+    staleTime: 30000, // Cache for 30 seconds
+    refetchOnMount: true,
+  });
+
+  // Fetch recent appointments
+  const { data: appointmentsData } = useQuery({
+    queryKey: ["/api/appointments", selectedBusinessId],
+    select: (data: any) => data.appointments?.slice(0, 3) || [],
+  });
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
+
+  const statsCards = [
+    {
+      title: "Today's Appointments",
+      value: isLoadingStats ? "..." : stats?.todayAppointments.toString() || "0",
+      change: isLoadingStats ? "Loading..." : stats?.appointmentChange || "No data",
+      icon: Calendar,
+      iconColor: "text-blue-600",
+      iconBg: "bg-blue-100",
+    },
+    {
+      title: "Daily Revenue",
+      value: isLoadingStats ? "..." : formatCurrency(stats?.todayRevenue || 0),
+      change: isLoadingStats ? "Loading..." : stats?.revenueChange || "No data",
+      icon: DollarSign,
+      iconColor: "text-green-600",
+      iconBg: "bg-green-100",
+    },
+    {
+      title: "Total Clients",
+      value: isLoadingStats ? "..." : stats?.totalClients.toString() || "0",
+      change: "Active clients",
+      icon: Users,
+      iconColor: "text-purple-600",
+      iconBg: "bg-purple-100",
+    },
+    {
+      title: "Services Completed",
+      value: isLoadingStats ? "..." : stats?.completedServices.toString() || "0",
+      change: "All time",
+      icon: CheckCircle,
+      iconColor: "text-orange-600",
+      iconBg: "bg-orange-100",
+    },
+  ];
+
   return (
     <div className="p-6">
       {/* Dashboard Header */}

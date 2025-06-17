@@ -1732,6 +1732,18 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  // Dashboard Statistics routes
+  app.get("/api/dashboard/stats", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const businessIds = getBusinessFilter(req.user, req);
+      const stats = await storage.getDashboardStats(businessIds);
+      res.json(stats);
+    } catch (error) {
+      console.error("Dashboard stats fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch dashboard statistics" });
+    }
+  });
+
   // Accounting Transaction Category routes
   app.get("/api/accounting-transaction-categories", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
