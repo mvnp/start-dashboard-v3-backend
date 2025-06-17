@@ -154,6 +154,12 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
         isOpen={showBusinessModal}
         onBusinessSelected={handleBusinessSelected}
         onLogout={handleLogout}
+        isInitialSelection={isInitialSelection}
+        onCancel={() => {
+          if (!isInitialSelection) {
+            setShowBusinessModal(false);
+          }
+        }}
       />
     </BusinessContext.Provider>
   );

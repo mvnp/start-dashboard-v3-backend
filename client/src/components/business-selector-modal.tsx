@@ -14,12 +14,16 @@ interface BusinessSelectorModalProps {
   isOpen: boolean;
   onBusinessSelected: (businessId: number) => void;
   onLogout: () => void;
+  isInitialSelection?: boolean;
+  onCancel?: () => void;
 }
 
 export default function BusinessSelectorModal({ 
   isOpen, 
   onBusinessSelected, 
-  onLogout 
+  onLogout,
+  isInitialSelection = true,
+  onCancel
 }: BusinessSelectorModalProps) {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -48,8 +52,8 @@ export default function BusinessSelectorModal({
   };
 
   const handleModalClose = () => {
-    // Don't allow closing if no business is selected - logout instead
-    if (!selectedBusinessId) {
+    // For initial selection, force logout if no business selected
+    if (isInitialSelection && !selectedBusinessId) {
       toast({
         title: "Business Selection Required",
         description: "You must select a business to continue. Logging out...",
@@ -58,6 +62,10 @@ export default function BusinessSelectorModal({
       setTimeout(() => {
         onLogout();
       }, 1500);
+    }
+    // For voluntary business changes, allow canceling
+    else if (!isInitialSelection && onCancel) {
+      onCancel();
     }
   };
 
