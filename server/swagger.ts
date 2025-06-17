@@ -46,6 +46,10 @@ Comprehensive barbershop management system with role-based access control and mu
     },
     servers: [
       {
+        url: 'https://9d5dc195-9aec-4464-a135-6e1134bfee48-00-3a9ys8x8hly4z.riker.replit.dev',
+        description: 'Production server (Replit)'
+      },
+      {
         url: 'http://localhost:5000',
         description: 'Development server'
       },
