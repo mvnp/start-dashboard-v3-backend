@@ -203,7 +203,7 @@ This API uses JWT Bearer authentication for all endpoints:
     },
     security: [
       {
-        cookieAuth: []
+        bearerAuth: []
       }
     ]
   },

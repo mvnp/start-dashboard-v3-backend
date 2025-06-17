@@ -600,6 +600,8 @@ export function registerRoutes(app: Express): void {
    *     summary: Get all clients
    *     description: Retrieve all clients with business-based filtering. Super Admin sees all clients, others see only clients from their businesses.
    *     tags: [Client Management]
+   *     security:
+   *       - bearerAuth: []
    *     responses:
    *       200:
    *         description: List of clients
@@ -609,6 +611,8 @@ export function registerRoutes(app: Express): void {
    *               type: array
    *               items:
    *                 $ref: '#/components/schemas/Person'
+   *       401:
+   *         description: Unauthorized - invalid or missing token
    *       500:
    *         description: Server error
    */
@@ -825,6 +829,8 @@ export function registerRoutes(app: Express): void {
    *     summary: Get all services
    *     description: Retrieve all services with business-based filtering. Super Admin sees all services, others see only services from their businesses.
    *     tags: [Service Management]
+   *     security:
+   *       - bearerAuth: []
    *     responses:
    *       200:
    *         description: List of services
@@ -834,6 +840,8 @@ export function registerRoutes(app: Express): void {
    *               type: array
    *               items:
    *                 $ref: '#/components/schemas/Service'
+   *       401:
+   *         description: Unauthorized - invalid or missing token
    *       500:
    *         description: Server error
    *   post:
@@ -1008,6 +1016,8 @@ export function registerRoutes(app: Express): void {
    *     summary: Get appointments with filtering and pagination
    *     description: Retrieve appointments with business-based filtering, pagination, and various filters like status, date range, etc.
    *     tags: [Appointment Management]
+   *     security:
+   *       - bearerAuth: []
    *     parameters:
    *       - in: query
    *         name: page
