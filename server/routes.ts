@@ -309,7 +309,7 @@ export function registerRoutes(app: Express): void {
   app.get("/api/businesses", async (req, res) => {
     try {
       // Allow testing with query parameter or use session
-      const testUserId = req.query.user ? parseInt(req.query.user as string) : (req.session?.userId || 1);
+      const testUserId = req.query.user ? parseInt(req.query.user as string) : (1);
       
       const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
@@ -399,7 +399,7 @@ export function registerRoutes(app: Express): void {
   app.get("/api/staff", async (req, res) => {
     try {
       // Allow testing with query parameter or use session
-      const testUserId = req.query.user ? parseInt(req.query.user as string) : (req.session?.userId || 1);
+      const testUserId = req.query.user ? parseInt(req.query.user as string) : (1);
       const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
         return res.status(500).json({ error: "User not found" });
@@ -626,7 +626,7 @@ export function registerRoutes(app: Express): void {
   app.get("/api/clients", async (req, res) => {
     try {
       // Allow testing with query parameter or use session
-      const testUserId = req.query.user ? parseInt(req.query.user as string) : (req.session?.userId || 1);
+      const testUserId = req.query.user ? parseInt(req.query.user as string) : (1);
       const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
         return res.status(500).json({ error: "User not found" });
@@ -888,7 +888,7 @@ export function registerRoutes(app: Express): void {
   app.get("/api/services", async (req, res) => {
     try {
       // Use session-based authentication with query parameter override for testing
-      const testUserId = req.query.user ? parseInt(req.query.user as string) : (req.session?.userId || 1);
+      const testUserId = req.query.user ? parseInt(req.query.user as string) : (1);
       const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
         return res.status(500).json({ error: "User not found" });
@@ -1124,7 +1124,7 @@ export function registerRoutes(app: Express): void {
   app.get("/api/appointments", async (req, res) => {
     try {
       // Allow testing with query parameter or use session
-      const testUserId = req.query.user ? parseInt(req.query.user as string) : (req.session?.userId || 1);
+      const testUserId = req.query.user ? parseInt(req.query.user as string) : (1);
       
       const userData = await storage.getUserWithRoleAndBusiness(testUserId);
       if (!userData) {
