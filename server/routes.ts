@@ -1649,7 +1649,7 @@ export function registerRoutes(app: Express): void {
       const bodyBusinessId = req.body.business_id ? (typeof req.body.business_id === 'number' ? req.body.business_id : parseInt(req.body.business_id)) : null;
       const selectedBusinessId = headerBusinessId || bodyBusinessId;
 
-      console.log('Debug update - headerBusinessId:', headerBusinessId, 'bodyBusinessId:', bodyBusinessId, 'selectedBusinessId:', selectedBusinessId);
+
 
       if (!selectedBusinessId || isNaN(selectedBusinessId)) {
         return res.status(400).json({ error: "Business ID is required and must be a valid number" });
