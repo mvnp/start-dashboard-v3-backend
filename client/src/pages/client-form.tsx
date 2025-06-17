@@ -83,7 +83,10 @@ export default function ClientForm() {
 
 
   const createClientMutation = useMutation({
-    mutationFn: (data: ClientFormData) => apiRequest("POST", "/api/clients", data),
+    mutationFn: (data: ClientFormData) => apiRequest("POST", "/api/clients", {
+      ...data,
+      business_id: selectedBusinessId
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clients", selectedBusinessId] });
       toast({
@@ -130,7 +133,10 @@ export default function ClientForm() {
   });
 
   const updateClientMutation = useMutation({
-    mutationFn: (data: ClientFormData) => apiRequest("PUT", `/api/clients/${clientId}`, data),
+    mutationFn: (data: ClientFormData) => apiRequest("PUT", `/api/clients/${clientId}`, {
+      ...data,
+      business_id: selectedBusinessId
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clients", selectedBusinessId] });
       queryClient.invalidateQueries({ queryKey: [`/api/clients/${clientId}`, selectedBusinessId] });
