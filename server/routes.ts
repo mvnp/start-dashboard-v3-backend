@@ -36,7 +36,7 @@ export function registerRoutes(app: Express): void {
    * /api/login:
    *   post:
    *     summary: User authentication
-   *     description: Authenticate user with email and password, creates session
+   *     description: Authenticate user with email and password, creates session cookie. Note - In Swagger UI, login first, then refresh the page to use authenticated endpoints.
    *     tags: [Authentication]
    *     requestBody:
    *       required: true
@@ -51,13 +51,19 @@ export function registerRoutes(app: Express): void {
    *               email:
    *                 type: string
    *                 format: email
-   *                 example: "admin@system.com"
+   *                 example: "mvnpereira@gmail.com"
    *               password:
    *                 type: string
-   *                 example: "password123"
+   *                 example: "123456"
    *     responses:
    *       200:
-   *         description: Login successful
+   *         description: Login successful - Session cookie is set automatically
+   *         headers:
+   *           Set-Cookie:
+   *             description: Session cookie for authentication
+   *             schema:
+   *               type: string
+   *               example: "connect.sid=s%3A..."
    *         content:
    *           application/json:
    *             schema:
@@ -67,7 +73,7 @@ export function registerRoutes(app: Express): void {
    *                   type: object
    *                   properties:
    *                     id: { type: integer, example: 1 }
-   *                     email: { type: string, example: "admin@system.com" }
+   *                     email: { type: string, example: "mvnpereira@gmail.com" }
    *                     roleId: { type: integer, example: 1 }
    *                     businessIds: { type: array, items: { type: integer }, example: [1] }
    *                     isSuperAdmin: { type: boolean, example: true }

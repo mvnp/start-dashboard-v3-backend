@@ -8,7 +8,37 @@ const options = {
     info: {
       title: 'BarberPro Management System API',
       version: '1.0.0',
-      description: 'Comprehensive barbershop management system with role-based access control and multi-business SaaS management',
+      description: `
+# BarberPro Management System API
+
+Comprehensive barbershop management system with role-based access control and multi-business SaaS management.
+
+## Authentication Instructions for Testing
+
+**Important:** This API uses session-based authentication with cookies. To test authenticated endpoints in Swagger:
+
+1. **Login first**: Use the \`/api/login\` endpoint with valid credentials:
+   - Email: \`mvnpereira@gmail.com\`
+   - Password: \`123456\`
+
+2. **After successful login**: The session cookie will be automatically set in your browser
+
+3. **Test other endpoints**: All subsequent API calls will include the session cookie automatically
+
+4. **If you get authentication errors**: Clear your browser cookies and login again
+
+## Available Test Accounts
+
+- **Super Admin**: \`mvnpereira@gmail.com\` / \`123456\`
+- **Test Account**: \`test@swagger.com\` / \`swagger123\` (for testing only)
+
+## Role-Based Access
+
+- **Super Admin (Role 1)**: Full access to all businesses and data
+- **Merchant (Role 2)**: Access to their own business data
+- **Employee (Role 3)**: Limited access to business operations
+- **Client (Role 4)**: Personal appointments and profile access
+      `,
       contact: {
         name: 'BarberPro Support',
         email: 'support@barberpro.com'
@@ -18,6 +48,10 @@ const options = {
       {
         url: 'http://localhost:5000',
         description: 'Development server'
+      },
+      {
+        url: '',
+        description: 'Current server'
       }
     ],
     components: {
@@ -172,12 +206,18 @@ const options = {
 const specs = swaggerJSDoc(options);
 
 export function setupSwagger(app: Express): void {
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+  const swaggerOptions = {
     explorer: true,
     customCss: `
       .swagger-ui .topbar { display: none }
       .swagger-ui .info hgroup.main h2 { color: #8B4513 }
       .swagger-ui .scheme-container { background: #f8f9fa }
+      .swagger-ui .info .description .markdown p {
+        background: #fff3cd;
+        padding: 10px;
+        border-left: 4px solid #8B4513;
+        margin: 10px 0;
+      }
     `,
     customSiteTitle: 'BarberPro API Documentation',
     swaggerOptions: {
@@ -186,9 +226,41 @@ export function setupSwagger(app: Express): void {
       defaultModelsExpandDepth: 2,
       displayRequestDuration: true,
       filter: true,
-      tryItOutEnabled: true
-    }
-  }));
+      tryItOutEnabled: true,
+      supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+      onComplete: () => {
+        // This will be executed when Swagger UI is fully loaded
+        console.log('Swagger UI loaded');
+      }
+    },
+    customJsStr: `
+      // Override the request interceptor to include credentials
+      window.swaggerUIConfig = {
+        requestInterceptor: function(request) {
+          request.credentials = 'include';
+          request.headers = request.headers || {};
+          return request;
+        }
+      };
+      
+      // Wait for SwaggerUI to be ready
+      window.addEventListener('DOMContentLoaded', function() {
+        if (window.ui) {
+          const originalFetch = window.fetch;
+          window.fetch = function(...args) {
+            if (args[1]) {
+              args[1].credentials = 'include';
+            } else {
+              args[1] = { credentials: 'include' };
+            }
+            return originalFetch.apply(this, args);
+          };
+        }
+      });
+    `
+  };
+
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, swaggerOptions));
 
   // Serve the raw OpenAPI JSON
   app.get('/api-docs.json', (req, res) => {
