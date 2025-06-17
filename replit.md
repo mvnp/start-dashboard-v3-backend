@@ -131,8 +131,9 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 - **WhatsApp Integration**: Communication management
 
 ### Accessing Documentation
-- Interactive UI: `http://localhost:5000/api-docs`
-- Raw OpenAPI JSON: `http://localhost:5000/api-docs.json`
+- **Production**: `https://9d5dc195-9aec-4464-a135-6e1134bfee48-00-3a9ys8x8hly4z.riker.replit.dev/api-docs`
+- **Development**: `http://localhost:5000/api-docs`
+- Raw OpenAPI JSON: Available at both `/api-docs.json` endpoints
 
 ## Changelog
 
