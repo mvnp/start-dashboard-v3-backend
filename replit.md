@@ -150,6 +150,10 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 17, 2025. Fixed critical client business context filtering issue - Super Admin now respects selected business context for proper data isolation
+- June 17, 2025. Enhanced appointment validation to include all staff roles (super-admin, merchant, employee) instead of just employees
+- June 17, 2025. Updated client form mutations to explicitly include business_id for complete business context compliance
+- June 17, 2025. Fixed appointment validation error by expanding staff member validation logic to support all user roles
 - June 17, 2025. Fixed client deletion error by implementing dependency checking - prevents deletion when appointments exist and provides clear error messages
 - June 17, 2025. Fixed appointment form display by implementing bidirectional user_id/person_id mapping in appointment GET endpoints for proper dropdown selection
 - June 17, 2025. Added JWT authentication middleware to all staff API endpoints to resolve authentication errors
