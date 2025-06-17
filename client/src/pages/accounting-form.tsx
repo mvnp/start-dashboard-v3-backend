@@ -54,6 +54,7 @@ export default function AccountingForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       type: "revenue",
+      business_id: undefined,
       category_id: undefined,
       description: "",
       amount: "",
@@ -73,6 +74,11 @@ export default function AccountingForm() {
     enabled: !!transactionId && isEdit,
     retry: 3,
     staleTime: 0, // Always fetch fresh data
+  });
+
+  // Fetch user businesses
+  const { data: userBusinesses = [] } = useQuery<Business[]>({
+    queryKey: ["/api/user-businesses"],
   });
 
   // Fetch clients (role ID 4)
@@ -97,6 +103,7 @@ export default function AccountingForm() {
       const timer = setTimeout(() => {
         const formData = {
           type: transaction.type as "revenue" | "expense",
+          business_id: transaction.business_id ?? undefined,
           category_id: transaction.category_id ?? undefined,
           description: transaction.description,
           amount: transaction.amount,
@@ -114,6 +121,7 @@ export default function AccountingForm() {
         
         // Force update each field value to ensure UI reflects the data
         form.setValue("type", formData.type);
+        if (formData.business_id) form.setValue("business_id", formData.business_id);
         if (formData.category_id) form.setValue("category_id", formData.category_id);
         form.setValue("description", formData.description);
         form.setValue("amount", formData.amount);
@@ -129,6 +137,13 @@ export default function AccountingForm() {
       return () => clearTimeout(timer);
     }
   }, [transaction, isEdit, isLoadingTransaction, categories, form]);
+
+  // Auto-select business if user has only one business
+  useEffect(() => {
+    if (userBusinesses.length === 1 && !isEdit && !form.getValues("business_id")) {
+      form.setValue("business_id", userBusinesses[0].id);
+    }
+  }, [userBusinesses, form, isEdit]);
 
   const createMutation = useMutation({
     mutationFn: (data: FormData) => 
@@ -256,6 +271,31 @@ export default function AccountingForm() {
                         <SelectContent>
                           <SelectItem value="revenue">Revenue</SelectItem>
                           <SelectItem value="expense">Expense</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="business_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Business *</FormLabel>
+                      <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select business" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {userBusinesses.map((business) => (
+                            <SelectItem key={business.id} value={business.id.toString()}>
+                              {business.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
