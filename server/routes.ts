@@ -412,7 +412,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/staff/:id", async (req, res) => {
+  app.get("/api/staff/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const person = await storage.getPerson(id);
@@ -528,7 +528,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/staff/:id", async (req, res) => {
+  app.put("/api/staff/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const { email, business_id, role_id, ...personData } = req.body;
@@ -581,7 +581,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/staff/:id", async (req, res) => {
+  app.delete("/api/staff/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deletePerson(id);

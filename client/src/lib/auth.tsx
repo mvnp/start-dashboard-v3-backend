@@ -25,16 +25,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Safe localStorage access
+  const safeGetLocalStorage = (key: string): string | null => {
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        return localStorage.getItem(key);
+      }
+    } catch (error) {
+      console.warn(`localStorage access failed for key "${key}":`, error);
+    }
+    return null;
+  };
+
+  const safeSetLocalStorage = (key: string, value: string): void => {
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        localStorage.setItem(key, value);
+      }
+    } catch (error) {
+      console.warn(`localStorage set failed for key "${key}":`, error);
+    }
+  };
+
+  const safeRemoveLocalStorage = (key: string): void => {
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        localStorage.removeItem(key);
+      }
+    } catch (error) {
+      console.warn(`localStorage remove failed for key "${key}":`, error);
+    }
+  };
+
   const getCurrentUser = async () => {
     try {
-      // Check if localStorage is available
-      if (typeof Storage === "undefined" || !window.localStorage) {
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-
-      const token = localStorage.getItem('accessToken');
+      const token = safeGetLocalStorage('accessToken');
       if (!token) {
         setUser(null);
         setLoading(false);
@@ -60,8 +85,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Failed to get current user:', error);
       setUser(null);
       // Clear tokens if authentication fails
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      safeRemoveLocalStorage('accessToken');
+      safeRemoveLocalStorage('refreshToken');
     } finally {
       setLoading(false);
     }
@@ -69,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshAccessToken = async () => {
     try {
-      const refreshToken = localStorage.getItem('refreshToken');
+      const refreshToken = safeGetLocalStorage('refreshToken');
       if (!refreshToken) {
         setUser(null);
         return;
@@ -88,16 +113,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await response.json();
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
+      safeSetLocalStorage('accessToken', data.accessToken);
+      safeSetLocalStorage('refreshToken', data.refreshToken);
       
       // Retry getting current user with new token
       await getCurrentUser();
     } catch (error) {
       console.error('Failed to refresh token:', error);
       setUser(null);
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      safeRemoveLocalStorage('accessToken');
+      safeRemoveLocalStorage('refreshToken');
     }
   };
 
@@ -113,8 +138,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    safeRemoveLocalStorage('accessToken');
+    safeRemoveLocalStorage('refreshToken');
     sessionStorage.removeItem('selectedBusinessId');
     setUser(null);
     queryClient.clear();
