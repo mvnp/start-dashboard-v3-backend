@@ -13,6 +13,7 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   const token = localStorage.getItem('accessToken');
+  const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
   const headers: Record<string, string> = {};
   
   if (data) {
@@ -21,6 +22,10 @@ export async function apiRequest(
   
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
+  }
+  
+  if (selectedBusinessId) {
+    headers["X-Selected-Business-Id"] = selectedBusinessId;
   }
 
   const res = await fetch(url, {
@@ -40,10 +45,15 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const token = localStorage.getItem('accessToken');
+    const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
     const headers: Record<string, string> = {};
     
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
+    }
+    
+    if (selectedBusinessId) {
+      headers["X-Selected-Business-Id"] = selectedBusinessId;
     }
 
     const res = await fetch(queryKey[0] as string, {

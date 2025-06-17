@@ -1137,7 +1137,16 @@ export function registerRoutes(app: Express): void {
           businessIds: null
         });
       } else {
-        // Other users see only appointments from their associated businesses
+        // Get business filter from middleware that handles session business selection
+        const businessIds = getBusinessFilter(user, req);
+        if (!businessIds || businessIds.length === 0) {
+          return res.status(400).json({ 
+            error: "Business selection required", 
+            message: "Please select a business to view appointments" 
+          });
+        }
+        
+        // Other users see only appointments from their selected business
         appointments = await storage.getFilteredAppointments({
           page,
           limit,
@@ -1145,7 +1154,7 @@ export function registerRoutes(app: Express): void {
           today,
           startDate,
           endDate,
-          businessIds: user.businessIds
+          businessIds: businessIds
         });
       }
       res.json(appointments);
