@@ -10,6 +10,7 @@ interface BusinessContextType {
   userBusinesses: Business[];
   setSelectedBusinessId: (businessId: number | null) => void;
   isBusinessSelectionRequired: boolean;
+  changeBusiness: () => void;
 }
 
 const BusinessContext = createContext<BusinessContextType | undefined>(undefined);
@@ -30,6 +31,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
   const { user, logout } = useAuth();
   const [selectedBusinessId, setSelectedBusinessIdState] = useState<number | null>(null);
   const [showBusinessModal, setShowBusinessModal] = useState(false);
+  const [isInitialSelection, setIsInitialSelection] = useState(false);
 
   // Fetch user businesses
   const { data: userBusinesses = [], isLoading } = useQuery<Business[]>({
@@ -57,19 +59,21 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     if (!isLoading && user && !user.isSuperAdmin) {
       const savedBusinessId = sessionStorage.getItem("selectedBusinessId");
       
-      // If user has multiple businesses and no saved business, show modal immediately
+      // If user has multiple businesses and no saved business, show modal immediately (initial selection)
       if (userBusinesses.length > 1 && !savedBusinessId) {
-        console.log('Showing business selection modal for user with multiple businesses');
+        console.log('Showing business selection modal for user with multiple businesses (initial selection)');
+        setIsInitialSelection(true);
         setShowBusinessModal(true);
       }
       
-      // If user has businesses but no valid saved business, show modal
+      // If user has businesses but no valid saved business, show modal (initial selection)
       if (userBusinesses.length > 1 && savedBusinessId) {
         const savedId = parseInt(savedBusinessId);
         const businessExists = userBusinesses.some(b => b.id === savedId);
         if (!businessExists) {
           sessionStorage.removeItem("selectedBusinessId");
           setSelectedBusinessIdState(null);
+          setIsInitialSelection(true);
           setShowBusinessModal(true);
         }
       }
@@ -84,7 +88,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
       sessionStorage.removeItem("selectedBusinessId");
     } else {
       // When user logs in, clear any previous business selection to force new selection
-      const currentUserId = user.userId;
+      const currentUserId = user.id;
       const lastUserId = sessionStorage.getItem("lastUserId");
       
       if (lastUserId && lastUserId !== currentUserId.toString()) {
@@ -127,12 +131,20 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
 
   const selectedBusiness = userBusinesses.find(b => b.id === selectedBusinessId) || null;
 
+  const changeBusiness = () => {
+    if (userBusinesses.length > 1) {
+      setIsInitialSelection(false); // This is a voluntary business change, not initial selection
+      setShowBusinessModal(true);
+    }
+  };
+
   const contextValue: BusinessContextType = {
     selectedBusinessId,
     selectedBusiness,
     userBusinesses,
     setSelectedBusinessId,
     isBusinessSelectionRequired,
+    changeBusiness,
   };
 
   return (
