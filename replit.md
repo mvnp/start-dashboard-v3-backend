@@ -150,6 +150,9 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 17, 2025. Applied comprehensive JWT authentication and business ID context filtering to Accounting Transactions CRUD operations with verified frontend and API tool compatibility
+- June 17, 2025. Enhanced accounting transaction storage methods with business-scoped filtering for update and delete operations matching barber plan implementation
+- June 17, 2025. Updated accounting frontend components to include business context filtering in queries and mutations for complete data isolation
 - June 17, 2025. Fixed barber plan update endpoint to accept business_id from both request header (frontend) and request body (API tools like Insomnia) with proper validation
 - June 17, 2025. Enhanced barber plan API to accept business ID from both request header (frontend) and request body (direct API calls) for flexible usage
 - June 17, 2025. Fixed barber plan validation to accept both string and number price formats with proper transformation (numbers → strings, commas → dots)
