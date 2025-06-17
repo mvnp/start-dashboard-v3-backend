@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import { safeGetLocalStorage, safeSetLocalStorage, safeRemoveLocalStorage } from './safe-storage';
 
 interface User {
   userId: number;
@@ -25,37 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Safe localStorage access
-  const safeGetLocalStorage = (key: string): string | null => {
-    try {
-      if (typeof window !== "undefined" && window.localStorage) {
-        return localStorage.getItem(key);
-      }
-    } catch (error) {
-      console.warn(`localStorage access failed for key "${key}":`, error);
-    }
-    return null;
-  };
 
-  const safeSetLocalStorage = (key: string, value: string): void => {
-    try {
-      if (typeof window !== "undefined" && window.localStorage) {
-        localStorage.setItem(key, value);
-      }
-    } catch (error) {
-      console.warn(`localStorage set failed for key "${key}":`, error);
-    }
-  };
-
-  const safeRemoveLocalStorage = (key: string): void => {
-    try {
-      if (typeof window !== "undefined" && window.localStorage) {
-        localStorage.removeItem(key);
-      }
-    } catch (error) {
-      console.warn(`localStorage remove failed for key "${key}":`, error);
-    }
-  };
 
   const getCurrentUser = async () => {
     try {
