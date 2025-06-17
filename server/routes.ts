@@ -1069,6 +1069,8 @@ export function registerRoutes(app: Express): void {
    *                 total: { type: integer, example: 150 }
    *                 totalPages: { type: integer, example: 6 }
    *                 currentPage: { type: integer, example: 1 }
+   *       401:
+   *         description: Unauthorized - invalid or missing token
    *       500:
    *         description: Server error
    *   post:
@@ -1076,7 +1078,7 @@ export function registerRoutes(app: Express): void {
    *     description: Create a new appointment for a client with a staff member
    *     tags: [Appointment Management]
    *     security:
-   *       - cookieAuth: []
+   *       - bearerAuth: []
    *     requestBody:
    *       required: true
    *       content:
