@@ -150,6 +150,9 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 17, 2025. Applied comprehensive business ID context filtering to Services CRUD operations - all service endpoints now enforce proper business-scoped data access
+- June 17, 2025. Updated service frontend operations to include selected business ID in queries and mutations for complete business isolation
+- June 17, 2025. Enhanced service API endpoints with business access validation for create, read, update, and delete operations
 - June 17, 2025. Fixed critical client business context filtering issue - Super Admin now respects selected business context for proper data isolation
 - June 17, 2025. Enhanced appointment validation to include all staff roles (super-admin, merchant, employee) instead of just employees
 - June 17, 2025. Updated client form mutations to explicitly include business_id for complete business context compliance

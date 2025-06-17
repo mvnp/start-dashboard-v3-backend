@@ -43,7 +43,7 @@ export default function ServiceList() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/services/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/services"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/services", selectedBusinessId] });
       toast({
         title: "Success",
         description: "Service deleted successfully",
