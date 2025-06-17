@@ -6,7 +6,7 @@ import {
   authenticateJWT, 
   authenticateUser as jwtAuthenticateUser, 
   refreshAccessToken,
-  AuthenticatedRequest 
+  AuthenticatedRequest as JWTAuthenticatedRequest 
 } from "./auth";
 
 interface SessionAuthenticatedRequest extends Request {
@@ -39,11 +39,215 @@ export function registerRoutes(app: Express): void {
   
   /**
    * @swagger
+   * /api/auth/login:
+   *   post:
+   *     summary: JWT User authentication
+   *     description: Authenticate user with email and password, returns JWT access token and refresh token with 24-hour lifetime.
+   *     tags: [JWT Authentication]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - email
+   *               - password
+   *             properties:
+   *               email:
+   *                 type: string
+   *                 format: email
+   *                 example: "mvnpereira@gmail.com"
+   *               password:
+   *                 type: string
+   *                 example: "admin123"
+   *     responses:
+   *       200:
+   *         description: Login successful with JWT tokens
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 message: { type: string, example: "Login successful" }
+   *                 user:
+   *                   type: object
+   *                   properties:
+   *                     userId: { type: integer, example: 1 }
+   *                     email: { type: string, example: "mvnpereira@gmail.com" }
+   *                     roleId: { type: integer, example: 1 }
+   *                     businessIds: { type: array, items: { type: integer }, example: [1] }
+   *                     isSuperAdmin: { type: boolean, example: true }
+   *                 accessToken: { type: string, example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
+   *                 refreshToken: { type: string, example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
+   *                 tokenType: { type: string, example: "Bearer" }
+   *                 expiresIn: { type: string, example: "24h" }
+   *       401:
+   *         description: Invalid credentials
+   *       500:
+   *         description: Server error
+   */
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ 
+          error: "Missing credentials",
+          message: "Email and password are required"
+        });
+      }
+
+      const authResult = await jwtAuthenticateUser(email, password);
+      
+      if (!authResult) {
+        return res.status(401).json({ 
+          error: "Invalid credentials",
+          message: "Email or password is incorrect"
+        });
+      }
+
+      res.json({
+        message: "Login successful",
+        user: authResult.user,
+        accessToken: authResult.accessToken,
+        refreshToken: authResult.refreshToken,
+        tokenType: "Bearer",
+        expiresIn: "24h"
+      });
+    } catch (error) {
+      console.error("JWT Login error:", error);
+      res.status(500).json({ 
+        error: "Internal server error",
+        message: "Unable to process login request"
+      });
+    }
+  });
+
+  /**
+   * @swagger
+   * /api/auth/refresh:
+   *   post:
+   *     summary: Refresh JWT access token
+   *     description: Use refresh token to get a new access token before the current one expires
+   *     tags: [JWT Authentication]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - refreshToken
+   *             properties:
+   *               refreshToken:
+   *                 type: string
+   *                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+   *     responses:
+   *       200:
+   *         description: Token refreshed successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 message: { type: string, example: "Token refreshed successfully" }
+   *                 accessToken: { type: string, example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
+   *                 refreshToken: { type: string, example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
+   *                 tokenType: { type: string, example: "Bearer" }
+   *                 expiresIn: { type: string, example: "24h" }
+   *       401:
+   *         description: Invalid or expired refresh token
+   *       500:
+   *         description: Server error
+   */
+  app.post("/api/auth/refresh", async (req, res) => {
+    try {
+      const { refreshToken } = req.body;
+      
+      if (!refreshToken) {
+        return res.status(400).json({ 
+          error: "Missing refresh token",
+          message: "Refresh token is required"
+        });
+      }
+
+      const refreshResult = await refreshAccessToken(refreshToken);
+      
+      if (!refreshResult) {
+        return res.status(401).json({ 
+          error: "Invalid refresh token",
+          message: "Refresh token is invalid or expired"
+        });
+      }
+
+      res.json({
+        message: "Token refreshed successfully",
+        accessToken: refreshResult.accessToken,
+        refreshToken: refreshResult.refreshToken,
+        tokenType: "Bearer",
+        expiresIn: "24h"
+      });
+    } catch (error) {
+      console.error("Token refresh error:", error);
+      res.status(500).json({ 
+        error: "Internal server error",
+        message: "Unable to refresh token"
+      });
+    }
+  });
+
+  /**
+   * @swagger
+   * /api/auth/me:
+   *   get:
+   *     summary: Get current user profile (JWT)
+   *     description: Get current authenticated user information using JWT Bearer token
+   *     tags: [JWT Authentication]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Current user information
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 user:
+   *                   type: object
+   *                   properties:
+   *                     userId: { type: integer, example: 1 }
+   *                     email: { type: string, example: "mvnpereira@gmail.com" }
+   *                     roleId: { type: integer, example: 1 }
+   *                     businessIds: { type: array, items: { type: integer }, example: [1] }
+   *                     isSuperAdmin: { type: boolean, example: true }
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       500:
+   *         description: Server error
+   */
+  app.get("/api/auth/me", authenticateJWT, async (req: JWTAuthenticatedRequest, res) => {
+    try {
+      res.json({
+        user: req.user
+      });
+    } catch (error) {
+      console.error("Get user profile error:", error);
+      res.status(500).json({ 
+        error: "Internal server error",
+        message: "Unable to fetch user profile"
+      });
+    }
+  });
+
+  /**
+   * @swagger
    * /api/login:
    *   post:
-   *     summary: User authentication
+   *     summary: Legacy session authentication
    *     description: Authenticate user with email and password, creates session cookie. Note - In Swagger UI, login first, then refresh the page to use authenticated endpoints.
-   *     tags: [Authentication]
+   *     tags: [Legacy Authentication]
    *     requestBody:
    *       required: true
    *       content:
@@ -719,7 +923,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/clients", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.post("/api/clients", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const { email, first_name, last_name, phone, tax_id, address } = req.body;
       
@@ -788,7 +992,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/clients/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.put("/api/clients/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const { email, first_name, last_name, phone, tax_id, address } = req.body;
@@ -938,7 +1142,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/services/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.get("/api/services/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const service = await storage.getService(id);
@@ -952,7 +1156,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/services", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.post("/api/services", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       // Get user's business context
       const businessId = req.user?.businessIds?.[0] || 1;
@@ -996,7 +1200,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/services/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.put("/api/services/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       
@@ -1037,7 +1241,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/services/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.delete("/api/services/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteService(id);
@@ -1199,7 +1403,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/appointments/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.get("/api/appointments/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const appointment = await storage.getAppointment(id);
@@ -1213,7 +1417,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/appointments", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.post("/api/appointments", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       // Get user's business context
       const businessId = req.user?.businessIds?.[0] || 1;
@@ -1278,7 +1482,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/appointments/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.put("/api/appointments/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       
@@ -1340,7 +1544,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/appointments/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.delete("/api/appointments/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteAppointment(id);
@@ -1413,7 +1617,7 @@ export function registerRoutes(app: Express): void {
   });
 
   // Accounting Transaction Category routes
-  app.get("/api/accounting-transaction-categories", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.get("/api/accounting-transaction-categories", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const businessIds = getBusinessFilter(req.user);
       const categories = await storage.getAccountingTransactionCategoriesByBusinessIds(businessIds);
@@ -1425,7 +1629,7 @@ export function registerRoutes(app: Express): void {
   });
 
   // Accounting Transaction routes
-  app.get("/api/accounting-transactions", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.get("/api/accounting-transactions", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const businessIds = getBusinessFilter(req.user);
       const transactions = await storage.getAccountingTransactionsByBusinessIds(businessIds);
@@ -1436,7 +1640,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/accounting-transactions/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.get("/api/accounting-transactions/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const transaction = await storage.getAccountingTransaction(id);
@@ -1450,7 +1654,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/accounting-transactions", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.post("/api/accounting-transactions", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const businessIds = getBusinessFilter(req.user);
       const businessId = businessIds?.[0] || req.body.business_id;
@@ -1471,7 +1675,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/accounting-transactions/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.put("/api/accounting-transactions/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const validatedData = insertAccountingTransactionSchema.partial().parse(req.body);
@@ -1490,7 +1694,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/accounting-transactions/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.delete("/api/accounting-transactions/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteAccountingTransaction(id);
@@ -1587,7 +1791,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/whatsapp-instances", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.get("/api/whatsapp-instances", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       // Get all instances first
       const allInstances = await storage.getAllWhatsappInstances();
@@ -1621,7 +1825,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/whatsapp-instances", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.post("/api/whatsapp-instances", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const validatedData = insertWhatsappInstanceSchema.parse(req.body);
       
@@ -1644,7 +1848,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/whatsapp-instances/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.put("/api/whatsapp-instances/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const validatedData = insertWhatsappInstanceSchema.partial().parse(req.body);
@@ -1671,7 +1875,7 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/whatsapp-instances/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  app.delete("/api/whatsapp-instances/:id", requireAuth, async (req: SessionAuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       
