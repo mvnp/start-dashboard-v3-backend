@@ -1643,7 +1643,17 @@ export function registerRoutes(app: Express): void {
   app.put("/api/barber-plans/:id", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
       const id = parseInt(req.params.id);
-      const selectedBusinessId = parseInt(req.headers['x-selected-business-id'] as string);
+      
+      // Get business ID from header (frontend) or request body (API tools)
+      const headerBusinessId = req.headers['x-selected-business-id'] ? parseInt(req.headers['x-selected-business-id'] as string) : null;
+      const bodyBusinessId = req.body.business_id ? (typeof req.body.business_id === 'number' ? req.body.business_id : parseInt(req.body.business_id)) : null;
+      const selectedBusinessId = headerBusinessId || bodyBusinessId;
+
+      console.log('Debug update - headerBusinessId:', headerBusinessId, 'bodyBusinessId:', bodyBusinessId, 'selectedBusinessId:', selectedBusinessId);
+
+      if (!selectedBusinessId || isNaN(selectedBusinessId)) {
+        return res.status(400).json({ error: "Business ID is required and must be a valid number" });
+      }
       
       // Validate business access
       const businessIds = getBusinessFilter(req.user, req);
@@ -1651,8 +1661,10 @@ export function registerRoutes(app: Express): void {
         return res.status(403).json({ error: "Access denied to this business" });
       }
 
+      // Remove business_id from request body to avoid validation conflicts
+      const { business_id, ...requestBodyWithoutBusinessId } = req.body;
       const validatedData = insertBarberPlanSchema.parse({
-        ...req.body,
+        ...requestBodyWithoutBusinessId,
         business_id: selectedBusinessId
       });
       const plan = await storage.updateBarberPlan(id, validatedData, businessIds);
