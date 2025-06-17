@@ -18,7 +18,6 @@ interface ClientFormData {
   phone: string;
   tax_id?: string;
   address?: string;
-  business_id: number;
 }
 
 interface ClientWithUser extends Person {
@@ -45,7 +44,6 @@ export default function ClientForm() {
     phone: "",
     tax_id: "",
     address: "",
-    business_id: selectedBusinessId || 0,
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});

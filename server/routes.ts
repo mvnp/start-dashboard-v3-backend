@@ -772,7 +772,17 @@ export function registerRoutes(app: Express): void {
 
       // Get existing client data with business filtering
       const existingClient = await storage.getPerson(id);
-      if (!existingClient || !businessIds.includes(existingClient.business_id)) {
+      if (!existingClient) {
+        return res.status(404).json({ error: "Client not found" });
+      }
+
+      // Check if the client's user has access to the selected business
+      if (existingClient.user_id) {
+        const userWithBusiness = await storage.getUserWithRoleAndBusiness(existingClient.user_id);
+        if (!userWithBusiness || !userWithBusiness.businessIds.some(bid => businessIds.includes(bid))) {
+          return res.status(404).json({ error: "Client not found" });
+        }
+      } else {
         return res.status(404).json({ error: "Client not found" });
       }
 
@@ -826,9 +836,32 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/clients/:id", async (req, res) => {
+  app.delete("/api/clients/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      
+      // Get business context from selected business
+      const businessIds = getBusinessFilter(req.user!, req);
+      if (!businessIds || businessIds.length === 0) {
+        return res.status(403).json({ error: "No business access" });
+      }
+
+      // Get existing client data with business filtering
+      const existingClient = await storage.getPerson(id);
+      if (!existingClient) {
+        return res.status(404).json({ error: "Client not found" });
+      }
+
+      // Check if the client's user has access to the selected business
+      if (existingClient.user_id) {
+        const userWithBusiness = await storage.getUserWithRoleAndBusiness(existingClient.user_id);
+        if (!userWithBusiness || !userWithBusiness.businessIds.some(bid => businessIds.includes(bid))) {
+          return res.status(404).json({ error: "Client not found" });
+        }
+      } else {
+        return res.status(404).json({ error: "Client not found" });
+      }
+
       const deleted = await storage.deletePerson(id);
       if (!deleted) {
         return res.status(404).json({ error: "Client not found" });
