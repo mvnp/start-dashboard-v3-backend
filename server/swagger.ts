@@ -36,7 +36,7 @@ For legacy browser-based applications:
 
 ## Available Test Accounts
 
-- **Super Admin**: \`mvnpereira@gmail.com\` / \`admin123\`
+- **Super Admin**: \`mvnpereira@gmail.com\` / \`Marcos$1986\`
 - **Test Account**: \`test@swagger.com\` / \`swagger123\` (for testing only)
 
 ## Role-Based Access

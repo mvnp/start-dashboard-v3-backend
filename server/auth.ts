@@ -139,21 +139,25 @@ export async function authenticateUser(email: string, password: string): Promise
     const user = await storage.getUserByEmail(email);
     
     if (!user) {
+      console.log('User not found:', email);
       return null;
     }
+
+    console.log('Found user:', user.email, 'stored password:', user.password, 'provided password:', password);
 
     // Get user with role and business information
     const userData = await storage.getUserWithRoleAndBusiness(user.id);
     
     if (!userData) {
+      console.log('User data not found for user ID:', user.id);
       return null;
     }
 
-    // For demo purposes, allow simple password validation
+    // Check password against database value
     // In production, you should use proper password hashing with bcrypt
-    const isValidPassword = password === 'admin123' || password === 'swagger123' || 
-                           (email === 'test@swagger.com' && password === 'swagger123') ||
-                           (email === 'mvnpereira@gmail.com' && password === 'admin123');
+    const isValidPassword = password === user.password;
+    
+    console.log('Password validation:', isValidPassword);
     
     if (!isValidPassword) {
       return null;
