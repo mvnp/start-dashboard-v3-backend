@@ -887,6 +887,15 @@ export function registerRoutes(app: Express): void {
       res.status(204).send();
     } catch (error) {
       console.error("Client deletion error:", error);
+      
+      // Handle specific dependency constraint errors
+      if (error instanceof Error && error.message.includes("existing appointments")) {
+        return res.status(400).json({ 
+          error: "Cannot delete client with existing appointments",
+          message: "Please cancel or reassign all appointments for this client before deletion."
+        });
+      }
+      
       res.status(500).json({ error: "Failed to delete client" });
     }
   });

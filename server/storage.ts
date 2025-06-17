@@ -295,6 +295,7 @@ class PostgresStorage implements IStorage {
         last_name: persons.last_name,
         phone: persons.phone,
         tax_id: persons.tax_id,
+        address: persons.address,
         hire_date: persons.hire_date,
         salary: persons.salary,
         created_at: persons.created_at,
@@ -362,6 +363,17 @@ class PostgresStorage implements IStorage {
   }
 
   async deletePerson(id: number): Promise<boolean> {
+    // First, check if this person has any appointments
+    const relatedAppointments = await this.db
+      .select({ id: appointments.id })
+      .from(appointments)
+      .where(or(eq(appointments.client_id, id), eq(appointments.user_id, id)))
+      .limit(1);
+
+    if (relatedAppointments.length > 0) {
+      throw new Error("Cannot delete person with existing appointments. Please cancel or reassign appointments first.");
+    }
+
     const result = await this.db.delete(persons).where(eq(persons.id, id));
     return result.rowCount > 0;
   }

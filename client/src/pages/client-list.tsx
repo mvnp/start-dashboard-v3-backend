@@ -60,10 +60,27 @@ export default function ClientList() {
         description: "The client has been successfully removed.",
       });
     },
-    onError: () => {
+    onError: async (error: any) => {
+      // Try to extract error details from response
+      let errorData = null;
+      try {
+        const response = await error;
+        if (response && !response.ok) {
+          errorData = await response.json();
+        }
+      } catch (e) {
+        // If error parsing fails, use generic error
+      }
+      
+      // Show specific error message if available
+      const errorMessage = errorData?.message || errorData?.error || "Failed to delete client. Please try again.";
+      const errorTitle = errorData?.error === "Cannot delete client with existing appointments" 
+        ? "Cannot Delete Client" 
+        : "Error";
+      
       toast({
-        title: "Error",
-        description: "Failed to delete client. Please try again.",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     },
