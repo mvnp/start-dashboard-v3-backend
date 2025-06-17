@@ -64,7 +64,22 @@ export default function AppointmentForm() {
     queryKey: ["/api/appointments", appointmentId],
     queryFn: async () => {
       if (!appointmentId) return null;
-      const response = await fetch(`/api/appointments/${appointmentId}`);
+      
+      const token = localStorage.getItem('accessToken');
+      const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
+      const headers: Record<string, string> = {};
+      
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      
+      if (selectedBusinessId) {
+        headers["X-Selected-Business-Id"] = selectedBusinessId;
+      }
+
+      const response = await fetch(`/api/appointments/${appointmentId}`, {
+        headers,
+      });
       if (!response.ok) throw new Error('Failed to fetch appointment');
       return response.json();
     },
