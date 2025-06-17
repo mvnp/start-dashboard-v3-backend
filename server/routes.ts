@@ -1292,7 +1292,24 @@ export function registerRoutes(app: Express): void {
         });
       }
       
-      const validatedData = insertAppointmentSchema.parse(appointmentData);
+      // Convert user_id to person_id for staff member
+      const staffPerson = await storage.getPersonsByRoles([3]); // Role 3 = Employee/Staff
+      const staffMember = staffPerson.find(person => person.user_id === appointmentData.user_id);
+      
+      if (!staffMember) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["user_id"], message: "Invalid staff member selected" }]
+        });
+      }
+      
+      // Create appointment data with correct person ID for staff
+      const appointmentDataWithPersonId = {
+        ...appointmentData,
+        user_id: staffMember.id // Use person ID instead of user ID
+      };
+      
+      const validatedData = insertAppointmentSchema.parse(appointmentDataWithPersonId);
       const appointment = await storage.createAppointment(validatedData);
       res.status(201).json(appointment);
     } catch (error) {
@@ -1366,6 +1383,21 @@ export function registerRoutes(app: Express): void {
           error: "Validation failed", 
           details: [{ path: ["service_id"], message: "Service is required" }]
         });
+      }
+      
+      // Convert user_id to person_id for staff member if user_id is being updated
+      if (updateData.user_id !== undefined) {
+        const staffPerson = await storage.getPersonsByRoles([3]); // Role 3 = Employee/Staff
+        const staffMember = staffPerson.find(person => person.user_id === updateData.user_id);
+        
+        if (!staffMember) {
+          return res.status(400).json({ 
+            error: "Validation failed", 
+            details: [{ path: ["user_id"], message: "Invalid staff member selected" }]
+          });
+        }
+        
+        updateData.user_id = staffMember.id; // Use person ID instead of user ID
       }
       
       const validatedData = insertAppointmentSchema.partial().parse(updateData);
