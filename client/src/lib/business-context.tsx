@@ -84,7 +84,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
       sessionStorage.removeItem("selectedBusinessId");
     } else {
       // When user logs in, clear any previous business selection to force new selection
-      const currentUserId = user.id;
+      const currentUserId = user.userId;
       const lastUserId = sessionStorage.getItem("lastUserId");
       
       if (lastUserId && lastUserId !== currentUserId.toString()) {
