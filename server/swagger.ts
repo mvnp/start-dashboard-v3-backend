@@ -13,26 +13,14 @@ const options = {
 
 Comprehensive barbershop management system with role-based access control and multi-business SaaS management.
 
-## Authentication Methods
+## Authentication Method
 
-This API supports two authentication methods:
-
-### 1. JWT Bearer Authentication (Recommended)
-
-For modern applications and API integrations:
+This API uses JWT Bearer authentication for all endpoints:
 
 1. **Get JWT tokens**: Use \`/api/auth/login\` with valid credentials
 2. **Use Bearer token**: Add \`Authorization: Bearer <access_token>\` header to requests
 3. **Refresh tokens**: Use \`/api/auth/refresh\` before token expires (24h lifetime)
 4. **Check user info**: Use \`/api/auth/me\` to get current user details
-
-### 2. Legacy Session Authentication
-
-For legacy browser-based applications:
-
-1. **Login first**: Use \`/api/login\` endpoint with valid credentials
-2. **Session cookie**: Automatically set in browser after successful login
-3. **Subsequent requests**: Session cookie included automatically
 
 ## Available Test Accounts
 
@@ -80,12 +68,7 @@ For legacy browser-based applications:
           bearerFormat: 'JWT',
           description: 'JWT Bearer token authentication. Login to get your token, then use it in the Authorization header.'
         },
-        cookieAuth: {
-          type: 'apiKey',
-          in: 'cookie',
-          name: 'connect.sid',
-          description: 'Session-based authentication using cookies (legacy)'
-        }
+
       },
       schemas: {
         User: {

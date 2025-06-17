@@ -241,16 +241,7 @@ export function registerRoutes(app: Express): void {
 
 
 
-  // Logout endpoint
-  app.post("/api/logout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("Logout error:", err);
-        return res.status(500).json({ error: "Logout failed" });
-      }
-      res.json({ message: "Logout successful" });
-    });
-  });
+
 
   // Get users by role for user switcher
   app.get("/api/users/by-role", async (req, res) => {
@@ -296,12 +287,7 @@ export function registerRoutes(app: Express): void {
         return res.status(404).json({ error: "User not found" });
       }
       
-      // Update session with new user data
-      req.session.userId = userData.user.id;
-      req.session.userEmail = userData.user.email;
-      req.session.roleId = userData.roleId;
-      req.session.businessIds = userData.businessIds;
-      req.session.isAuthenticated = true;
+      // JWT-only authentication - no session updates needed
       
       res.json({
         message: "User switched successfully",
