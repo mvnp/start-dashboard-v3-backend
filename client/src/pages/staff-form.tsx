@@ -162,7 +162,7 @@ export default function StaffForm() {
 
   useEffect(() => {
     console.log("useEffect triggered - staffMember:", staffMember, "isEdit:", isEdit);
-    if (staffMember && isEdit) {
+    if (staffMember && isEdit && typeof staffMember === 'object' && 'first_name' in staffMember) {
       console.log("Setting form data with staff member:", {
         email: staffMember.email,
         business_id: staffMember.business_id,

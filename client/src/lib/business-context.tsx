@@ -48,7 +48,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
 
   // Load selected business from sessionStorage on mount
   useEffect(() => {
-    const savedBusinessId = sessionStorage.getItem("selectedBusinessId");
+    const savedBusinessId = safeGetSessionStorage("selectedBusinessId");
     if (savedBusinessId) {
       setSelectedBusinessIdState(parseInt(savedBusinessId));
     }
@@ -57,13 +57,13 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
   // Handle business selection for all users
   useEffect(() => {
     if (!isLoading && user && userBusinesses.length > 0) {
-      const savedBusinessId = sessionStorage.getItem("selectedBusinessId");
+      const savedBusinessId = safeGetSessionStorage("selectedBusinessId");
       
       // If user has only one business, automatically select it
       if (userBusinesses.length === 1) {
         const singleBusiness = userBusinesses[0];
         setSelectedBusinessIdState(singleBusiness.id);
-        sessionStorage.setItem("selectedBusinessId", singleBusiness.id.toString());
+        safeSetSessionStorage("selectedBusinessId", singleBusiness.id.toString());
         console.log('Auto-selected single business:', singleBusiness.name);
         return;
       }
@@ -80,7 +80,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
         const savedId = parseInt(savedBusinessId);
         const businessExists = userBusinesses.some(b => b.id === savedId);
         if (!businessExists) {
-          sessionStorage.removeItem("selectedBusinessId");
+          safeRemoveSessionStorage("selectedBusinessId");
           setSelectedBusinessIdState(null);
           setIsInitialSelection(true);
           setShowBusinessModal(true);
@@ -94,19 +94,19 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     if (!user) {
       setSelectedBusinessIdState(null);
       setShowBusinessModal(false);
-      sessionStorage.removeItem("selectedBusinessId");
+      safeRemoveSessionStorage("selectedBusinessId");
     } else {
       // When user logs in, clear any previous business selection to force new selection
       const currentUserId = user.userId;
-      const lastUserId = sessionStorage.getItem("lastUserId");
+      const lastUserId = safeGetSessionStorage("lastUserId");
       
       if (lastUserId && lastUserId !== currentUserId.toString()) {
         // Different user logged in, clear previous business selection
-        sessionStorage.removeItem("selectedBusinessId");
+        safeRemoveSessionStorage("selectedBusinessId");
         setSelectedBusinessIdState(null);
       }
       
-      sessionStorage.setItem("lastUserId", currentUserId.toString());
+      safeSetSessionStorage("lastUserId", currentUserId.toString());
     }
   }, [user]);
 
@@ -115,16 +115,16 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     if (!isLoading && user && !user.isSuperAdmin && userBusinesses.length === 1) {
       const businessId = userBusinesses[0].id;
       setSelectedBusinessIdState(businessId);
-      sessionStorage.setItem("selectedBusinessId", businessId.toString());
+      safeSetSessionStorage("selectedBusinessId", businessId.toString());
     }
   }, [user, userBusinesses, isLoading]);
 
   const setSelectedBusinessId = (businessId: number | null) => {
     setSelectedBusinessIdState(businessId);
     if (businessId) {
-      sessionStorage.setItem("selectedBusinessId", businessId.toString());
+      safeSetSessionStorage("selectedBusinessId", businessId.toString());
     } else {
-      sessionStorage.removeItem("selectedBusinessId");
+      safeRemoveSessionStorage("selectedBusinessId");
     }
   };
 
