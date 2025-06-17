@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { navigationItems } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import UserSwitcher from "@/components/user-switcher";
+import BusinessChangeButton from "@/components/business-change-button";
+import { useBusinessContext } from "@/lib/business-context";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -12,6 +14,11 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [location] = useLocation();
+  const { selectedBusinessId, setSelectedBusinessId } = useBusinessContext();
+
+  const handleBusinessChange = (businessId: number) => {
+    setSelectedBusinessId(businessId);
+  };
 
   return (
     <>
@@ -45,6 +52,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {/* User Switcher */}
           <div className="px-4 py-4">
             <UserSwitcher />
+          </div>
+
+          {/* Business Selector */}
+          <div className="px-4 pb-4">
+            <BusinessChangeButton
+              currentBusinessId={selectedBusinessId || undefined}
+              onBusinessChange={handleBusinessChange}
+            />
           </div>
 
           {/* Navigation Menu */}

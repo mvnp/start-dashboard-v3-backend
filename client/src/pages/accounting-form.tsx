@@ -15,6 +15,7 @@ import { ArrowLeft, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { AccountingTransaction, AccountingTransactionCategory, Person, Business } from "@shared/schema";
+import { useBusinessContext } from "@/lib/business-context";
 import { format } from "date-fns";
 
 const formSchema = z.object({
