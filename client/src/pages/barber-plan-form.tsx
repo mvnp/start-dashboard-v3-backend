@@ -10,6 +10,7 @@ import { ArrowLeft, Plus, X } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { BarberPlan } from "@shared/schema";
+import { useBusinessContext } from "@/lib/business-context";
 
 interface BarberPlanFormData {
   title: string;
@@ -27,6 +28,7 @@ export default function BarberPlanForm() {
   const [, setLocation] = useLocation();
   const params = useParams();
   const { toast } = useToast();
+  const { selectedBusinessId } = useBusinessContext();
   const isEdit = !!params.id;
   const planId = params.id ? parseInt(params.id) : null;
 
@@ -43,15 +45,18 @@ export default function BarberPlanForm() {
   });
 
   const { data: planData, isLoading } = useQuery({
-    queryKey: ["/api/barber-plans", planId],
+    queryKey: ["/api/barber-plans", planId, selectedBusinessId],
     enabled: isEdit && !!planId,
     select: (data: BarberPlan) => data,
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: BarberPlanFormData) => apiRequest("POST", "/api/barber-plans", data),
+    mutationFn: (data: BarberPlanFormData) => apiRequest("POST", "/api/barber-plans", {
+      ...data,
+      business_id: selectedBusinessId
+    }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", selectedBusinessId] });
       toast({
         title: "Success",
         description: "Barber plan created successfully",
@@ -68,10 +73,13 @@ export default function BarberPlanForm() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: BarberPlanFormData) => apiRequest("PUT", `/api/barber-plans/${planId}`, data),
+    mutationFn: (data: BarberPlanFormData) => apiRequest("PUT", `/api/barber-plans/${planId}`, {
+      ...data,
+      business_id: selectedBusinessId
+    }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", planId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", planId, selectedBusinessId] });
       toast({
         title: "Success",
         description: "Barber plan updated successfully",

@@ -150,6 +150,9 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 17, 2025. Applied comprehensive business ID context filtering to Barber Plans CRUD operations - all endpoints now enforce proper business-scoped data access
+- June 17, 2025. Fixed barber plan price validation to handle comma-separated decimal values (99,90 → 99.90) and implemented complete business context filtering
+- June 17, 2025. Updated barber plan frontend operations to include selected business ID in queries and mutations for complete business isolation
 - June 17, 2025. Applied comprehensive business ID context filtering to Services CRUD operations - all service endpoints now enforce proper business-scoped data access
 - June 17, 2025. Updated service frontend operations to include selected business ID in queries and mutations for complete business isolation
 - June 17, 2025. Enhanced service API endpoints with business access validation for create, read, update, and delete operations

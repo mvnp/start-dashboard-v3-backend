@@ -54,7 +54,7 @@ export default function BarberPlanList() {
 
   const filteredPlans = plans.filter(plan =>
     plan.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    plan.subtitle.toLowerCase().includes(searchTerm.toLowerCase())
+    (plan.subtitle && plan.subtitle.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const formatPrice = (cents: number) => {
