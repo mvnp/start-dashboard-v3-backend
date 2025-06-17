@@ -1127,6 +1127,25 @@ export function registerRoutes(app: Express): void {
   app.delete("/api/services/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      const user = req.user!;
+      
+      // Get business context from selected business
+      const businessIds = getBusinessFilter(user, req);
+      if (!businessIds || businessIds.length === 0) {
+        return res.status(403).json({ error: "No business access" });
+      }
+
+      // Get existing service to verify business access
+      const existingService = await storage.getService(id);
+      if (!existingService) {
+        return res.status(404).json({ error: "Service not found" });
+      }
+
+      // Verify service belongs to user's accessible businesses
+      if (!user.isSuperAdmin && existingService.business_id && !businessIds.includes(existingService.business_id)) {
+        return res.status(403).json({ error: "Access denied to this service" });
+      }
+
       const deleted = await storage.deleteService(id);
       if (!deleted) {
         return res.status(404).json({ error: "Service not found" });

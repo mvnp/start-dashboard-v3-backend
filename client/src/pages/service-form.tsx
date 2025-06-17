@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useBusinessContext } from "@/lib/business-context";
 import { Service } from "@shared/schema";
 
 interface ServiceFormData {
@@ -26,6 +27,7 @@ export default function ServiceForm() {
   const [, setLocation] = useLocation();
   const params = useParams();
   const { toast } = useToast();
+  const { selectedBusinessId } = useBusinessContext();
   const isEdit = !!params.id;
   const serviceId = params.id ? parseInt(params.id) : null;
 
@@ -38,17 +40,18 @@ export default function ServiceForm() {
   });
 
   const { data: serviceData, isLoading } = useQuery({
-    queryKey: [`/api/services/${serviceId}`],
-    enabled: isEdit && !!serviceId,
+    queryKey: [`/api/services/${serviceId}`, selectedBusinessId],
+    enabled: isEdit && !!serviceId && !!selectedBusinessId,
     select: (data: Service) => data,
   });
 
-
-
   const createMutation = useMutation({
-    mutationFn: (data: ServiceFormData) => apiRequest("POST", "/api/services", data),
+    mutationFn: (data: ServiceFormData) => apiRequest("POST", "/api/services", {
+      ...data,
+      business_id: selectedBusinessId
+    }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/services"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/services", selectedBusinessId] });
       toast({
         title: "Success",
         description: "Service created successfully",
@@ -65,9 +68,12 @@ export default function ServiceForm() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: ServiceFormData) => apiRequest("PUT", `/api/services/${serviceId}`, data),
+    mutationFn: (data: ServiceFormData) => apiRequest("PUT", `/api/services/${serviceId}`, {
+      ...data,
+      business_id: selectedBusinessId
+    }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/services"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/services", selectedBusinessId] });
       queryClient.invalidateQueries({ queryKey: [`/api/services/${serviceId}`] });
       toast({
         title: "Success",
