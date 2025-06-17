@@ -306,24 +306,18 @@ export function registerRoutes(app: Express): void {
   });
   
   // Business routes
-  app.get("/api/businesses", async (req, res) => {
+  app.get("/api/businesses", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
-      // Allow testing with query parameter or use session
-      const testUserId = req.query.user ? parseInt(req.query.user as string) : (1);
-      
-      const userData = await storage.getUserWithRoleAndBusiness(testUserId);
-      if (!userData) {
-        return res.status(500).json({ error: "User not found" });
-      }
+      const user = req.user!;
       
       let businesses;
       // Super Admin (role ID: 1) can see all businesses
-      if (userData.roleId === 1) {
+      if (user.isSuperAdmin) {
         businesses = await storage.getAllBusinesses();
       } else {
         // Other users see only their associated businesses
         businesses = [];
-        for (const businessId of userData.businessIds) {
+        for (const businessId of user.businessIds) {
           const business = await storage.getBusiness(businessId);
           if (business) businesses.push(business);
         }
@@ -623,22 +617,17 @@ export function registerRoutes(app: Express): void {
    *       500:
    *         description: Server error
    */
-  app.get("/api/clients", async (req, res) => {
+  app.get("/api/clients", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
-      // Allow testing with query parameter or use session
-      const testUserId = req.query.user ? parseInt(req.query.user as string) : (1);
-      const userData = await storage.getUserWithRoleAndBusiness(testUserId);
-      if (!userData) {
-        return res.status(500).json({ error: "User not found" });
-      }
+      const user = req.user!;
 
       let persons;
-      // Super Admin (role ID: 1) can see all clients across all businesses
-      if (userData.roleId === 1) {
+      // Super Admin can see all clients across all businesses
+      if (user.isSuperAdmin) {
         persons = await storage.getPersonsByRoles([4]);
       } else {
         // Other users see only clients from their associated businesses
-        persons = await storage.getPersonsByRolesAndBusiness([4], userData.businessIds);
+        persons = await storage.getPersonsByRolesAndBusiness([4], user.businessIds);
       }
       
       // Enrich each person with their user email if they have a user_id
@@ -885,22 +874,17 @@ export function registerRoutes(app: Express): void {
    *       500:
    *         description: Server error
    */
-  app.get("/api/services", async (req, res) => {
+  app.get("/api/services", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
-      // Use session-based authentication with query parameter override for testing
-      const testUserId = req.query.user ? parseInt(req.query.user as string) : (1);
-      const userData = await storage.getUserWithRoleAndBusiness(testUserId);
-      if (!userData) {
-        return res.status(500).json({ error: "User not found" });
-      }
+      const user = req.user!;
 
       let services;
-      // Super Admin (role ID: 1) can see all services
-      if (userData.roleId === 1 || userData.isSuperAdmin) {
+      // Super Admin can see all services
+      if (user.isSuperAdmin) {
         services = await storage.getAllServices();
       } else {
-        // Other users see services from their associated businesses + global services
-        services = await storage.getServicesByBusinessIds(userData.businessIds);
+        // Other users see services from their associated businesses
+        services = await storage.getServicesByBusinessIds(user.businessIds);
       }
       res.json(services);
     } catch (error) {
@@ -1121,15 +1105,9 @@ export function registerRoutes(app: Express): void {
    *       500:
    *         description: Server error
    */
-  app.get("/api/appointments", async (req, res) => {
+  app.get("/api/appointments", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
-      // Allow testing with query parameter or use session
-      const testUserId = req.query.user ? parseInt(req.query.user as string) : (1);
-      
-      const userData = await storage.getUserWithRoleAndBusiness(testUserId);
-      if (!userData) {
-        return res.status(500).json({ error: "User not found" });
-      }
+      const user = req.user!;
       
       // Extract query parameters for filtering and pagination
       const page = parseInt(req.query.page as string) || 1;
@@ -1140,8 +1118,8 @@ export function registerRoutes(app: Express): void {
       const endDate = req.query.endDate as string;
       
       let appointments;
-      // Super Admin (role ID: 1) can see all appointments
-      if (userData.roleId === 1) {
+      // Super Admin can see all appointments
+      if (user.isSuperAdmin) {
         appointments = await storage.getFilteredAppointments({
           page,
           limit,
@@ -1160,7 +1138,7 @@ export function registerRoutes(app: Express): void {
           today,
           startDate,
           endDate,
-          businessIds: userData.businessIds
+          businessIds: user.businessIds
         });
       }
       res.json(appointments);
