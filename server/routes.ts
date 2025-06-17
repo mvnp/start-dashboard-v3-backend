@@ -1380,7 +1380,7 @@ export function registerRoutes(app: Express): void {
   // Accounting Transaction Category routes
   app.get("/api/accounting-transaction-categories", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const businessIds = getBusinessFilter(req.user);
+      const businessIds = getBusinessFilter(req.user, req);
       const categories = await storage.getAccountingTransactionCategoriesByBusinessIds(businessIds);
       res.json(categories);
     } catch (error) {
@@ -1419,7 +1419,7 @@ export function registerRoutes(app: Express): void {
    */
   app.get("/api/user-businesses", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const businessIds = getBusinessFilter(req.user);
+      const businessIds = getBusinessFilter(req.user, req);
       
       if (!businessIds) {
         // Super admin gets all businesses
@@ -1514,7 +1514,7 @@ export function registerRoutes(app: Express): void {
    */
   app.get("/api/accounting-transactions", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const businessIds = getBusinessFilter(req.user);
+      const businessIds = getBusinessFilter(req.user, req);
       const transactions = await storage.getAccountingTransactionsByBusinessIds(businessIds);
       res.json(transactions);
     } catch (error) {
@@ -1556,7 +1556,7 @@ export function registerRoutes(app: Express): void {
   app.get("/api/accounting-transactions/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const businessIds = getBusinessFilter(req.user);
+      const businessIds = getBusinessFilter(req.user, req);
       const transaction = await storage.getAccountingTransaction(id);
       
       if (!transaction) {
@@ -1577,7 +1577,7 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/accounting-transactions", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const businessIds = getBusinessFilter(req.user);
+      const businessIds = getBusinessFilter(req.user, req);
       const businessId = businessIds?.[0] || req.body.business_id;
       
       const validatedData = insertAccountingTransactionSchema.parse({
