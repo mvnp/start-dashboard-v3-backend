@@ -60,7 +60,7 @@ export function registerRoutes(app: Express): void {
    *                 example: "mvnpereira@gmail.com"
    *               password:
    *                 type: string
-   *                 example: "admin123"
+   *                 example: "Marcos$1986"
    *     responses:
    *       200:
    *         description: Login successful with JWT tokens
