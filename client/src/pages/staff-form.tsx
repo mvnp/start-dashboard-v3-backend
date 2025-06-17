@@ -29,12 +29,17 @@ interface StaffFormData {
   business_id: number;
 }
 
-interface StaffMember extends Person {
+interface StaffMember {
+  id: number;
+  first_name: string;
+  last_name: string;
+  phone: string | null;
+  tax_id: string | null;
   email: string;
   business_id: number;
   role_id: number;
-  hire_date: string;
-  salary: number;
+  hire_date: string | null;
+  salary: string | null;
 }
 
 
@@ -170,7 +175,7 @@ export default function StaffForm() {
 
   useEffect(() => {
     console.log("useEffect triggered - staffMember:", staffMember, "isEdit:", isEdit);
-    if (staffMember && isEdit && staffMember.id) {
+    if (staffMember && isEdit && !isLoading) {
       console.log("Setting form data with staff member:", {
         email: staffMember.email,
         business_id: staffMember.business_id,
@@ -192,7 +197,7 @@ export default function StaffForm() {
       // Clear any previous errors when loading new data
       setErrors({});
     }
-  }, [staffMember, isEdit]);
+  }, [staffMember, isEdit, isLoading]);
 
   // Set default business when businesses are loaded and form is for creation
   useEffect(() => {

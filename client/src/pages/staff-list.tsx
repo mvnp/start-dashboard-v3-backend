@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useBusinessContext } from "@/lib/business-context";
 import { Person } from "@shared/schema";
 
 interface Staff extends Person {
@@ -61,13 +62,12 @@ const roleConfig = {
 export default function StaffList() {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
-  
-  // Get selected business ID to include in cache key
-  const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
+  const { selectedBusinessId } = useBusinessContext();
 
   const { data: staff = [], isLoading } = useQuery({
     queryKey: ["/api/staff", selectedBusinessId],
     select: (data: Staff[]) => data,
+    enabled: !!selectedBusinessId,
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
