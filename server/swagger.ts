@@ -13,23 +13,30 @@ const options = {
 
 Comprehensive barbershop management system with role-based access control and multi-business SaaS management.
 
-## Authentication Instructions for Testing
+## Authentication Methods
 
-**Important:** This API uses session-based authentication with cookies. To test authenticated endpoints in Swagger:
+This API supports two authentication methods:
 
-1. **Login first**: Use the \`/api/login\` endpoint with valid credentials:
-   - Email: \`mvnpereira@gmail.com\`
-   - Password: \`admin123\`
+### 1. JWT Bearer Authentication (Recommended)
 
-2. **After successful login**: The session cookie will be automatically set in your browser
+For modern applications and API integrations:
 
-3. **Test other endpoints**: All subsequent API calls will include the session cookie automatically
+1. **Get JWT tokens**: Use \`/api/auth/login\` with valid credentials
+2. **Use Bearer token**: Add \`Authorization: Bearer <access_token>\` header to requests
+3. **Refresh tokens**: Use \`/api/auth/refresh\` before token expires (24h lifetime)
+4. **Check user info**: Use \`/api/auth/me\` to get current user details
 
-4. **If you get authentication errors**: Clear your browser cookies and login again
+### 2. Legacy Session Authentication
+
+For legacy browser-based applications:
+
+1. **Login first**: Use \`/api/login\` endpoint with valid credentials
+2. **Session cookie**: Automatically set in browser after successful login
+3. **Subsequent requests**: Session cookie included automatically
 
 ## Available Test Accounts
 
-- **Super Admin**: \`mvnpereira@gmail.com\` / \`123456\`
+- **Super Admin**: \`mvnpereira@gmail.com\` / \`admin123\`
 - **Test Account**: \`test@swagger.com\` / \`swagger123\` (for testing only)
 
 ## Role-Based Access
@@ -38,6 +45,13 @@ Comprehensive barbershop management system with role-based access control and mu
 - **Merchant (Role 2)**: Access to their own business data
 - **Employee (Role 3)**: Limited access to business operations
 - **Client (Role 4)**: Personal appointments and profile access
+
+## Testing JWT Authentication in Swagger
+
+1. Use \`/api/auth/login\` to get an access token
+2. Click the "Authorize" button (🔒) at the top
+3. Enter \`Bearer <your_access_token>\` in the bearerAuth field
+4. Test JWT-protected endpoints under "JWT Authentication" tag
       `,
       contact: {
         name: 'BarberPro Support',

@@ -26,13 +26,17 @@ This is a comprehensive barbershop management system built with a modern full-st
 ## Key Components
 
 ### Authentication & Authorization
+- **Dual Authentication System**:
+  - **JWT Bearer Authentication**: Modern token-based system with 24-hour access tokens and 7-day refresh tokens
+  - **Session-based Authentication**: Legacy cookie-based system for backward compatibility
 - Role-based access control with hierarchical permissions:
   - Super Admin: Full system access across all businesses
   - Merchant: Business owner with full access to their business
   - Employee: Staff member with limited business operations access
   - Client: Customer with booking and profile access
-- Session-based authentication with automatic login middleware for development
 - Business-scoped data access with filtering based on user permissions
+- JWT endpoints: `/api/auth/login`, `/api/auth/refresh`, `/api/auth/me`
+- Session endpoints: `/api/login`, `/api/user` (legacy)
 
 ### Database Schema
 - **Users**: Core user authentication and profile data
@@ -139,7 +143,8 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
-- June 17, 2025. Added comprehensive Swagger API documentation with interactive UI
+- June 17, 2025. Implemented JWT Bearer authentication system with access/refresh tokens (24-hour lifetime)
+- June 17, 2025. Added comprehensive Swagger API documentation with interactive UI supporting both JWT and session authentication
 - June 16, 2025. Initial setup
 ```
 
