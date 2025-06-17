@@ -77,7 +77,7 @@ export default function StaffList() {
   const deleteStaffMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/staff/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/staff", selectedBusinessId] });
       toast({
         title: "Staff member deleted",
         description: "The staff member has been successfully removed.",
@@ -98,14 +98,17 @@ export default function StaffList() {
     (member.role || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const formatSalary = (salary: number) => {
+  const formatSalary = (salary: string | null) => {
+    if (!salary) return "N/A";
+    const numSalary = Number(salary);
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
-    }).format(salary);
+    }).format(numSalary);
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "N/A";
     return new Date(dateString + 'T12:00:00').toLocaleDateString();
   };
 

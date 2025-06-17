@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useBusinessContext } from "@/lib/business-context";
 import { Person, Business, Role } from "@shared/schema";
 
 interface StaffFormData {
@@ -48,6 +49,7 @@ export default function StaffForm() {
   const [, setLocation] = useLocation();
   const params = useParams();
   const { toast } = useToast();
+  const { selectedBusinessId } = useBusinessContext();
   const isEdit = !!params.id;
   const staffId = params.id ? parseInt(params.id) : null;
 
@@ -101,7 +103,7 @@ export default function StaffForm() {
   const createStaffMutation = useMutation({
     mutationFn: (data: StaffFormData) => apiRequest("POST", "/api/staff", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/staff", selectedBusinessId] });
       toast({
         title: "Staff member created",
         description: "The new staff member has been successfully added.",
@@ -138,8 +140,8 @@ export default function StaffForm() {
   const updateStaffMutation = useMutation({
     mutationFn: (data: StaffFormData) => apiRequest("PUT", `/api/staff/${staffId}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/staff", staffId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/staff", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/staff/${staffId}`] });
       toast({
         title: "Staff member updated",
         description: "The staff member has been successfully updated.",
