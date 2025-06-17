@@ -19,22 +19,24 @@ import { Plus, Search, Edit, Trash2, ExternalLink, Crown } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { BarberPlan } from "@shared/schema";
+import { useBusinessContext } from "@/lib/business-context";
 
 export default function BarberPlanList() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { toast } = useToast();
+  const { selectedBusinessId } = useBusinessContext();
 
   const { data: plans = [], isLoading } = useQuery({
-    queryKey: ["/api/barber-plans"],
+    queryKey: ["/api/barber-plans", selectedBusinessId],
     select: (data: BarberPlan[]) => data,
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/barber-plans/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", selectedBusinessId] });
       toast({
         title: "Success",
         description: "Barber plan deleted successfully",

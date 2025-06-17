@@ -1582,9 +1582,10 @@ export function registerRoutes(app: Express): void {
   });
 
   // Barber Plan routes
-  app.get("/api/barber-plans", async (req, res) => {
+  app.get("/api/barber-plans", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
-      const plans = await storage.getAllBarberPlans();
+      const businessIds = getBusinessFilter(req.user, req);
+      const plans = await storage.getAllBarberPlans(businessIds);
       res.json(plans);
     } catch (error) {
       console.error("Barber plan fetch error:", error);
@@ -1592,9 +1593,38 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/barber-plans", async (req, res) => {
+  app.get("/api/barber-plans/:id", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
-      const validatedData = insertBarberPlanSchema.parse(req.body);
+      const id = parseInt(req.params.id);
+      const businessIds = getBusinessFilter(req.user, req);
+      const plan = await storage.getBarberPlan(id, businessIds);
+      if (!plan) {
+        return res.status(404).json({ error: "Barber plan not found" });
+      }
+      res.json(plan);
+    } catch (error) {
+      console.error("Barber plan fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch barber plan" });
+    }
+  });
+
+  app.post("/api/barber-plans", authenticateJWT, async (req: AuthenticatedRequest, res) => {
+    try {
+      const selectedBusinessId = parseInt(req.headers['x-selected-business-id'] as string);
+      if (!selectedBusinessId) {
+        return res.status(400).json({ error: "Business selection required" });
+      }
+
+      // Validate business access
+      const businessIds = getBusinessFilter(req.user, req);
+      if (businessIds && !businessIds.includes(selectedBusinessId)) {
+        return res.status(403).json({ error: "Access denied to this business" });
+      }
+
+      const validatedData = insertBarberPlanSchema.parse({
+        ...req.body,
+        business_id: selectedBusinessId
+      });
       const plan = await storage.createBarberPlan(validatedData);
       res.status(201).json(plan);
     } catch (error) {
@@ -1603,6 +1633,50 @@ export function registerRoutes(app: Express): void {
         return res.status(400).json({ error: "Invalid data", details: error.errors });
       }
       res.status(500).json({ error: "Failed to create barber plan" });
+    }
+  });
+
+  app.put("/api/barber-plans/:id", authenticateJWT, async (req: AuthenticatedRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const selectedBusinessId = parseInt(req.headers['x-selected-business-id'] as string);
+      
+      // Validate business access
+      const businessIds = getBusinessFilter(req.user, req);
+      if (businessIds && !businessIds.includes(selectedBusinessId)) {
+        return res.status(403).json({ error: "Access denied to this business" });
+      }
+
+      const validatedData = insertBarberPlanSchema.parse({
+        ...req.body,
+        business_id: selectedBusinessId
+      });
+      const plan = await storage.updateBarberPlan(id, validatedData, businessIds);
+      if (!plan) {
+        return res.status(404).json({ error: "Barber plan not found" });
+      }
+      res.json(plan);
+    } catch (error) {
+      console.error("Barber plan update error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update barber plan" });
+    }
+  });
+
+  app.delete("/api/barber-plans/:id", authenticateJWT, async (req: AuthenticatedRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const businessIds = getBusinessFilter(req.user, req);
+      const success = await storage.deleteBarberPlan(id, businessIds);
+      if (!success) {
+        return res.status(404).json({ error: "Barber plan not found" });
+      }
+      res.json({ message: "Barber plan deleted successfully" });
+    } catch (error) {
+      console.error("Barber plan deletion error:", error);
+      res.status(500).json({ error: "Failed to delete barber plan" });
     }
   });
 

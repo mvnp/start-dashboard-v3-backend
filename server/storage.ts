@@ -546,13 +546,34 @@ class PostgresStorage implements IStorage {
   }
 
   // Barber Plan methods
-  async getAllBarberPlans(): Promise<BarberPlan[]> {
-    return await this.db.select().from(barber_plans);
+  async getAllBarberPlans(businessIds?: number[] | null): Promise<BarberPlan[]> {
+    if (businessIds === null) {
+      // No filtering for super admin
+      return await this.db.select().from(barber_plans);
+    }
+    
+    if (businessIds && businessIds.length > 0) {
+      return await this.db.select().from(barber_plans).where(inArray(barber_plans.business_id, businessIds));
+    }
+    
+    return [];
   }
 
-  async getBarberPlan(id: number): Promise<BarberPlan | undefined> {
-    const result = await this.db.select().from(barber_plans).where(eq(barber_plans.id, id));
-    return result[0];
+  async getBarberPlan(id: number, businessIds?: number[] | null): Promise<BarberPlan | undefined> {
+    if (businessIds === null) {
+      // No filtering for super admin
+      const result = await this.db.select().from(barber_plans).where(eq(barber_plans.id, id));
+      return result[0];
+    }
+    
+    if (businessIds && businessIds.length > 0) {
+      const result = await this.db.select().from(barber_plans).where(
+        and(eq(barber_plans.id, id), inArray(barber_plans.business_id, businessIds))
+      );
+      return result[0];
+    }
+    
+    return undefined;
   }
 
   async createBarberPlan(insertBarberPlan: InsertBarberPlan): Promise<BarberPlan> {
@@ -560,14 +581,42 @@ class PostgresStorage implements IStorage {
     return result[0];
   }
 
-  async updateBarberPlan(id: number, updateData: Partial<InsertBarberPlan>): Promise<BarberPlan | undefined> {
-    const result = await this.db.update(barber_plans).set(updateData).where(eq(barber_plans.id, id)).returning();
-    return result[0];
+  async updateBarberPlan(id: number, updateData: Partial<InsertBarberPlan>, businessIds?: number[] | null): Promise<BarberPlan | undefined> {
+    if (businessIds === null) {
+      // No filtering for super admin
+      const result = await this.db.update(barber_plans)
+        .set(updateData)
+        .where(eq(barber_plans.id, id))
+        .returning();
+      return result[0];
+    }
+    
+    if (businessIds && businessIds.length > 0) {
+      const result = await this.db.update(barber_plans)
+        .set(updateData)
+        .where(and(eq(barber_plans.id, id), inArray(barber_plans.business_id, businessIds)))
+        .returning();
+      return result[0];
+    }
+    
+    return undefined;
   }
 
-  async deleteBarberPlan(id: number): Promise<boolean> {
-    const result = await this.db.delete(barber_plans).where(eq(barber_plans.id, id));
-    return result.rowCount > 0;
+  async deleteBarberPlan(id: number, businessIds?: number[] | null): Promise<boolean> {
+    if (businessIds === null) {
+      // No filtering for super admin
+      const result = await this.db.delete(barber_plans)
+        .where(eq(barber_plans.id, id));
+      return result.rowCount > 0;
+    }
+    
+    if (businessIds && businessIds.length > 0) {
+      const result = await this.db.delete(barber_plans)
+        .where(and(eq(barber_plans.id, id), inArray(barber_plans.business_id, businessIds)));
+      return result.rowCount > 0;
+    }
+    
+    return false;
   }
 
   // Payment Gateway methods
