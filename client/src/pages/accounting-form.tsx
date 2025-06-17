@@ -40,6 +40,7 @@ export default function AccountingForm() {
   const { toast } = useToast();
   const [isEdit, setIsEdit] = useState(false);
   const [transactionId, setTransactionId] = useState<number | null>(null);
+  const { selectedBusinessId } = useBusinessContext();
 
   // Get transaction ID from URL if editing
   useEffect(() => {
@@ -139,12 +140,12 @@ export default function AccountingForm() {
     }
   }, [transaction, isEdit, isLoadingTransaction, categories, form]);
 
-  // Auto-select business if user has only one business
+  // Auto-set business_id from selected business context
   useEffect(() => {
-    if (userBusinesses.length === 1 && !isEdit && !form.getValues("business_id")) {
-      form.setValue("business_id", userBusinesses[0].id);
+    if (selectedBusinessId && !isEdit && !form.getValues("business_id")) {
+      form.setValue("business_id", selectedBusinessId);
     }
-  }, [userBusinesses, form, isEdit]);
+  }, [selectedBusinessId, form, isEdit]);
 
   const createMutation = useMutation({
     mutationFn: (data: FormData) => 
@@ -279,30 +280,8 @@ export default function AccountingForm() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="business_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Business *</FormLabel>
-                      <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select business" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {userBusinesses.map((business) => (
-                            <SelectItem key={business.id} value={business.id.toString()}>
-                              {business.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Business ID is automatically set from session context */}
+                <input type="hidden" {...form.register("business_id")} />
 
                 <FormField
                   control={form.control}

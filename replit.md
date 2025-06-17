@@ -36,6 +36,15 @@ This is a comprehensive barbershop management system built with a modern full-st
 - JWT endpoints: `/api/auth/login`, `/api/auth/refresh`, `/api/auth/me`
 - All API endpoints require JWT Bearer authentication
 
+### Business Selection System
+- **Multi-Business Support**: Users can be registered to multiple businesses
+- **Mandatory Business Selection**: After login, users with multiple businesses must select an active business via modal
+- **Session Storage**: Selected business ID is stored in browser session for persistence
+- **Business Change Button**: Available in sidebar and mobile header for quick business switching
+- **Super Admin Exemption**: Super Admin bypasses business selection requirement and sees all data
+- **Automatic Filtering**: All forms, lists, and CRUD operations use selected business context
+- **Logout on Close**: Attempting to close business selection modal without selection triggers logout
+
 ### Database Schema
 - **Users**: Core user authentication and profile data
 - **Roles**: Hierarchical role definitions (super-admin, merchant, employee, client)
@@ -141,6 +150,9 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 17, 2025. Implemented mandatory business selection system with session storage and context-based filtering
+- June 17, 2025. Added business selection modal for multi-business users with logout enforcement
+- June 17, 2025. Created business change buttons in sidebar and mobile header for quick switching
 - June 17, 2025. Removed legacy session authentication system completely - SaaS now uses JWT-only authentication
 - June 17, 2025. Implemented JWT Bearer authentication system with access/refresh tokens (24-hour lifetime)
 - June 17, 2025. Added comprehensive Swagger API documentation with interactive UI
