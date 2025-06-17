@@ -31,7 +31,55 @@ import {
 
 export function registerRoutes(app: Express): void {
   
-  // Authentication routes
+  /**
+   * @swagger
+   * /api/login:
+   *   post:
+   *     summary: User authentication
+   *     description: Authenticate user with email and password, creates session
+   *     tags: [Authentication]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - email
+   *               - password
+   *             properties:
+   *               email:
+   *                 type: string
+   *                 format: email
+   *                 example: "admin@system.com"
+   *               password:
+   *                 type: string
+   *                 example: "password123"
+   *     responses:
+   *       200:
+   *         description: Login successful
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 user:
+   *                   type: object
+   *                   properties:
+   *                     id: { type: integer, example: 1 }
+   *                     email: { type: string, example: "admin@system.com" }
+   *                     roleId: { type: integer, example: 1 }
+   *                     businessIds: { type: array, items: { type: integer }, example: [1] }
+   *                     isSuperAdmin: { type: boolean, example: true }
+   *       401:
+   *         description: Invalid credentials
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *       500:
+   *         description: Server error
+   */
   app.post("/api/login", async (req, res) => {
     try {
       const { email, password } = req.body;
@@ -97,6 +145,32 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  /**
+   * @swagger
+   * /api/user:
+   *   get:
+   *     summary: Get current authenticated user
+   *     description: Returns the current user's session information including role and business access
+   *     tags: [Authentication]
+   *     responses:
+   *       200:
+   *         description: Current user information
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 user:
+   *                   type: object
+   *                   properties:
+   *                     id: { type: integer, example: 1 }
+   *                     email: { type: string, example: "admin@system.com" }
+   *                     roleId: { type: integer, example: 1 }
+   *                     businessIds: { type: array, items: { type: integer }, example: [1] }
+   *                     isSuperAdmin: { type: boolean, example: true }
+   *       500:
+   *         description: Server error
+   */
   app.get("/api/user", async (req, res) => {
     try {
       // Check if session exists and has user data
@@ -503,7 +577,25 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  // Client routes (also using persons table) - role 4 (client)
+  /**
+   * @swagger
+   * /api/clients:
+   *   get:
+   *     summary: Get all clients
+   *     description: Retrieve all clients with business-based filtering. Super Admin sees all clients, others see only clients from their businesses.
+   *     tags: [Client Management]
+   *     responses:
+   *       200:
+   *         description: List of clients
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Person'
+   *       500:
+   *         description: Server error
+   */
   app.get("/api/clients", async (req, res) => {
     try {
       // Allow testing with query parameter or use session
@@ -715,7 +807,57 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  // Service routes
+  /**
+   * @swagger
+   * /api/services:
+   *   get:
+   *     summary: Get all services
+   *     description: Retrieve all services with business-based filtering. Super Admin sees all services, others see only services from their businesses.
+   *     tags: [Service Management]
+   *     responses:
+   *       200:
+   *         description: List of services
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Service'
+   *       500:
+   *         description: Server error
+   *   post:
+   *     summary: Create a new service
+   *     description: Create a new service for the business
+   *     tags: [Service Management]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - name
+   *               - duration
+   *               - price
+   *               - business_id
+   *             properties:
+   *               name: { type: string, example: "Premium Haircut" }
+   *               description: { type: string, example: "Professional haircut with styling" }
+   *               duration: { type: integer, example: 60 }
+   *               price: { type: number, format: decimal, example: 35.00 }
+   *               business_id: { type: integer, example: 1 }
+   *     responses:
+   *       201:
+   *         description: Service created successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Service'
+   *       400:
+   *         description: Invalid input data
+   *       500:
+   *         description: Server error
+   */
   app.get("/api/services", async (req, res) => {
     try {
       // Use session-based authentication with query parameter override for testing
@@ -853,7 +995,105 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  // Appointment routes
+  /**
+   * @swagger
+   * /api/appointments:
+   *   get:
+   *     summary: Get appointments with filtering and pagination
+   *     description: Retrieve appointments with business-based filtering, pagination, and various filters like status, date range, etc.
+   *     tags: [Appointment Management]
+   *     parameters:
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *           default: 1
+   *         description: Page number for pagination
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *           default: 25
+   *         description: Number of appointments per page
+   *       - in: query
+   *         name: status
+   *         schema:
+   *           type: string
+   *           enum: [Scheduled, Confirmed, Completed, Cancelled]
+   *         description: Filter by appointment status
+   *       - in: query
+   *         name: today
+   *         schema:
+   *           type: boolean
+   *         description: Filter for today's appointments only
+   *       - in: query
+   *         name: startDate
+   *         schema:
+   *           type: string
+   *           format: date
+   *         description: Start date for date range filter
+   *       - in: query
+   *         name: endDate
+   *         schema:
+   *           type: string
+   *           format: date
+   *         description: End date for date range filter
+   *     responses:
+   *       200:
+   *         description: Paginated list of appointments
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 appointments:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/components/schemas/Appointment'
+   *                 total: { type: integer, example: 150 }
+   *                 totalPages: { type: integer, example: 6 }
+   *                 currentPage: { type: integer, example: 1 }
+   *       500:
+   *         description: Server error
+   *   post:
+   *     summary: Create a new appointment
+   *     description: Create a new appointment for a client with a staff member
+   *     tags: [Appointment Management]
+   *     security:
+   *       - cookieAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - appointment_date
+   *               - appointment_time
+   *               - status
+   *               - user_id
+   *               - client_id
+   *               - service_id
+   *             properties:
+   *               appointment_date: { type: string, format: date, example: "2025-06-17" }
+   *               appointment_time: { type: string, format: time, example: "14:30" }
+   *               status: { type: string, enum: [Scheduled, Confirmed, Completed, Cancelled], example: "Scheduled" }
+   *               notes: { type: string, example: "Client prefers shorter sides" }
+   *               user_id: { type: integer, example: 1 }
+   *               client_id: { type: integer, example: 2 }
+   *               service_id: { type: integer, example: 1 }
+   *     responses:
+   *       201:
+   *         description: Appointment created successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Appointment'
+   *       400:
+   *         description: Invalid input data
+   *       500:
+   *         description: Server error
+   */
   app.get("/api/appointments", async (req, res) => {
     try {
       // Allow testing with query parameter or use session
