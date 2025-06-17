@@ -1932,12 +1932,24 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/accounting-transactions", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      // Get business ID from header (frontend) or request body (API tools)
+      const headerBusinessId = req.headers['x-selected-business-id'] ? parseInt(req.headers['x-selected-business-id'] as string) : null;
+      const bodyBusinessId = req.body.business_id ? (typeof req.body.business_id === 'number' ? req.body.business_id : parseInt(req.body.business_id)) : null;
+      const selectedBusinessId = headerBusinessId || bodyBusinessId;
+
+      if (!selectedBusinessId || isNaN(selectedBusinessId)) {
+        return res.status(400).json({ error: "Business ID is required and must be a valid number" });
+      }
+
+      // Validate business access
       const businessIds = getBusinessFilter(req.user, req);
-      const businessId = businessIds?.[0] || req.body.business_id;
+      if (businessIds && !businessIds.includes(selectedBusinessId)) {
+        return res.status(403).json({ error: "Access denied to this business" });
+      }
       
       const validatedData = insertAccountingTransactionSchema.parse({
         ...req.body,
-        business_id: businessId
+        business_id: selectedBusinessId
       });
       
       const transaction = await storage.createAccountingTransaction(validatedData);
@@ -2016,7 +2028,21 @@ export function registerRoutes(app: Express): void {
   app.put("/api/accounting-transactions/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      
+      // Get business ID from header (frontend) or request body (API tools)
+      const headerBusinessId = req.headers['x-selected-business-id'] ? parseInt(req.headers['x-selected-business-id'] as string) : null;
+      const bodyBusinessId = req.body.business_id ? (typeof req.body.business_id === 'number' ? req.body.business_id : parseInt(req.body.business_id)) : null;
+      const selectedBusinessId = headerBusinessId || bodyBusinessId;
+
+      if (!selectedBusinessId || isNaN(selectedBusinessId)) {
+        return res.status(400).json({ error: "Business ID is required and must be a valid number" });
+      }
+
+      // Validate business access
       const businessIds = getBusinessFilter(req.user, req);
+      if (businessIds && !businessIds.includes(selectedBusinessId)) {
+        return res.status(403).json({ error: "Access denied to this business" });
+      }
       
       // First check if transaction exists and user has access
       const existingTransaction = await storage.getAccountingTransaction(id);
@@ -2029,8 +2055,13 @@ export function registerRoutes(app: Express): void {
         return res.status(403).json({ error: "Access denied to this transaction" });
       }
       
-      const validatedData = insertAccountingTransactionSchema.partial().parse(req.body);
-      const transaction = await storage.updateAccountingTransaction(id, validatedData);
+      // Remove business_id from request body to avoid validation conflicts
+      const { business_id, ...requestBodyWithoutBusinessId } = req.body;
+      const validatedData = insertAccountingTransactionSchema.partial().parse({
+        ...requestBodyWithoutBusinessId,
+        business_id: selectedBusinessId
+      });
+      const transaction = await storage.updateAccountingTransaction(id, validatedData, businessIds);
       
       res.json(transaction);
     } catch (error) {
@@ -2086,7 +2117,7 @@ export function registerRoutes(app: Express): void {
         return res.status(403).json({ error: "Access denied to this transaction" });
       }
       
-      const deleted = await storage.deleteAccountingTransaction(id);
+      const deleted = await storage.deleteAccountingTransaction(id, businessIds);
       if (!deleted) {
         return res.status(404).json({ error: "Transaction not found" });
       }

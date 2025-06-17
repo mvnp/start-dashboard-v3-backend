@@ -678,14 +678,38 @@ class PostgresStorage implements IStorage {
     return result[0];
   }
 
-  async updateAccountingTransaction(id: number, updateData: Partial<InsertAccountingTransaction>): Promise<AccountingTransaction | undefined> {
-    const result = await this.db.update(accounting_transactions).set(updateData).where(eq(accounting_transactions.id, id)).returning();
-    return result[0];
+  async updateAccountingTransaction(id: number, updateData: Partial<InsertAccountingTransaction>, businessIds?: number[] | null): Promise<AccountingTransaction | undefined> {
+    if (businessIds === null) {
+      // No filtering for super admin
+      const result = await this.db.update(accounting_transactions).set(updateData).where(eq(accounting_transactions.id, id)).returning();
+      return result[0];
+    }
+    
+    if (businessIds && businessIds.length > 0) {
+      const result = await this.db.update(accounting_transactions)
+        .set(updateData)
+        .where(and(eq(accounting_transactions.id, id), inArray(accounting_transactions.business_id, businessIds)))
+        .returning();
+      return result[0];
+    }
+    
+    return undefined;
   }
 
-  async deleteAccountingTransaction(id: number): Promise<boolean> {
-    const result = await this.db.delete(accounting_transactions).where(eq(accounting_transactions.id, id));
-    return result.rowCount > 0;
+  async deleteAccountingTransaction(id: number, businessIds?: number[] | null): Promise<boolean> {
+    if (businessIds === null) {
+      // No filtering for super admin
+      const result = await this.db.delete(accounting_transactions).where(eq(accounting_transactions.id, id));
+      return result.rowCount > 0;
+    }
+    
+    if (businessIds && businessIds.length > 0) {
+      const result = await this.db.delete(accounting_transactions)
+        .where(and(eq(accounting_transactions.id, id), inArray(accounting_transactions.business_id, businessIds)));
+      return result.rowCount > 0;
+    }
+    
+    return false;
   }
 
   // Support Ticket methods

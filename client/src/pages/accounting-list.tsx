@@ -9,23 +9,29 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { AccountingTransaction, AccountingTransactionCategory } from "@shared/schema";
 import { format } from "date-fns";
+import { useBusinessContext } from "@/lib/business-context";
 
 export default function AccountingList() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { selectedBusinessId } = useBusinessContext();
 
   const { data: transactions = [], isLoading } = useQuery<AccountingTransaction[]>({
-    queryKey: ["/api/accounting-transactions"],
+    queryKey: ["/api/accounting-transactions", selectedBusinessId],
+    staleTime: 0, // Data is immediately stale
+    gcTime: 0, // Don't keep in cache
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 
   const { data: categories = [] } = useQuery<AccountingTransactionCategory[]>({
-    queryKey: ["/api/accounting-transaction-categories"],
+    queryKey: ["/api/accounting-transaction-categories", selectedBusinessId],
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/accounting-transactions/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions", selectedBusinessId] });
       toast({
         title: "Success",
         description: "Transaction deleted successfully",
