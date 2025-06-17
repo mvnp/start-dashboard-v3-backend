@@ -94,16 +94,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const switchUser = async (userId: number) => {
-    try {
-      const response = await apiRequest('POST', '/api/switch-user', { userId });
-      const data = await response.json();
-      setUser(data.user);
-      // Invalidate all queries when switching users
-      queryClient.invalidateQueries();
-    } catch (error) {
-      console.error('Failed to switch user:', error);
-      throw error;
-    }
+    // JWT authentication doesn't support user switching in the same way
+    // This would require re-authentication with different credentials
+    console.warn('User switching not implemented for JWT authentication');
+    throw new Error('User switching requires re-authentication with JWT');
   };
 
   const refreshData = () => {

@@ -115,7 +115,7 @@ export default function UserSwitcher() {
         )}
         
         <Select
-          value={user?.id.toString()}
+          value={user?.id?.toString() || ""}
           onValueChange={handleUserSwitch}
           disabled={switching || isLoading}
         >

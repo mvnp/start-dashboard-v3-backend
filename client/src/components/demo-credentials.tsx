@@ -44,7 +44,7 @@ const getRoleDisplayName = (roleType: string) => {
 export function DemoCredentials() {
   const { toast } = useToast();
 
-  const { data: usersByRole = [], isLoading } = useQuery({
+  const { data: usersByRole = [], isLoading } = useQuery<any[]>({
     queryKey: ['/api/users/by-role'],
   });
 
@@ -73,12 +73,14 @@ export function DemoCredentials() {
   }
 
   // Create demo credentials from actual database users
-  const demoCredentials: DemoCredential[] = usersByRole.map((user: any) => ({
-    email: user.email,
-    password: getPasswordForRole(user.roleType),
-    role: getRoleDisplayName(user.roleType),
-    description: getRoleDescription(user.roleType)
-  }));
+  const demoCredentials: DemoCredential[] = Array.isArray(usersByRole) 
+    ? usersByRole.map((user: any) => ({
+        email: user.email,
+        password: getPasswordForRole(user.roleType),
+        role: getRoleDisplayName(user.roleType),
+        description: getRoleDescription(user.roleType)
+      }))
+    : [];
 
   return (
     <Card className="mt-6">
