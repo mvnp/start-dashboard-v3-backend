@@ -390,22 +390,17 @@ export function registerRoutes(app: Express): void {
   });
 
   // Staff routes (using persons table now) - roles 1,2,3 (super-admin, merchant, employee)
-  app.get("/api/staff", async (req, res) => {
+  app.get("/api/staff", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
-      // Allow testing with query parameter or use session
-      const testUserId = req.query.user ? parseInt(req.query.user as string) : (1);
-      const userData = await storage.getUserWithRoleAndBusiness(testUserId);
-      if (!userData) {
-        return res.status(500).json({ error: "User not found" });
-      }
+      const user = req.user!;
 
       let persons;
-      // Super Admin (role ID: 1) can see all staff across all businesses
-      if (userData.roleId === 1) {
+      // Super Admin can see all staff across all businesses
+      if (user.isSuperAdmin) {
         persons = await storage.getPersonsByRoles([1, 2, 3]);
       } else {
         // Other users see only staff from their associated businesses
-        persons = await storage.getPersonsByRolesAndBusiness([1, 2, 3], userData.businessIds);
+        persons = await storage.getPersonsByRolesAndBusiness([1, 2, 3], user.businessIds);
       }
       
       res.json(persons);
