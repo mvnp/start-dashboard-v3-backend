@@ -150,6 +150,7 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 17, 2025. Fixed client deletion error by implementing dependency checking - prevents deletion when appointments exist and provides clear error messages
 - June 17, 2025. Fixed appointment form display by implementing bidirectional user_id/person_id mapping in appointment GET endpoints for proper dropdown selection
 - June 17, 2025. Added JWT authentication middleware to all staff API endpoints to resolve authentication errors
 - June 17, 2025. Implemented comprehensive safe storage utilities for localStorage/sessionStorage to prevent data URL context errors

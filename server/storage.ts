@@ -331,6 +331,7 @@ class PostgresStorage implements IStorage {
         last_name: persons.last_name,
         phone: persons.phone,
         tax_id: persons.tax_id,
+        address: persons.address,
         hire_date: persons.hire_date,
         salary: persons.salary,
         created_at: persons.created_at,
