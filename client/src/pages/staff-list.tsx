@@ -28,7 +28,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Staff } from "@shared/schema";
+import { Person } from "@shared/schema";
+
+interface Staff extends Person {
+  role?: string;
+  email?: string;
+}
 
 const roleConfig = {
   "super-admin": {

@@ -150,6 +150,8 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 17, 2025. Fixed data refresh issue - updated React Query global configuration for automatic data refresh on list page access
+- June 17, 2025. Fixed client CRUD operations to respect selected business ID filtering with proper user-business relationship validation
 - June 17, 2025. Implemented mandatory business selection system with session storage and context-based filtering
 - June 17, 2025. Added business selection modal for multi-business users with logout enforcement
 - June 17, 2025. Created business change buttons in sidebar and mobile header for quick switching
