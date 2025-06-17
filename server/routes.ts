@@ -625,9 +625,11 @@ export function registerRoutes(app: Express): void {
 
       let persons;
       // Filter clients by selected business or user's business access
+      // Always respect selected business context, even for Super Admin
       if (businessIds && businessIds.length > 0) {
         persons = await storage.getPersonsByRolesAndBusiness([4], businessIds);
       } else if (user.isSuperAdmin) {
+        // Super Admin without business selection sees all clients
         persons = await storage.getPersonsByRoles([4]);
       } else {
         persons = await storage.getPersonsByRolesAndBusiness([4], user.businessIds);
