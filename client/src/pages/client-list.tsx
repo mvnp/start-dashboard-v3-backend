@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useBusinessContext } from "@/lib/business-context";
 import { Person } from "@shared/schema";
 
 interface Client extends Person {
@@ -38,13 +39,12 @@ interface Client extends Person {
 export default function ClientList() {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
-  
-  // Get selected business ID to include in cache key
-  const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
+  const { selectedBusinessId } = useBusinessContext();
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ["/api/clients", selectedBusinessId],
     select: (data: Client[]) => data,
+    enabled: !!selectedBusinessId,
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts

@@ -657,19 +657,37 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/clients/:id", async (req, res) => {
+  app.get("/api/clients/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      const user = req.user!;
+      
+      // Get business context from selected business
+      const businessIds = getBusinessFilter(user, req);
+      if (!businessIds || businessIds.length === 0) {
+        return res.status(403).json({ error: "No business access" });
+      }
+
       const person = await storage.getPerson(id);
       if (!person) {
+        return res.status(404).json({ error: "Client not found" });
+      }
+
+      // Check if the client's user has access to the selected business
+      if (person.user_id) {
+        const userWithBusiness = await storage.getUserWithRoleAndBusiness(person.user_id);
+        if (!userWithBusiness || !userWithBusiness.businessIds.some(bid => businessIds.includes(bid))) {
+          return res.status(404).json({ error: "Client not found" });
+        }
+      } else {
         return res.status(404).json({ error: "Client not found" });
       }
 
       // Get associated user email if exists
       let userEmail = null;
       if (person.user_id) {
-        const user = await storage.getUser(person.user_id);
-        userEmail = user?.email || null;
+        const clientUser = await storage.getUser(person.user_id);
+        userEmail = clientUser?.email || null;
       }
 
       res.json({

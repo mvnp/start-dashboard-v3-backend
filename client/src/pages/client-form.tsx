@@ -76,17 +76,8 @@ export default function ClientForm() {
   };
 
   const { data: clientMember, isLoading, error } = useQuery({
-    queryKey: [`/api/clients/${clientId}`] as const,
-    queryFn: async () => {
-      const response = await fetch(`/api/clients/${clientId}`, {
-        credentials: "include",
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to fetch client: ${response.statusText}`);
-      }
-      return response.json();
-    },
-    enabled: isEdit && !!clientId,
+    queryKey: [`/api/clients/${clientId}`, selectedBusinessId] as const,
+    enabled: isEdit && !!clientId && !!selectedBusinessId,
   });
 
 
@@ -94,7 +85,7 @@ export default function ClientForm() {
   const createClientMutation = useMutation({
     mutationFn: (data: ClientFormData) => apiRequest("POST", "/api/clients", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/clients", selectedBusinessId] });
       toast({
         title: "Client created",
         description: "The new client has been successfully added.",
@@ -141,7 +132,8 @@ export default function ClientForm() {
   const updateClientMutation = useMutation({
     mutationFn: (data: ClientFormData) => apiRequest("PUT", `/api/clients/${clientId}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/clients", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/clients/${clientId}`, selectedBusinessId] });
       queryClient.invalidateQueries({ queryKey: ["/api/clients", clientId] });
       toast({
         title: "Client updated",
