@@ -619,13 +619,15 @@ export function registerRoutes(app: Express): void {
   app.get("/api/clients", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
       const user = req.user!;
+      const businessIds = getBusinessFilter(user, req);
 
       let persons;
-      // Super Admin can see all clients across all businesses
-      if (user.isSuperAdmin) {
+      // Filter clients by selected business or user's business access
+      if (businessIds && businessIds.length > 0) {
+        persons = await storage.getPersonsByRolesAndBusiness([4], businessIds);
+      } else if (user.isSuperAdmin) {
         persons = await storage.getPersonsByRoles([4]);
       } else {
-        // Other users see only clients from their associated businesses
         persons = await storage.getPersonsByRolesAndBusiness([4], user.businessIds);
       }
       
