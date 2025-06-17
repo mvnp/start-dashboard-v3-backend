@@ -118,10 +118,27 @@ This is a comprehensive barbershop management system built with a modern full-st
 - **Port Configuration**: Backend on 5000, external on 80
 - **Deployment**: Autoscale deployment target
 
+## API Documentation
+
+The application now includes comprehensive Swagger/OpenAPI documentation accessible at `/api-docs`. The documentation covers all major API endpoints including:
+
+- **Authentication**: User login and session management
+- **Client Management**: Full CRUD operations for client data
+- **Service Management**: Business service offerings management
+- **Appointment Management**: Scheduling with filtering and pagination
+- **Business Management**: Multi-tenant business operations
+- **Accounting**: Transaction and financial tracking
+- **WhatsApp Integration**: Communication management
+
+### Accessing Documentation
+- Interactive UI: `http://localhost:5000/api-docs`
+- Raw OpenAPI JSON: `http://localhost:5000/api-docs.json`
+
 ## Changelog
 
 ```
 Changelog:
+- June 17, 2025. Added comprehensive Swagger API documentation with interactive UI
 - June 16, 2025. Initial setup
 ```
 
