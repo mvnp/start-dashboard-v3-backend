@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Person } from "@shared/schema";
+import { useBusinessContext } from "@/lib/business-context";
 
 interface ClientFormData {
   first_name: string;
@@ -17,6 +18,7 @@ interface ClientFormData {
   phone: string;
   tax_id?: string;
   address?: string;
+  business_id: number;
 }
 
 interface ClientWithUser extends Person {
@@ -31,6 +33,7 @@ export default function ClientForm() {
   const [editMatch] = useRoute("/clients/edit/:id");
   const [createMatch] = useRoute("/clients/new");
   const { toast } = useToast();
+  const { selectedBusinessId } = useBusinessContext();
   const isEdit = !!editMatch;
   const isCreating = !!createMatch;
   const clientId = isEdit && params.id ? parseInt(params.id) : null;
@@ -42,6 +45,7 @@ export default function ClientForm() {
     phone: "",
     tax_id: "",
     address: "",
+    business_id: selectedBusinessId || 0,
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -193,9 +197,20 @@ export default function ClientForm() {
         phone: clientMember.phone ? formatPhoneNumber(clientMember.phone) : "",
         tax_id: clientMember.tax_id ? formatTaxId(clientMember.tax_id) : "",
         address: clientMember.address || "",
+        business_id: selectedBusinessId || 0,
       });
     }
-  }, [clientMember, isEdit, clientId]);
+  }, [clientMember, isEdit, clientId, selectedBusinessId]);
+
+  // Update business_id when selected business changes
+  useEffect(() => {
+    if (selectedBusinessId) {
+      setFormData(prev => ({
+        ...prev,
+        business_id: selectedBusinessId
+      }));
+    }
+  }, [selectedBusinessId]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};

@@ -708,8 +708,16 @@ export function registerRoutes(app: Express): void {
         });
       }
 
-      // Get user's business context
-      const businessId = req.user?.businessIds?.[0] || 1;
+      // Get business context from selected business or request body
+      const businessIds = getBusinessFilter(req.user!, req);
+      const businessId = businessIds?.[0] || req.body.business_id;
+      
+      if (!businessId) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["business_id"], message: "Business context is required" }]
+        });
+      }
       
       // Create user account
       const generatedPassword = Math.random().toString(36).slice(-8);
@@ -756,9 +764,15 @@ export function registerRoutes(app: Express): void {
       const id = parseInt(req.params.id);
       const { email, first_name, last_name, phone, tax_id, address } = req.body;
 
-      // Get existing client data
+      // Get business context from selected business
+      const businessIds = getBusinessFilter(req.user!, req);
+      if (!businessIds || businessIds.length === 0) {
+        return res.status(403).json({ error: "No business access" });
+      }
+
+      // Get existing client data with business filtering
       const existingClient = await storage.getPerson(id);
-      if (!existingClient) {
+      if (!existingClient || !businessIds.includes(existingClient.business_id)) {
         return res.status(404).json({ error: "Client not found" });
       }
 
