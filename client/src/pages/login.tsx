@@ -20,7 +20,7 @@ export default function Login() {
 
   const loginMutation = useMutation({
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
-      const response = await fetch('/api/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,6 +36,10 @@ export default function Login() {
       return response.json();
     },
     onSuccess: (data) => {
+      // Store JWT tokens in localStorage
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      
       setUser(data.user);
       // Invalidate all queries to refresh data with new user context
       queryClient.invalidateQueries();

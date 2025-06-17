@@ -26,14 +26,70 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const getCurrentUser = async () => {
     try {
-      const response = await apiRequest('GET', '/api/user');
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch('/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        // Token might be expired, try to refresh
+        await refreshAccessToken();
+        return;
+      }
+      
       const data = await response.json();
       setUser(data.user);
     } catch (error) {
       console.error('Failed to get current user:', error);
       setUser(null);
+      // Clear tokens if authentication fails
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshAccessToken = async () => {
+    try {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) {
+        setUser(null);
+        return;
+      }
+
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Token refresh failed');
+      }
+
+      const data = await response.json();
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      
+      // Retry getting current user with new token
+      await getCurrentUser();
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      setUser(null);
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
     }
   };
 

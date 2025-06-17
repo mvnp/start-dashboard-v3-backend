@@ -46,13 +46,6 @@ export function DemoCredentials() {
 
   const { data: usersByRole = [], isLoading } = useQuery({
     queryKey: ['/api/users/by-role'],
-    queryFn: async () => {
-      const response = await fetch('/api/users/by-role');
-      if (!response.ok) {
-        throw new Error('Failed to fetch users by role');
-      }
-      return response.json();
-    },
   });
 
   const copyCredentials = (email: string, password: string) => {
