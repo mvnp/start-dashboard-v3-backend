@@ -195,20 +195,9 @@ export default function ClientForm() {
         phone: clientMember.phone ? formatPhoneNumber(clientMember.phone) : "",
         tax_id: clientMember.tax_id ? formatTaxId(clientMember.tax_id) : "",
         address: clientMember.address || "",
-        business_id: selectedBusinessId || 0,
       });
     }
-  }, [clientMember, isEdit, clientId, selectedBusinessId]);
-
-  // Update business_id when selected business changes
-  useEffect(() => {
-    if (selectedBusinessId) {
-      setFormData(prev => ({
-        ...prev,
-        business_id: selectedBusinessId
-      }));
-    }
-  }, [selectedBusinessId]);
+  }, [clientMember, isEdit, clientId]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
