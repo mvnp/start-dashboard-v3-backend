@@ -981,10 +981,24 @@ export function registerRoutes(app: Express): void {
   app.get("/api/services/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      const user = req.user!;
+      
+      // Get business context from selected business
+      const businessIds = getBusinessFilter(user, req);
+      if (!businessIds || businessIds.length === 0) {
+        return res.status(403).json({ error: "No business access" });
+      }
+
       const service = await storage.getService(id);
       if (!service) {
         return res.status(404).json({ error: "Service not found" });
       }
+
+      // Verify service belongs to user's accessible businesses
+      if (!user.isSuperAdmin && service.business_id && !businessIds.includes(service.business_id)) {
+        return res.status(403).json({ error: "Access denied to this service" });
+      }
+
       res.json(service);
     } catch (error) {
       console.error("Service fetch error:", error);
@@ -994,8 +1008,16 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/services", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      // Get user's business context
-      const businessId = req.user?.businessIds?.[0] || 1;
+      // Get business context from selected business or request body
+      const businessIds = getBusinessFilter(req.user!, req);
+      const businessId = businessIds?.[0] || req.body.business_id;
+      
+      if (!businessId) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["business_id"], message: "Business context is required" }]
+        });
+      }
       
       const serviceData = {
         ...req.body,
@@ -1039,30 +1061,55 @@ export function registerRoutes(app: Express): void {
   app.put("/api/services/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      const user = req.user!;
+      
+      // Get business context from selected business
+      const businessIds = getBusinessFilter(user, req);
+      if (!businessIds || businessIds.length === 0) {
+        return res.status(403).json({ error: "No business access" });
+      }
+
+      // Get existing service to verify business access
+      const existingService = await storage.getService(id);
+      if (!existingService) {
+        return res.status(404).json({ error: "Service not found" });
+      }
+
+      // Verify service belongs to user's accessible businesses
+      if (!user.isSuperAdmin && existingService.business_id && !businessIds.includes(existingService.business_id)) {
+        return res.status(403).json({ error: "Access denied to this service" });
+      }
+      
+      // Get business context for update data
+      const businessId = businessIds[0] || req.body.business_id;
+      const updateData = {
+        ...req.body,
+        business_id: businessId
+      };
       
       // Validate required fields for updates
-      if (req.body.name !== undefined && (!req.body.name || !req.body.name.trim())) {
+      if (updateData.name !== undefined && (!updateData.name || !updateData.name.trim())) {
         return res.status(400).json({ 
           error: "Validation failed", 
           details: [{ path: ["name"], message: "Service name is required" }]
         });
       }
       
-      if (req.body.price !== undefined && (!req.body.price || req.body.price.trim() === "" || parseFloat(req.body.price) <= 0)) {
+      if (updateData.price !== undefined && (!updateData.price || updateData.price.trim() === "" || parseFloat(updateData.price) <= 0)) {
         return res.status(400).json({ 
           error: "Validation failed", 
           details: [{ path: ["price"], message: "Price must be a valid number greater than 0" }]
         });
       }
       
-      if (req.body.duration !== undefined && (!req.body.duration || req.body.duration < 1)) {
+      if (updateData.duration !== undefined && (!updateData.duration || updateData.duration < 1)) {
         return res.status(400).json({ 
           error: "Validation failed", 
           details: [{ path: ["duration"], message: "Duration must be at least 1 minute" }]
         });
       }
       
-      const validatedData = insertServiceSchema.partial().parse(req.body);
+      const validatedData = insertServiceSchema.partial().parse(updateData);
       const service = await storage.updateService(id, validatedData);
       if (!service) {
         return res.status(404).json({ error: "Service not found" });
