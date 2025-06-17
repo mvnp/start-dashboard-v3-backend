@@ -33,16 +33,15 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
   const [showBusinessModal, setShowBusinessModal] = useState(false);
   const [isInitialSelection, setIsInitialSelection] = useState(false);
 
-  // Fetch user businesses
+  // Fetch user businesses - Super Admin gets all businesses, others get their assigned businesses
   const { data: userBusinesses = [], isLoading } = useQuery<Business[]>({
-    queryKey: ["/api/user-businesses"],
-    enabled: !!user && !user.isSuperAdmin,
+    queryKey: user?.isSuperAdmin ? ["/api/businesses"] : ["/api/user-businesses"],
+    enabled: !!user,
   });
 
-  // Check if business selection is required
+  // Check if business selection is required - for all users with multiple businesses
   const isBusinessSelectionRequired = 
     !!user && 
-    !user.isSuperAdmin && 
     userBusinesses.length > 1 && 
     !selectedBusinessId;
 
@@ -54,10 +53,19 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     }
   }, []);
 
-  // Show modal when user logs in and has multiple businesses
+  // Handle business selection for all users
   useEffect(() => {
-    if (!isLoading && user && !user.isSuperAdmin) {
+    if (!isLoading && user && userBusinesses.length > 0) {
       const savedBusinessId = sessionStorage.getItem("selectedBusinessId");
+      
+      // If user has only one business, automatically select it
+      if (userBusinesses.length === 1) {
+        const singleBusiness = userBusinesses[0];
+        setSelectedBusinessIdState(singleBusiness.id);
+        sessionStorage.setItem("selectedBusinessId", singleBusiness.id.toString());
+        console.log('Auto-selected single business:', singleBusiness.name);
+        return;
+      }
       
       // If user has multiple businesses and no saved business, show modal immediately (initial selection)
       if (userBusinesses.length > 1 && !savedBusinessId) {
@@ -66,7 +74,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
         setShowBusinessModal(true);
       }
       
-      // If user has businesses but no valid saved business, show modal (initial selection)
+      // If user has multiple businesses but no valid saved business, show modal (initial selection)
       if (userBusinesses.length > 1 && savedBusinessId) {
         const savedId = parseInt(savedBusinessId);
         const businessExists = userBusinesses.some(b => b.id === savedId);
