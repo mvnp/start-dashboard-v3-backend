@@ -1180,8 +1180,16 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/appointments", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      // Get user's business context
-      const businessId = req.user?.businessIds?.[0] || 1;
+      // Get business context from selected business or request body
+      const businessIds = getBusinessFilter(req.user, req);
+      const businessId = businessIds?.[0] || req.body.business_id;
+      
+      if (!businessId) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["business_id"], message: "Business context is required" }]
+        });
+      }
       
       const appointmentData = {
         ...req.body,

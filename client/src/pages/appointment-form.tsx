@@ -11,11 +11,13 @@ import { ArrowLeft } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Appointment, Service, Person } from "@shared/schema";
+import { useBusinessContext } from "@/lib/business-context";
 
 interface AppointmentFormData {
   client_id: number;
   user_id: number;
   service_id: number;
+  business_id: number;
   appointment_date: string;
   appointment_time: string;
   status: string;
@@ -26,6 +28,7 @@ export default function AppointmentForm() {
   const [, setLocation] = useLocation();
   const params = useParams();
   const { toast } = useToast();
+  const { selectedBusinessId } = useBusinessContext();
   const isEdit = !!params.id;
   const appointmentId = params.id ? parseInt(params.id) : null;
 
@@ -33,6 +36,7 @@ export default function AppointmentForm() {
     client_id: 0,
     user_id: 0,
     service_id: 0,
+    business_id: selectedBusinessId || 0,
     appointment_date: "",
     appointment_time: "",
     status: "Scheduled",
@@ -126,13 +130,24 @@ export default function AppointmentForm() {
         client_id: appointmentData.client_id || 0,
         user_id: appointmentData.user_id || 0,
         service_id: appointmentData.service_id || 0,
+        business_id: appointmentData.business_id || selectedBusinessId || 0,
         appointment_date: appointmentData.appointment_date || "",
         appointment_time: formattedTime,
         status: normalizeStatus(appointmentData.status || ""),
         notes: appointmentData.notes || "",
       });
     }
-  }, [appointmentData, isEdit, isSuccess, staffLoaded, servicesLoaded, clientsLoaded]);
+  }, [appointmentData, isEdit, isSuccess, staffLoaded, servicesLoaded, clientsLoaded, selectedBusinessId]);
+
+  // Update business_id when selected business changes
+  useEffect(() => {
+    if (selectedBusinessId) {
+      setFormData(prev => ({
+        ...prev,
+        business_id: selectedBusinessId
+      }));
+    }
+  }, [selectedBusinessId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
