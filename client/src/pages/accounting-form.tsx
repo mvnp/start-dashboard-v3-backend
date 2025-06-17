@@ -72,7 +72,7 @@ export default function AccountingForm() {
 
   // Fetch transaction data for editing
   const { data: transaction, isLoading: isLoadingTransaction, error: transactionError } = useQuery<AccountingTransaction>({
-    queryKey: [`/api/accounting-transactions/${transactionId}`],
+    queryKey: [`/api/accounting-transactions/${transactionId}`, selectedBusinessId],
     enabled: !!transactionId && isEdit,
     retry: 3,
     staleTime: 0, // Always fetch fresh data
@@ -85,17 +85,17 @@ export default function AccountingForm() {
 
   // Fetch clients (role ID 4)
   const { data: clients = [] } = useQuery<Person[]>({
-    queryKey: ["/api/clients"],
+    queryKey: ["/api/clients", selectedBusinessId],
   });
 
   // Fetch staff (role ID 3)
   const { data: staff = [] } = useQuery<Person[]>({
-    queryKey: ["/api/staff"],
+    queryKey: ["/api/staff", selectedBusinessId],
   });
 
   // Fetch categories
   const { data: categories = [] } = useQuery<AccountingTransactionCategory[]>({
-    queryKey: ["/api/accounting-transaction-categories"],
+    queryKey: ["/api/accounting-transaction-categories", selectedBusinessId],
   });
 
   // Set form values when editing
@@ -149,9 +149,12 @@ export default function AccountingForm() {
 
   const createMutation = useMutation({
     mutationFn: (data: FormData) => 
-      apiRequest("POST", "/api/accounting-transactions", data),
+      apiRequest("POST", "/api/accounting-transactions", {
+        ...data,
+        business_id: selectedBusinessId
+      }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions", selectedBusinessId] });
       toast({
         title: "Success",
         description: "Transaction created successfully",
@@ -169,9 +172,12 @@ export default function AccountingForm() {
 
   const updateMutation = useMutation({
     mutationFn: (data: FormData) =>
-      apiRequest("PUT", `/api/accounting-transactions/${transactionId}`, data),
+      apiRequest("PUT", `/api/accounting-transactions/${transactionId}`, {
+        ...data,
+        business_id: selectedBusinessId
+      }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions", selectedBusinessId] });
       toast({
         title: "Success",
         description: "Transaction updated successfully",
