@@ -41,7 +41,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
             </div>
-            <span className="ml-3 text-xl font-bold text-slate-900">BarberPro</span>
+            <TranslatableText tag="span" className="ml-3 text-xl font-bold text-slate-900">BarberPro</TranslatableText>
           </div>
 
           {/* User Switcher */}

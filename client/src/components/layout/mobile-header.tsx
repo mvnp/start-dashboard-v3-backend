@@ -1,6 +1,7 @@
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BusinessChangeButton from "@/components/business-change-button";
+import { TranslatableText } from "@/components/translatable-text";
 
 interface MobileHeaderProps {
   onMenuToggle: () => void;
@@ -20,7 +21,7 @@ export default function MobileHeader({ onMenuToggle }: MobileHeaderProps) {
           >
             <Menu className="w-6 h-6" />
           </Button>
-          <span className="ml-3 text-xl font-bold text-slate-900">BarberPro</span>
+          <TranslatableText tag="span" className="ml-3 text-xl font-bold text-slate-900">BarberPro</TranslatableText>
         </div>
         <div className="flex items-center">
           <BusinessChangeButton />

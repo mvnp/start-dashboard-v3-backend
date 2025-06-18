@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Business } from "@shared/schema";
 import { useAuth } from "@/lib/auth";
+import { TranslatableText } from "@/components/translatable-text";
 
 interface BusinessSelectorModalProps {
   isOpen: boolean;
@@ -76,7 +77,7 @@ export default function BusinessSelectorModal({
           <div className="flex justify-center items-center p-8">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <div className="text-lg">Loading your businesses...</div>
+              <TranslatableText tag="div" className="text-lg">Loading your businesses...</TranslatableText>
             </div>
           </div>
         </DialogContent>
@@ -96,14 +97,14 @@ export default function BusinessSelectorModal({
             <div className="w-8 h-8 bg-barber-primary rounded-lg flex items-center justify-center">
               <Building2 className="w-5 h-5 text-white" />
             </div>
-            Select Your Active Business
+            <TranslatableText>Select Your Active Business</TranslatableText>
           </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
-          <p className="text-muted-foreground">
+          <TranslatableText tag="p" className="text-muted-foreground">
             You have access to multiple businesses. Please select which business you'd like to work with:
-          </p>
+          </TranslatableText>
           
           <div className="grid gap-3">
             {userBusinesses.map((business) => (
@@ -134,7 +135,7 @@ export default function BusinessSelectorModal({
                     <div className="flex flex-col items-end gap-2">
                       {selectedBusinessId === business.id && (
                         <Badge variant="default" className="bg-barber-primary">
-                          Selected
+                          <TranslatableText>Selected</TranslatableText>
                         </Badge>
                       )}
                       <div className="w-6 h-6 rounded-full border-2 border-muted-foreground flex items-center justify-center">
@@ -155,7 +156,7 @@ export default function BusinessSelectorModal({
               disabled={!selectedBusinessId}
               className="flex-1"
             >
-              Continue with Selected Business
+              <TranslatableText>Continue with Selected Business</TranslatableText>
             </Button>
             <Button
               variant="outline"
@@ -163,7 +164,7 @@ export default function BusinessSelectorModal({
               className="flex items-center gap-2"
             >
               <LogOut className="w-4 h-4" />
-              Logout
+              <TranslatableText>Logout</TranslatableText>
             </Button>
           </div>
         </div>
