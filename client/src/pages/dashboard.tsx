@@ -151,7 +151,7 @@ export default function Dashboard() {
     },
     {
       title: "Services Completed",
-      value: isLoadingStats ? "..." : stats?.completedServices.toString() || "0",
+      value: isLoadingStats ? "..." : stats?.todayCompleted.toString() || "0",
       change: isLoadingStats ? "Loading..." : stats?.completedChange || "No data",
       changeType: stats?.completedChangeType || "neutral",
       icon: CheckCircle,
