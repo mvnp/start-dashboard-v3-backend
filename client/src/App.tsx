@@ -35,6 +35,7 @@ import WhatsappList from "@/pages/whatsapp-list";
 import WhatsappForm from "@/pages/whatsapp-form";
 import BusinessList from "@/pages/business-list";
 import BusinessForm from "@/pages/business-form";
+import Settings from "@/pages/settings";
 import Support from "@/pages/support";
 import NotFound from "@/pages/not-found";
 
@@ -254,6 +255,11 @@ function Router() {
       <Route path="/whatsapp/:id/edit">
         <Layout>
           <WhatsappForm />
+        </Layout>
+      </Route>
+      <Route path="/settings">
+        <Layout>
+          <Settings />
         </Layout>
       </Route>
 

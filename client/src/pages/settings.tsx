@@ -310,7 +310,20 @@ export default function Settings() {
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings', selectedBusinessId],
-    queryFn: () => `/api/settings`,
+    queryFn: async () => {
+      const response = await fetch('/api/settings', {
+        headers: {
+          'business-id': selectedBusinessId?.toString() || '',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch settings');
+      }
+      
+      return response.json();
+    },
     enabled: !!selectedBusinessId,
   });
 
@@ -350,11 +363,11 @@ export default function Settings() {
 
   // Update form when settings data is loaded
   React.useEffect(() => {
-    if (settings) {
+    if (settings && typeof settings === 'object') {
       form.reset({
-        language: settings.language || 'en',
-        timezone: settings.timezone || 'UTC',
-        currency: settings.currency || 'USD',
+        language: (settings as any).language || 'en',
+        timezone: (settings as any).timezone || 'UTC',
+        currency: (settings as any).currency || 'USD',
       });
     }
   }, [settings, form]);
