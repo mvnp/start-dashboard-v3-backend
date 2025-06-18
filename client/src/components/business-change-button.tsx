@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Building2, ChevronDown } from "lucide-react";
 import { useBusinessContext } from "@/lib/business-context";
 import { useAuth } from "@/lib/auth";
+import { TranslatableText } from "@/components/translatable-text";
 
 export default function BusinessChangeButton() {
   const { user } = useAuth();
@@ -19,9 +20,9 @@ export default function BusinessChangeButton() {
       className="flex items-center gap-2"
     >
       <Building2 className="w-4 h-4" style={{ color: 'var(--barber-primary)' }} />
-      <span className="max-w-32 truncate">
+      <TranslatableText tag="span" className="max-w-32 truncate">
         {selectedBusiness?.name || "Select Business"}
-      </span>
+      </TranslatableText>
       <ChevronDown className="w-4 h-4" />
     </Button>
   );
