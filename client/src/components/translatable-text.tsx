@@ -33,7 +33,7 @@ export function TranslatableText({
       if (!response.ok) return null;
       return response.json();
     },
-    enabled: isEditionMode && currentLanguage !== 'en', // Only fetch if not English
+    enabled: isEditionMode, // Fetch translations when edition mode is active
   });
 
   // Mutation to save translation
@@ -117,7 +117,7 @@ export function TranslatableText({
   return (
     <Tag className={`relative inline-block group ${className}`}>
       {displayText}
-      {isEditionMode && canEdit && currentLanguage !== 'en' && (
+      {isEditionMode && canEdit && (
         <button
           onClick={handleEditClick}
           className="inline-flex items-center justify-center ml-1 opacity-0 group-hover:opacity-100 transition-opacity w-3 h-3 text-blue-500 hover:text-blue-700"
