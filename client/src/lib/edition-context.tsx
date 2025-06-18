@@ -13,7 +13,11 @@ interface EditionContextType {
 const EditionContext = createContext<EditionContextType | undefined>(undefined);
 
 export function EditionProvider({ children }: { children: ReactNode }) {
-  const [isEditionMode, setIsEditionMode] = useState(false);
+  const [isEditionMode, setIsEditionMode] = useState(() => {
+    // Restore edition mode from localStorage on initialization
+    const saved = localStorage.getItem('editionMode');
+    return saved === 'true';
+  });
   const { selectedBusinessId } = useBusinessContext();
   const { user } = useAuth();
 
@@ -39,7 +43,10 @@ export function EditionProvider({ children }: { children: ReactNode }) {
 
   const toggleEditionMode = () => {
     if (canEdit) {
-      setIsEditionMode(!isEditionMode);
+      const newMode = !isEditionMode;
+      setIsEditionMode(newMode);
+      // Persist edition mode to localStorage
+      localStorage.setItem('editionMode', newMode.toString());
     }
   };
 

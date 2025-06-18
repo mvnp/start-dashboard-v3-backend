@@ -74,10 +74,14 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: true, // Refetch when window gains focus
-      refetchOnMount: true, // Always refetch when component mounts
-      staleTime: 0, // Data is immediately stale
-      gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
-      retry: false,
+      refetchOnMount: "always", // Always refetch when component mounts
+      staleTime: 30 * 1000, // Data is stale after 30 seconds
+      gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
+      retry: (failureCount, error: any) => {
+        // Don't retry 401 errors (authentication)
+        if (error?.message?.includes('401')) return false;
+        return failureCount < 3;
+      },
     },
     mutations: {
       retry: false,

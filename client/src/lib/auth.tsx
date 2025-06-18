@@ -128,8 +128,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Enhanced initialization with retry logic
   useEffect(() => {
-    getCurrentUser();
+    const initializeAuth = async () => {
+      setLoading(true);
+      try {
+        await getCurrentUser();
+      } catch (error) {
+        console.error('Failed to initialize authentication:', error);
+        // If initialization fails, try refreshing token once
+        const refreshToken = safeGetLocalStorage('refreshToken');
+        if (refreshToken) {
+          try {
+            await refreshAccessToken();
+          } catch (refreshError) {
+            console.error('Failed to refresh token during initialization:', refreshError);
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   return (
