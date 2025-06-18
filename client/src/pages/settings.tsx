@@ -374,7 +374,7 @@ export default function Settings() {
     return (
       <div className="w-full p-6 space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-slate-900">Settings</h1>
+          <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">Settings</TranslatableText>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
           {[1, 2, 3].map((i) => (
