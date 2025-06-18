@@ -73,7 +73,7 @@ export default function FaqForm() {
 
   // Load FAQ data for editing
   const { data: faq, isLoading: isFaqLoading } = useQuery<Faq>({
-    queryKey: ["/api/faqs", faqId],
+    queryKey: [`/api/faqs/${faqId}`],
     enabled: isEditing && !!faqId,
   });
 

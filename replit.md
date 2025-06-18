@@ -150,6 +150,7 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 18, 2025. Fixed FAQ edit form to properly load individual FAQ data using GET /api/faqs/:id endpoint instead of loading all FAQs - form now correctly fetches and populates specific FAQ data for editing
 - June 18, 2025. Implemented complete FAQ CRUD system with role-based access control - only Super Admin (Role ID 1) can create, update, delete FAQs; all authenticated users can view FAQs; no business context filtering applied
 - June 18, 2025. Fixed Services Completed dashboard card to properly count today's completed appointments as main number with accurate "X more/less than yesterday" comparisons (handles both 'completed' and 'Completed' status values)
 - June 17, 2025. Enhanced Services Completed dashboard card to show completed appointments count comparisons with color-coded text displaying "X more/less than yesterday" (green for increases, red for decreases)
