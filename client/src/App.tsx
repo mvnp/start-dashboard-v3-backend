@@ -7,7 +7,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/lib/auth";
 import { BusinessProvider } from "@/lib/business-context";
 import { EditionProvider } from "@/lib/edition-context";
-import { EditionModeOverlay } from "@/components/edition-mode-overlay";
 
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
@@ -46,7 +45,6 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <BusinessProvider>
-      <EditionModeOverlay />
       <div className="min-h-screen flex bg-slate-50">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         

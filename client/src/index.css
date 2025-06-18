@@ -120,37 +120,6 @@
   color: white;
 }
 
-/* Edition mode styles */
-body[data-edition-mode="true"] {
-  position: relative;
-}
-
-body[data-edition-mode="true"]::before {
-  content: "Edition Mode Active - Click text to edit";
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  background: rgba(59, 130, 246, 0.9);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  z-index: 9999;
-  pointer-events: none;
-}
-
-body[data-edition-mode="true"] button:not([data-translatable] button),
-body[data-edition-mode="true"] a:not([data-translatable] a) {
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-.translatable-text:hover {
-  background-color: rgba(59, 130, 246, 0.1);
-  border-radius: 2px;
-}
-
 /* Card icon styling */
 .card-icon-amber {
   color: var(--barber-primary);

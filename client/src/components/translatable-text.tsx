@@ -71,9 +71,7 @@ export function TranslatableText({
     },
   });
 
-  const handleEditClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleEditClick = () => {
     setEditValue(translation?.traduction || children);
     setIsEditing(true);
   };
@@ -116,25 +114,13 @@ export function TranslatableText({
     );
   }
 
-  const handleContainerClick = (e: React.MouseEvent) => {
-    if (isEditionMode && canEdit) {
-      e.preventDefault();
-      e.stopPropagation();
-      handleEditClick(e);
-    }
-  };
-
   return (
-    <Tag 
-      className={`relative inline-block group translatable-text ${className} ${isEditionMode && canEdit ? 'cursor-pointer' : ''}`}
-      onClick={handleContainerClick}
-      data-translatable="true"
-    >
+    <Tag className={`relative inline-block group ${className}`}>
       {displayText}
       {isEditionMode && canEdit && (
         <button
           onClick={handleEditClick}
-          className="inline-flex items-center justify-center ml-1 opacity-0 group-hover:opacity-100 transition-opacity w-3 h-3 text-blue-500 hover:text-blue-700 z-10"
+          className="inline-flex items-center justify-center ml-1 opacity-0 group-hover:opacity-100 transition-opacity w-3 h-3 text-blue-500 hover:text-blue-700"
           title="Edit translation"
         >
           <Pen className="w-2.5 h-2.5" />
