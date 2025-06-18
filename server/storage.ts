@@ -149,7 +149,11 @@ export interface IStorage {
     totalClients: number;
     clientChange: string;
     clientChangeType: 'positive' | 'negative' | 'neutral';
+    todayCompleted: number;
+    yesterdayCompleted: number;
     completedServices: number;
+    completedChange: string;
+    completedChangeType: 'positive' | 'negative' | 'neutral';
   }>;
 }
 
@@ -808,11 +812,23 @@ class PostgresStorage implements IStorage {
         : `SELECT COUNT(*) as count FROM persons`;
       const totalClientsResult = await this.db.execute(sql.raw(totalClientsQuery));
 
-      // Get completed services count
-      const completedQuery = businessIds && businessIds.length > 0
+      // Get today's completed appointments
+      const todayCompletedQuery = businessIds && businessIds.length > 0
+        ? `SELECT COUNT(*) as count FROM appointments WHERE status = 'completed' AND appointment_date = '${todayStr}' AND business_id = ANY(ARRAY[${businessIds.join(',')}])`
+        : `SELECT COUNT(*) as count FROM appointments WHERE status = 'completed' AND appointment_date = '${todayStr}'`;
+      const todayCompletedResult = await this.db.execute(sql.raw(todayCompletedQuery));
+
+      // Get yesterday's completed appointments
+      const yesterdayCompletedQuery = businessIds && businessIds.length > 0
+        ? `SELECT COUNT(*) as count FROM appointments WHERE status = 'completed' AND appointment_date = '${yesterdayStr}' AND business_id = ANY(ARRAY[${businessIds.join(',')}])`
+        : `SELECT COUNT(*) as count FROM appointments WHERE status = 'completed' AND appointment_date = '${yesterdayStr}'`;
+      const yesterdayCompletedResult = await this.db.execute(sql.raw(yesterdayCompletedQuery));
+
+      // Get total completed services count
+      const totalCompletedQuery = businessIds && businessIds.length > 0
         ? `SELECT COUNT(*) as count FROM appointments WHERE status = 'completed' AND business_id = ANY(ARRAY[${businessIds.join(',')}])`
         : `SELECT COUNT(*) as count FROM appointments WHERE status = 'completed'`;
-      const completedResult = await this.db.execute(sql.raw(completedQuery));
+      const totalCompletedResult = await this.db.execute(sql.raw(totalCompletedQuery));
 
       const todayAppointments = Number(todayAppointmentsResult.rows[0]?.count || 0);
       const yesterdayAppointments = Number(yesterdayAppointmentsResult.rows[0]?.count || 0);
@@ -821,7 +837,9 @@ class PostgresStorage implements IStorage {
       const todayClients = Number(todayClientsResult.rows[0]?.count || 0);
       const yesterdayClients = Number(yesterdayClientsResult.rows[0]?.count || 0);
       const totalClients = Number(totalClientsResult.rows[0]?.count || 0);
-      const completedServices = Number(completedResult.rows[0]?.count || 0);
+      const todayCompleted = Number(todayCompletedResult.rows[0]?.count || 0);
+      const yesterdayCompleted = Number(yesterdayCompletedResult.rows[0]?.count || 0);
+      const completedServices = Number(totalCompletedResult.rows[0]?.count || 0);
 
       // Calculate appointment change
       const appointmentDiff = todayAppointments - yesterdayAppointments;
@@ -868,6 +886,22 @@ class PostgresStorage implements IStorage {
         clientChangeType = 'neutral';
       }
 
+      // Calculate completed appointments change 
+      const completedDiff = todayCompleted - yesterdayCompleted;
+      let completedChange = 'Same as yesterday';
+      let completedChangeType = 'neutral';
+      
+      if (completedDiff > 0) {
+        completedChange = `${completedDiff} more than yesterday`;
+        completedChangeType = 'positive';
+      } else if (completedDiff < 0) {
+        completedChange = `${Math.abs(completedDiff)} less than yesterday`;
+        completedChangeType = 'negative';
+      } else if (todayCompleted === 0 && yesterdayCompleted === 0) {
+        completedChange = 'No completed appointments';
+        completedChangeType = 'neutral';
+      }
+
       return {
         todayAppointments,
         yesterdayAppointments,
@@ -881,7 +915,11 @@ class PostgresStorage implements IStorage {
         totalClients,
         clientChange,
         clientChangeType,
+        todayCompleted,
+        yesterdayCompleted,
         completedServices,
+        completedChange,
+        completedChangeType,
       };
     } catch (error) {
       console.error('Dashboard stats error:', error);
@@ -899,7 +937,11 @@ class PostgresStorage implements IStorage {
         totalClients: 0,
         clientChange: 'No data',
         clientChangeType: 'neutral' as const,
+        todayCompleted: 0,
+        yesterdayCompleted: 0,
         completedServices: 0,
+        completedChange: 'No data',
+        completedChangeType: 'neutral' as const,
       };
     }
   }

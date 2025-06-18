@@ -19,7 +19,11 @@ interface DashboardStats {
   totalClients: number;
   clientChange: string;
   clientChangeType: 'positive' | 'negative' | 'neutral';
+  todayCompleted: number;
+  yesterdayCompleted: number;
   completedServices: number;
+  completedChange: string;
+  completedChangeType: 'positive' | 'negative' | 'neutral';
 }
 
 const recentAppointments = [
@@ -148,8 +152,8 @@ export default function Dashboard() {
     {
       title: "Services Completed",
       value: isLoadingStats ? "..." : stats?.completedServices.toString() || "0",
-      change: "All time",
-      changeType: "neutral",
+      change: isLoadingStats ? "Loading..." : stats?.completedChange || "No data",
+      changeType: stats?.completedChangeType || "neutral",
       icon: CheckCircle,
       iconColor: "text-orange-600",
       iconBg: "bg-orange-100",

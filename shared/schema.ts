@@ -380,5 +380,9 @@ export interface DashboardStats {
   totalClients: number;
   clientChange: string;
   clientChangeType: 'positive' | 'negative' | 'neutral';
+  todayCompleted: number;
+  yesterdayCompleted: number;
   completedServices: number;
+  completedChange: string;
+  completedChangeType: 'positive' | 'negative' | 'neutral';
 }
