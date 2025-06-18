@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useBusinessContext } from './business-context';
+import { useAuth } from './auth';
 
 interface EditionContextType {
   isEditionMode: boolean;
   toggleEditionMode: () => void;
   currentLanguage: string;
+  canEdit: boolean;
 }
 
 const EditionContext = createContext<EditionContextType | undefined>(undefined);
@@ -13,6 +15,7 @@ const EditionContext = createContext<EditionContextType | undefined>(undefined);
 export function EditionProvider({ children }: { children: ReactNode }) {
   const [isEditionMode, setIsEditionMode] = useState(false);
   const { selectedBusinessId } = useBusinessContext();
+  const { user } = useAuth();
 
   // Get current language from settings
   const { data: settings } = useQuery({
@@ -31,15 +34,21 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     enabled: !!selectedBusinessId,
   });
 
+  // Check if user is Super Admin (Role ID: 1)
+  const canEdit = user?.roleId === 1;
+
   const toggleEditionMode = () => {
-    setIsEditionMode(!isEditionMode);
+    if (canEdit) {
+      setIsEditionMode(!isEditionMode);
+    }
   };
 
   return (
     <EditionContext.Provider value={{
-      isEditionMode,
+      isEditionMode: isEditionMode && canEdit,
       toggleEditionMode,
       currentLanguage: settings?.language || 'en',
+      canEdit,
     }}>
       {children}
     </EditionContext.Provider>

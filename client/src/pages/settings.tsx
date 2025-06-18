@@ -291,7 +291,7 @@ export default function Settings() {
   const { selectedBusinessId } = useBusinessContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { isEditionMode, toggleEditionMode } = useEdition();
+  const { isEditionMode, toggleEditionMode, canEdit } = useEdition();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -401,17 +401,19 @@ export default function Settings() {
         <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
           Business Settings
         </TranslatableText>
-        <div className="flex items-center gap-3">
-          <Edit3 className="w-4 h-4 text-slate-600" />
-          <span className="text-sm text-slate-600">
-            <TranslatableText>Edition Mode</TranslatableText>
-          </span>
-          <Switch 
-            checked={isEditionMode} 
-            onCheckedChange={toggleEditionMode}
-            className="data-[state=checked]:bg-barber-primary"
-          />
-        </div>
+        {canEdit && (
+          <div className="flex items-center gap-3">
+            <Edit3 className="w-4 h-4 text-slate-600" />
+            <span className="text-sm text-slate-600">
+              <TranslatableText>Edition Mode</TranslatableText>
+            </span>
+            <Switch 
+              checked={isEditionMode} 
+              onCheckedChange={toggleEditionMode}
+              className="data-[state=checked]:bg-barber-primary"
+            />
+          </div>
+        )}
       </div>
 
       <Form {...form}>

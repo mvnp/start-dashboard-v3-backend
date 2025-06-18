@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useBusinessContext } from "@/lib/business-context";
 import { Appointment } from "@shared/schema";
 import { Link } from "wouter";
+import { TranslatableText } from "@/components/translatable-text";
 
 interface DashboardStats {
   todayAppointments: number;

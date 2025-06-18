@@ -15,7 +15,7 @@ export function TranslatableText({
   className = '', 
   tag: Tag = 'span' 
 }: TranslatableTextProps) {
-  const { isEditionMode, currentLanguage } = useEdition();
+  const { isEditionMode, currentLanguage, canEdit } = useEdition();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
@@ -117,7 +117,7 @@ export function TranslatableText({
   return (
     <Tag className={`relative inline-block group ${className}`}>
       {displayText}
-      {isEditionMode && currentLanguage !== 'en' && (
+      {isEditionMode && canEdit && currentLanguage !== 'en' && (
         <button
           onClick={handleEditClick}
           className="inline-flex items-center justify-center ml-1 opacity-0 group-hover:opacity-100 transition-opacity w-3 h-3 text-blue-500 hover:text-blue-700"
