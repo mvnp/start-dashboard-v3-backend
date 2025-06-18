@@ -139,8 +139,8 @@ export default function Dashboard() {
     {
       title: "Total Clients",
       value: isLoadingStats ? "..." : stats?.totalClients.toString() || "0",
-      change: "Active clients",
-      changeType: "neutral",
+      change: isLoadingStats ? "Loading..." : stats?.clientChange || "No data",
+      changeType: stats?.clientChangeType || "neutral",
       icon: Users,
       iconColor: "text-purple-600",
       iconBg: "bg-purple-100",

@@ -150,6 +150,7 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 17, 2025. Enhanced Total Clients dashboard card to show client registration percentages with color-coded comparisons (green for increases, red for decreases) displaying "X% more/less than yesterday"
 - June 17, 2025. Implemented comprehensive Dashboard with real-time appointment statistics showing today's appointments count with comparison to yesterday, daily revenue tracking, total clients and completed services with proper business context filtering
 - June 17, 2025. Created dashboard statistics API endpoint with JWT authentication and business-scoped data queries for appointments, revenue, clients and completed services
 - June 17, 2025. Updated dashboard frontend to display real appointment data with business context filtering and automatic data refresh
