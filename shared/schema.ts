@@ -297,6 +297,12 @@ export const insertFaqSchema = createInsertSchema(faqs).omit({
   id: true,
   created_at: true,
   updated_at: true,
+}).extend({
+  question: z.string().min(1, "Question is required"),
+  answer: z.string().min(1, "Answer is required"),
+  category: z.string().optional(),
+  is_published: z.boolean().default(true),
+  order_index: z.number().default(0),
 });
 
 export const insertPaymentGatewayTypeSchema = createInsertSchema(payment_gateway_types).omit({

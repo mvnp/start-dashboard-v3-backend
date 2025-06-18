@@ -816,17 +816,13 @@ class PostgresStorage implements IStorage {
       const todayCompletedQuery = businessIds && businessIds.length > 0
         ? `SELECT COUNT(*) as count FROM appointments WHERE (status = 'completed' OR status = 'Completed') AND appointment_date = '${todayStr}' AND business_id = ANY(ARRAY[${businessIds.join(',')}])`
         : `SELECT COUNT(*) as count FROM appointments WHERE (status = 'completed' OR status = 'Completed') AND appointment_date = '${todayStr}'`;
-      console.log('Today completed query:', todayCompletedQuery);
       const todayCompletedResult = await this.db.execute(sql.raw(todayCompletedQuery));
-      console.log('Today completed result:', todayCompletedResult.rows);
 
       // Get yesterday's completed appointments
       const yesterdayCompletedQuery = businessIds && businessIds.length > 0
         ? `SELECT COUNT(*) as count FROM appointments WHERE (status = 'completed' OR status = 'Completed') AND appointment_date = '${yesterdayStr}' AND business_id = ANY(ARRAY[${businessIds.join(',')}])`
         : `SELECT COUNT(*) as count FROM appointments WHERE (status = 'completed' OR status = 'Completed') AND appointment_date = '${yesterdayStr}'`;
-      console.log('Yesterday completed query:', yesterdayCompletedQuery);
       const yesterdayCompletedResult = await this.db.execute(sql.raw(yesterdayCompletedQuery));
-      console.log('Yesterday completed result:', yesterdayCompletedResult.rows);
 
       // Get total completed services count
       const totalCompletedQuery = businessIds && businessIds.length > 0
@@ -845,7 +841,7 @@ class PostgresStorage implements IStorage {
       const yesterdayCompleted = parseInt(yesterdayCompletedResult.rows[0]?.count || '0', 10);
       const completedServices = parseInt(totalCompletedResult.rows[0]?.count || '0', 10);
       
-      console.log('Parsed completed counts:', { todayCompleted, yesterdayCompleted, completedServices });
+
 
       // Calculate appointment change
       const appointmentDiff = todayAppointments - yesterdayAppointments;
