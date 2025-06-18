@@ -138,14 +138,14 @@ export default function StaffList() {
             <Users className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Staff Management</h1>
-            <p className="text-slate-600 mt-2">Manage your barbershop team members</p>
+            <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">Staff Management</TranslatableText>
+            <TranslatableText tag="p" className="text-slate-600 mt-2">Manage your barbershop team members</TranslatableText>
           </div>
         </div>
         <Link href="/staff/new">
           <Button className="mt-4 sm:mt-0 bg-barber-primary hover:bg-barber-secondary">
             <Plus className="w-4 h-4 mr-2" />
-            Add Staff Member
+            <TranslatableText>Add Staff Member</TranslatableText>
           </Button>
         </Link>
       </div>
@@ -167,7 +167,7 @@ export default function StaffList() {
           <CardContent className="p-4">
             <div className="text-center">
               <p className="text-2xl font-bold text-slate-900">{staff.length}</p>
-              <p className="text-sm text-slate-600">Total Staff</p>
+              <TranslatableText tag="p" className="text-sm text-slate-600">Total Staff</TranslatableText>
             </div>
           </CardContent>
         </Card>
@@ -176,20 +176,20 @@ export default function StaffList() {
       {/* Staff List */}
       <Card>
         <CardHeader>
-          <CardTitle>Staff Members</CardTitle>
+          <CardTitle><TranslatableText>Staff Members</TranslatableText></CardTitle>
         </CardHeader>
         <CardContent>
           {filteredStaff.length === 0 ? (
             <div className="text-center py-12">
               <Users className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-              <p className="text-slate-600">
+              <TranslatableText tag="p" className="text-slate-600">
                 {searchTerm ? "No staff members found matching your search." : "No staff members yet."}
-              </p>
+              </TranslatableText>
               {!searchTerm && (
                 <Link href="/staff/new">
                   <Button className="mt-4 bg-barber-primary hover:bg-barber-secondary">
                     <Plus className="w-4 h-4 mr-2" />
-                    Add First Staff Member
+                    <TranslatableText>Add First Staff Member</TranslatableText>
                   </Button>
                 </Link>
               )}

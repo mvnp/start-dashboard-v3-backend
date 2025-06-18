@@ -110,15 +110,15 @@ export default function FaqList() {
               <HelpCircle className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">FAQs</h1>
-              <p className="text-slate-600">Manage frequently asked questions</p>
+              <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">FAQs</TranslatableText>
+              <TranslatableText tag="p" className="text-slate-600">Manage frequently asked questions</TranslatableText>
             </div>
           </div>
           {isSuperAdmin && (
             <Link href="/faqs/new">
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
-                New FAQ
+                <TranslatableText>New FAQ</TranslatableText>
               </Button>
             </Link>
           )}
@@ -130,7 +130,7 @@ export default function FaqList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Total FAQs</p>
+                  <TranslatableText tag="p" className="text-sm font-medium text-slate-600">Total FAQs</TranslatableText>
                   <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
                 </div>
                 <HelpCircle className="w-8 h-8 text-slate-400" />
@@ -141,7 +141,7 @@ export default function FaqList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Published</p>
+                  <TranslatableText tag="p" className="text-sm font-medium text-slate-600">Published</TranslatableText>
                   <p className="text-2xl font-bold text-green-600">{stats.published}</p>
                 </div>
                 <Eye className="w-8 h-8 text-green-400" />
@@ -152,7 +152,7 @@ export default function FaqList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Draft</p>
+                  <TranslatableText tag="p" className="text-sm font-medium text-slate-600">Draft</TranslatableText>
                   <p className="text-2xl font-bold text-yellow-600">{stats.draft}</p>
                 </div>
                 <EyeOff className="w-8 h-8 text-yellow-400" />
@@ -163,7 +163,7 @@ export default function FaqList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Categories</p>
+                  <TranslatableText tag="p" className="text-sm font-medium text-slate-600">Categories</TranslatableText>
                   <p className="text-2xl font-bold text-blue-600">{stats.categories}</p>
                 </div>
                 <HelpCircle className="w-8 h-8 text-blue-400" />
