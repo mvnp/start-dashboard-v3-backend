@@ -274,13 +274,13 @@ export default function Dashboard() {
                   </Button>
                 </Link>
                 
-                <Link href="/accounting/new">
+                <Link href="/accounting-form/new">
                   <Button 
                     className="w-full justify-center transition-colors bg-slate-100 hover:bg-slate-200 text-slate-700"
                     size="lg"
                   >
                     <CreditCard className="w-5 h-5 mr-2" />
-                    Process Payment
+                    Add Revenue or Expense
                   </Button>
                 </Link>
               </div>
