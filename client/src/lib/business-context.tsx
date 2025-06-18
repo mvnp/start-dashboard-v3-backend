@@ -103,15 +103,18 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
       setSelectedBusinessIdState(null);
       setShowBusinessModal(false);
       safeRemoveSessionStorage("selectedBusinessId");
+      safeRemoveSessionStorage("lastUserId");
     } else {
-      // When user logs in, clear any previous business selection to force new selection
+      // When user logs in, clear any previous business selection to force new selection for different users
       const currentUserId = user.userId;
       const lastUserId = safeGetSessionStorage("lastUserId");
       
       if (lastUserId && lastUserId !== currentUserId.toString()) {
         // Different user logged in, clear previous business selection
+        console.log('Different user logged in, clearing business selection for user:', user.email);
         safeRemoveSessionStorage("selectedBusinessId");
         setSelectedBusinessIdState(null);
+        setShowBusinessModal(false); // Reset modal state
       }
       
       safeSetSessionStorage("lastUserId", currentUserId.toString());
