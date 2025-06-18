@@ -150,6 +150,7 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 18, 2025. Implemented complete FAQ CRUD system with role-based access control - only Super Admin (Role ID 1) can create, update, delete FAQs; all authenticated users can view FAQs; no business context filtering applied
 - June 18, 2025. Fixed Services Completed dashboard card to properly count today's completed appointments as main number with accurate "X more/less than yesterday" comparisons (handles both 'completed' and 'Completed' status values)
 - June 17, 2025. Enhanced Services Completed dashboard card to show completed appointments count comparisons with color-coded text displaying "X more/less than yesterday" (green for increases, red for decreases)
 - June 17, 2025. Enhanced Total Clients dashboard card to show client registration percentages with color-coded comparisons (green for increases, red for decreases) displaying "X% more/less than yesterday"
