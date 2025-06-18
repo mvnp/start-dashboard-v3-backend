@@ -33,6 +33,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
   const [selectedBusinessId, setSelectedBusinessIdState] = useState<number | null>(null);
   const [showBusinessModal, setShowBusinessModal] = useState(false);
   const [isInitialSelection, setIsInitialSelection] = useState(false);
+  const [modalShownForUser, setModalShownForUser] = useState<number | null>(null);
 
   // Fetch user businesses - Super Admin gets all businesses, others get their assigned businesses
   const { data: userBusinesses = [], isLoading } = useQuery<Business[]>({
@@ -70,16 +71,17 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
         return;
       }
       
-      // If user has multiple businesses and no saved business, show modal immediately (initial selection)
-      if (userBusinesses.length > 1 && !savedBusinessId) {
-        console.log('Showing business selection modal for', user.email, 'with multiple businesses (initial selection). Role ID:', user.roleId);
-        setIsInitialSelection(true);
-        setShowBusinessModal(true);
-        return;
-      }
-      
-      // If user has multiple businesses but saved business doesn't exist, show modal (initial selection)
-      if (userBusinesses.length > 1 && savedBusinessId) {
+      // For users with multiple businesses, only show modal once per user session
+      if (userBusinesses.length > 1 && modalShownForUser !== user.userId) {
+        if (!savedBusinessId) {
+          console.log('Showing business selection modal for', user.email, 'with multiple businesses (initial selection). Role ID:', user.roleId);
+          setIsInitialSelection(true);
+          setShowBusinessModal(true);
+          setModalShownForUser(user.userId);
+          return;
+        }
+        
+        // Check if saved business exists in user's accessible businesses
         const savedId = parseInt(savedBusinessId);
         const businessExists = userBusinesses.some(b => b.id === savedId);
         if (!businessExists) {
@@ -88,20 +90,23 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
           setSelectedBusinessIdState(null);
           setIsInitialSelection(true);
           setShowBusinessModal(true);
+          setModalShownForUser(user.userId);
           return;
         }
+        
         // If saved business exists, restore it
         setSelectedBusinessIdState(savedId);
         console.log('Restored business selection for', user.email, ':', savedId);
       }
     }
-  }, [user, userBusinesses, isLoading]);
+  }, [user, userBusinesses, isLoading, modalShownForUser]);
 
   // Clear business selection when user changes (logout/login)
   useEffect(() => {
     if (!user) {
       setSelectedBusinessIdState(null);
       setShowBusinessModal(false);
+      setModalShownForUser(null);
       safeRemoveSessionStorage("selectedBusinessId");
       safeRemoveSessionStorage("lastUserId");
     } else {
@@ -114,7 +119,8 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
         console.log('Different user logged in, clearing business selection for user:', user.email);
         safeRemoveSessionStorage("selectedBusinessId");
         setSelectedBusinessIdState(null);
-        setShowBusinessModal(false); // Reset modal state
+        setShowBusinessModal(false);
+        setModalShownForUser(null); // Reset modal tracking
       }
       
       safeSetSessionStorage("lastUserId", currentUserId.toString());
