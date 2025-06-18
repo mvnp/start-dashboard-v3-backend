@@ -11,6 +11,16 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { Faq } from "@shared/schema";
 
+interface AuthUser {
+  user: {
+    userId: number;
+    email: string;
+    roleId: number;
+    businessIds: number[];
+    isSuperAdmin: boolean;
+  };
+}
+
 export default function FaqList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -19,16 +29,16 @@ export default function FaqList() {
   const queryClient = useQueryClient();
 
   // Get current user information for role-based access control
-  const { data: currentUser } = useQuery({
+  const { data: currentUser } = useQuery<AuthUser>({
     queryKey: ["/api/auth/me"],
   });
 
-  const { data: faqs = [], isLoading } = useQuery({
+  const { data: faqs = [], isLoading } = useQuery<Faq[]>({
     queryKey: ["/api/faqs"],
   });
 
   // Check if current user is Super Admin (can create, edit, delete FAQs)
-  const isSuperAdmin = currentUser?.isSuperAdmin === true;
+  const isSuperAdmin = currentUser?.user?.isSuperAdmin === true;
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/faqs/${id}`),
@@ -52,9 +62,9 @@ export default function FaqList() {
     const matchesSearch = 
       faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
       faq.answer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      faq.category.toLowerCase().includes(searchTerm.toLowerCase());
+      (faq.category || '').toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesCategory = categoryFilter === "all" || faq.category === categoryFilter;
+    const matchesCategory = categoryFilter === "all" || (faq.category || '') === categoryFilter;
     const matchesStatus = statusFilter === "all" || 
       (statusFilter === "published" && faq.is_published) ||
       (statusFilter === "draft" && !faq.is_published);
@@ -72,7 +82,7 @@ export default function FaqList() {
   };
 
   const getUniqueCategories = () => {
-    return [...new Set(faqs.map((f: Faq) => f.category))];
+    return Array.from(new Set(faqs.map((f: Faq) => f.category).filter(Boolean)));
   };
 
   const stats = getFaqStats();

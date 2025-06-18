@@ -42,7 +42,7 @@ export default function FaqForm() {
   });
 
   // Check if current user is Super Admin (can create, edit, delete FAQs)
-  const isSuperAdmin = currentUser?.isSuperAdmin === true;
+  const isSuperAdmin = currentUser?.user?.isSuperAdmin === true;
 
   // Redirect non-Super Admin users
   if (currentUser && !isSuperAdmin) {
