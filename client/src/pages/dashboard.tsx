@@ -251,7 +251,7 @@ export default function Dashboard() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
+              <CardTitle className="text-lg font-semibold"><TranslatableText>Quick Actions</TranslatableText></CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">

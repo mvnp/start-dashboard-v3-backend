@@ -10,6 +10,7 @@ import { Trash2, Plus, Search, Edit, HelpCircle, Eye, EyeOff } from "lucide-reac
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { Faq } from "@shared/schema";
+import { TranslatableText } from "@/components/translatable-text";
 
 interface AuthUser {
   user: {

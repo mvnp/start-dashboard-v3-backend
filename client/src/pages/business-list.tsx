@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import type { Business } from "@shared/schema";
+import { TranslatableText } from "@/components/translatable-text";
 
 export default function BusinessList() {
   const { toast } = useToast();
@@ -49,7 +50,7 @@ export default function BusinessList() {
   };
 
   if (isLoading) {
-    return <div>Loading businesses...</div>;
+    return <div><TranslatableText>Loading businesses...</TranslatableText></div>;
   }
 
   return (
@@ -63,8 +64,8 @@ export default function BusinessList() {
             <Building2 className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Business Management</h1>
-            <p className="text-slate-600 mt-2">Manage your business locations and details</p>
+            <h1 className="text-3xl font-bold text-slate-900"><TranslatableText tag="h1">Business Management</TranslatableText></h1>
+            <p className="text-slate-600 mt-2"><TranslatableText>Manage your business locations and details</TranslatableText></p>
           </div>
         </div>
         <Link href="/businesses/new">
@@ -74,7 +75,7 @@ export default function BusinessList() {
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-primary)'}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Add Business
+            <TranslatableText>Add Business</TranslatableText>
           </Button>
         </Link>
       </div>
