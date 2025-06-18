@@ -33,7 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const token = safeGetLocalStorage('accessToken');
       if (!token) {
         setUser(null);
-        setLoading(false);
         return;
       }
 
@@ -45,21 +44,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       if (!response.ok) {
-        // Token might be expired, try to refresh
-        await refreshAccessToken();
-        return;
+        if (response.status === 401) {
+          // Token might be expired, try to refresh
+          await refreshAccessToken();
+          return;
+        }
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       
       const data = await response.json();
       setUser(data.user);
+      console.log('Successfully restored user session:', data.user.email);
     } catch (error) {
       console.error('Failed to get current user:', error);
       setUser(null);
       // Clear tokens if authentication fails
       safeRemoveLocalStorage('accessToken');
       safeRemoveLocalStorage('refreshToken');
-    } finally {
-      setLoading(false);
     }
   };
 

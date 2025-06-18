@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Switch, Route } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
+import { QueryPersistenceManager } from "./lib/persisted-query-client";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/lib/auth";
@@ -270,6 +271,28 @@ function Router() {
 }
 
 function App() {
+  // Initialize query cache persistence on app startup
+  useEffect(() => {
+    // Restore cached query data on app start
+    QueryPersistenceManager.restoreQueryData(queryClient);
+
+    // Save query data periodically and before unload
+    const saveInterval = setInterval(() => {
+      QueryPersistenceManager.saveQueryData(queryClient);
+    }, 30000); // Save every 30 seconds
+
+    const handleBeforeUnload = () => {
+      QueryPersistenceManager.saveQueryData(queryClient);
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      clearInterval(saveInterval);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

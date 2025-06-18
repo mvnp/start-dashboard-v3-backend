@@ -46,11 +46,13 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     userBusinesses.length > 1 && 
     !selectedBusinessId;
 
-  // Load selected business from sessionStorage on mount
+  // Load selected business from sessionStorage on mount with enhanced persistence
   useEffect(() => {
     const savedBusinessId = safeGetSessionStorage("selectedBusinessId");
-    if (savedBusinessId) {
-      setSelectedBusinessIdState(parseInt(savedBusinessId));
+    if (savedBusinessId && !isNaN(parseInt(savedBusinessId))) {
+      const businessId = parseInt(savedBusinessId);
+      setSelectedBusinessIdState(businessId);
+      console.log('Restored selected business from session:', businessId);
     }
   }, []);
 
