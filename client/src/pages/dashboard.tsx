@@ -171,8 +171,8 @@ export default function Dashboard() {
             <Home className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
-            <p className="text-slate-600">Welcome back! Here's what's happening at your barbershop today.</p>
+            <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">Dashboard</TranslatableText>
+            <TranslatableText tag="p" className="text-slate-600">Welcome back! Here's what's happening at your barbershop today.</TranslatableText>
           </div>
         </div>
       </div>
@@ -186,7 +186,7 @@ export default function Dashboard() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-slate-600">{stat.title}</p>
+                    <TranslatableText tag="p" className="text-sm font-medium text-slate-600">{stat.title}</TranslatableText>
                     <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
                     <p className={`text-xs ${
                       stat.changeType === 'positive' ? 'text-green-600' : 
@@ -213,10 +213,10 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold">Recent Appointments</CardTitle>
+                <TranslatableText tag="div" className="text-lg font-semibold">Recent Appointments</TranslatableText>
                 <Link href="/appointments">
                   <Button variant="ghost" className="text-sm barber-primary hover:text-barber-secondary font-medium">
-                    View All
+                    <TranslatableText>View All</TranslatableText>
                   </Button>
                 </Link>
               </div>
@@ -261,7 +261,7 @@ export default function Dashboard() {
                     size="lg"
                   >
                     <Plus className="w-5 h-5 mr-2" />
-                    New Appointment
+                    <TranslatableText>New Appointment</TranslatableText>
                   </Button>
                 </Link>
                 
@@ -271,7 +271,7 @@ export default function Dashboard() {
                     size="lg"
                   >
                     <UserPlus className="w-5 h-5 mr-2" />
-                    Add Client
+                    <TranslatableText>Add Client</TranslatableText>
                   </Button>
                 </Link>
                 
@@ -281,7 +281,7 @@ export default function Dashboard() {
                     size="lg"
                   >
                     <CreditCard className="w-5 h-5 mr-2" />
-                    Add Revenue or Expense
+                    <TranslatableText>Add Revenue or Expense</TranslatableText>
                   </Button>
                 </Link>
               </div>
@@ -290,7 +290,7 @@ export default function Dashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg font-semibold">Today's Schedule</CardTitle>
+              <TranslatableText tag="div" className="text-lg font-semibold">Today's Schedule</TranslatableText>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
