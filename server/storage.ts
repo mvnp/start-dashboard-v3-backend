@@ -5,7 +5,7 @@ import {
   users, businesses, persons, roles, users_business, users_roles,
   services, appointments, barber_plans, payment_gateways, payment_gateway_types,
   accounting_transactions, accounting_transaction_categories,
-  support_tickets, support_ticket_categories, whatsapp_instances, faqs,
+  support_tickets, support_ticket_categories, whatsapp_instances, faqs, settings,
   type User, type InsertUser, 
   type Business, type InsertBusiness,
   type Person, type InsertPerson,
@@ -22,7 +22,8 @@ import {
   type SupportTicket, type InsertSupportTicket,
   type SupportTicketCategory, type InsertSupportTicketCategory,
   type WhatsappInstance, type InsertWhatsappInstance,
-  type Faq, type InsertFaq
+  type Faq, type InsertFaq,
+  type Settings, type InsertSettings
 } from "@shared/schema";
 
 export interface IStorage {
@@ -155,6 +156,12 @@ export interface IStorage {
     completedChange: string;
     completedChangeType: 'positive' | 'negative' | 'neutral';
   }>;
+
+  // Settings methods
+  getSettings(businessId: number): Promise<Settings | undefined>;
+  createSettings(settings: InsertSettings): Promise<Settings>;
+  updateSettings(businessId: number, settings: Partial<InsertSettings>): Promise<Settings | undefined>;
+  deleteSettings(businessId: number): Promise<boolean>;
 }
 
 class PostgresStorage implements IStorage {

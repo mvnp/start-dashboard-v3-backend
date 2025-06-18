@@ -197,6 +197,16 @@ export const whatsapp_instances = pgTable("whatsapp_instances", {
   business_id: integer("business_id").references(() => businesses.id),
 });
 
+export const settings = pgTable("settings", {
+  id: serial("id").primaryKey(),
+  language: text("language").notNull().default('en'),
+  timezone: text("timezone").notNull().default('UTC'),
+  currency: text("currency").notNull().default('USD'),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+  business_id: integer("business_id").references(() => businesses.id).notNull(),
+});
+
 // Create insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -336,6 +346,17 @@ export const insertWhatsappInstanceSchema = createInsertSchema(whatsapp_instance
   last_seen: true,
 });
 
+export const insertSettingsSchema = createInsertSchema(settings).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+}).extend({
+  language: z.string().min(1, "Language is required"),
+  timezone: z.string().min(1, "Timezone is required"),
+  currency: z.string().min(1, "Currency is required"),
+  business_id: z.number().min(1, "Business ID is required"),
+});
+
 // Export types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -371,6 +392,8 @@ export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
 export type SupportTicket = typeof support_tickets.$inferSelect;
 export type InsertWhatsappInstance = z.infer<typeof insertWhatsappInstanceSchema>;
 export type WhatsappInstance = typeof whatsapp_instances.$inferSelect;
+export type InsertSettings = z.infer<typeof insertSettingsSchema>;
+export type Settings = typeof settings.$inferSelect;
 
 // Dashboard Stats Type
 export interface DashboardStats {
