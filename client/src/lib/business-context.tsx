@@ -40,7 +40,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     enabled: !!user,
   });
 
-  // Check if business selection is required - for all users with multiple businesses
+  // Check if business selection is required - for all users with multiple businesses (Super Admin, Merchant, Employee)
   const isBusinessSelectionRequired = 
     !!user && 
     userBusinesses.length > 1 && 
@@ -56,7 +56,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     }
   }, []);
 
-  // Handle business selection for all users
+  // Handle business selection for all users (Super Admin, Merchant, Employee)
   useEffect(() => {
     if (!isLoading && user && userBusinesses.length > 0) {
       const savedBusinessId = safeGetSessionStorage("selectedBusinessId");
@@ -66,27 +66,33 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
         const singleBusiness = userBusinesses[0];
         setSelectedBusinessIdState(singleBusiness.id);
         safeSetSessionStorage("selectedBusinessId", singleBusiness.id.toString());
-        console.log('Auto-selected single business:', singleBusiness.name);
+        console.log('Auto-selected single business for', user.email, ':', singleBusiness.name);
         return;
       }
       
       // If user has multiple businesses and no saved business, show modal immediately (initial selection)
       if (userBusinesses.length > 1 && !savedBusinessId) {
-        console.log('Showing business selection modal for user with multiple businesses (initial selection)');
+        console.log('Showing business selection modal for', user.email, 'with multiple businesses (initial selection). Role ID:', user.roleId);
         setIsInitialSelection(true);
         setShowBusinessModal(true);
+        return;
       }
       
-      // If user has multiple businesses but no valid saved business, show modal (initial selection)
+      // If user has multiple businesses but saved business doesn't exist, show modal (initial selection)
       if (userBusinesses.length > 1 && savedBusinessId) {
         const savedId = parseInt(savedBusinessId);
         const businessExists = userBusinesses.some(b => b.id === savedId);
         if (!businessExists) {
+          console.log('Saved business not found for', user.email, ', showing selection modal. Role ID:', user.roleId);
           safeRemoveSessionStorage("selectedBusinessId");
           setSelectedBusinessIdState(null);
           setIsInitialSelection(true);
           setShowBusinessModal(true);
+          return;
         }
+        // If saved business exists, restore it
+        setSelectedBusinessIdState(savedId);
+        console.log('Restored business selection for', user.email, ':', savedId);
       }
     }
   }, [user, userBusinesses, isLoading]);
@@ -112,12 +118,13 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     }
   }, [user]);
 
-  // Auto-select business if user has only one
+  // Auto-select business if user has only one (for all non-Super Admin users)
   useEffect(() => {
     if (!isLoading && user && !user.isSuperAdmin && userBusinesses.length === 1) {
       const businessId = userBusinesses[0].id;
       setSelectedBusinessIdState(businessId);
       safeSetSessionStorage("selectedBusinessId", businessId.toString());
+      console.log('Auto-selected single business for user:', businessId);
     }
   }, [user, userBusinesses, isLoading]);
 
