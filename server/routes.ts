@@ -25,6 +25,7 @@ import {
   insertWhatsappInstanceSchema,
   insertUserBusinessSchema,
   insertUserRoleSchema,
+  insertSettingsSchema,
 } from "@shared/schema";
 
 export function registerRoutes(app: Express): void {
@@ -2604,6 +2605,111 @@ export function registerRoutes(app: Express): void {
     } catch (error) {
       console.error("FAQ deletion error:", error);
       res.status(500).json({ error: "Failed to delete FAQ" });
+    }
+  });
+
+  // Settings routes
+  app.get("/api/settings", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const businessId = parseInt(req.headers['business-id'] as string);
+      
+      if (!businessId || isNaN(businessId)) {
+        return res.status(400).json({ error: "Business ID is required" });
+      }
+
+      // Verify user has access to this business
+      if (!req.user?.isSuperAdmin && !req.user?.businessIds?.includes(businessId)) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      let settings = await storage.getSettings(businessId);
+      
+      // If no settings exist, create default ones
+      if (!settings) {
+        const defaultSettings = {
+          language: 'en',
+          timezone: 'UTC',
+          currency: 'USD',
+          business_id: businessId
+        };
+        settings = await storage.createSettings(defaultSettings);
+      }
+      
+      res.json(settings);
+    } catch (error) {
+      console.error("Settings fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch settings" });
+    }
+  });
+
+  app.put("/api/settings", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      // Get business ID from header or body
+      const businessIdFromHeader = parseInt(req.headers['business-id'] as string);
+      const businessIdFromBody = req.body.business_id;
+      const businessId = businessIdFromHeader || businessIdFromBody;
+      
+      if (!businessId || isNaN(businessId)) {
+        return res.status(400).json({ error: "Business ID is required" });
+      }
+
+      // Verify user has access to this business
+      if (!req.user?.isSuperAdmin && !req.user?.businessIds?.includes(businessId)) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      const validatedData = insertSettingsSchema.parse({
+        ...req.body,
+        business_id: businessId
+      });
+
+      // Check if settings exist
+      let settings = await storage.getSettings(businessId);
+      
+      if (!settings) {
+        // Create new settings
+        settings = await storage.createSettings(validatedData);
+      } else {
+        // Update existing settings
+        settings = await storage.updateSettings(businessId, validatedData);
+      }
+      
+      if (!settings) {
+        return res.status(404).json({ error: "Settings not found" });
+      }
+      
+      res.json(settings);
+    } catch (error) {
+      console.error("Settings update error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update settings" });
+    }
+  });
+
+  app.delete("/api/settings", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const businessId = parseInt(req.headers['business-id'] as string);
+      
+      if (!businessId || isNaN(businessId)) {
+        return res.status(400).json({ error: "Business ID is required" });
+      }
+
+      // Verify user has access to this business
+      if (!req.user?.isSuperAdmin && !req.user?.businessIds?.includes(businessId)) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      const success = await storage.deleteSettings(businessId);
+      if (!success) {
+        return res.status(404).json({ error: "Settings not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Settings deletion error:", error);
+      res.status(500).json({ error: "Failed to delete settings" });
     }
   });
 

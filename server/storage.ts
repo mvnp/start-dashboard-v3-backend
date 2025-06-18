@@ -1062,6 +1062,30 @@ class PostgresStorage implements IStorage {
       role_id: roleId
     });
   }
+
+  // Settings methods
+  async getSettings(businessId: number): Promise<Settings | undefined> {
+    const result = await this.db.select().from(settings).where(eq(settings.business_id, businessId));
+    return result[0];
+  }
+
+  async createSettings(insertSettings: InsertSettings): Promise<Settings> {
+    const result = await this.db.insert(settings).values(insertSettings).returning();
+    return result[0];
+  }
+
+  async updateSettings(businessId: number, updateData: Partial<InsertSettings>): Promise<Settings | undefined> {
+    const result = await this.db.update(settings).set({
+      ...updateData,
+      updated_at: new Date()
+    }).where(eq(settings.business_id, businessId)).returning();
+    return result[0];
+  }
+
+  async deleteSettings(businessId: number): Promise<boolean> {
+    const result = await this.db.delete(settings).where(eq(settings.business_id, businessId));
+    return result.rowCount > 0;
+  }
 }
 
 const storage = new PostgresStorage();
