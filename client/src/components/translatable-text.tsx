@@ -15,19 +15,20 @@ export function TranslatableText({
   className = '', 
   tag: Tag = 'span' 
 }: TranslatableTextProps) {
-  const { isEditionMode, currentLanguage, canEdit } = useEdition();
+  const { isEditionMode, currentLanguage, canEdit, selectedBusinessId } = useEdition();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
 
-  // Fetch existing translation
+  // Fetch existing translation with business context
   const { data: translation } = useQuery({
-    queryKey: ['translation', children, currentLanguage],
+    queryKey: ['translation', children, currentLanguage, selectedBusinessId],
     queryFn: async () => {
       const response = await fetch(`/api/traductions/${encodeURIComponent(children)}/${currentLanguage}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          ...(selectedBusinessId && { 'business-id': selectedBusinessId.toString() }),
         },
       });
       if (!response.ok) return null;
@@ -36,7 +37,7 @@ export function TranslatableText({
     enabled: isEditionMode, // Fetch translations when edition mode is active
   });
 
-  // Mutation to save translation
+  // Mutation to save translation with business context
   const saveTranslation = useMutation({
     mutationFn: async (traduction: string) => {
       const response = await fetch('/api/traductions', {
@@ -44,6 +45,7 @@ export function TranslatableText({
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          ...(selectedBusinessId && { 'business-id': selectedBusinessId.toString() }),
         },
         body: JSON.stringify({
           string: children,
@@ -55,7 +57,7 @@ export function TranslatableText({
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['translation', children, currentLanguage] });
+      queryClient.invalidateQueries({ queryKey: ['translation', children, currentLanguage, selectedBusinessId] });
       toast({
         title: "Translation saved",
         description: "The translation has been saved successfully.",

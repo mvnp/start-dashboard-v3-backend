@@ -173,6 +173,7 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 18, 2025. Enhanced translation system to use business language settings and business ID context - translations now save with proper language from settings table and selected business context
 - June 18, 2025. Fixed EditionProvider context hierarchy - moved above BusinessProvider to ensure TranslatableText components work properly in business selector modal and all application components
 - June 18, 2025. Implemented comprehensive TranslatableText coverage across ALL pages and components - every hardcoded string now displays pen icons when edition mode is active, enabling complete inline translation editing for Super Admin users throughout the entire SaaS application
 - June 18, 2025. Implemented comprehensive inline translation system with "edition mode" - real-time string editing with pen icons, Enter key saving, language-based context from settings, JWT-authenticated API endpoints, and database persistence via traductions table

@@ -1,12 +1,14 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useAuth } from './auth';
 import { safeGetSessionStorage } from './safe-storage';
+import { useQuery } from '@tanstack/react-query';
 
 interface EditionContextType {
   isEditionMode: boolean;
   toggleEditionMode: () => void;
   currentLanguage: string;
   canEdit: boolean;
+  selectedBusinessId: number | null;
 }
 
 const EditionContext = createContext<EditionContextType | undefined>(undefined);
@@ -18,9 +20,50 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     return saved === 'true';
   });
   const { user } = useAuth();
+  
+  // Get selected business ID from session storage
+  const [selectedBusinessId, setSelectedBusinessId] = useState<number | null>(() => {
+    const saved = safeGetSessionStorage("selectedBusinessId");
+    return saved ? parseInt(saved) : null;
+  });
 
-  // Get current language from session storage (default to 'en')
-  const currentLanguage = 'en'; // Default to English for now, can be enhanced later
+  // Listen for changes in session storage
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = safeGetSessionStorage("selectedBusinessId");
+      setSelectedBusinessId(saved ? parseInt(saved) : null);
+    };
+
+    // Listen for storage events and custom events
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('sessionStorageChange', handleStorageChange);
+    
+    // Check periodically for changes (fallback)
+    const interval = setInterval(handleStorageChange, 1000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('sessionStorageChange', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Get current language from business settings
+  const { data: settings } = useQuery({
+    queryKey: ['settings', selectedBusinessId],
+    queryFn: async () => {
+      if (!selectedBusinessId) return null;
+      const response = await fetch('/api/settings', {
+        headers: {
+          'business-id': selectedBusinessId.toString(),
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
+      if (!response.ok) return null;
+      return response.json();
+    },
+    enabled: !!selectedBusinessId,
+  });
 
   // Check if user is Super Admin (Role ID: 1)
   const canEdit = user?.roleId === 1;
@@ -38,8 +81,9 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     <EditionContext.Provider value={{
       isEditionMode: isEditionMode && canEdit,
       toggleEditionMode,
-      currentLanguage,
+      currentLanguage: settings?.language || 'en',
       canEdit,
+      selectedBusinessId,
     }}>
       {children}
     </EditionContext.Provider>
