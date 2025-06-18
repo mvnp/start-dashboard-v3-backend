@@ -150,7 +150,6 @@ body[data-edition-mode="true"] a:not([data-translatable] a) {
   background-color: rgba(59, 130, 246, 0.1);
   border-radius: 2px;
 }
-}
 
 /* Card icon styling */
 .card-icon-amber {
