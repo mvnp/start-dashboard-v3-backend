@@ -189,7 +189,7 @@ const TIMEZONES = [
 // Comprehensive currency options
 const CURRENCIES = [
   { code: 'USD', name: 'US Dollar', symbol: '$' },
-  { code: 'EUR', name: 'Euro', symbol: '€' },
+
   { code: 'GBP', name: 'British Pound', symbol: '£' },
   { code: 'JPY', name: 'Japanese Yen', symbol: '¥' },
   { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$' },
@@ -206,7 +206,7 @@ const CURRENCIES = [
   { code: 'PLN', name: 'Polish Zloty', symbol: 'zł' },
   { code: 'CZK', name: 'Czech Koruna', symbol: 'Kč' },
   { code: 'HUF', name: 'Hungarian Forint', symbol: 'Ft' },
-  { code: 'RUB', name: 'Russian Ruble', symbol: '₽' },
+
   { code: 'TRY', name: 'Turkish Lira', symbol: '₺' },
   { code: 'BRL', name: 'Brazilian Real', symbol: 'R$' },
   { code: 'ARS', name: 'Argentine Peso', symbol: '$' },
