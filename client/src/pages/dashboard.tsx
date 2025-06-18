@@ -14,7 +14,11 @@ interface DashboardStats {
   yesterdayRevenue: number;
   revenueChange: string;
   revenueChangeType: 'positive' | 'negative' | 'neutral';
+  todayClients: number;
+  yesterdayClients: number;
   totalClients: number;
+  clientChange: string;
+  clientChangeType: 'positive' | 'negative' | 'neutral';
   completedServices: number;
 }
 

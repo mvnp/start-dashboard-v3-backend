@@ -144,7 +144,11 @@ export interface IStorage {
     yesterdayRevenue: number;
     revenueChange: string;
     revenueChangeType: 'positive' | 'negative' | 'neutral';
+    todayClients: number;
+    yesterdayClients: number;
     totalClients: number;
+    clientChange: string;
+    clientChangeType: 'positive' | 'negative' | 'neutral';
     completedServices: number;
   }>;
 }
@@ -777,14 +781,32 @@ class PostgresStorage implements IStorage {
         : `SELECT COALESCE(SUM(CAST(amount AS DECIMAL)), 0) as total FROM accounting_transactions WHERE type = 'revenue' AND transaction_date = '${yesterdayStr}'`;
       const yesterdayRevenueResult = await this.db.execute(sql.raw(yesterdayRevenueQuery));
 
-      // Get total clients (persons linked through users_business table)
-      const clientsQuery = businessIds && businessIds.length > 0
+      // Get today's new clients (registered today)
+      const todayClientsQuery = businessIds && businessIds.length > 0
+        ? `SELECT COUNT(DISTINCT p.id) as count FROM persons p 
+           JOIN users u ON p.user_id = u.id 
+           JOIN users_business ub ON u.id = ub.user_id 
+           WHERE ub.business_id = ANY(ARRAY[${businessIds.join(',')}]) AND DATE(p.created_at) = '${todayStr}'`
+        : `SELECT COUNT(*) as count FROM persons WHERE DATE(created_at) = '${todayStr}'`;
+      const todayClientsResult = await this.db.execute(sql.raw(todayClientsQuery));
+
+      // Get yesterday's new clients (registered yesterday)
+      const yesterdayClientsQuery = businessIds && businessIds.length > 0
+        ? `SELECT COUNT(DISTINCT p.id) as count FROM persons p 
+           JOIN users u ON p.user_id = u.id 
+           JOIN users_business ub ON u.id = ub.user_id 
+           WHERE ub.business_id = ANY(ARRAY[${businessIds.join(',')}]) AND DATE(p.created_at) = '${yesterdayStr}'`
+        : `SELECT COUNT(*) as count FROM persons WHERE DATE(created_at) = '${yesterdayStr}'`;
+      const yesterdayClientsResult = await this.db.execute(sql.raw(yesterdayClientsQuery));
+
+      // Get total clients (all registered clients)
+      const totalClientsQuery = businessIds && businessIds.length > 0
         ? `SELECT COUNT(DISTINCT p.id) as count FROM persons p 
            JOIN users u ON p.user_id = u.id 
            JOIN users_business ub ON u.id = ub.user_id 
            WHERE ub.business_id = ANY(ARRAY[${businessIds.join(',')}])`
         : `SELECT COUNT(*) as count FROM persons`;
-      const clientsResult = await this.db.execute(sql.raw(clientsQuery));
+      const totalClientsResult = await this.db.execute(sql.raw(totalClientsQuery));
 
       // Get completed services count
       const completedQuery = businessIds && businessIds.length > 0
@@ -796,7 +818,9 @@ class PostgresStorage implements IStorage {
       const yesterdayAppointments = Number(yesterdayAppointmentsResult.rows[0]?.count || 0);
       const todayRevenue = Number(todayRevenueResult.rows[0]?.total || 0);
       const yesterdayRevenue = Number(yesterdayRevenueResult.rows[0]?.total || 0);
-      const totalClients = Number(clientsResult.rows[0]?.count || 0);
+      const todayClients = Number(todayClientsResult.rows[0]?.count || 0);
+      const yesterdayClients = Number(yesterdayClientsResult.rows[0]?.count || 0);
+      const totalClients = Number(totalClientsResult.rows[0]?.count || 0);
       const completedServices = Number(completedResult.rows[0]?.count || 0);
 
       // Calculate appointment change
@@ -823,6 +847,27 @@ class PostgresStorage implements IStorage {
         revenueChangeType = 'neutral';
       }
 
+      // Calculate client registration change with percentage
+      const clientDiff = todayClients - yesterdayClients;
+      let clientChange = 'Same as yesterday';
+      let clientChangeType = 'neutral';
+      
+      if (clientDiff > 0 && yesterdayClients > 0) {
+        const clientPercent = Math.round((clientDiff / yesterdayClients) * 100);
+        clientChange = `${clientPercent}% more than yesterday`;
+        clientChangeType = 'positive';
+      } else if (clientDiff < 0 && yesterdayClients > 0) {
+        const clientPercent = Math.round((Math.abs(clientDiff) / yesterdayClients) * 100);
+        clientChange = `${clientPercent}% less than yesterday`;
+        clientChangeType = 'negative';
+      } else if (yesterdayClients === 0 && todayClients > 0) {
+        clientChange = `${todayClients} new clients today`;
+        clientChangeType = 'positive';
+      } else if (todayClients === 0 && yesterdayClients === 0) {
+        clientChange = 'No new clients';
+        clientChangeType = 'neutral';
+      }
+
       return {
         todayAppointments,
         yesterdayAppointments,
@@ -831,7 +876,11 @@ class PostgresStorage implements IStorage {
         yesterdayRevenue,
         revenueChange,
         revenueChangeType,
+        todayClients,
+        yesterdayClients,
         totalClients,
+        clientChange,
+        clientChangeType,
         completedServices,
       };
     } catch (error) {
@@ -845,7 +894,11 @@ class PostgresStorage implements IStorage {
         yesterdayRevenue: 0,
         revenueChange: 'No data',
         revenueChangeType: 'neutral' as const,
+        todayClients: 0,
+        yesterdayClients: 0,
         totalClients: 0,
+        clientChange: 'No data',
+        clientChangeType: 'neutral' as const,
         completedServices: 0,
       };
     }
