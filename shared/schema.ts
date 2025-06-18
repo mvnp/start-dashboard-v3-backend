@@ -207,6 +207,15 @@ export const settings = pgTable("settings", {
   business_id: integer("business_id").references(() => businesses.id).notNull(),
 });
 
+export const traductions = pgTable("traductions", {
+  id: serial("id").primaryKey(),
+  string: text("string").notNull(),
+  traduction: text("traduction").notNull(),
+  language: text("language").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
 // Create insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -357,6 +366,16 @@ export const insertSettingsSchema = createInsertSchema(settings).omit({
   business_id: z.number().min(1, "Business ID is required"),
 });
 
+export const insertTraductionSchema = createInsertSchema(traductions).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+}).extend({
+  string: z.string().min(1, "Original string is required"),
+  traduction: z.string().min(1, "Translation is required"),
+  language: z.string().min(1, "Language is required"),
+});
+
 // Export types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -394,6 +413,8 @@ export type InsertWhatsappInstance = z.infer<typeof insertWhatsappInstanceSchema
 export type WhatsappInstance = typeof whatsapp_instances.$inferSelect;
 export type InsertSettings = z.infer<typeof insertSettingsSchema>;
 export type Settings = typeof settings.$inferSelect;
+export type InsertTraduction = z.infer<typeof insertTraductionSchema>;
+export type Traduction = typeof traductions.$inferSelect;
 
 // Dashboard Stats Type
 export interface DashboardStats {

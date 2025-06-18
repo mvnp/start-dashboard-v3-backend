@@ -5,7 +5,7 @@ import {
   users, businesses, persons, roles, users_business, users_roles,
   services, appointments, barber_plans, payment_gateways, payment_gateway_types,
   accounting_transactions, accounting_transaction_categories,
-  support_tickets, support_ticket_categories, whatsapp_instances, faqs, settings,
+  support_tickets, support_ticket_categories, whatsapp_instances, faqs, settings, traductions,
   type User, type InsertUser, 
   type Business, type InsertBusiness,
   type Person, type InsertPerson,
@@ -23,7 +23,8 @@ import {
   type SupportTicketCategory, type InsertSupportTicketCategory,
   type WhatsappInstance, type InsertWhatsappInstance,
   type Faq, type InsertFaq,
-  type Settings, type InsertSettings
+  type Settings, type InsertSettings,
+  type Traduction, type InsertTraduction
 } from "@shared/schema";
 
 export interface IStorage {
@@ -162,6 +163,13 @@ export interface IStorage {
   createSettings(settings: InsertSettings): Promise<Settings>;
   updateSettings(businessId: number, settings: Partial<InsertSettings>): Promise<Settings | undefined>;
   deleteSettings(businessId: number): Promise<boolean>;
+
+  // Translation methods
+  getTraduction(string: string, language: string): Promise<Traduction | undefined>;
+  getAllTraductions(language: string): Promise<Traduction[]>;
+  createTraduction(traduction: InsertTraduction): Promise<Traduction>;
+  updateTraduction(string: string, language: string, traduction: string): Promise<Traduction | undefined>;
+  deleteTraduction(id: number): Promise<boolean>;
 }
 
 class PostgresStorage implements IStorage {
@@ -1084,6 +1092,38 @@ class PostgresStorage implements IStorage {
 
   async deleteSettings(businessId: number): Promise<boolean> {
     const result = await this.db.delete(settings).where(eq(settings.business_id, businessId));
+    return result.rowCount > 0;
+  }
+
+  // Translation methods
+  async getTraduction(string: string, language: string): Promise<Traduction | undefined> {
+    const result = await this.db.select().from(traductions).where(
+      and(eq(traductions.string, string), eq(traductions.language, language))
+    );
+    return result[0];
+  }
+
+  async getAllTraductions(language: string): Promise<Traduction[]> {
+    return await this.db.select().from(traductions).where(eq(traductions.language, language));
+  }
+
+  async createTraduction(insertTraduction: InsertTraduction): Promise<Traduction> {
+    const result = await this.db.insert(traductions).values(insertTraduction).returning();
+    return result[0];
+  }
+
+  async updateTraduction(string: string, language: string, traduction: string): Promise<Traduction | undefined> {
+    const result = await this.db.update(traductions).set({
+      traduction,
+      updated_at: new Date()
+    }).where(
+      and(eq(traductions.string, string), eq(traductions.language, language))
+    ).returning();
+    return result[0];
+  }
+
+  async deleteTraduction(id: number): Promise<boolean> {
+    const result = await this.db.delete(traductions).where(eq(traductions.id, id));
     return result.rowCount > 0;
   }
 }
