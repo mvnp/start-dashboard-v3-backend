@@ -2333,5 +2333,279 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  /**
+   * @swagger
+   * /api/faqs:
+   *   get:
+   *     summary: Get all FAQs
+   *     description: Retrieve all FAQs. All authenticated users can view FAQs. No business context filtering.
+   *     tags: [FAQ Management]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: List of FAQs
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   id:
+   *                     type: integer
+   *                     example: 1
+   *                   question:
+   *                     type: string
+   *                     example: "What is SaaS?"
+   *                   answer:
+   *                     type: string
+   *                     example: "SaaS stands for Software as a Service..."
+   *                   category:
+   *                     type: string
+   *                     example: "General"
+   *                   is_published:
+   *                     type: boolean
+   *                     example: true
+   *                   order_index:
+   *                     type: integer
+   *                     example: 1
+   *                   created_at:
+   *                     type: string
+   *                     format: date-time
+   *                   updated_at:
+   *                     type: string
+   *                     format: date-time
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       500:
+   *         description: Server error
+   *   post:
+   *     summary: Create a new FAQ
+   *     description: Create a new FAQ. Only Super Admin (Role ID 1) can create FAQs.
+   *     tags: [FAQ Management]
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - question
+   *               - answer
+   *             properties:
+   *               question:
+   *                 type: string
+   *                 example: "What is SaaS?"
+   *               answer:
+   *                 type: string
+   *                 example: "SaaS stands for Software as a Service..."
+   *               category:
+   *                 type: string
+   *                 example: "General"
+   *               is_published:
+   *                 type: boolean
+   *                 example: true
+   *               order_index:
+   *                 type: integer
+   *                 example: 1
+   *     responses:
+   *       201:
+   *         description: FAQ created successfully
+   *       400:
+   *         description: Invalid input data
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Forbidden - only Super Admin can create FAQs
+   *       500:
+   *         description: Server error
+   */
+  app.get("/api/faqs", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const faqs = await storage.getAllFaqs();
+      res.json(faqs);
+    } catch (error) {
+      console.error("FAQs fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch FAQs" });
+    }
+  });
+
+  app.post("/api/faqs", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      // Only Super Admin (Role ID: 1) can create FAQs
+      if (!req.user?.isSuperAdmin) {
+        return res.status(403).json({ error: "Access denied", message: "Only Super Admin can create FAQs" });
+      }
+
+      const validatedData = insertFaqSchema.parse(req.body);
+      const faq = await storage.createFaq(validatedData);
+      res.status(201).json(faq);
+    } catch (error) {
+      console.error("FAQ creation error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create FAQ" });
+    }
+  });
+
+  /**
+   * @swagger
+   * /api/faqs/{id}:
+   *   get:
+   *     summary: Get a specific FAQ
+   *     description: Retrieve a specific FAQ by ID. All authenticated users can view FAQs.
+   *     tags: [FAQ Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: FAQ ID
+   *     responses:
+   *       200:
+   *         description: FAQ details
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       404:
+   *         description: FAQ not found
+   *       500:
+   *         description: Server error
+   *   put:
+   *     summary: Update a FAQ
+   *     description: Update a FAQ. Only Super Admin (Role ID 1) can update FAQs.
+   *     tags: [FAQ Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: FAQ ID
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               question:
+   *                 type: string
+   *               answer:
+   *                 type: string
+   *               category:
+   *                 type: string
+   *               is_published:
+   *                 type: boolean
+   *               order_index:
+   *                 type: integer
+   *     responses:
+   *       200:
+   *         description: FAQ updated successfully
+   *       400:
+   *         description: Invalid input data
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Forbidden - only Super Admin can update FAQs
+   *       404:
+   *         description: FAQ not found
+   *       500:
+   *         description: Server error
+   *   delete:
+   *     summary: Delete a FAQ
+   *     description: Delete a FAQ. Only Super Admin (Role ID 1) can delete FAQs.
+   *     tags: [FAQ Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: FAQ ID
+   *     responses:
+   *       204:
+   *         description: FAQ deleted successfully
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Forbidden - only Super Admin can delete FAQs
+   *       404:
+   *         description: FAQ not found
+   *       500:
+   *         description: Server error
+   */
+  app.get("/api/faqs/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const faq = await storage.getFaq(id);
+      
+      if (!faq) {
+        return res.status(404).json({ error: "FAQ not found" });
+      }
+      
+      res.json(faq);
+    } catch (error) {
+      console.error("FAQ fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch FAQ" });
+    }
+  });
+
+  app.put("/api/faqs/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      // Only Super Admin (Role ID: 1) can update FAQs
+      if (!req.user?.isSuperAdmin) {
+        return res.status(403).json({ error: "Access denied", message: "Only Super Admin can update FAQs" });
+      }
+
+      const id = parseInt(req.params.id);
+      const validatedData = insertFaqSchema.partial().parse(req.body);
+      
+      const faq = await storage.updateFaq(id, validatedData);
+      if (!faq) {
+        return res.status(404).json({ error: "FAQ not found" });
+      }
+      
+      res.json(faq);
+    } catch (error) {
+      console.error("FAQ update error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update FAQ" });
+    }
+  });
+
+  app.delete("/api/faqs/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      // Only Super Admin (Role ID: 1) can delete FAQs
+      if (!req.user?.isSuperAdmin) {
+        return res.status(403).json({ error: "Access denied", message: "Only Super Admin can delete FAQs" });
+      }
+
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteFaq(id);
+      
+      if (!success) {
+        return res.status(404).json({ error: "FAQ not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("FAQ deletion error:", error);
+      res.status(500).json({ error: "Failed to delete FAQ" });
+    }
+  });
+
   // Routes are now registered, no need to return anything
 }

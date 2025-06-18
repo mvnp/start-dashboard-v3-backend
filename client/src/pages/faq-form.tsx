@@ -36,6 +36,20 @@ export default function FaqForm() {
   const isEditing = !!match;
   const isCreating = !!createMatch;
 
+  // Get current user information for role-based access control
+  const { data: currentUser } = useQuery({
+    queryKey: ["/api/auth/me"],
+  });
+
+  // Check if current user is Super Admin (can create, edit, delete FAQs)
+  const isSuperAdmin = currentUser?.isSuperAdmin === true;
+
+  // Redirect non-Super Admin users
+  if (currentUser && !isSuperAdmin) {
+    setLocation("/faqs");
+    return null;
+  }
+
   const form = useForm<FaqFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {

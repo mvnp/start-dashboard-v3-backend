@@ -18,9 +18,17 @@ export default function FaqList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Get current user information for role-based access control
+  const { data: currentUser } = useQuery({
+    queryKey: ["/api/auth/me"],
+  });
+
   const { data: faqs = [], isLoading } = useQuery({
     queryKey: ["/api/faqs"],
   });
+
+  // Check if current user is Super Admin (can create, edit, delete FAQs)
+  const isSuperAdmin = currentUser?.isSuperAdmin === true;
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/faqs/${id}`),
@@ -95,12 +103,14 @@ export default function FaqList() {
               <p className="text-slate-600">Manage frequently asked questions</p>
             </div>
           </div>
-          <Link href="/faqs/new">
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              New FAQ
-            </Button>
-          </Link>
+          {isSuperAdmin && (
+            <Link href="/faqs/new">
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                New FAQ
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Stats Cards */}
@@ -222,21 +232,23 @@ export default function FaqList() {
                       <span><strong>Updated:</strong> {new Date(faq.updated_at!).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
-                    <Link href={`/faqs/${faq.id}/edit`}>
-                      <Button variant="outline" size="sm">
-                        <Edit className="w-4 h-4" />
+                  {isSuperAdmin && (
+                    <div className="flex items-center gap-2 ml-4">
+                      <Link href={`/faqs/${faq.id}/edit`}>
+                        <Button variant="outline" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => deleteMutation.mutate(faq.id)}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </Button>
-                    </Link>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => deleteMutation.mutate(faq.id)}
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
