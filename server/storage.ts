@@ -134,6 +134,19 @@ export interface IStorage {
   createWhatsappInstance(instance: InsertWhatsappInstance): Promise<WhatsappInstance>;
   updateWhatsappInstance(id: number, instance: Partial<InsertWhatsappInstance>): Promise<WhatsappInstance | undefined>;
   deleteWhatsappInstance(id: number): Promise<boolean>;
+
+  // Dashboard Statistics methods
+  getDashboardStats(businessIds: number[] | null): Promise<{
+    todayAppointments: number;
+    yesterdayAppointments: number;
+    appointmentChange: string;
+    todayRevenue: number;
+    yesterdayRevenue: number;
+    revenueChange: string;
+    revenueChangeType: 'positive' | 'negative' | 'neutral';
+    totalClients: number;
+    completedServices: number;
+  }>;
 }
 
 class PostgresStorage implements IStorage {
