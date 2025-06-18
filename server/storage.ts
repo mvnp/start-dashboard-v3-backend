@@ -814,20 +814,24 @@ class PostgresStorage implements IStorage {
 
       // Get today's completed appointments
       const todayCompletedQuery = businessIds && businessIds.length > 0
-        ? `SELECT COUNT(*) as count FROM appointments WHERE status = 'completed' AND appointment_date = '${todayStr}' AND business_id = ANY(ARRAY[${businessIds.join(',')}])`
-        : `SELECT COUNT(*) as count FROM appointments WHERE status = 'completed' AND appointment_date = '${todayStr}'`;
+        ? `SELECT COUNT(*) as count FROM appointments WHERE (status = 'completed' OR status = 'Completed') AND appointment_date = '${todayStr}' AND business_id = ANY(ARRAY[${businessIds.join(',')}])`
+        : `SELECT COUNT(*) as count FROM appointments WHERE (status = 'completed' OR status = 'Completed') AND appointment_date = '${todayStr}'`;
+      console.log('Today completed query:', todayCompletedQuery);
       const todayCompletedResult = await this.db.execute(sql.raw(todayCompletedQuery));
+      console.log('Today completed result:', todayCompletedResult.rows);
 
       // Get yesterday's completed appointments
       const yesterdayCompletedQuery = businessIds && businessIds.length > 0
-        ? `SELECT COUNT(*) as count FROM appointments WHERE status = 'completed' AND appointment_date = '${yesterdayStr}' AND business_id = ANY(ARRAY[${businessIds.join(',')}])`
-        : `SELECT COUNT(*) as count FROM appointments WHERE status = 'completed' AND appointment_date = '${yesterdayStr}'`;
+        ? `SELECT COUNT(*) as count FROM appointments WHERE (status = 'completed' OR status = 'Completed') AND appointment_date = '${yesterdayStr}' AND business_id = ANY(ARRAY[${businessIds.join(',')}])`
+        : `SELECT COUNT(*) as count FROM appointments WHERE (status = 'completed' OR status = 'Completed') AND appointment_date = '${yesterdayStr}'`;
+      console.log('Yesterday completed query:', yesterdayCompletedQuery);
       const yesterdayCompletedResult = await this.db.execute(sql.raw(yesterdayCompletedQuery));
+      console.log('Yesterday completed result:', yesterdayCompletedResult.rows);
 
       // Get total completed services count
       const totalCompletedQuery = businessIds && businessIds.length > 0
-        ? `SELECT COUNT(*) as count FROM appointments WHERE status = 'completed' AND business_id = ANY(ARRAY[${businessIds.join(',')}])`
-        : `SELECT COUNT(*) as count FROM appointments WHERE status = 'completed'`;
+        ? `SELECT COUNT(*) as count FROM appointments WHERE (status = 'completed' OR status = 'Completed') AND business_id = ANY(ARRAY[${businessIds.join(',')}])`
+        : `SELECT COUNT(*) as count FROM appointments WHERE (status = 'completed' OR status = 'Completed')`;
       const totalCompletedResult = await this.db.execute(sql.raw(totalCompletedQuery));
 
       const todayAppointments = Number(todayAppointmentsResult.rows[0]?.count || 0);
@@ -837,9 +841,11 @@ class PostgresStorage implements IStorage {
       const todayClients = Number(todayClientsResult.rows[0]?.count || 0);
       const yesterdayClients = Number(yesterdayClientsResult.rows[0]?.count || 0);
       const totalClients = Number(totalClientsResult.rows[0]?.count || 0);
-      const todayCompleted = Number(todayCompletedResult.rows[0]?.count || 0);
-      const yesterdayCompleted = Number(yesterdayCompletedResult.rows[0]?.count || 0);
-      const completedServices = Number(totalCompletedResult.rows[0]?.count || 0);
+      const todayCompleted = parseInt(todayCompletedResult.rows[0]?.count || '0', 10);
+      const yesterdayCompleted = parseInt(yesterdayCompletedResult.rows[0]?.count || '0', 10);
+      const completedServices = parseInt(totalCompletedResult.rows[0]?.count || '0', 10);
+      
+      console.log('Parsed completed counts:', { todayCompleted, yesterdayCompleted, completedServices });
 
       // Calculate appointment change
       const appointmentDiff = todayAppointments - yesterdayAppointments;
