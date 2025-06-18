@@ -365,3 +365,16 @@ export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
 export type SupportTicket = typeof support_tickets.$inferSelect;
 export type InsertWhatsappInstance = z.infer<typeof insertWhatsappInstanceSchema>;
 export type WhatsappInstance = typeof whatsapp_instances.$inferSelect;
+
+// Dashboard Stats Type
+export interface DashboardStats {
+  todayAppointments: number;
+  yesterdayAppointments: number;
+  appointmentChange: string;
+  todayRevenue: number;
+  yesterdayRevenue: number;
+  revenueChange: string;
+  revenueChangeType: 'positive' | 'negative' | 'neutral';
+  totalClients: number;
+  completedServices: number;
+}

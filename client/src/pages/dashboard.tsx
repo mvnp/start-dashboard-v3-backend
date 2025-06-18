@@ -13,6 +13,7 @@ interface DashboardStats {
   todayRevenue: number;
   yesterdayRevenue: number;
   revenueChange: string;
+  revenueChangeType: 'positive' | 'negative' | 'neutral';
   totalClients: number;
   completedServices: number;
 }
@@ -125,6 +126,7 @@ export default function Dashboard() {
       title: "Daily Revenue",
       value: isLoadingStats ? "..." : formatCurrency(stats?.todayRevenue || 0),
       change: isLoadingStats ? "Loading..." : stats?.revenueChange || "No data",
+      changeType: stats?.revenueChangeType || "neutral",
       icon: DollarSign,
       iconColor: "text-green-600",
       iconBg: "bg-green-100",
@@ -173,7 +175,13 @@ export default function Dashboard() {
                   <div>
                     <p className="text-sm font-medium text-slate-600">{stat.title}</p>
                     <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
-                    <p className="text-xs text-green-600">{stat.change}</p>
+                    <p className={`text-xs ${
+                      stat.changeType === 'positive' ? 'text-green-600' : 
+                      stat.changeType === 'negative' ? 'text-red-600' : 
+                      'text-slate-500'
+                    }`}>
+                      {stat.change}
+                    </p>
                   </div>
                   <div className={`p-3 ${stat.iconBg} rounded-lg`}>
                     <Icon className={`w-6 h-6 ${stat.iconColor}`} />

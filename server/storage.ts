@@ -794,17 +794,21 @@ class PostgresStorage implements IStorage {
           ? `${appointmentDiff} from yesterday`
           : 'Same as yesterday';
 
-      // Calculate revenue change
+      // Calculate revenue change with dollar amounts
       const revenueDiff = todayRevenue - yesterdayRevenue;
-      const revenueChangePercent = yesterdayRevenue > 0 
-        ? Math.round((revenueDiff / yesterdayRevenue) * 100)
-        : todayRevenue > 0 ? 100 : 0;
+      let revenueChange = 'Same as yesterday';
+      let revenueChangeType = 'neutral';
       
-      const revenueChange = revenueChangePercent > 0 
-        ? `+${revenueChangePercent}% from yesterday`
-        : revenueChangePercent < 0 
-          ? `${revenueChangePercent}% from yesterday`
-          : 'Same as yesterday';
+      if (revenueDiff > 0) {
+        revenueChange = `$${revenueDiff.toFixed(2)} more than yesterday`;
+        revenueChangeType = 'positive';
+      } else if (revenueDiff < 0) {
+        revenueChange = `$${Math.abs(revenueDiff).toFixed(2)} less than yesterday`;
+        revenueChangeType = 'negative';
+      } else if (todayRevenue === 0 && yesterdayRevenue === 0) {
+        revenueChange = 'No revenue data';
+        revenueChangeType = 'neutral';
+      }
 
       return {
         todayAppointments,
@@ -813,6 +817,7 @@ class PostgresStorage implements IStorage {
         todayRevenue,
         yesterdayRevenue,
         revenueChange,
+        revenueChangeType,
         totalClients,
         completedServices,
       };
