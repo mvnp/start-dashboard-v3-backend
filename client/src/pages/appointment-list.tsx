@@ -35,6 +35,7 @@ import {
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Appointment, Service, Person } from "@shared/schema";
+import { TranslatableText } from "@/components/translatable-text";
 
 const statusOptions = [
   { value: "all", label: "All Statuses" },
@@ -226,8 +227,8 @@ export default function AppointmentList() {
             <Calendar className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
-            <p className="text-gray-600">Manage customer appointments</p>
+            <TranslatableText tag="h1" className="text-3xl font-bold text-gray-900">Appointments</TranslatableText>
+            <TranslatableText tag="p" className="text-gray-600">Manage customer appointments</TranslatableText>
           </div>
         </div>
         
@@ -239,7 +240,7 @@ export default function AppointmentList() {
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-primary)'}
         >
           <Plus className="w-4 h-4" />
-          New Appointment
+          <TranslatableText>New Appointment</TranslatableText>
         </Button>
       </div>
 
@@ -248,7 +249,7 @@ export default function AppointmentList() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Filter className="w-5 h-5" />
-            Filters
+            <TranslatableText>Filters</TranslatableText>
           </CardTitle>
         </CardHeader>
         <CardContent>
