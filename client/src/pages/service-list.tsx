@@ -19,6 +19,7 @@ import { Plus, Search, Edit, Trash2, Settings, Clock, DollarSign, User } from "l
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Service } from "@shared/schema";
+import { TranslatableText } from "@/components/translatable-text";
 
 export default function ServiceList() {
   const [, setLocation] = useLocation();

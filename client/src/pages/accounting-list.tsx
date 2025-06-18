@@ -10,6 +10,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { AccountingTransaction, AccountingTransactionCategory } from "@shared/schema";
 import { format } from "date-fns";
 import { useBusinessContext } from "@/lib/business-context";
+import { TranslatableText } from "@/components/translatable-text";
 
 export default function AccountingList() {
   const [, setLocation] = useLocation();
@@ -83,7 +84,7 @@ export default function AccountingList() {
     return (
       <div className="min-h-screen w-full p-6">
         <div className="flex justify-center items-center h-64">
-          <div className="text-lg">Loading transactions...</div>
+          <div className="text-lg"><TranslatableText>Loading transactions...</TranslatableText></div>
         </div>
       </div>
     );
@@ -97,13 +98,13 @@ export default function AccountingList() {
             <DollarSign className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold">Accounting Transactions</h1>
-            <p className="text-slate-600">Manage revenues and expenses</p>
+            <h1 className="text-3xl font-bold"><TranslatableText tag="h1">Accounting Transactions</TranslatableText></h1>
+            <p className="text-slate-600"><TranslatableText>Manage revenues and expenses</TranslatableText></p>
           </div>
         </div>
         <Button onClick={() => setLocation("/accounting-form")}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Transaction
+          <TranslatableText>Add Transaction</TranslatableText>
         </Button>
       </div>
 
@@ -111,7 +112,7 @@ export default function AccountingList() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium"><TranslatableText>Total Revenue</TranslatableText></CardTitle>
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -123,7 +124,7 @@ export default function AccountingList() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+            <CardTitle className="text-sm font-medium"><TranslatableText>Total Expenses</TranslatableText></CardTitle>
             <TrendingDown className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
@@ -135,7 +136,7 @@ export default function AccountingList() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Income</CardTitle>
+            <CardTitle className="text-sm font-medium"><TranslatableText>Net Income</TranslatableText></CardTitle>
             <DollarSign className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
@@ -147,7 +148,7 @@ export default function AccountingList() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
+            <CardTitle className="text-sm font-medium"><TranslatableText>Total Transactions</TranslatableText></CardTitle>
             <DollarSign className="h-4 w-4 text-gray-600" />
           </CardHeader>
           <CardContent>
@@ -159,15 +160,15 @@ export default function AccountingList() {
       {/* Transactions Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
+          <CardTitle><TranslatableText>Recent Transactions</TranslatableText></CardTitle>
         </CardHeader>
         <CardContent>
           {transactions.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">No transactions found</p>
+              <p className="text-muted-foreground mb-4"><TranslatableText>No transactions found</TranslatableText></p>
               <Button onClick={() => setLocation("/accounting-form")}>
                 <Plus className="h-4 w-4 mr-2" />
-                Add First Transaction
+                <TranslatableText>Add First Transaction</TranslatableText>
               </Button>
             </div>
           ) : (
@@ -175,14 +176,14 @@ export default function AccountingList() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left p-2">Date</th>
-                    <th className="text-left p-2">Type</th>
-                    <th className="text-left p-2">Description</th>
-                    <th className="text-left p-2">Category</th>
-                    <th className="text-left p-2">Amount</th>
-                    <th className="text-left p-2">Payment Method</th>
-                    <th className="text-left p-2">Reference</th>
-                    <th className="text-left p-2">Actions</th>
+                    <th className="text-left p-2"><TranslatableText>Date</TranslatableText></th>
+                    <th className="text-left p-2"><TranslatableText>Type</TranslatableText></th>
+                    <th className="text-left p-2"><TranslatableText>Description</TranslatableText></th>
+                    <th className="text-left p-2"><TranslatableText>Category</TranslatableText></th>
+                    <th className="text-left p-2"><TranslatableText>Amount</TranslatableText></th>
+                    <th className="text-left p-2"><TranslatableText>Payment Method</TranslatableText></th>
+                    <th className="text-left p-2"><TranslatableText>Reference</TranslatableText></th>
+                    <th className="text-left p-2"><TranslatableText>Actions</TranslatableText></th>
                   </tr>
                 </thead>
                 <tbody>
