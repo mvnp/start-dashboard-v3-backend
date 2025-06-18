@@ -291,6 +291,7 @@ export default function Settings() {
   const { selectedBusinessId } = useBusinessContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { isEditionMode, toggleEditionMode } = useEdition();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -397,7 +398,20 @@ export default function Settings() {
   return (
     <div className="w-full p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-slate-900">Business Settings</h1>
+        <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
+          Business Settings
+        </TranslatableText>
+        <div className="flex items-center gap-3">
+          <Edit3 className="w-4 h-4 text-slate-600" />
+          <span className="text-sm text-slate-600">
+            <TranslatableText>Edition Mode</TranslatableText>
+          </span>
+          <Switch 
+            checked={isEditionMode} 
+            onCheckedChange={toggleEditionMode}
+            className="data-[state=checked]:bg-barber-primary"
+          />
+        </div>
       </div>
 
       <Form {...form}>
@@ -408,7 +422,7 @@ export default function Settings() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Globe className="w-5 h-5 text-barber-primary" />
-                  Language Settings
+                  <TranslatableText>Language Settings</TranslatableText>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -417,7 +431,7 @@ export default function Settings() {
                   name="language"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Display Language</FormLabel>
+                      <FormLabel><TranslatableText>Display Language</TranslatableText></FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>

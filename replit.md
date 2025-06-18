@@ -146,10 +146,34 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 - **Development**: `http://localhost:5000/api-docs`
 - Raw OpenAPI JSON: Available at both `/api-docs.json` endpoints
 
+## Translation System and Edition Mode
+
+### Edition Mode Features
+- **Inline Translation Editing**: Toggle-able edition mode that displays pen icons next to translatable text
+- **Real-time String Translation**: Click pen icon to edit translations inline, save with Enter key
+- **Language-based Context**: Automatically uses language from business settings for translation context
+- **Database Persistence**: Translations stored in `traductions` table with string, traduction, language, timestamps
+- **JWT Authentication**: All translation endpoints require Bearer authentication
+- **Smart Fallback**: Shows original English text when no translation exists
+
+### Translation API Endpoints
+- `GET /api/traductions/:language` - Get all translations for a language
+- `GET /api/traductions/:string/:language` - Get specific translation
+- `POST /api/traductions` - Create or update translation (upsert functionality)
+- `PUT /api/traductions/:string/:language` - Update existing translation
+- `DELETE /api/traductions/:id` - Delete translation by ID
+
+### Edition Mode Components
+- **EditionProvider**: Context provider managing edition mode state and current language
+- **TranslatableText**: Reusable component wrapping text with inline editing capability
+- **Edition Toggle**: Switch in Settings page to activate/deactivate edition mode
+- **Visual Indicators**: Pen icons appear on hover when edition mode is active
+
 ## Changelog
 
 ```
 Changelog:
+- June 18, 2025. Implemented comprehensive inline translation system with "edition mode" - real-time string editing with pen icons, Enter key saving, language-based context from settings, JWT-authenticated API endpoints, and database persistence via traductions table
 - June 18, 2025. Implemented comprehensive Settings page with 56 languages, 100+ timezones, and 90+ currencies - business-scoped settings with JWT authentication, automatic defaults, and complete CRUD operations via /settings route
 - June 18, 2025. Updated Dashboard Quick Actions - Changed "Process Payment" to "Add Revenue or Expense" with link to /accounting-form/new; New Appointment and Add Client buttons link to /appointments/new and /clients/new respectively; also added navigation link to View All appointments button
 - June 18, 2025. Enhanced FAQ edit form with proper category dropdown selection - replaced text input with Select component that displays all common categories and automatically selects the saved category when editing
