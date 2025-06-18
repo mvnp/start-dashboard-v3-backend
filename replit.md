@@ -173,6 +173,8 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 18, 2025. Fixed EditionProvider context hierarchy - moved above BusinessProvider to ensure TranslatableText components work properly in business selector modal and all application components
+- June 18, 2025. Implemented comprehensive TranslatableText coverage across ALL pages and components - every hardcoded string now displays pen icons when edition mode is active, enabling complete inline translation editing for Super Admin users throughout the entire SaaS application
 - June 18, 2025. Implemented comprehensive inline translation system with "edition mode" - real-time string editing with pen icons, Enter key saving, language-based context from settings, JWT-authenticated API endpoints, and database persistence via traductions table
 - June 18, 2025. Implemented comprehensive Settings page with 56 languages, 100+ timezones, and 90+ currencies - business-scoped settings with JWT authentication, automatic defaults, and complete CRUD operations via /settings route
 - June 18, 2025. Updated Dashboard Quick Actions - Changed "Process Payment" to "Add Revenue or Expense" with link to /accounting-form/new; New Appointment and Add Client buttons link to /appointments/new and /clients/new respectively; also added navigation link to View All appointments button

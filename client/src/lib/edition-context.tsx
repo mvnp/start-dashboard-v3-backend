@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useBusinessContext } from './business-context';
 import { useAuth } from './auth';
+import { safeGetSessionStorage } from './safe-storage';
 
 interface EditionContextType {
   isEditionMode: boolean;
@@ -18,25 +17,10 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem('editionMode');
     return saved === 'true';
   });
-  const { selectedBusinessId } = useBusinessContext();
   const { user } = useAuth();
 
-  // Get current language from settings
-  const { data: settings } = useQuery({
-    queryKey: ['settings', selectedBusinessId],
-    queryFn: async () => {
-      if (!selectedBusinessId) return null;
-      const response = await fetch('/api/settings', {
-        headers: {
-          'business-id': selectedBusinessId.toString(),
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-      });
-      if (!response.ok) return null;
-      return response.json();
-    },
-    enabled: !!selectedBusinessId,
-  });
+  // Get current language from session storage (default to 'en')
+  const currentLanguage = 'en'; // Default to English for now, can be enhanced later
 
   // Check if user is Super Admin (Role ID: 1)
   const canEdit = user?.roleId === 1;
@@ -54,7 +38,7 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     <EditionContext.Provider value={{
       isEditionMode: isEditionMode && canEdit,
       toggleEditionMode,
-      currentLanguage: settings?.language || 'en',
+      currentLanguage,
       canEdit,
     }}>
       {children}

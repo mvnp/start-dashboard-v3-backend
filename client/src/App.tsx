@@ -46,16 +46,14 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <BusinessProvider>
-      <EditionProvider>
-        <div className="min-h-screen flex bg-slate-50">
-          <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-          
-          <main className="flex-1 lg:ml-0 min-h-screen">
-            <MobileHeader onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
-            {children}
-          </main>
-        </div>
-      </EditionProvider>
+      <div className="min-h-screen flex bg-slate-50">
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        
+        <main className="flex-1 lg:ml-0 min-h-screen">
+          <MobileHeader onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
+          {children}
+        </main>
+      </div>
     </BusinessProvider>
   );
 }
@@ -298,14 +296,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BusinessProvider>
-          <EditionProvider>
+        <EditionProvider>
+          <BusinessProvider>
             <TooltipProvider>
               <Toaster />
               <Router />
             </TooltipProvider>
-          </EditionProvider>
-        </BusinessProvider>
+          </BusinessProvider>
+        </EditionProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
