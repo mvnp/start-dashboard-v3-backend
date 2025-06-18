@@ -94,6 +94,12 @@ export const navigationItems = [
     current: false,
   },
   {
+    name: "Settings",
+    href: "/settings",
+    icon: Settings,
+    current: false,
+  },
+  {
     name: "Support",
     href: "/support",
     icon: HeadphonesIcon,

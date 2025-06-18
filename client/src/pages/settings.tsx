@@ -264,7 +264,6 @@ const CURRENCIES = [
   { code: 'SCR', name: 'Seychellois Rupee', symbol: '₨' },
   { code: 'MGA', name: 'Malagasy Ariary', symbol: 'Ar' },
   { code: 'KMF', name: 'Comorian Franc', symbol: 'CF' },
-  { code: 'RUB', name: 'Russian Ruble', symbol: '₽' },
   { code: 'UAH', name: 'Ukrainian Hryvnia', symbol: '₴' },
   { code: 'BYN', name: 'Belarusian Ruble', symbol: 'Br' },
   { code: 'MDL', name: 'Moldovan Leu', symbol: 'L' },
@@ -275,7 +274,7 @@ const CURRENCIES = [
   { code: 'BAM', name: 'Bosnia-Herzegovina Convertible Mark', symbol: 'KM' },
   { code: 'MKD', name: 'Macedonian Denar', symbol: 'ден' },
   { code: 'ALL', name: 'Albanian Lek', symbol: 'L' },
-  { code: 'EUR', name: 'Euro (Montenegro)', symbol: '€' },
+  { code: 'MNE', name: 'Euro (Montenegro)', symbol: '€' },
   { code: 'GEL', name: 'Georgian Lari', symbol: '₾' },
   { code: 'AMD', name: 'Armenian Dram', symbol: '֏' },
   { code: 'AZN', name: 'Azerbaijani Manat', symbol: '₼' },
@@ -288,7 +287,6 @@ const CURRENCIES = [
   { code: 'BTN', name: 'Bhutanese Ngultrum', symbol: 'Nu.' },
   { code: 'MVR', name: 'Maldivian Rufiyaa', symbol: '.ރ' },
   { code: 'TWD', name: 'Taiwan Dollar', symbol: 'NT$' },
-  { code: 'HKD', name: 'Hong Kong Dollar', symbol: 'HK$' },
   { code: 'MOP', name: 'Macanese Pataca', symbol: 'MOP$' }
 ];
 
