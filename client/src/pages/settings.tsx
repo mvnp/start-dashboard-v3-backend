@@ -11,7 +11,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useBusinessContext } from "@/lib/business-context";
 import { apiRequest } from "@/lib/queryClient";
 import { insertSettingsSchema, type Settings } from "@shared/schema";
-import { Save, Globe, Clock, DollarSign } from "lucide-react";
+import { Save, Globe, Clock, DollarSign, Edit3 } from "lucide-react";
+import { useEdition } from "@/lib/edition-context";
+import { TranslatableText } from "@/components/translatable-text";
+import { Switch } from "@/components/ui/switch";
 
 // Comprehensive language options (sorted alphabetically by English name)
 const LANGUAGES = [

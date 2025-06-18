@@ -26,6 +26,7 @@ import {
   insertUserBusinessSchema,
   insertUserRoleSchema,
   insertSettingsSchema,
+  insertTraductionSchema,
 } from "@shared/schema";
 
 export function registerRoutes(app: Express): void {
@@ -2710,6 +2711,102 @@ export function registerRoutes(app: Express): void {
     } catch (error) {
       console.error("Settings deletion error:", error);
       res.status(500).json({ error: "Failed to delete settings" });
+    }
+  });
+
+  // Translation API routes for edition mode
+  app.get("/api/traductions/:language", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { language } = req.params;
+      const traductions = await storage.getAllTraductions(language);
+      res.json(traductions);
+    } catch (error) {
+      console.error("Error fetching translations:", error);
+      res.status(500).json({ error: "Failed to fetch translations" });
+    }
+  });
+
+  app.get("/api/traductions/:string/:language", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { string, language } = req.params;
+      const traduction = await storage.getTraduction(decodeURIComponent(string), language);
+      res.json(traduction);
+    } catch (error) {
+      console.error("Error fetching translation:", error);
+      res.status(500).json({ error: "Failed to fetch translation" });
+    }
+  });
+
+  app.post("/api/traductions", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const validatedData = insertTraductionSchema.parse(req.body);
+      
+      // Check if translation already exists
+      const existing = await storage.getTraduction(validatedData.string, validatedData.language);
+      if (existing) {
+        // Update existing translation
+        const updated = await storage.updateTraduction(
+          validatedData.string, 
+          validatedData.language, 
+          validatedData.traduction
+        );
+        return res.json(updated);
+      }
+      
+      // Create new translation
+      const traduction = await storage.createTraduction(validatedData);
+      res.status(201).json(traduction);
+    } catch (error) {
+      console.error("Error creating/updating translation:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create/update translation" });
+    }
+  });
+
+  app.put("/api/traductions/:string/:language", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { string, language } = req.params;
+      const { traduction } = req.body;
+      
+      if (!traduction || typeof traduction !== 'string') {
+        return res.status(400).json({ error: "Translation text is required" });
+      }
+      
+      const updated = await storage.updateTraduction(
+        decodeURIComponent(string), 
+        language, 
+        traduction
+      );
+      
+      if (!updated) {
+        return res.status(404).json({ error: "Translation not found" });
+      }
+      
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating translation:", error);
+      res.status(500).json({ error: "Failed to update translation" });
+    }
+  });
+
+  app.delete("/api/traductions/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid translation ID" });
+      }
+      
+      const success = await storage.deleteTraduction(id);
+      if (!success) {
+        return res.status(404).json({ error: "Translation not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting translation:", error);
+      res.status(500).json({ error: "Failed to delete translation" });
     }
   });
 
