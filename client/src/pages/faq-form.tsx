@@ -15,6 +15,16 @@ import { apiRequest } from "@/lib/queryClient";
 import { insertFaqSchema, type Faq } from "@shared/schema";
 import { z } from "zod";
 
+interface AuthUser {
+  user: {
+    userId: number;
+    email: string;
+    roleId: number;
+    businessIds: number[];
+    isSuperAdmin: boolean;
+  };
+}
+
 interface FaqFormData {
   question: string;
   answer: string;
@@ -37,7 +47,7 @@ export default function FaqForm() {
   const isCreating = !!createMatch;
 
   // Get current user information for role-based access control
-  const { data: currentUser } = useQuery({
+  const { data: currentUser } = useQuery<AuthUser>({
     queryKey: ["/api/auth/me"],
   });
 
@@ -62,21 +72,20 @@ export default function FaqForm() {
   });
 
   // Load FAQ data for editing
-  const { data: faq } = useQuery({
+  const { data: faq, isLoading: isFaqLoading } = useQuery<Faq>({
     queryKey: ["/api/faqs", faqId],
-    enabled: !isCreating && !!faqId,
-    select: (data: Faq) => data,
+    enabled: isEditing && !!faqId,
   });
 
   // Update form when FAQ data is loaded
   useEffect(() => {
     if (faq) {
       form.reset({
-        question: faq.question,
-        answer: faq.answer,
-        category: faq.category,
-        is_published: faq.is_published,
-        order_index: faq.order_index
+        question: faq.question || "",
+        answer: faq.answer || "",
+        category: faq.category || "",
+        is_published: faq.is_published ?? true,
+        order_index: faq.order_index ?? 0
       });
     }
   }, [faq, form]);
@@ -142,6 +151,19 @@ export default function FaqForm() {
     "Contact",
     "Products"
   ];
+
+  // Show loading state while FAQ data is being fetched
+  if (isEditing && isFaqLoading) {
+    return (
+      <div className="p-6 w-full">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-32 bg-gray-200 rounded"></div>
+          <div className="h-32 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 w-full">
