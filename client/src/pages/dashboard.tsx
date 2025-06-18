@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useBusinessContext } from "@/lib/business-context";
 import { Appointment } from "@shared/schema";
+import { Link } from "wouter";
 
 interface DashboardStats {
   todayAppointments: number;
@@ -212,9 +213,11 @@ export default function Dashboard() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg font-semibold">Recent Appointments</CardTitle>
-                <Button variant="ghost" className="text-sm barber-primary hover:text-barber-secondary font-medium">
-                  View All
-                </Button>
+                <Link href="/appointments">
+                  <Button variant="ghost" className="text-sm barber-primary hover:text-barber-secondary font-medium">
+                    View All
+                  </Button>
+                </Link>
               </div>
             </CardHeader>
             <CardContent>
@@ -251,22 +254,35 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {quickActions.map((action, index) => {
-                  const Icon = action.icon;
-                  return (
-                    <Button 
-                      key={index}
-                      className="w-full justify-center transition-colors"
-                      style={action.style}
-                      size="lg"
-                      onMouseEnter={(e) => Object.assign(e.currentTarget.style, action.hoverStyle)}
-                      onMouseLeave={(e) => Object.assign(e.currentTarget.style, action.style)}
-                    >
-                      <Icon className="w-5 h-5 mr-2" />
-                      {action.name}
-                    </Button>
-                  );
-                })}
+                <Link href="/appointments/new">
+                  <Button 
+                    className="w-full justify-center transition-colors bg-barber-primary hover:bg-barber-secondary text-white"
+                    size="lg"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    New Appointment
+                  </Button>
+                </Link>
+                
+                <Link href="/clients/new">
+                  <Button 
+                    className="w-full justify-center transition-colors bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    size="lg"
+                  >
+                    <UserPlus className="w-5 h-5 mr-2" />
+                    Add Client
+                  </Button>
+                </Link>
+                
+                <Link href="/accounting/new">
+                  <Button 
+                    className="w-full justify-center transition-colors bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    size="lg"
+                  >
+                    <CreditCard className="w-5 h-5 mr-2" />
+                    Process Payment
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>

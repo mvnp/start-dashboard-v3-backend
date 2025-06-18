@@ -150,6 +150,7 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 18, 2025. Fixed Dashboard Quick Actions navigation - New Appointment, Add Client, and Process Payment buttons now properly link to /appointments/new, /clients/new, and /accounting/new respectively; also added navigation link to View All appointments button
 - June 18, 2025. Enhanced FAQ edit form with proper category dropdown selection - replaced text input with Select component that displays all common categories and automatically selects the saved category when editing
 - June 18, 2025. Fixed FAQ edit form to properly load individual FAQ data using GET /api/faqs/:id endpoint instead of loading all FAQs - form now correctly fetches and populates specific FAQ data for editing
 - June 18, 2025. Implemented complete FAQ CRUD system with role-based access control - only Super Admin (Role ID 1) can create, update, delete FAQs; all authenticated users can view FAQs; no business context filtering applied
