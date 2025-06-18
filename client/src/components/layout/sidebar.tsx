@@ -5,6 +5,7 @@ import { navigationItems } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import UserSwitcher from "@/components/user-switcher";
 import BusinessChangeButton from "@/components/business-change-button";
+import { TranslatableText } from "@/components/translatable-text";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -77,7 +78,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     }}
                   >
                     <Icon className="w-5 h-5 mr-3" />
-                    {item.name}
+                    <TranslatableText>{item.name}</TranslatableText>
                   </a>
                 );
               }
@@ -98,7 +99,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     }}
                   >
                     <Icon className="w-5 h-5 mr-3" />
-                    {item.name}
+                    <TranslatableText>{item.name}</TranslatableText>
                   </div>
                 </Link>
               );
@@ -118,7 +119,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 }}
               >
                 <LogOut className="w-5 h-5 mr-3" />
-                Logout
+                <TranslatableText>Logout</TranslatableText>
               </Button>
             </Link>
           </div>

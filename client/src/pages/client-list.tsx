@@ -31,6 +31,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useBusinessContext } from "@/lib/business-context";
 import { Person } from "@shared/schema";
+import { TranslatableText } from "@/components/translatable-text";
 
 interface Client extends Person {
   email?: string;
@@ -126,14 +127,14 @@ export default function ClientList() {
             <UserCheck className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Client Management</h1>
-            <p className="text-slate-600 mt-2">Manage your barbershop clients</p>
+            <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">Client Management</TranslatableText>
+            <TranslatableText tag="p" className="text-slate-600 mt-2">Manage your barbershop clients</TranslatableText>
           </div>
         </div>
         <Link href="/clients/new">
           <Button className="mt-4 sm:mt-0 bg-barber-primary hover:bg-barber-secondary">
             <Plus className="w-4 h-4 mr-2" />
-            Add Client
+            <TranslatableText>Add Client</TranslatableText>
           </Button>
         </Link>
       </div>
