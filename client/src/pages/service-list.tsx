@@ -99,8 +99,8 @@ export default function ServiceList() {
       <div className="w-full p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Services</h1>
-            <p className="text-slate-600 mt-2">Manage your barbershop services</p>
+            <h1 className="text-3xl font-bold text-slate-900"><TranslatableText tag="h1">Services</TranslatableText></h1>
+            <p className="text-slate-600 mt-2"><TranslatableText>Manage your barbershop services</TranslatableText></p>
           </div>
         </div>
         <div className="animate-pulse space-y-4">
@@ -120,8 +120,8 @@ export default function ServiceList() {
             <Settings className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Services</h1>
-            <p className="text-slate-600 mt-2">Manage your barbershop services</p>
+            <h1 className="text-3xl font-bold text-slate-900"><TranslatableText tag="h1">Services</TranslatableText></h1>
+            <p className="text-slate-600 mt-2"><TranslatableText>Manage your barbershop services</TranslatableText></p>
           </div>
         </div>
         <Button
@@ -131,7 +131,7 @@ export default function ServiceList() {
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-primary)'}
         >
           <Plus className="w-4 h-4 mr-2" />
-          New Service
+          <TranslatableText>New Service</TranslatableText>
         </Button>
       </div>
 
@@ -162,7 +162,7 @@ export default function ServiceList() {
                   variant={service.is_active ? "default" : "secondary"} 
                   className={service.is_active ? "bg-green-100 text-green-800" : ""}
                 >
-                  {service.is_active ? "Active" : "Inactive"}
+                  <TranslatableText>{service.is_active ? "Active" : "Inactive"}</TranslatableText>
                 </Badge>
               </div>
               <CardTitle className="text-lg font-semibold text-slate-900">
@@ -194,7 +194,7 @@ export default function ServiceList() {
                   className="flex-1"
                 >
                   <Edit className="w-4 h-4 mr-1" />
-                  Edit
+                  <TranslatableText>Edit</TranslatableText>
                 </Button>
                 <Button
                   variant="outline"
@@ -213,9 +213,9 @@ export default function ServiceList() {
       {filteredServices.length === 0 && !isLoading && (
         <div className="text-center py-12">
           <Settings className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No services found</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2"><TranslatableText>No services found</TranslatableText></h3>
           <p className="text-gray-600 mb-4">
-            {searchTerm ? "No services match your search criteria." : "Get started by creating your first service."}
+            <TranslatableText>{searchTerm ? "No services match your search criteria." : "Get started by creating your first service."}</TranslatableText>
           </p>
           <Button
             onClick={() => setLocation("/services/new")}
@@ -224,7 +224,7 @@ export default function ServiceList() {
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-primary)'}
           >
             <Plus className="w-4 h-4 mr-2" />
-            Create New Service
+            <TranslatableText>Create New Service</TranslatableText>
           </Button>
         </div>
       )}

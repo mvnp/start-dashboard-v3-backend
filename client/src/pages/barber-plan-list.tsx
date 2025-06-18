@@ -80,8 +80,8 @@ export default function BarberPlanList() {
       <div className="w-full p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Barber Plans</h1>
-            <p className="text-slate-600 mt-2">Manage subscription plans for barbershops</p>
+            <h1 className="text-3xl font-bold text-slate-900"><TranslatableText tag="h1">Barber Plans</TranslatableText></h1>
+            <p className="text-slate-600 mt-2"><TranslatableText>Manage subscription plans for barbershops</TranslatableText></p>
           </div>
         </div>
         <div className="animate-pulse space-y-4">
@@ -101,8 +101,8 @@ export default function BarberPlanList() {
             <Crown className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Barber Plans</h1>
-            <p className="text-slate-600 mt-2">Manage subscription plans for barbershops</p>
+            <h1 className="text-3xl font-bold text-slate-900"><TranslatableText tag="h1">Barber Plans</TranslatableText></h1>
+            <p className="text-slate-600 mt-2"><TranslatableText>Manage subscription plans for barbershops</TranslatableText></p>
           </div>
         </div>
         <Button
@@ -112,7 +112,7 @@ export default function BarberPlanList() {
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-primary)'}
         >
           <Plus className="w-4 h-4 mr-2" />
-          New Plan
+          <TranslatableText>New Plan</TranslatableText>
         </Button>
       </div>
 
