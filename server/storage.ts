@@ -844,6 +844,7 @@ class PostgresStorage implements IStorage {
         todayRevenue: 0,
         yesterdayRevenue: 0,
         revenueChange: 'No data',
+        revenueChangeType: 'neutral' as const,
         totalClients: 0,
         completedServices: 0,
       };
