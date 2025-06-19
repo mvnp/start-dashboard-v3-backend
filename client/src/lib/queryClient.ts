@@ -13,9 +13,6 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   const token = localStorage.getItem('accessToken');
-  // Get selected business ID from business context storage
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const selectedBusinessId = user.email ? localStorage.getItem(`selectedBusinessId_${user.email}`) : null;
   const headers: Record<string, string> = {};
   
   if (data) {
@@ -26,11 +23,16 @@ export async function apiRequest(
     headers["Authorization"] = `Bearer ${token}`;
   }
   
-  if (selectedBusinessId) {
-    headers["business-id"] = selectedBusinessId;
-    console.log(`🔧 API Request [${method}] ${url} - Sending business-id: ${selectedBusinessId}`);
-  } else {
-    console.log(`⚠️ API Request [${method}] ${url} - No business ID found. User: ${user.email}`);
+  // Always try to get business ID from localStorage
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  if (user.email) {
+    const selectedBusinessId = localStorage.getItem(`selectedBusinessId_${user.email}`);
+    if (selectedBusinessId) {
+      headers["business-id"] = selectedBusinessId;
+      console.log(`🔧 API Request [${method}] ${url} - Sending business-id: ${selectedBusinessId}`);
+    } else {
+      console.log(`⚠️ API Request [${method}] ${url} - No business ID found for user: ${user.email}`);
+    }
   }
 
   const res = await fetch(url, {
@@ -50,20 +52,22 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const token = localStorage.getItem('accessToken');
-    // Get selected business ID from business context storage
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const selectedBusinessId = user.email ? localStorage.getItem(`selectedBusinessId_${user.email}`) : null;
     const headers: Record<string, string> = {};
     
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
     
-    if (selectedBusinessId) {
-      headers["business-id"] = selectedBusinessId;
-      console.log(`🔧 Query [GET] ${queryKey[0]} - Sending business-id: ${selectedBusinessId}`);
-    } else {
-      console.log(`⚠️ Query [GET] ${queryKey[0]} - No business ID found. User: ${user.email}`);
+    // Always try to get business ID from localStorage
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.email) {
+      const selectedBusinessId = localStorage.getItem(`selectedBusinessId_${user.email}`);
+      if (selectedBusinessId) {
+        headers["business-id"] = selectedBusinessId;
+        console.log(`🔧 Query [GET] ${queryKey[0]} - Sending business-id: ${selectedBusinessId}`);
+      } else {
+        console.log(`⚠️ Query [GET] ${queryKey[0]} - No business ID found for user: ${user.email}`);
+      }
     }
 
     const res = await fetch(queryKey[0] as string, {

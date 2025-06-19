@@ -32,7 +32,14 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
   const { user, logout } = useAuth();
   const queryClient = useQueryClient();
   
-  const [selectedBusinessId, setSelectedBusinessIdState] = useState<number | null>(null);
+  const [selectedBusinessId, setSelectedBusinessIdState] = useState<number | null>(() => {
+    // Initialize from localStorage immediately
+    if (typeof window !== 'undefined' && user?.email) {
+      const saved = localStorage.getItem(`selectedBusinessId_${user.email}`);
+      return saved ? parseInt(saved) : null;
+    }
+    return null;
+  });
   
   const [showBusinessModal, setShowBusinessModal] = useState(false);
   const [isInitialSelection, setIsInitialSelection] = useState(false);
@@ -50,33 +57,20 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     userBusinesses.length > 1 && 
     !selectedBusinessId;
 
-  // Single useEffect to handle business selection and restoration
+  // Force business selection immediately when data is available
   useEffect(() => {
-    if (!isLoading && user && userBusinesses.length > 0 && !selectedBusinessId) {
-      console.log(`Business auto-selection for ${user.email}: ${userBusinesses.length} businesses available`);
-      
-      // Try to restore saved business ID first
-      const savedBusinessId = safeGetLocalStorage(`selectedBusinessId_${user.email}`);
-      
-      if (savedBusinessId) {
-        const savedId = parseInt(savedBusinessId);
-        const businessExists = userBusinesses.some(b => b.id === savedId);
-        
-        if (businessExists) {
-          console.log(`Restoring business ID ${savedId} for ${user.email}`);
-          setSelectedBusinessIdState(savedId);
-          return;
-        } else {
-          // Clear invalid saved business ID
-          safeRemoveLocalStorage(`selectedBusinessId_${user.email}`);
-        }
-      }
-      
-      // Auto-select first business
+    if (!isLoading && user && userBusinesses.length > 0) {
       const firstBusiness = userBusinesses[0];
-      console.log(`Auto-selecting business ID ${firstBusiness.id} (${firstBusiness.name}) for ${user.email}`);
-      setSelectedBusinessIdState(firstBusiness.id);
-      safeSetLocalStorage(`selectedBusinessId_${user.email}`, firstBusiness.id.toString());
+      
+      // Always set the first business if no business is selected
+      if (!selectedBusinessId) {
+        console.log(`Auto-selecting business ${firstBusiness.name} (ID: ${firstBusiness.id}) for ${user.email}`);
+        setSelectedBusinessIdState(firstBusiness.id);
+        safeSetLocalStorage(`selectedBusinessId_${user.email}`, firstBusiness.id.toString());
+        
+        // Force immediate query invalidation to refresh data with business context
+        setTimeout(() => queryClient.invalidateQueries(), 100);
+      }
     }
   }, [user, userBusinesses, isLoading, selectedBusinessId]);
 
