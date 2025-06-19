@@ -72,7 +72,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
       }
       
       // For users with multiple businesses, only show modal once per user session
-      if (userBusinesses.length > 1 && modalShownForUser !== user.userId) {
+      if (userBusinesses.length > 1 && modalShownForUser !== user.userId && !showBusinessModal) {
         if (!savedBusinessId) {
           console.log('Showing business selection modal for', user.email, 'with multiple businesses (initial selection). Role ID:', user.roleId);
           setIsInitialSelection(true);
@@ -96,10 +96,11 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
         
         // If saved business exists, restore it
         setSelectedBusinessIdState(savedId);
+        setModalShownForUser(user.userId); // Mark modal as shown even when restoring
         console.log('Restored business selection for', user.email, ':', savedId);
       }
     }
-  }, [user, userBusinesses, isLoading, modalShownForUser]);
+  }, [user, userBusinesses, isLoading, modalShownForUser, showBusinessModal]);
 
   // Clear business selection when user changes (logout/login)
   useEffect(() => {
@@ -127,15 +128,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     }
   }, [user]);
 
-  // Auto-select business if user has only one (for all non-Super Admin users)
-  useEffect(() => {
-    if (!isLoading && user && !user.isSuperAdmin && userBusinesses.length === 1) {
-      const businessId = userBusinesses[0].id;
-      setSelectedBusinessIdState(businessId);
-      safeSetSessionStorage("selectedBusinessId", businessId.toString());
-      console.log('Auto-selected single business for user:', businessId);
-    }
-  }, [user, userBusinesses, isLoading]);
+  // This useEffect is now redundant as single business auto-selection is handled in the main business selection effect above
 
   const setSelectedBusinessId = (businessId: number | null) => {
     setSelectedBusinessIdState(businessId);
@@ -149,6 +142,10 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
   const handleBusinessSelected = (businessId: number) => {
     setSelectedBusinessId(businessId);
     setShowBusinessModal(false);
+    // Ensure modal is marked as shown for this user to prevent duplicate modals
+    if (user) {
+      setModalShownForUser(user.userId);
+    }
   };
 
   const handleLogout = () => {
@@ -162,6 +159,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     if (userBusinesses.length > 1) {
       setIsInitialSelection(false); // This is a voluntary business change, not initial selection
       setShowBusinessModal(true);
+      // Don't update modalShownForUser here since this is a voluntary change
     }
   };
 
