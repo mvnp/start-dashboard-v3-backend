@@ -175,30 +175,30 @@ export default function SupportTicketForm() {
   };
 
   const categories = [
-    "Technical Issue",
-    "General Inquiry",
-    "Billing Question",
-    "Service Request",
-    "Complaint",
-    "Feature Request",
-    "Bug Report",
-    "Account Issue",
-    "Pricing",
-    "Other"
+    <TranslatableText>Technical Issue</TranslatableText>,
+    <TranslatableText>General Inquiry</TranslatableText>,
+    <TranslatableText>Billing Question</TranslatableText>,
+    <TranslatableText>Service Request</TranslatableText>,
+    <TranslatableText>Complaint</TranslatableText>,
+    <TranslatableText>Feature Request</TranslatableText>,
+    <TranslatableText>Bug Report</TranslatableText>,
+    <TranslatableText>Account Issue</TranslatableText>,
+    <TranslatableText>Pricing</TranslatableText>,
+    <TranslatableText>Other</TranslatableText>,
   ];
 
   const priorityOptions = [
-    { value: "low", label: "Low" },
-    { value: "medium", label: "Medium" },
-    { value: "high", label: "High" },
-    { value: "urgent", label: "Urgent" }
+    { value: "low", label: <TranslatableText>Low</TranslatableText> },
+    { value: "medium", label: <TranslatableText>Medium</TranslatableText> },
+    { value: "high", label: <TranslatableText>High</TranslatableText> },
+    { value: "urgent", label: <TranslatableText>Urgent</TranslatableText> }
   ];
 
   const statusOptions = [
-    { value: "open", label: "Open" },
-    { value: "in_progress", label: "In Progress" },
-    { value: "resolved", label: "Resolved" },
-    { value: "closed", label: "Closed" }
+    { value: "open", label: <TranslatableText>Open</TranslatableText> },
+    { value: "in_progress", label: <TranslatableText>In Progress</TranslatableText> },
+    { value: "resolved", label: <TranslatableText>Resolved</TranslatableText> },
+    { value: "closed", label: <TranslatableText>Closed</TranslatableText> }
   ];
 
   return (
@@ -218,12 +218,12 @@ export default function SupportTicketForm() {
             <Ticket className="w-6 h-6 text-white" />
           </div>
           <div>
-            <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
-              {isViewing ? "View Ticket" : isEditing ? "Edit Ticket" : "New Support Ticket"}
-            </TranslatableText>
-            <TranslatableText tag="p" className="text-slate-600">
+            <h1 className="text-3xl font-bold text-slate-900">
+              {isViewing ? <TranslatableText>View Ticket</TranslatableText> : isEditing ? <TranslatableText>Edit Ticket</TranslatableText> : <TranslatableText>New Support Ticket</TranslatableText>}
+            </h1>
+            <p className="text-slate-600">
               {isViewing ? "Ticket details and information" : isEditing ? "Update ticket details" : "Create a new customer support ticket"}
-            </TranslatableText>
+            </p>
           </div>
         </div>
       </div>
@@ -231,9 +231,7 @@ export default function SupportTicketForm() {
       <Card>
         <CardHeader>
           <CardTitle>
-            <TranslatableText>
-              {isViewing ? "Ticket Information" : "Ticket Details"}
-            </TranslatableText>
+            {isViewing ? <TranslatableText>Ticket Information</TranslatableText> : <TranslatableText>Ticket Details</TranslatableText>}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -246,7 +244,9 @@ export default function SupportTicketForm() {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Title *</TranslatableText></FormLabel>
+                      <FormLabel>
+                        <TranslatableText>Title *</TranslatableText>
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="Brief description of the issue"
@@ -264,7 +264,9 @@ export default function SupportTicketForm() {
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Category *</TranslatableText></FormLabel>
+                      <FormLabel>
+                        <TranslatableText>Category *</TranslatableText>
+                      </FormLabel>
                       <Select 
                         value={field.value} 
                         onValueChange={field.onChange}
@@ -296,7 +298,9 @@ export default function SupportTicketForm() {
                   name="client_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Client Name *</TranslatableText></FormLabel>
+                      <FormLabel>
+                        <TranslatableText>Client Name *</TranslatableText>
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="Customer's full name"
@@ -314,7 +318,9 @@ export default function SupportTicketForm() {
                   name="client_email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Client Email *</TranslatableText></FormLabel>
+                      <FormLabel>
+                        <TranslatableText>Client Email *</TranslatableText>
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           type="email"
@@ -336,7 +342,9 @@ export default function SupportTicketForm() {
                   name="priority"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Priority *</TranslatableText></FormLabel>
+                      <FormLabel>
+                        <TranslatableText>Priority *</TranslatableText>
+                      </FormLabel>
                       <Select 
                         value={field.value} 
                         onValueChange={field.onChange}
@@ -365,7 +373,9 @@ export default function SupportTicketForm() {
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Status *</TranslatableText></FormLabel>
+                      <FormLabel>
+                        <TranslatableText>Status *</TranslatableText>
+                      </FormLabel>
                       <Select 
                         value={field.value} 
                         onValueChange={field.onChange}
@@ -394,7 +404,9 @@ export default function SupportTicketForm() {
                   name="assigned_staff_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Assigned Staff</TranslatableText></FormLabel>
+                      <FormLabel>
+                        <TranslatableText>Assigned Staff</TranslatableText>
+                      </FormLabel>
                       <Select 
                         value={field.value?.toString() || "none"} 
                         onValueChange={(value) => field.onChange(value === "none" ? undefined : parseInt(value))}
@@ -426,7 +438,9 @@ export default function SupportTicketForm() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel><TranslatableText>Description *</TranslatableText></FormLabel>
+                    <FormLabel>
+                      <TranslatableText>Description *</TranslatableText>
+                    </FormLabel>
                     <FormControl>
                       <Textarea 
                         placeholder="Detailed description of the issue or request..."
@@ -447,7 +461,9 @@ export default function SupportTicketForm() {
                   name="resolution_notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Resolution Notes</FormLabel>
+                      <FormLabel>
+                        <TranslatableText>Resolution Notes</TranslatableText>
+                      </FormLabel>
                       <FormControl>
                         <Textarea 
                           placeholder="Notes about the resolution or progress..."
@@ -465,7 +481,9 @@ export default function SupportTicketForm() {
               {/* File Attachments */}
               {!isViewing && (
                 <div>
-                  <Label>Attachments (Optional)</Label>
+                  <Label>
+                    <TranslatableText>Attachments (Optional)</TranslatableText>
+                  </Label>
                   <div className="mt-2">
                     <div className="flex items-center gap-4">
                       <Button
@@ -474,7 +492,7 @@ export default function SupportTicketForm() {
                         onClick={() => document.getElementById('file-upload')?.click()}
                       >
                         <Upload className="w-4 h-4 mr-2" />
-                        Upload Files
+                        <TranslatableText>Upload Files</TranslatableText>
                       </Button>
                       <input
                         id="file-upload"
@@ -485,13 +503,15 @@ export default function SupportTicketForm() {
                         accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"
                       />
                       <span className="text-sm text-gray-500">
-                        Supported: PDF, DOC, DOCX, JPG, PNG, TXT
+                        <TranslatableText>Supported: PDF, DOC, DOCX, JPG, PNG, TXT</TranslatableText>
                       </span>
                     </div>
                     
                     {attachedFiles.length > 0 && (
                       <div className="mt-4 space-y-2">
-                        <Label>Attached Files:</Label>
+                        <Label>
+                          <TranslatableText>Attached Files:</TranslatableText>
+                        </Label>
                         {attachedFiles.map((file, index) => (
                           <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
                             <span className="text-sm">{file.split('/').pop()}</span>
@@ -514,7 +534,9 @@ export default function SupportTicketForm() {
               {/* View Attachments */}
               {isViewing && attachedFiles.length > 0 && (
                 <div>
-                  <Label>Attachments</Label>
+                  <Label>
+                    <TranslatableText>Attachments</TranslatableText>
+                  </Label>
                   <div className="mt-2 space-y-2">
                     {attachedFiles.map((file, index) => (
                       <div key={index} className="flex items-center bg-gray-50 p-2 rounded">
@@ -533,10 +555,10 @@ export default function SupportTicketForm() {
                     variant="outline" 
                     onClick={() => setLocation("/support-tickets")}
                   >
-    <TranslatableText>Cancel</TranslatableText>
+                    <TranslatableText>Cancel</TranslatableText>
                   </Button>
                   <Button type="submit" disabled={isPending}>
-                    {isPending ? "Saving..." : isEditing ? "Update Ticket" : "Create Ticket"}
+                    {isPending ? <TranslatableText>Saving...</TranslatableText> : isEditing ? <TranslatableText>Update Ticket</TranslatableText> : <TranslatableText>Create Ticket</TranslatableText>}
                   </Button>
                 </div>
               )}
@@ -548,7 +570,7 @@ export default function SupportTicketForm() {
                     variant="outline" 
                     onClick={() => setLocation(`/support-tickets/${ticketId}/edit`)}
                   >
-                    Edit Ticket
+                    <TranslatableText>Edit Ticket</TranslatableText>
                   </Button>
                 </div>
               )}

@@ -270,7 +270,9 @@ export default function FaqForm() {
                   name="order_index"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Display Order</TranslatableText></FormLabel>
+                      <FormLabel>
+                        <TranslatableText>Display Order</TranslatableText>
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           type="number"

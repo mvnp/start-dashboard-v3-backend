@@ -433,7 +433,9 @@ export default function Settings() {
                   name="language"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Display Language</TranslatableText></FormLabel>
+                      <FormLabel>
+                        <TranslatableText>Display Language</TranslatableText>
+                      </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -469,7 +471,9 @@ export default function Settings() {
                   name="timezone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Business Timezone</FormLabel>
+                      <FormLabel>
+                        <TranslatableText>Business Timezone</TranslatableText>
+                      </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -505,7 +509,9 @@ export default function Settings() {
                   name="currency"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Business Currency</FormLabel>
+                      <FormLabel>
+                        <TranslatableText>Business Currency</TranslatableText>
+                      </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>

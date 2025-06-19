@@ -214,7 +214,9 @@ export default function WhatsappForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Instance Name *</TranslatableText></FormLabel>
+                      <FormLabel>
+                        <TranslatableText>Instance Name *</TranslatableText>
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="e.g., Main Business WhatsApp"
@@ -232,7 +234,9 @@ export default function WhatsappForm() {
                   name="phone_number"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Phone Number *</TranslatableText></FormLabel>
+                      <FormLabel>
+                        <TranslatableText>Phone Number *</TranslatableText>
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="e.g., +1234567890"
@@ -254,7 +258,9 @@ export default function WhatsappForm() {
                   name="webhook_url"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Webhook URL</TranslatableText></FormLabel>
+                      <FormLabel>
+                        <TranslatableText>Webhook URL</TranslatableText>
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="https://yourapi.com/webhook"
@@ -262,7 +268,7 @@ export default function WhatsappForm() {
                         />
                       </FormControl>
                       <p className="text-sm text-slate-500">
-                        Optional: URL to receive WhatsApp messages and events
+                        <TranslatableText>Optional: URL to receive WhatsApp messages and events</TranslatableText>
                       </p>
                       <FormMessage />
                     </FormItem>
@@ -276,12 +282,14 @@ export default function WhatsappForm() {
                     variant="outline" 
                     onClick={() => setLocation("/whatsapp")}
                   >
-    <TranslatableText>Cancel</TranslatableText>
+                    <TranslatableText>Cancel</TranslatableText>
                   </Button>
                   <Button type="submit" disabled={isPending}>
-                    <TranslatableText>
-                      {isPending ? "Saving..." : isEditing ? "Update Instance" : "Create Instance"}
-                    </TranslatableText>
+                    {isPending 
+                      ? <TranslatableText>Saving...</TranslatableText>
+                      : isEditing ? <TranslatableText>Update Instance</TranslatableText> 
+                      : <TranslatableText>Create Instance</TranslatableText>
+                    }
                   </Button>
                 </div>
               </form>
@@ -295,7 +303,7 @@ export default function WhatsappForm() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Smartphone className="w-5 h-5" />
-                Connection Status
+                <TranslatableText>Connection Status</TranslatableText>
               </CardTitle>
             </CardHeader>
             <CardContent>
