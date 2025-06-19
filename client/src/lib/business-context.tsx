@@ -129,7 +129,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
       // Only clear if we have a different user ID stored
       if (lastUserId && lastUserId !== currentUserId.toString()) {
         console.log('Different user logged in, clearing business selection for user:', user.email);
-        safeRemoveLocalStorage("selectedBusinessId");
+        safeRemoveLocalStorage(`selectedBusinessId_${user.email}`);
         setSelectedBusinessIdState(null);
         setShowBusinessModal(false);
         setModalShownForUser(null);
@@ -144,12 +144,12 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
 
   const setSelectedBusinessId = (businessId: number | null) => {
     setSelectedBusinessIdState(businessId);
-    if (businessId) {
-      safeSetLocalStorage("selectedBusinessId", businessId.toString());
-      console.log('Saved business ID to localStorage:', businessId);
-    } else {
-      safeRemoveLocalStorage("selectedBusinessId");
-      console.log('Removed business ID from localStorage');
+    if (businessId && user) {
+      safeSetLocalStorage(`selectedBusinessId_${user.email}`, businessId.toString());
+      console.log('Saved business ID to localStorage:', businessId, 'for user:', user.email);
+    } else if (user) {
+      safeRemoveLocalStorage(`selectedBusinessId_${user.email}`);
+      console.log('Removed business ID from localStorage for user:', user.email);
     }
     
     // Force refresh of queries that depend on business context
