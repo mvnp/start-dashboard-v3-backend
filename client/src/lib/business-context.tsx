@@ -50,30 +50,33 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     userBusinesses.length > 1 && 
     !selectedBusinessId;
 
-  // Restore business ID from localStorage when user becomes available
+  // Single useEffect to handle business selection and restoration
   useEffect(() => {
-    if (user && !selectedBusinessId) {
-      const savedBusinessId = safeGetLocalStorage(`selectedBusinessId_${user.email}`);
-      if (savedBusinessId && !isNaN(parseInt(savedBusinessId))) {
-        const businessId = parseInt(savedBusinessId);
-        setSelectedBusinessIdState(businessId);
-        console.log('Restored business ID from localStorage:', businessId, 'for user:', user.email);
-      }
-    }
-  }, [user?.email]); // Only trigger when user email changes
-
-  // Handle business selection and restoration
-  useEffect(() => {
-    if (!isLoading && user && userBusinesses.length > 0) {
-      console.log(`Business selection logic for ${user.email}: current=${selectedBusinessId}, businesses=${userBusinesses.length}`);
+    if (!isLoading && user && userBusinesses.length > 0 && !selectedBusinessId) {
+      console.log(`Business auto-selection for ${user.email}: ${userBusinesses.length} businesses available`);
       
-      // If no business is selected, auto-select the first one
-      if (!selectedBusinessId) {
-        const firstBusiness = userBusinesses[0];
-        console.log(`Auto-selecting first business: ${firstBusiness.name} (ID: ${firstBusiness.id})`);
-        setSelectedBusinessIdState(firstBusiness.id);
-        safeSetLocalStorage(`selectedBusinessId_${user.email}`, firstBusiness.id.toString());
+      // Try to restore saved business ID first
+      const savedBusinessId = safeGetLocalStorage(`selectedBusinessId_${user.email}`);
+      
+      if (savedBusinessId) {
+        const savedId = parseInt(savedBusinessId);
+        const businessExists = userBusinesses.some(b => b.id === savedId);
+        
+        if (businessExists) {
+          console.log(`Restoring business ID ${savedId} for ${user.email}`);
+          setSelectedBusinessIdState(savedId);
+          return;
+        } else {
+          // Clear invalid saved business ID
+          safeRemoveLocalStorage(`selectedBusinessId_${user.email}`);
+        }
       }
+      
+      // Auto-select first business
+      const firstBusiness = userBusinesses[0];
+      console.log(`Auto-selecting business ID ${firstBusiness.id} (${firstBusiness.name}) for ${user.email}`);
+      setSelectedBusinessIdState(firstBusiness.id);
+      safeSetLocalStorage(`selectedBusinessId_${user.email}`, firstBusiness.id.toString());
     }
   }, [user, userBusinesses, isLoading, selectedBusinessId]);
 
@@ -115,10 +118,8 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     setSelectedBusinessIdState(businessId);
     if (businessId && user) {
       safeSetLocalStorage(`selectedBusinessId_${user.email}`, businessId.toString());
-      console.log('Saved business ID to localStorage:', businessId, 'for user:', user.email);
     } else if (user) {
       safeRemoveLocalStorage(`selectedBusinessId_${user.email}`);
-      console.log('Removed business ID from localStorage for user:', user.email);
     }
     
     // Force refresh of queries that depend on business context
