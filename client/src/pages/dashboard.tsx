@@ -172,7 +172,7 @@ export default function Dashboard() {
           </div>
           <div>
             <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">Dashboard</TranslatableText>
-            <TranslatableText tag="p" className="text-slate-600">Welcome back! Here's what's happening at your barbershop today.</TranslatableText>
+            <p className="text-slate-600 mt-2"><TranslatableText>Welcome back! Here's what's happening at your barbershop today.</TranslatableText></p>
           </div>
         </div>
       </div>
