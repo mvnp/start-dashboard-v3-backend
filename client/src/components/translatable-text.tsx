@@ -16,8 +16,33 @@ export function TranslatableText({
   className = '', 
   tag: Tag = 'span' 
 }: TranslatableTextProps) {
-  const { isEditionMode, currentLanguage, canEdit, selectedBusinessId } = useEdition();
-  const { getTranslation } = useTranslationCache();
+  // Handle case where component renders before providers are ready
+  let editionContext;
+  let translationCache;
+  
+  try {
+    editionContext = useEdition();
+  } catch (error) {
+    // EditionProvider not available, use fallback values
+    editionContext = {
+      isEditionMode: false,
+      currentLanguage: 'en',
+      canEdit: false,
+      selectedBusinessId: null
+    };
+  }
+  
+  try {
+    translationCache = useTranslationCache();
+  } catch (error) {
+    // TranslationCacheProvider not available, use fallback
+    translationCache = {
+      getTranslation: (text: string) => text
+    };
+  }
+  
+  const { isEditionMode, currentLanguage, canEdit, selectedBusinessId } = editionContext;
+  const { getTranslation } = translationCache;
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');

@@ -6,7 +6,17 @@ import { TranslatableText } from "@/components/translatable-text";
 
 export default function BusinessChangeButton() {
   const { user } = useAuth();
-  const { selectedBusiness, userBusinesses, changeBusiness } = useBusinessContext();
+  
+  // Handle case where component renders before BusinessProvider is ready
+  let businessContext;
+  try {
+    businessContext = useBusinessContext();
+  } catch (error) {
+    // BusinessProvider not available, return null
+    return null;
+  }
+  
+  const { selectedBusiness, userBusinesses, changeBusiness } = businessContext;
 
   // Don't show button if user has no businesses
   if (!user || userBusinesses.length === 0) {

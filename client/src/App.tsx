@@ -332,14 +332,14 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BusinessProvider>
-          <TranslationCacheProvider>
-            <EditionProvider>
+          <EditionProvider>
+            <TranslationCacheProvider>
               <TooltipProvider>
                 <Toaster />
                 <Router />
               </TooltipProvider>
-            </EditionProvider>
-          </TranslationCacheProvider>
+            </TranslationCacheProvider>
+          </EditionProvider>
         </BusinessProvider>
       </AuthProvider>
     </QueryClientProvider>
