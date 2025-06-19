@@ -138,19 +138,19 @@ export default function Traductions() {
   });
 
   // Handle Enter key press to save translation
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, string: string) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, englishString: any) => {
     if (e.key === 'Enter') {
-      const value = editingValues[string] || '';
+      const value = editingValues[englishString.string] || '';
       if (value.trim() && selectedLanguage) {
         saveTranslationMutation.mutate({
-          string,
+          string: englishString.string,
           traduction: value.trim(),
           language: selectedLanguage
         });
         // Remove from editing values after saving
         setEditingValues(prev => {
           const newValues = { ...prev };
-          delete newValues[string];
+          delete newValues[englishString.string];
           return newValues;
         });
       }
@@ -267,7 +267,7 @@ export default function Traductions() {
                           <Input
                             value={getTranslationValue(englishTranslation.string)}
                             onChange={(e) => handleInputChange(englishTranslation.string, e.target.value)}
-                            onKeyPress={(e) => handleKeyPress(e, englishTranslation.string)}
+                            onKeyPress={(e) => handleKeyPress(e, englishTranslation)}
                             placeholder={`Enter ${LANGUAGES.find(l => l.code === selectedLanguage)?.name} translation...`}
                             className="w-full"
                             disabled={saveTranslationMutation.isPending}

@@ -5,7 +5,7 @@ import {
   users, businesses, persons, roles, users_business, users_roles,
   services, appointments, barber_plans, payment_gateways, payment_gateway_types,
   accounting_transactions, accounting_transaction_categories,
-  support_tickets, support_ticket_categories, whatsapp_instances, faqs, settings, traductions,
+  support_tickets, support_ticket_categories, whatsapp_instances, faqs, settings, traductions, translations,
   type User, type InsertUser, 
   type Business, type InsertBusiness,
   type Person, type InsertPerson,
@@ -24,7 +24,8 @@ import {
   type WhatsappInstance, type InsertWhatsappInstance,
   type Faq, type InsertFaq,
   type Settings, type InsertSettings,
-  type Traduction, type InsertTraduction
+  type Traduction, type InsertTraduction,
+  type Translation, type InsertTranslation
 } from "@shared/schema";
 
 export interface IStorage {
