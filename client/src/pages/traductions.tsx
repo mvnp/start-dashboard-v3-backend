@@ -114,9 +114,10 @@ export default function Traductions() {
 
   // Create mutation for saving translations
   const saveTranslationMutation = useMutation({
-    mutationFn: async ({ string, traduction, language }: { string: string; traduction: string; language: string }) => {
+    mutationFn: async ({ englishStringObj, traduction, language }: { englishStringObj: any; traduction: string; language: string }) => {
       return apiRequest('POST', '/api/traductions', {
-        string,
+        string: englishStringObj.string,
+        traduction_id: englishStringObj.id,
         traduction,
         language
       });
@@ -143,7 +144,7 @@ export default function Traductions() {
       const value = editingValues[englishString.string] || '';
       if (value.trim() && selectedLanguage) {
         saveTranslationMutation.mutate({
-          string: englishString.string,
+          englishStringObj: englishString,
           traduction: value.trim(),
           language: selectedLanguage
         });
