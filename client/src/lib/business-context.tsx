@@ -62,29 +62,18 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     }
   }, [user?.email]); // Only trigger when user email changes
 
-  // Handle business selection and restoration in a single effect
+  // Handle business selection and restoration
   useEffect(() => {
-    if (!isLoading && user && userBusinesses.length > 0 && !selectedBusinessId) {
-      const savedBusinessId = safeGetLocalStorage(`selectedBusinessId_${user.email}`);
+    if (!isLoading && user && userBusinesses.length > 0) {
+      console.log(`Business selection logic for ${user.email}: current=${selectedBusinessId}, businesses=${userBusinesses.length}`);
       
-      // Try to restore saved business ID first
-      if (savedBusinessId) {
-        const savedId = parseInt(savedBusinessId);
-        const businessExists = userBusinesses.some(b => b.id === savedId);
-        
-        if (businessExists) {
-          setSelectedBusinessIdState(savedId);
-          return;
-        } else {
-          // Saved business no longer exists, clear it
-          safeRemoveLocalStorage(`selectedBusinessId_${user.email}`);
-        }
+      // If no business is selected, auto-select the first one
+      if (!selectedBusinessId) {
+        const firstBusiness = userBusinesses[0];
+        console.log(`Auto-selecting first business: ${firstBusiness.name} (ID: ${firstBusiness.id})`);
+        setSelectedBusinessIdState(firstBusiness.id);
+        safeSetLocalStorage(`selectedBusinessId_${user.email}`, firstBusiness.id.toString());
       }
-      
-      // Auto-select first business for all users
-      const firstBusiness = userBusinesses[0];
-      setSelectedBusinessIdState(firstBusiness.id);
-      safeSetLocalStorage(`selectedBusinessId_${user.email}`, firstBusiness.id.toString());
     }
   }, [user, userBusinesses, isLoading, selectedBusinessId]);
 

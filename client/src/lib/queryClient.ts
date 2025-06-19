@@ -26,6 +26,14 @@ export async function apiRequest(
     headers["Authorization"] = `Bearer ${token}`;
   }
   
+  // Debug localStorage contents
+  console.log(`API Request [${method}] ${url}:`, {
+    userEmail: user.email,
+    selectedBusinessId,
+    localStorageKey: user.email ? `selectedBusinessId_${user.email}` : 'no-email',
+    allLocalStorageKeys: Object.keys(localStorage).filter(k => k.includes('selectedBusinessId'))
+  });
+  
   if (selectedBusinessId) {
     headers["business-id"] = selectedBusinessId;
   }
@@ -58,6 +66,9 @@ export const getQueryFn: <T>(options: {
     
     if (selectedBusinessId) {
       headers["business-id"] = selectedBusinessId;
+      console.log(`🔧 Query [GET] ${queryKey[0]} - Sending business-id: ${selectedBusinessId}`);
+    } else {
+      console.log(`⚠️ Query [GET] ${queryKey[0]} - No business ID found. User email: ${user.email}`);
     }
 
     const res = await fetch(queryKey[0] as string, {
