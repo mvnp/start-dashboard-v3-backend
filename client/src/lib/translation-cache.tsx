@@ -18,10 +18,11 @@ const TranslationCacheContext = createContext<TranslationCacheContextType | unde
 export function TranslationCacheProvider({ children }: { children: React.ReactNode }) {
   const [translations, setTranslations] = useState<TranslationCache>({});
   const [isLoading, setIsLoading] = useState(false);
-  const { token } = useAuth();
+  const { user } = useAuth();
   const { selectedBusinessId } = useBusinessContext();
 
   const loadTranslations = async (language: string) => {
+    const token = localStorage.getItem('accessToken');
     if (!token || !language || translations[language]) {
       return; // Already loaded or no token
     }
@@ -66,12 +67,12 @@ export function TranslationCacheProvider({ children }: { children: React.ReactNo
 
   // Auto-load translations when language changes
   useEffect(() => {
-    if (selectedBusinessId && token) {
+    if (selectedBusinessId && user) {
       // Get language from business settings (this will be handled by EditionContext)
       // For now, we'll load Portuguese as the main non-English language
       loadTranslations('pt');
     }
-  }, [selectedBusinessId, token]);
+  }, [selectedBusinessId, user]);
 
   return (
     <TranslationCacheContext.Provider value={{

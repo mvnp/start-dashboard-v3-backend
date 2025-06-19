@@ -2,6 +2,7 @@ import { useState, useEffect, KeyboardEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Pen } from 'lucide-react';
 import { useEdition } from '@/lib/edition-context';
+import { useTranslationCache } from '@/lib/translation-cache';
 import { useToast } from '@/hooks/use-toast';
 
 interface TranslatableTextProps {
