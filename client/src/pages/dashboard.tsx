@@ -171,7 +171,7 @@ export default function Dashboard() {
             <Home className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="ghdtext-3xl font-bold text-slate-900fg">
+            <h1 className="text-3xl font-bold text-slate-900">
               <TranslatableText>Dashboard</TranslatableText>
             </h1>
             <p className="text-slate-600 mt-2">
