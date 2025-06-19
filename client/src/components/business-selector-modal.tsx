@@ -46,7 +46,7 @@ export default function BusinessSelectorModal({
       sessionStorage.setItem("selectedBusinessId", selectedBusinessId.toString());
       onBusinessSelected(selectedBusinessId);
       toast({
-        title: <TranslatableText>Business Selected</TranslatableText>,
+        title: "Business Selected",
         description: `You're now working with ${userBusinesses.find(b => b.id === selectedBusinessId)?.name}`,
       });
     }
@@ -56,8 +56,8 @@ export default function BusinessSelectorModal({
     // For initial selection, force logout if no business selected
     if (isInitialSelection && !selectedBusinessId) {
       toast({
-        title: <TranslatableText>Business Selection Required</TranslatableText>,
-        description: <TranslatableText>You must select a business to continue. Logging out...</TranslatableText>,
+        title: "Business Selection Required",
+        description: "You must select a business to continue. Logging out...",
         variant: "destructive",
       });
       setTimeout(() => {
