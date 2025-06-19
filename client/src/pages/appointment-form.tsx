@@ -12,6 +12,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Appointment, Service, Person } from "@shared/schema";
 import { useBusinessContext } from "@/lib/business-context";
+import { TranslatableText } from "@/components/translatable-text";
 
 interface AppointmentFormData {
   client_id: number;
@@ -258,29 +259,29 @@ export default function AppointmentForm() {
       <div className="flex items-center gap-4 mb-6">
         <Button variant="ghost" size="sm" onClick={() => setLocation("/appointments")}>
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Appointments
+          <TranslatableText>Back to Appointments</TranslatableText>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">
+          <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
             {isEdit ? "Edit Appointment" : "Create New Appointment"}
-          </h1>
-          <p className="text-slate-600">
+          </TranslatableText>
+          <TranslatableText tag="p" className="text-slate-600">
             {isEdit ? "Update the appointment details" : "Schedule a new appointment for a client"}
-          </p>
+          </TranslatableText>
         </div>
       </div>
 
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-xl font-semibold text-slate-900">
-            Appointment Information
+            <TranslatableText>Appointment Information</TranslatableText>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="client_id">Client</Label>
+                <Label htmlFor="client_id"><TranslatableText>Client</TranslatableText></Label>
                 <Select 
                   value={formData.client_id && formData.client_id > 0 ? formData.client_id.toString() : ""} 
                   onValueChange={(value) => handleInputChange('client_id', parseInt(value))}
@@ -300,7 +301,7 @@ export default function AppointmentForm() {
               </div>
 
               <div>
-                <Label htmlFor="user_id">Staff Member</Label>
+                <Label htmlFor="user_id"><TranslatableText>Staff Member</TranslatableText></Label>
                 <Select 
                   value={formData.user_id && formData.user_id > 0 ? formData.user_id.toString() : ""} 
                   onValueChange={(value) => handleInputChange('user_id', parseInt(value))}
@@ -320,7 +321,7 @@ export default function AppointmentForm() {
               </div>
 
               <div>
-                <Label htmlFor="service_id">Service</Label>
+                <Label htmlFor="service_id"><TranslatableText>Service</TranslatableText></Label>
                 <Select 
                   value={formData.service_id && formData.service_id > 0 ? formData.service_id.toString() : ""} 
                   onValueChange={(value) => handleInputChange('service_id', parseInt(value))}
@@ -340,7 +341,7 @@ export default function AppointmentForm() {
               </div>
 
               <div>
-                <Label htmlFor="status">Status</Label>
+                <Label htmlFor="status"><TranslatableText>Status</TranslatableText></Label>
                 <Select 
                   value={formData.status || ""} 
                   onValueChange={(value) => handleInputChange('status', value)}
@@ -360,7 +361,7 @@ export default function AppointmentForm() {
               </div>
 
               <div>
-                <Label htmlFor="appointment_date">Appointment Date</Label>
+                <Label htmlFor="appointment_date"><TranslatableText>Appointment Date</TranslatableText></Label>
                 <Input
                   id="appointment_date"
                   type="date"
@@ -371,7 +372,7 @@ export default function AppointmentForm() {
               </div>
 
               <div>
-                <Label htmlFor="appointment_time">Appointment Time</Label>
+                <Label htmlFor="appointment_time"><TranslatableText>Appointment Time</TranslatableText></Label>
                 <Input
                   id="appointment_time"
                   type="time"
@@ -383,7 +384,7 @@ export default function AppointmentForm() {
             </div>
 
             <div>
-              <Label htmlFor="notes">Notes (Optional)</Label>
+              <Label htmlFor="notes"><TranslatableText>Notes (Optional)</TranslatableText></Label>
               <Textarea
                 id="notes"
                 placeholder="Enter any special notes or requirements"
@@ -399,20 +400,22 @@ export default function AppointmentForm() {
                 disabled={createMutation.isPending || updateMutation.isPending}
                 className="bg-amber-600 hover:bg-amber-700 text-white"
               >
-                {createMutation.isPending || updateMutation.isPending ? (
-                  "Saving..."
-                ) : isEdit ? (
-                  "Update Appointment"
-                ) : (
-                  "Create Appointment"
-                )}
+                <TranslatableText>
+                  {createMutation.isPending || updateMutation.isPending ? (
+                    "Saving..."
+                  ) : isEdit ? (
+                    "Update Appointment"
+                  ) : (
+                    "Create Appointment"
+                  )}
+                </TranslatableText>
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setLocation("/appointments")}
               >
-                Cancel
+<TranslatableText>Cancel</TranslatableText>
               </Button>
             </div>
           </form>
