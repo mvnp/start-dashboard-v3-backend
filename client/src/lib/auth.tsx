@@ -137,8 +137,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Clear all authentication tokens to ensure clean start
       safeRemoveLocalStorage('accessToken');
       safeRemoveLocalStorage('refreshToken');
-      sessionStorage.removeItem('selectedBusinessId');
-      sessionStorage.removeItem('lastUserId');
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem('selectedBusinessId');
+        sessionStorage.removeItem('lastUserId');
+      }
       
       // Force user to null to require proper login
       setUser(null);

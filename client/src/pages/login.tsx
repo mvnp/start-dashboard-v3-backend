@@ -45,14 +45,14 @@ export default function Login() {
       // Invalidate all queries to refresh data with new user context
       queryClient.invalidateQueries();
       toast({
-        title: <TranslatableText>Login successful</TranslatableText>,
-        description: <TranslatableText>Welcome to BarberPro Dashboard</TranslatableText>
+        title: "Login successful",
+        description: "Welcome to BarberPro Dashboard"
       });
       setLocation("/");
     },
     onError: (error: Error) => {
       toast({
-        title: <TranslatableText>Login failed</TranslatableText>,
+        title: "Login failed",
         description: error.message,
         variant: "destructive",
       });
