@@ -1096,15 +1096,14 @@ class PostgresStorage implements IStorage {
   }
 
   // Translation methods
-  async getTraduction(string: string, language: string): Promise<Traduction | undefined> {
-    const result = await this.db.select().from(traductions).where(
-      and(eq(traductions.string, string), eq(traductions.language, language))
-    );
-    return result[0];
+  // Get English source strings (traductions table)
+  async getAllTraductions(): Promise<Traduction[]> {
+    return await this.db.select().from(traductions);
   }
 
-  async getAllTraductions(language: string): Promise<Traduction[]> {
-    return await this.db.select().from(traductions).where(eq(traductions.language, language));
+  async getTraductionByString(string: string): Promise<Traduction | undefined> {
+    const result = await this.db.select().from(traductions).where(eq(traductions.string, string));
+    return result[0];
   }
 
   async createTraduction(insertTraduction: InsertTraduction): Promise<Traduction> {
@@ -1112,18 +1111,53 @@ class PostgresStorage implements IStorage {
     return result[0];
   }
 
-  async updateTraduction(string: string, language: string, traduction: string): Promise<Traduction | undefined> {
-    const result = await this.db.update(traductions).set({
-      traduction,
-      updated_at: new Date()
-    }).where(
-      and(eq(traductions.string, string), eq(traductions.language, language))
-    ).returning();
+  // Get translations for a specific language (translations table)
+  async getTranslationsByLanguage(language: string): Promise<Translation[]> {
+    return await this.db.select({
+      id: translations.id,
+      traduction_id: translations.traduction_id,
+      traduction: translations.traduction,
+      language: translations.language,
+      created_at: translations.created_at,
+      updated_at: translations.updated_at,
+      string: traductions.string
+    }).from(translations)
+    .innerJoin(traductions, eq(translations.traduction_id, traductions.id))
+    .where(eq(translations.language, language));
+  }
+
+  async getTranslation(traductionId: number, language: string): Promise<Translation | undefined> {
+    const result = await this.db.select().from(translations).where(
+      and(eq(translations.traduction_id, traductionId), eq(translations.language, language))
+    );
     return result[0];
   }
 
-  async deleteTraduction(id: number): Promise<boolean> {
-    const result = await this.db.delete(traductions).where(eq(traductions.id, id));
+  async createOrUpdateTranslation(traductionId: number, language: string, traduction: string): Promise<Translation> {
+    // Try to update existing translation
+    const existing = await this.getTranslation(traductionId, language);
+    
+    if (existing) {
+      const result = await this.db.update(translations).set({
+        traduction,
+        updated_at: new Date()
+      }).where(
+        and(eq(translations.traduction_id, traductionId), eq(translations.language, language))
+      ).returning();
+      return result[0];
+    } else {
+      // Create new translation
+      const result = await this.db.insert(translations).values({
+        traduction_id: traductionId,
+        traduction,
+        language
+      }).returning();
+      return result[0];
+    }
+  }
+
+  async deleteTranslation(id: number): Promise<boolean> {
+    const result = await this.db.delete(translations).where(eq(translations.id, id));
     return result.rowCount > 0;
   }
 }
