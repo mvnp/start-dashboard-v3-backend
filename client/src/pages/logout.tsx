@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { TranslatableText } from "@/components/translatable-text";
 
 export default function Logout() {
   const [, setLocation] = useLocation();
@@ -17,8 +18,8 @@ export default function Logout() {
     setTimeout(() => {
       setIsLoading(false);
       toast({
-        title: "Logged out successfully",
-        description: "You have been signed out of your account",
+        title: <TranslatableText>Logged out successfully</TranslatableText>,
+        description: <TranslatableText>You have been signed out of your account</TranslatableText>,
       });
       setLocation("/login");
     }, 500);
@@ -36,9 +37,9 @@ export default function Logout() {
             <div className="mx-auto w-16 h-16 bg-red-100 rounded-xl flex items-center justify-center">
               <LogOut className="w-8 h-8 text-red-600" />
             </div>
-            <h2 className="mt-6 text-3xl font-bold text-slate-900">Sign Out</h2>
+            <h2 className="mt-6 text-3xl font-bold text-slate-900"><TranslatableText>Sign Out</TranslatableText></h2>
             <p className="mt-2 text-sm text-slate-600">
-              Are you sure you want to sign out of your account?
+              <TranslatableText>Are you sure you want to sign out of your account?</TranslatableText>
             </p>
           </div>
           
@@ -55,7 +56,7 @@ export default function Logout() {
               variant="outline"
               className="w-full border-slate-300 text-slate-700 hover:bg-slate-50 focus:ring-barber-primary"
             >
-              Cancel
+              <TranslatableText>Cancel</TranslatableText>
             </Button>
           </div>
         </CardContent>

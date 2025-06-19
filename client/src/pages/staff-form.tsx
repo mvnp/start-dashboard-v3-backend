@@ -106,8 +106,8 @@ export default function StaffForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/staff", selectedBusinessId] });
       toast({
-        title: "Staff member created",
-        description: "The new staff member has been successfully added.",
+        title: <TranslatableText>Staff member created</TranslatableText>,
+        description: <TranslatableText>The new staff member has been successfully added.</TranslatableText>,
       });
       setLocation("/staff");
     },
@@ -124,14 +124,14 @@ export default function StaffForm() {
       }
       
       // Handle email exists error specifically
-      if (errorData?.error === "Email exists on database") {
-        setErrors({ email: "Email exists on database" });
+      if (errorData?.error === <TranslatableText>Email exists on database</TranslatableText>) {
+        setErrors({ email: <TranslatableText>Email exists on database</TranslatableText> });
         return;
       }
       
-      const errorMessage = errorData?.error || "Failed to create staff member";
+      const errorMessage = errorData?.error || <TranslatableText>Failed to create staff member</TranslatableText>;
       toast({
-        title: "Error",
+        title: <TranslatableText>Error</TranslatableText>,
         description: errorMessage,
         variant: "destructive",
       });

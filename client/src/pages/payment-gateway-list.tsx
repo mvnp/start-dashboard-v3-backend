@@ -19,6 +19,7 @@ import { Plus, Search, Edit, Trash2, CreditCard, Globe, Key, Mail, User } from "
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { PaymentGateway, Staff } from "@shared/schema";
+import { TranslatableText } from "@/components/translatable-text";
 
 export default function PaymentGatewayList() {
   const [, setLocation] = useLocation();
@@ -41,15 +42,15 @@ export default function PaymentGatewayList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/payment-gateways"] });
       toast({
-        title: "Success",
-        description: "Payment gateway deleted successfully",
+        title: <TranslatableText>Success</TranslatableText>,
+        description: <TranslatableText>Payment gateway deleted successfully</TranslatableText>,
       });
       setDeleteId(null);
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete payment gateway",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to delete payment gateway</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -57,14 +58,14 @@ export default function PaymentGatewayList() {
 
   const getStaffName = (staffId: number) => {
     const staffMember = staff.find(s => s.id === staffId);
-    return staffMember ? `${staffMember.first_name} ${staffMember.last_name}` : 'Unknown Staff';
+    return staffMember ? `${staffMember.first_name} ${staffMember.last_name}` : <TranslatableText>Unknown Staff</TranslatableText>;
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'Mercado Pago': return 'bg-blue-100 text-blue-800';
-      case 'Asaas': return 'bg-green-100 text-green-800';
-      case 'Pagbank': return 'bg-orange-100 text-orange-800';
+      case 'Mercado Pago' : return 'bg-blue-100 text-blue-800';
+      case 'Asaas' : return 'bg-green-100 text-green-800';
+      case 'Pagbank' : return 'bg-orange-100 text-orange-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -94,8 +95,8 @@ export default function PaymentGatewayList() {
       <div className="w-full p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Payment Gateways</h1>
-            <p className="text-slate-600 mt-2">Manage payment processing systems</p>
+            <h1 className="text-3xl font-bold text-slate-900"><TranslatableText>Payment Gateways</TranslatableText>,</h1>
+            <p className="text-slate-600 mt-2"><TranslatableText>Manage payment processing systems</TranslatableText>,</p>
           </div>
         </div>
         <div className="animate-pulse space-y-4">
@@ -115,8 +116,8 @@ export default function PaymentGatewayList() {
             <CreditCard className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Payment Gateways</h1>
-            <p className="text-slate-600 mt-2">Manage payment processing systems</p>
+            <h1 className="text-3xl font-bold text-slate-900"><TranslatableText>Payment Gateways</TranslatableText></h1>
+            <p className="text-slate-600 mt-2"><TranslatableText>Manage payment processing systems</TranslatableText></p>
           </div>
         </div>
         <Button
@@ -126,7 +127,7 @@ export default function PaymentGatewayList() {
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-primary)'}
         >
           <Plus className="w-4 h-4 mr-2" />
-          New Gateway
+          <TranslatableText>New Gateway</TranslatableText>
         </Button>
       </div>
 
@@ -150,7 +151,7 @@ export default function PaymentGatewayList() {
                 <div className="flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-amber-600" />
                   <Badge variant="secondary" className="text-xs">
-                    ID: {gateway.id}
+                    <TranslatableText>ID:</TranslatableText> {gateway.id}
                   </Badge>
                 </div>
                 <div className="flex gap-2">
@@ -175,7 +176,7 @@ export default function PaymentGatewayList() {
                 <div className="flex items-center gap-2">
                   <Key className="w-4 h-4 text-green-600" />
                   <span className="text-sm text-slate-600">
-                    Key: {gateway.api_key.substring(0, 12)}...
+                    <TranslatableText>Key:</TranslatableText> {gateway.api_key.substring(0, 12)}...
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -190,7 +191,7 @@ export default function PaymentGatewayList() {
 
               <div className="bg-slate-50 p-3 rounded-md">
                 <p className="text-xs text-slate-600">
-                  Token: {gateway.token.substring(0, 16)}...
+                  <TranslatableText>Token:</TranslatableText> {gateway.token.substring(0, 16)}...
                 </p>
               </div>
 
@@ -202,7 +203,7 @@ export default function PaymentGatewayList() {
                   className="flex-1"
                 >
                   <Edit className="w-4 h-4 mr-1" />
-                  Edit
+                  <TranslatableText>Edit</TranslatableText>
                 </Button>
                 <Button
                   variant="outline"
@@ -221,7 +222,7 @@ export default function PaymentGatewayList() {
       {filteredGateways.length === 0 && !isLoading && (
         <div className="text-center py-12">
           <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No payment gateways found</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2"><TranslatableText>No payment gateways found</TranslatableText></h3>
           <p className="text-gray-600 mb-4">
             {searchTerm ? "No gateways match your search criteria." : "Get started by adding your first payment gateway."}
           </p>
@@ -230,7 +231,7 @@ export default function PaymentGatewayList() {
             className="bg-amber-600 hover:bg-amber-700 text-white"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Add Payment Gateway
+            <TranslatableText>Add Payment Gateway</TranslatableText>
           </Button>
         </div>
       )}
@@ -238,19 +239,19 @@ export default function PaymentGatewayList() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Payment Gateway</AlertDialogTitle>
+            <AlertDialogTitle><TranslatableText>Delete Payment Gateway</TranslatableText></AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this payment gateway? This action cannot be undone.
+              <TranslatableText>Are you sure you want to delete this payment gateway? This action cannot be undone.</TranslatableText>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel><TranslatableText>Cancel</TranslatableText></AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-red-600 hover:bg-red-700"
               disabled={deleteMutation.isPending}
             >
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteMutation.isPending ? <TranslatableText>Deleting...</TranslatableText> : <TranslatableText>Delete</TranslatableText>}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
