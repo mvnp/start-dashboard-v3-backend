@@ -173,6 +173,7 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 19, 2025. Added 12 new TranslatableText strings from appointment-list.tsx to database - registered appointment filtering and pagination strings in English for translation system
 - June 19, 2025. Registered 556 TranslatableText strings in database - scanned entire codebase and bulk inserted all TranslatableText wrapped strings as English translations (string=traduction, language='en') for complete translation system functionality
 - June 19, 2025. Fixed TranslatableText display properties to preserve proper block-level layout - headers and paragraphs now maintain natural line breaks while keeping pen icon editing functionality for Super Admin users
 - June 19, 2025. Completed TranslatableText coverage across ALL form pages with proper imports - resolved missing TranslatableText import in support-ticket-list.tsx and ensured all 11 major form pages have complete translation editing capability
