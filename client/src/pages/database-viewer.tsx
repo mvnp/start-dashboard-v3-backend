@@ -110,8 +110,12 @@ export default function DatabaseViewer() {
         <div className="flex items-center gap-3">
           <Database className="w-8 h-8 text-blue-600" />
           <div>
-            <h1 className="text-3xl font-bold text-gray-900"><TranslatableText>Database Viewer</TranslatableText></h1>
-            <p className="text-gray-600"><TranslatableText>Browse and export database tables</TranslatableText></p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              <TranslatableText>Database Viewer</TranslatableText>
+            </h1>
+            <p className="text-gray-600">
+              <TranslatableText>Browse and export database tables</TranslatableText>
+            </p>
           </div>
         </div>
         

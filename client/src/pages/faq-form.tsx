@@ -142,16 +142,16 @@ export default function FaqForm() {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   const commonCategories = [
-    "General",
-    "Appointments",
-    "Services",
-    "Pricing",
-    "Policies",
-    "Payment",
-    "Location",
-    "Hours",
-    "Contact",
-    "Products"
+    <TranslatableText>General</TranslatableText>,
+    <TranslatableText>Appointments</TranslatableText>,
+    <TranslatableText>Services</TranslatableText>,
+    <TranslatableText>Pricing</TranslatableText>,
+    <TranslatableText>Policies</TranslatableText>,
+    <TranslatableText>Payment</TranslatableText>,
+    <TranslatableText>Location</TranslatableText>,
+    <TranslatableText>Hours</TranslatableText>,
+    <TranslatableText>Contact</TranslatableText>,
+    <TranslatableText>Products</TranslatableText>,
   ];
 
   // Show loading state while FAQ data is being fetched

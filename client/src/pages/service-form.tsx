@@ -156,7 +156,7 @@ export default function ServiceForm() {
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" size="sm" onClick={() => setLocation("/services")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Services
+            <TranslatableText>Back to Services</TranslatableText>
           </Button>
         </div>
         <div className="animate-pulse space-y-4">
@@ -175,12 +175,12 @@ export default function ServiceForm() {
           <TranslatableText>Back to Services</TranslatableText>
         </Button>
         <div>
-          <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
-            {isEdit ? "Edit Service" : "Create New Service"}
-          </TranslatableText>
-          <TranslatableText tag="p" className="text-slate-600">
-            {isEdit ? "Update the service details" : "Add a new service to your barbershop"}
-          </TranslatableText>
+          <h1 className="text-3xl font-bold text-slate-900">
+            {isEdit ? <TranslatableText>Edit Service</TranslatableText> : <TranslatableText>Create New Service</TranslatableText>}
+          </h1>
+          <p className="text-slate-600">
+            {isEdit ? <TranslatableText>Update the service details</TranslatableText> : <TranslatableText>Add a new service to your barbershop</TranslatableText>}
+          </p>
         </div>
       </div>
 
@@ -219,7 +219,9 @@ export default function ServiceForm() {
               </div>
 
               <div>
-                <Label htmlFor="duration"><TranslatableText>Duration (minutes)</TranslatableText></Label>
+                <Label htmlFor="duration">
+                  <TranslatableText>Duration (minutes)</TranslatableText>
+                </Label>
                 <Input
                   id="duration"
                   type="number"
@@ -233,7 +235,9 @@ export default function ServiceForm() {
             </div>
 
             <div>
-              <Label htmlFor="description"><TranslatableText>Service Description (Optional)</TranslatableText></Label>
+              <Label htmlFor="description">
+                <TranslatableText>Service Description (Optional)</TranslatableText>
+              </Label>
               <Textarea
                 id="description"
                 placeholder="Enter service description (optional)"

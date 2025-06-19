@@ -81,19 +81,19 @@ const todaySchedule = [
 
 const quickActions = [
   {
-    name: "New Appointment",
+    name: <TranslatableText>New Appointment</TranslatableText>,
     icon: Plus,
     style: { backgroundColor: 'var(--barber-primary)', color: 'white' },
     hoverStyle: { backgroundColor: 'var(--barber-secondary)' },
   },
   {
-    name: "Add Client",
+    name: <TranslatableText>Add Client</TranslatableText>,
     icon: UserPlus,
     style: { backgroundColor: 'var(--barber-primary)', color: 'white' },
     hoverStyle: { backgroundColor: 'var(--barber-secondary)' },
   },
   {
-    name: "Process Payment",
+    name: <TranslatableText>Process Payment</TranslatableText>,
     icon: CreditCard,
     style: { backgroundColor: 'var(--barber-primary)', color: 'white' },
     hoverStyle: { backgroundColor: 'var(--barber-secondary)' },
@@ -125,7 +125,7 @@ export default function Dashboard() {
 
   const statsCards = [
     {
-      title: "Today's Appointments",
+      title: <TranslatableText>Today's Appointments</TranslatableText>,
       value: isLoadingStats ? "..." : stats?.todayAppointments.toString() || "0",
       change: isLoadingStats ? "Loading..." : stats?.appointmentChange || "No data",
       changeType: "neutral",
@@ -134,7 +134,7 @@ export default function Dashboard() {
       iconBg: "bg-blue-100",
     },
     {
-      title: "Daily Revenue",
+      title: <TranslatableText>Daily Revenue</TranslatableText>,
       value: isLoadingStats ? "..." : formatCurrency(stats?.todayRevenue || 0),
       change: isLoadingStats ? "Loading..." : stats?.revenueChange || "No data",
       changeType: stats?.revenueChangeType || "neutral",
@@ -143,7 +143,7 @@ export default function Dashboard() {
       iconBg: "bg-green-100",
     },
     {
-      title: "Total Clients",
+      title: <TranslatableText>Total Clients</TranslatableText>,
       value: isLoadingStats ? "..." : stats?.totalClients.toString() || "0",
       change: isLoadingStats ? "Loading..." : stats?.clientChange || "No data",
       changeType: stats?.clientChangeType || "neutral",
@@ -152,7 +152,7 @@ export default function Dashboard() {
       iconBg: "bg-purple-100",
     },
     {
-      title: "Services Completed",
+      title: <TranslatableText>Services Completed</TranslatableText>,
       value: isLoadingStats ? "..." : stats?.todayCompleted.toString() || "0",
       change: isLoadingStats ? "Loading..." : stats?.completedChange || "No data",
       changeType: stats?.completedChangeType || "neutral",
@@ -190,7 +190,7 @@ export default function Dashboard() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <TranslatableText tag="p" className="text-sm font-medium text-slate-600">{stat.title}</TranslatableText>
+                    <p className="text-sm font-medium text-slate-600">{stat.title}</p>
                     <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
                     <p className={`text-xs ${
                       stat.changeType === 'positive' ? 'text-green-600' : 
