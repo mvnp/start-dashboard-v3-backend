@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { navigationItems } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import UserSwitcher from "@/components/user-switcher";
-import BusinessChangeButton from "@/components/business-change-button";
 import { TranslatableText } from "@/components/translatable-text";
 
 interface SidebarProps {
@@ -49,10 +48,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <UserSwitcher />
           </div>
 
-          {/* Business Selector */}
-          <div className="px-4 pb-4">
-            <BusinessChangeButton />
-          </div>
+
 
           {/* Navigation Menu */}
           <nav className="flex-1 px-4 py-2 space-y-2">

@@ -2,16 +2,13 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Business } from "@shared/schema";
 import { useAuth } from "@/lib/auth";
-import BusinessSelectorModal from "@/components/business-selector-modal";
-import { safeGetLocalStorage, safeSetLocalStorage, safeRemoveLocalStorage, safeGetSessionStorage, safeSetSessionStorage, safeRemoveSessionStorage } from "./safe-storage";
+import { safeGetLocalStorage, safeSetLocalStorage, safeRemoveLocalStorage } from "./safe-storage";
 
 interface BusinessContextType {
   selectedBusinessId: number | null;
   selectedBusiness: Business | null;
   userBusinesses: Business[];
   setSelectedBusinessId: (businessId: number | null) => void;
-  isBusinessSelectionRequired: boolean;
-  changeBusiness: () => void;
 }
 
 const BusinessContext = createContext<BusinessContextType | undefined>(undefined);
@@ -29,7 +26,7 @@ interface BusinessProviderProps {
 }
 
 export function BusinessProvider({ children }: BusinessProviderProps) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   
   const [selectedBusinessId, setSelectedBusinessIdState] = useState<number | null>(null);
