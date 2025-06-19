@@ -98,6 +98,15 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
             }
           }
           
+          // For Super Admin, auto-select first business to avoid modal unless they want to change
+          if (user.isSuperAdmin && userBusinesses.length > 0) {
+            const firstBusiness = userBusinesses[0];
+            setSelectedBusinessIdState(firstBusiness.id);
+            safeSetLocalStorage(`selectedBusinessId_${user.email}`, firstBusiness.id.toString());
+            console.log('Auto-selected first business for Super Admin', user.email, ':', firstBusiness.name);
+            return;
+          }
+          
           // Show modal only if no valid selection exists and modal hasn't been shown for this user
           if (modalShownForUser !== user.userId && !showBusinessModal) {
             console.log('Showing business selection modal for', user.email, 'with multiple businesses. Role ID:', user.roleId);
