@@ -255,7 +255,7 @@ export default function StaffList() {
                                 className="bg-red-600 hover:bg-red-700"
                                 disabled={deleteStaffMutation.isPending}
                               >
-                                {deleteStaffMutation.isPending ? "Deleting..." : "Delete"}
+                                {deleteStaffMutation.isPending ? <TranslatableText>Deleting...</TranslatableText> : <TranslatableText>Delete</TranslatableText>}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>

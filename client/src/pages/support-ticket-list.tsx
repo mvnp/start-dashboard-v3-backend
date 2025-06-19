@@ -28,14 +28,14 @@ export default function SupportTicketList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/support-tickets"] });
       toast({
-        title: "Ticket deleted",
-        description: "The support ticket has been successfully deleted.",
+        title: <TranslatableText>Ticket deleted</TranslatableText>,
+        description: <TranslatableText>The support ticket has been successfully deleted.</TranslatableText>,
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete the ticket. Please try again.",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to delete the ticket. Please try again.</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -138,7 +138,7 @@ export default function SupportTicketList() {
           <Link href="/support-tickets/new">
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              New Ticket
+              <TranslatableText>New Ticket</TranslatableText>
             </Button>
           </Link>
         </div>
@@ -149,7 +149,7 @@ export default function SupportTicketList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Total Tickets</p>
+                  <p className="text-sm font-medium text-slate-600"><TranslatableText>Total Tickets</TranslatableText></p>
                   <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
                 </div>
                 <AlertCircle className="w-8 h-8 text-slate-400" />
@@ -160,7 +160,7 @@ export default function SupportTicketList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Open</p>
+                  <p className="text-sm font-medium text-slate-600"><TranslatableText>Open</TranslatableText></p>
                   <p className="text-2xl font-bold text-red-600">{stats.open}</p>
                 </div>
                 <AlertCircle className="w-8 h-8 text-red-400" />
@@ -171,7 +171,7 @@ export default function SupportTicketList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">In Progress</p>
+                  <p className="text-sm font-medium text-slate-600"><TranslatableText>In Progress</TranslatableText></p>
                   <p className="text-2xl font-bold text-yellow-600">{stats.inProgress}</p>
                 </div>
                 <Clock className="w-8 h-8 text-yellow-400" />
@@ -182,7 +182,7 @@ export default function SupportTicketList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Resolved</p>
+                  <p className="text-sm font-medium text-slate-600"><TranslatableText>Resolved</TranslatableText></p>
                   <p className="text-2xl font-bold text-green-600">{stats.resolved}</p>
                 </div>
                 <CheckCircle className="w-8 h-8 text-green-400" />
@@ -207,11 +207,11 @@ export default function SupportTicketList() {
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="open">Open</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="resolved">Resolved</SelectItem>
-              <SelectItem value="closed">Closed</SelectItem>
+              <SelectItem value="all"><TranslatableText>All Statuses</TranslatableText></SelectItem>
+              <SelectItem value="open"><TranslatableText>Open</TranslatableText></SelectItem>
+              <SelectItem value="in_progress"><TranslatableText>In Progress</TranslatableText></SelectItem>
+              <SelectItem value="resolved"><TranslatableText>Resolved</TranslatableText></SelectItem>
+              <SelectItem value="closed"><TranslatableText>Closed</TranslatableText></SelectItem>
             </SelectContent>
           </Select>
           <Select value={priorityFilter} onValueChange={setPriorityFilter}>
@@ -219,11 +219,11 @@ export default function SupportTicketList() {
               <SelectValue placeholder="Filter by priority" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Priorities</SelectItem>
-              <SelectItem value="urgent">Urgent</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
+              <SelectItem value="all"><TranslatableText>All Priorities</TranslatableText></SelectItem>
+              <SelectItem value="urgent"><TranslatableText>Urgent</TranslatableText></SelectItem>
+              <SelectItem value="high"><TranslatableText>High</TranslatableText></SelectItem>
+              <SelectItem value="medium"><TranslatableText>Medium</TranslatableText></SelectItem>
+              <SelectItem value="low"><TranslatableText>Low</TranslatableText></SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -235,11 +235,12 @@ export default function SupportTicketList() {
           <Card>
             <CardContent className="p-8 text-center">
               <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No tickets found</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2"><TranslatableText>No tickets found</TranslatableText></h3>
               <p className="text-gray-600">
                 {searchTerm || statusFilter !== "all" || priorityFilter !== "all"
-                  ? "Try adjusting your search or filters"
-                  : "Get started by creating your first support ticket"}
+                  ? <TranslatableText>Try adjusting your search or filters</TranslatableText>
+                  : <TranslatableText>Get started by creating your first support ticket</TranslatableText>
+                }
               </p>
             </CardContent>
           </Card>
@@ -261,10 +262,10 @@ export default function SupportTicketList() {
                     </div>
                     <p className="text-slate-600 mb-3 line-clamp-2">{ticket.description}</p>
                     <div className="flex items-center gap-4 text-sm text-slate-500">
-                      <span><strong>From:</strong> {ticket.client_name}</span>
-                      <span><strong>Email:</strong> {ticket.client_email}</span>
-                      <span><strong>Category:</strong> {ticket.category}</span>
-                      <span><strong>Created:</strong> {new Date(ticket.created_at!).toLocaleDateString()}</span>
+                      <span><strong><TranslatableText>From:</TranslatableText></strong> {ticket.client_name}</span>
+                      <span><strong><TranslatableText>Email:</TranslatableText></strong> {ticket.client_email}</span>
+                      <span><strong><TranslatableText>Category:</TranslatableText></strong> {ticket.category}</span>
+                      <span><strong><TranslatableText>Created:</TranslatableText></strong> {new Date(ticket.created_at!).toLocaleDateString()}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-4">
