@@ -15,6 +15,7 @@ import { insertBusinessSchema, type InsertBusiness, type Business, type User } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
+import { TranslatableText } from "@/components/translatable-text";
 
 interface BusinessFormProps {
   businessId?: number;

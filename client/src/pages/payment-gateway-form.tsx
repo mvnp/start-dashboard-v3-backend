@@ -184,29 +184,29 @@ export default function PaymentGatewayForm() {
       <div className="flex items-center gap-4 mb-6">
         <Button variant="ghost" size="sm" onClick={() => setLocation("/payment-gateways")}>
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Payment Gateways
+          <TranslatableText>Back to Payment Gateways</TranslatableText>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">
+          <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
             {isEdit ? "Edit Payment Gateway" : "Create New Payment Gateway"}
-          </h1>
-          <p className="text-slate-600">
+          </TranslatableText>
+          <TranslatableText tag="p" className="text-slate-600">
             {isEdit ? "Update the payment gateway details" : "Add a new payment processing system"}
-          </p>
+          </TranslatableText>
         </div>
       </div>
 
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-xl font-semibold text-slate-900">
-            Gateway Information
+            <TranslatableText>Gateway Information</TranslatableText>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="name">Gateway Name</Label>
+                <Label htmlFor="name"><TranslatableText>Gateway Name</TranslatableText></Label>
                 <Input
                   id="name"
                   placeholder="e.g., Main Mercado Pago"
@@ -217,7 +217,7 @@ export default function PaymentGatewayForm() {
               </div>
 
               <div>
-                <Label htmlFor="type">Gateway Type</Label>
+                <Label htmlFor="type"><TranslatableText>Gateway Type</TranslatableText></Label>
                 <Select 
                   value={formData.type} 
                   onValueChange={(value) => handleTypeChange(value)}
@@ -235,7 +235,7 @@ export default function PaymentGatewayForm() {
               </div>
 
               <div>
-                <Label htmlFor="api_url">API URL</Label>
+                <Label htmlFor="api_url"><TranslatableText>API URL</TranslatableText></Label>
                 <Input
                   id="api_url"
                   placeholder="https://api.example.com"
@@ -246,7 +246,7 @@ export default function PaymentGatewayForm() {
               </div>
 
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email"><TranslatableText>Email</TranslatableText></Label>
                 <Input
                   id="email"
                   type="email"
@@ -258,7 +258,7 @@ export default function PaymentGatewayForm() {
               </div>
 
               <div>
-                <Label htmlFor="api_key">API Key</Label>
+                <Label htmlFor="api_key"><TranslatableText>API Key</TranslatableText></Label>
                 <Input
                   id="api_key"
                   type="password"
@@ -270,7 +270,7 @@ export default function PaymentGatewayForm() {
               </div>
 
               <div>
-                <Label htmlFor="token">Token</Label>
+                <Label htmlFor="token"><TranslatableText>Token</TranslatableText></Label>
                 <Input
                   id="token"
                   type="password"
@@ -282,7 +282,7 @@ export default function PaymentGatewayForm() {
               </div>
 
               <div>
-                <Label htmlFor="staff_id">Assigned Staff</Label>
+                <Label htmlFor="staff_id"><TranslatableText>Assigned Staff</TranslatableText></Label>
                 <Select 
                   value={formData.staff_id ? formData.staff_id.toString() : ""} 
                   onValueChange={(value) => handleInputChange('staff_id', parseInt(value))}
@@ -307,7 +307,7 @@ export default function PaymentGatewayForm() {
                   checked={formData.is_active}
                   onCheckedChange={(checked) => handleInputChange('is_active', !!checked)}
                 />
-                <Label htmlFor="is_active">Gateway is active</Label>
+                <Label htmlFor="is_active"><TranslatableText>Gateway is active</TranslatableText></Label>
               </div>
             </div>
 
@@ -317,20 +317,22 @@ export default function PaymentGatewayForm() {
                 disabled={createMutation.isPending || updateMutation.isPending}
                 className="bg-amber-600 hover:bg-amber-700 text-white"
               >
-                {createMutation.isPending || updateMutation.isPending ? (
-                  "Saving..."
-                ) : isEdit ? (
-                  "Update Gateway"
-                ) : (
-                  "Create Gateway"
-                )}
+                <TranslatableText>
+                  {createMutation.isPending || updateMutation.isPending ? (
+                    "Saving..."
+                  ) : isEdit ? (
+                    "Update Gateway"
+                  ) : (
+                    "Create Gateway"
+                  )}
+                </TranslatableText>
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setLocation("/payment-gateways")}
               >
-                Cancel
+<TranslatableText>Cancel</TranslatableText>
               </Button>
             </div>
           </form>
