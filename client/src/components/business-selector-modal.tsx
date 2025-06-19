@@ -30,9 +30,9 @@ export default function BusinessSelectorModal({
   const { user } = useAuth();
   const [selectedBusinessId, setSelectedBusinessId] = useState<number | null>(null);
 
-  // Fetch user businesses
+  // Fetch user businesses - Super Admin gets all businesses, others get their assigned businesses
   const { data: userBusinesses = [], isLoading } = useQuery<Business[]>({
-    queryKey: ["/api/user-businesses"],
+    queryKey: user?.isSuperAdmin ? ["/api/businesses"] : ["/api/user-businesses"],
     enabled: isOpen && !!user,
   });
 

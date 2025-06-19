@@ -36,16 +36,34 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
   const [isInitialSelection, setIsInitialSelection] = useState(false);
   const [modalShownForUser, setModalShownForUser] = useState<number | null>(null);
 
+  // Force invalidate cache when user changes to ensure fresh data
+  useEffect(() => {
+    if (user) {
+      queryClient.invalidateQueries({ queryKey: ["/api/businesses"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user-businesses"] });
+    }
+  }, [user?.userId, user?.isSuperAdmin, queryClient]);
+
   // Fetch user businesses - Super Admin gets all businesses, others get their assigned businesses
   const { data: userBusinesses = [], isLoading } = useQuery<Business[]>({
     queryKey: user?.isSuperAdmin ? ["/api/businesses"] : ["/api/user-businesses"],
     enabled: !!user,
     staleTime: 0, // Force fresh requests to debug caching issue
-    cacheTime: 0, // Disable caching temporarily for debugging
-    onSuccess: (data) => {
-      console.log('Business query result for user:', user?.email, 'isSuperAdmin:', user?.isSuperAdmin, 'businesses found:', data?.length, data);
-    }
+    gcTime: 0, // Disable caching temporarily for debugging
   });
+
+  // Debug logging for business data (TanStack Query v5 doesn't support onSuccess)
+  useEffect(() => {
+    if (userBusinesses.length > 0) {
+      console.log('Business query completed:', {
+        user: user?.email,
+        isSuperAdmin: user?.isSuperAdmin,
+        queryKey: user?.isSuperAdmin ? "/api/businesses" : "/api/user-businesses",
+        businessCount: userBusinesses.length,
+        businesses: userBusinesses.map(b => ({ id: b.id, name: b.name }))
+      });
+    }
+  }, [userBusinesses, user?.email, user?.isSuperAdmin]);
 
   // Check if business selection is required - for all users with multiple businesses (Super Admin, Merchant, Employee)
   const isBusinessSelectionRequired = 
