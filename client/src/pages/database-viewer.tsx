@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Database, RefreshCw, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { TranslatableText } from "@/components/translatable-text";
 
 const tables = [
   { name: 'users', label: 'Users' },
@@ -109,19 +110,19 @@ export default function DatabaseViewer() {
         <div className="flex items-center gap-3">
           <Database className="w-8 h-8 text-blue-600" />
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Database Viewer</h1>
-            <p className="text-gray-600">Browse and export database tables</p>
+            <h1 className="text-3xl font-bold text-gray-900"><TranslatableText>Database Viewer</TranslatableText></h1>
+            <p className="text-gray-600"><TranslatableText>Browse and export database tables</TranslatableText></p>
           </div>
         </div>
         
         <div className="flex items-center gap-3">
           <Button onClick={handleRefresh} variant="outline" size="sm">
             <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
+            <TranslatableText>Refresh</TranslatableText>
           </Button>
           <Button onClick={handleExport} variant="outline" size="sm" disabled={!tableData}>
             <Download className="w-4 h-4 mr-2" />
-            Export CSV
+            <TranslatableText>Export CSV</TranslatableText>
           </Button>
         </div>
       </div>
@@ -129,10 +130,10 @@ export default function DatabaseViewer() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Table Selection</CardTitle>
+            <CardTitle><TranslatableText>Table Selection</TranslatableText></CardTitle>
             {tableCount && (
               <Badge variant="secondary">
-                {tableCount} records
+                {tableCount} <TranslatableText>records</TranslatableText>
               </Badge>
             )}
           </div>
@@ -159,14 +160,14 @@ export default function DatabaseViewer() {
       <Card>
         <CardHeader>
           <CardTitle>
-            Table Data: {tables.find(t => t.name === selectedTable)?.label}
+            <TranslatableText>Table Data:</TranslatableText> {tables.find(t => t.name === selectedTable)?.label}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
-              <span className="ml-2">Loading table data...</span>
+              <span className="ml-2"><TranslatableText>Loading table data...</TranslatableText></span>
             </div>
           ) : tableData && tableData.length > 0 ? (
             <div className="overflow-x-auto">
@@ -195,7 +196,7 @@ export default function DatabaseViewer() {
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              No data found in this table
+              <TranslatableText>No data found in this table</TranslatableText>
             </div>
           )}
         </CardContent>

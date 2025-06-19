@@ -97,15 +97,15 @@ export default function FaqForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/faqs"] });
       toast({
-        title: "FAQ created",
-        description: "The FAQ has been successfully created.",
+        title: <TranslatableText>FAQ created</TranslatableText>,
+        description: <TranslatableText>The FAQ has been successfully created.</TranslatableText>,
       });
       setLocation("/faqs");
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to create the FAQ. Please try again.",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to create the FAQ. Please try again.</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -117,15 +117,15 @@ export default function FaqForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/faqs"] });
       queryClient.invalidateQueries({ queryKey: ["/api/faqs", faqId] });
       toast({
-        title: "FAQ updated",
-        description: "The FAQ has been successfully updated.",
+        title: <TranslatableText>FAQ updated</TranslatableText>,
+        description: <TranslatableText>The FAQ has been successfully updated.</TranslatableText>,
       });
       setLocation("/faqs");
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update the FAQ. Please try again.",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to update the FAQ. Please try again.</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -185,10 +185,10 @@ export default function FaqForm() {
           </div>
           <div>
             <h1 className="text-3xl font-bold text-slate-900">
-              {isEditing ? "Edit FAQ" : "New FAQ"}
+              {isEditing ? <TranslatableText>Edit FAQ</TranslatableText> : <TranslatableText>New FAQ</TranslatableText>}
             </h1>
             <p className="text-slate-600">
-              {isEditing ? "Update FAQ details" : "Create a new frequently asked question"}
+              {isEditing ? <TranslatableText>Update FAQ details</TranslatableText> : <TranslatableText>Create a new frequently asked question</TranslatableText>}
             </p>
           </div>
         </div>
@@ -270,7 +270,7 @@ export default function FaqForm() {
                   name="order_index"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Display Order</FormLabel>
+                      <FormLabel><TranslatableText>Display Order</TranslatableText></FormLabel>
                       <FormControl>
                         <Input 
                           type="number"
@@ -280,7 +280,7 @@ export default function FaqForm() {
                         />
                       </FormControl>
                       <p className="text-sm text-slate-500">
-                        Lower numbers appear first (0 = highest priority)
+                        <TranslatableText>Lower numbers appear first (0 = highest priority)</TranslatableText>
                       </p>
                       <FormMessage />
                     </FormItem>
@@ -296,10 +296,10 @@ export default function FaqForm() {
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
                       <FormLabel className="text-base">
-                        Published
+                        <TranslatableText>Published</TranslatableText>
                       </FormLabel>
                       <div className="text-sm text-slate-500">
-                        Make this FAQ visible to customers
+                        <TranslatableText>Make this FAQ visible to customers</TranslatableText>
                       </div>
                     </div>
                     <FormControl>
@@ -319,7 +319,7 @@ export default function FaqForm() {
                   variant="outline" 
                   onClick={() => setLocation("/faqs")}
                 >
-  <TranslatableText>Cancel</TranslatableText>
+                  <TranslatableText>Cancel</TranslatableText>
                 </Button>
                 <Button type="submit" disabled={isPending}>
                   <TranslatableText>
@@ -335,24 +335,24 @@ export default function FaqForm() {
       {/* Help Section */}
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle>Tips for Writing Good FAQs</CardTitle>
+          <CardTitle><TranslatableText>Tips for Writing Good FAQs</TranslatableText></CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3 text-sm text-slate-600">
             <div>
-              <strong>Questions:</strong> Write questions from the customer's perspective. Use clear, simple language.
+              <strong><TranslatableText>Questions:</TranslatableText></strong> <TranslatableText>Write questions from the customer's perspective. Use clear, simple language.</TranslatableText>
             </div>
             <div>
-              <strong>Answers:</strong> Provide complete, helpful answers. Include relevant details but keep it concise.
+              <strong><TranslatableText>Answers:</TranslatableText></strong> <TranslatableText>Provide complete, helpful answers. Include relevant details but keep it concise.</TranslatableText>
             </div>
             <div>
-              <strong>Categories:</strong> Group related questions together. Common categories include appointments, services, pricing, and policies.
+              <strong><TranslatableText>Categories:</TranslatableText></strong> <TranslatableText>Group related questions together. Common categories include appointments, services, pricing, and policies.</TranslatableText>
             </div>
             <div>
-              <strong>Order:</strong> Put the most important and frequently asked questions first (lower order numbers).
+              <strong><TranslatableText>Order:</TranslatableText></strong> <TranslatableText>Put the most important and frequently asked questions first (lower order numbers).</TranslatableText>
             </div>
             <div>
-              <strong>Publishing:</strong> Use draft status to prepare FAQs before making them visible to customers.
+              <strong><TranslatableText>Publishing:</TranslatableText></strong> <TranslatableText>Use draft status to prepare FAQs before making them visible to customers.</TranslatableText>
             </div>
           </div>
         </CardContent>
