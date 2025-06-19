@@ -174,6 +174,7 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 19, 2025. Fixed Super Admin business selection modal issue - updated business selector modal to use correct API endpoint (/api/businesses) for Super Admin users instead of /api/user-businesses, ensuring all 4 businesses are visible during business selection instead of just 1. Server-side logic was working correctly; frontend was using wrong endpoint due to hardcoded query key.
 - June 19, 2025. Implemented session persistence to maintain user authentication across browser refreshes - JWT tokens are now validated on app initialization and user session is restored automatically, eliminating the need to re-login after page refresh.
 - June 19, 2025. Enhanced Translation Management page layout to occupy 100% of content area and added comprehensive pagination with 10-25-50-100 rows per page options, persistent settings, and smart navigation controls for handling 755+ translatable strings efficiently.
 - June 19, 2025. Added auto-login back for development mode - automatically logs in with mvnpereira@gmail.com credentials when in development environment to speed up development workflow. Production deployments still require manual authentication.
