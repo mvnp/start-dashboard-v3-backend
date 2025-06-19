@@ -971,13 +971,17 @@ export function registerRoutes(app: Express): void {
       const businessIds = getBusinessFilter(user, req);
 
       let services;
-      // Filter services by selected business or user's business access
-      if (businessIds && businessIds.length > 0) {
-        services = await storage.getServicesByBusinessIds(businessIds);
-      } else if (user.isSuperAdmin) {
+      // Super Admin can see all data when no business is selected
+      if (user.isSuperAdmin && businessIds === null) {
         services = await storage.getAllServices();
-      } else {
-        services = await storage.getServicesByBusinessIds(user.businessIds);
+      } 
+      // For selected business or non-Super Admin users
+      else if (businessIds && businessIds.length > 0) {
+        services = await storage.getServicesByBusinessIds(businessIds);
+      } 
+      // Non-Super Admin without selected business gets empty array
+      else {
+        services = [];
       }
       res.json(services);
     } catch (error) {
@@ -1281,8 +1285,10 @@ export function registerRoutes(app: Express): void {
       const endDate = req.query.endDate as string;
       
       let appointments;
-      // Super Admin can see all appointments
-      if (user.isSuperAdmin) {
+      const businessIds = getBusinessFilter(user, req);
+      
+      // Super Admin can see all data when no business is selected
+      if (user.isSuperAdmin && businessIds === null) {
         appointments = await storage.getFilteredAppointments({
           page,
           limit,
@@ -1292,17 +1298,9 @@ export function registerRoutes(app: Express): void {
           endDate,
           businessIds: null
         });
-      } else {
-        // Get business filter from middleware that handles session business selection
-        const businessIds = getBusinessFilter(user, req);
-        if (!businessIds || businessIds.length === 0) {
-          return res.status(400).json({ 
-            error: "Business selection required", 
-            message: "Please select a business to view appointments" 
-          });
-        }
-        
-        // Other users see only appointments from their selected business
+      } 
+      // For selected business or non-Super Admin users
+      else if (businessIds && businessIds.length > 0) {
         appointments = await storage.getFilteredAppointments({
           page,
           limit,
@@ -1312,6 +1310,10 @@ export function registerRoutes(app: Express): void {
           endDate,
           businessIds: businessIds
         });
+      } 
+      // Non-Super Admin without selected business gets empty array
+      else {
+        appointments = { appointments: [], total: 0, totalPages: 0, currentPage: page };
       }
 
       // Map person IDs back to user IDs for staff members in all appointments
@@ -1592,8 +1594,23 @@ export function registerRoutes(app: Express): void {
   // Barber Plan routes
   app.get("/api/barber-plans", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
-      const businessIds = getBusinessFilter(req.user, req);
-      const plans = await storage.getAllBarberPlans(businessIds);
+      const user = req.user!;
+      const businessIds = getBusinessFilter(user, req);
+      
+      let plans;
+      // Super Admin can see all data when no business is selected
+      if (user.isSuperAdmin && businessIds === null) {
+        plans = await storage.getAllBarberPlans(null);
+      } 
+      // For selected business or non-Super Admin users
+      else if (businessIds && businessIds.length > 0) {
+        plans = await storage.getAllBarberPlans(businessIds);
+      } 
+      // Non-Super Admin without selected business gets empty array
+      else {
+        plans = [];
+      }
+      
       res.json(plans);
     } catch (error) {
       console.error("Barber plan fetch error:", error);
@@ -1771,8 +1788,23 @@ export function registerRoutes(app: Express): void {
   // Accounting Transaction Category routes
   app.get("/api/accounting-transaction-categories", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const businessIds = getBusinessFilter(req.user, req);
-      const categories = await storage.getAccountingTransactionCategoriesByBusinessIds(businessIds);
+      const user = req.user!;
+      const businessIds = getBusinessFilter(user, req);
+      
+      let categories;
+      // Super Admin can see all data when no business is selected
+      if (user.isSuperAdmin && businessIds === null) {
+        categories = await storage.getAllAccountingTransactionCategories();
+      } 
+      // For selected business or non-Super Admin users
+      else if (businessIds && businessIds.length > 0) {
+        categories = await storage.getAccountingTransactionCategoriesByBusinessIds(businessIds);
+      } 
+      // Non-Super Admin without selected business gets empty array
+      else {
+        categories = [];
+      }
+      
       res.json(categories);
     } catch (error) {
       console.error("Accounting transaction categories fetch error:", error);
@@ -1908,8 +1940,23 @@ export function registerRoutes(app: Express): void {
    */
   app.get("/api/accounting-transactions", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const businessIds = getBusinessFilter(req.user, req);
-      const transactions = await storage.getAccountingTransactionsByBusinessIds(businessIds);
+      const user = req.user!;
+      const businessIds = getBusinessFilter(user, req);
+      
+      let transactions;
+      // Super Admin can see all data when no business is selected
+      if (user.isSuperAdmin && businessIds === null) {
+        transactions = await storage.getAllAccountingTransactions();
+      } 
+      // For selected business or non-Super Admin users
+      else if (businessIds && businessIds.length > 0) {
+        transactions = await storage.getAccountingTransactionsByBusinessIds(businessIds);
+      } 
+      // Non-Super Admin without selected business gets empty array
+      else {
+        transactions = [];
+      }
+      
       res.json(transactions);
     } catch (error) {
       console.error("Accounting transactions fetch error:", error);
@@ -2272,13 +2319,17 @@ export function registerRoutes(app: Express): void {
       const businessIds = getBusinessFilter(user, req);
       
       let instances;
-      // Filter WhatsApp instances by selected business or user's business access
-      if (businessIds && businessIds.length > 0) {
-        instances = await storage.getWhatsappInstancesByBusinessIds(businessIds);
-      } else if (user.isSuperAdmin) {
+      // Super Admin can see all data when no business is selected
+      if (user.isSuperAdmin && businessIds === null) {
         instances = await storage.getAllWhatsappInstances();
-      } else {
-        instances = await storage.getWhatsappInstancesByBusinessIds(user.businessIds);
+      } 
+      // For selected business or non-Super Admin users
+      else if (businessIds && businessIds.length > 0) {
+        instances = await storage.getWhatsappInstancesByBusinessIds(businessIds);
+      } 
+      // Non-Super Admin without selected business gets empty array
+      else {
+        instances = [];
       }
       
       res.json(instances);
