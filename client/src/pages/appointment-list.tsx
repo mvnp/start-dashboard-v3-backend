@@ -256,7 +256,7 @@ export default function AppointmentList() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Status Filter */}
             <div className="space-y-2">
-              <Label>Status</Label>
+              <Label><TranslatableText>Status</TranslatableText></Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
@@ -273,20 +273,20 @@ export default function AppointmentList() {
 
             {/* Today Filter */}
             <div className="space-y-2">
-              <Label>Quick Filters</Label>
+              <Label><TranslatableText>Quick Filters</TranslatableText></Label>
               <Button 
                 variant={todayFilter ? "default" : "outline"} 
                 onClick={applyTodayFilter}
                 className="w-full gap-2"
               >
                 <CalendarDays className="w-4 h-4" />
-                Today's Appointments
+                <TranslatableText>Today's Appointments</TranslatableText>
               </Button>
             </div>
 
             {/* Start Date */}
             <div className="space-y-2">
-              <Label>Start Date</Label>
+              <Label><TranslatableText>Start Date</TranslatableText></Label>
               <Input
                 type="date"
                 value={startDate}
@@ -301,7 +301,7 @@ export default function AppointmentList() {
 
             {/* End Date */}
             <div className="space-y-2">
-              <Label>End Date</Label>
+              <Label><TranslatableText>End Date</TranslatableText></Label>
               <Input
                 type="date"
                 value={endDate}
@@ -318,7 +318,7 @@ export default function AppointmentList() {
             <div className="space-y-2">
               <Label className="invisible">Clear</Label>
               <Button variant="outline" onClick={resetFilters} className="w-full">
-                Clear Filters
+                <TranslatableText>Clear Filters</TranslatableText>
               </Button>
             </div>
           </div>
@@ -328,10 +328,10 @@ export default function AppointmentList() {
       {/* Results Summary */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-600">
-          Showing {appointments.length} of {total} appointments
+          <TranslatableText>Showing</TranslatableText> {appointments.length} <TranslatableText>of</TranslatableText> {total} <TranslatableText>appointments</TranslatableText>
         </p>
         <div className="flex items-center gap-2 text-sm text-gray-600">
-          Page {currentPage} of {totalPages}
+          <TranslatableText>Page</TranslatableText> {currentPage} <TranslatableText>of</TranslatableText> {totalPages}
         </div>
       </div>
 
@@ -341,7 +341,7 @@ export default function AppointmentList() {
           <Card>
             <CardContent className="text-center py-8">
               <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No appointments found matching your criteria</p>
+              <p className="text-gray-500"><TranslatableText>No appointments found matching your criteria</TranslatableText></p>
             </CardContent>
           </Card>
         ) : (
@@ -445,7 +445,7 @@ export default function AppointmentList() {
             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
           >
-            Next
+            <TranslatableText>Next</TranslatableText>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
@@ -455,18 +455,18 @@ export default function AppointmentList() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Appointment</AlertDialogTitle>
+            <AlertDialogTitle><TranslatableText>Delete Appointment</TranslatableText></AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this appointment? This action cannot be undone.
+              <TranslatableText>Are you sure you want to delete this appointment? This action cannot be undone.</TranslatableText>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel><TranslatableText>Cancel</TranslatableText></AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteId && handleDelete(deleteId)}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              <TranslatableText>Delete</TranslatableText>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
