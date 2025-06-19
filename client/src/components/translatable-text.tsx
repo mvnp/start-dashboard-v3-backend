@@ -40,7 +40,7 @@ export function TranslatableText({
   const { data: translation } = useQuery({
     queryKey: ['translation', children, currentLanguage, selectedBusinessId],
     queryFn: async () => {
-      console.log('Fetching translation for:', children, 'in language:', currentLanguage);
+
       const response = await fetch(`/api/traductions/${encodeURIComponent(children)}/${currentLanguage}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,

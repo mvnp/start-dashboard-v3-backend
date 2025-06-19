@@ -28,7 +28,6 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     queryKey: ['settings', selectedBusinessId],
     queryFn: async () => {
       if (!selectedBusinessId) return null;
-      console.log('Fetching settings for business ID:', selectedBusinessId);
       const response = await fetch('/api/settings', {
         headers: {
           'business-id': selectedBusinessId.toString(),
@@ -37,12 +36,10 @@ export function EditionProvider({ children }: { children: ReactNode }) {
       });
       if (!response.ok) return null;
       const settingsData = await response.json();
-      console.log('Settings data received:', settingsData);
       
       // Cache language setting in localStorage for persistence across page reloads
       if (settingsData?.language) {
         localStorage.setItem(`businessLanguage_${selectedBusinessId}`, settingsData.language);
-        console.log('Cached language:', settingsData.language, 'for business:', selectedBusinessId);
       }
       
       return settingsData;

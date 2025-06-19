@@ -174,6 +174,7 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 19, 2025. Successfully fixed provider hierarchy and language detection system - moved BusinessProvider before EditionProvider in App.tsx to enable proper business context access in translation system. Portuguese translations now load correctly based on business settings with automatic language detection from business configuration. Fixed localStorage persistence and session restoration for seamless user experience across page refreshes.
 - June 19, 2025. Fixed persistence issue where selected language and business information were lost on page refresh (F5) by implementing proper localStorage restoration with user-specific keys and automatic business selection for single-business users. Translation system now maintains language settings across browser refresh.
 - June 19, 2025. Implemented automatic language detection from business settings - SaaS now displays all strings in the language configured in business settings automatically, without requiring edition mode activation. Translation system loads appropriate language based on business configuration and falls back to English when translations are unavailable.
 - June 19, 2025. Fixed DOM manipulation errors in TranslatableText components - resolved circular rendering issues by removing JSX elements from navigation constants and replacing toast messages with plain strings instead of TranslatableText components.
