@@ -129,21 +129,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Initialize authentication - clear any existing tokens in development to force clean login
+  // Initialize authentication - restore session if valid tokens exist
   useEffect(() => {
     const initializeAuth = async () => {
       setLoading(true);
       
-      // Clear all authentication tokens to ensure clean start
-      safeRemoveLocalStorage('accessToken');
-      safeRemoveLocalStorage('refreshToken');
-      if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.removeItem('selectedBusinessId');
-        sessionStorage.removeItem('lastUserId');
+      const accessToken = safeGetLocalStorage('accessToken');
+      const refreshToken = safeGetLocalStorage('refreshToken');
+      
+      if (accessToken && refreshToken) {
+        // Try to restore user session with existing tokens
+        try {
+          await getCurrentUser();
+        } catch (error) {
+          console.error('Failed to restore session:', error);
+          // Clear invalid tokens
+          safeRemoveLocalStorage('accessToken');
+          safeRemoveLocalStorage('refreshToken');
+          sessionStorage.removeItem('selectedBusinessId');
+          setUser(null);
+        }
+      } else {
+        // No tokens found, user needs to login
+        setUser(null);
       }
       
-      // Force user to null to require proper login
-      setUser(null);
       setLoading(false);
     };
 
