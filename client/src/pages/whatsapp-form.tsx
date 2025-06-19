@@ -69,15 +69,15 @@ export default function WhatsappForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances"] });
       toast({
-        title: "Instance created",
-        description: "The WhatsApp instance has been successfully created.",
+        title: <TranslatableText>Instance created</TranslatableText>,
+        description: <TranslatableText>The WhatsApp instance has been successfully created.</TranslatableText>,
       });
       setLocation("/whatsapp");
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to create the WhatsApp instance. Please try again.",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to create the WhatsApp instance. Please try again.</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -89,15 +89,15 @@ export default function WhatsappForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances"] });
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances", instanceId] });
       toast({
-        title: "Instance updated",
-        description: "The WhatsApp instance has been successfully updated.",
+        title: <TranslatableText>Instance updated</TranslatableText>,
+        description: <TranslatableText>The WhatsApp instance has been successfully updated.</TranslatableText>,
       });
       setLocation("/whatsapp");
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update the WhatsApp instance. Please try again.",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to update the WhatsApp instance. Please try again.</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -113,14 +113,14 @@ export default function WhatsappForm() {
       setIsConnecting(true);
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances", instanceId] });
       toast({
-        title: "QR Code generated",
-        description: "QR code has been generated. Please scan it with your phone to connect.",
+        title: <TranslatableText>QR Code generated</TranslatableText>,
+        description: <TranslatableText>QR code has been generated. Please scan it with your phone to connect.</TranslatableText>,
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to generate QR code. Please try again.",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to generate QR code. Please try again.</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -135,14 +135,14 @@ export default function WhatsappForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances"] });
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances", instanceId] });
       toast({
-        title: "Instance connected",
-        description: "WhatsApp instance has been successfully connected.",
+        title: <TranslatableText>Instance connected</TranslatableText>,
+        description: <TranslatableText>WhatsApp instance has been successfully connected.</TranslatableText>,
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to connect the instance. Please try again.",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to connect the instance. Please try again.</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -188,16 +188,16 @@ export default function WhatsappForm() {
           <div className="w-12 h-12 bg-barber-primary rounded-xl flex items-center justify-center">
             <MessageCircle className="w-6 h-6 text-white" />
           </div>
-          <div>
-            <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
-              {isEditing ? "Edit WhatsApp Instance" : "New WhatsApp Instance"}
-            </TranslatableText>
-            <TranslatableText tag="p" className="text-slate-600">
-              {isEditing ? "Update instance details" : "Create a new WhatsApp business instance"}
-            </TranslatableText>
-          </div>
+        <div>
+        <h1 className="text-3xl font-bold text-slate-900">
+          {isEditing ? <TranslatableText>Edit WhatsApp Instance</TranslatableText> : <TranslatableText>New WhatsApp Instance</TranslatableText>}
+        </h1>
+        <p className="text-slate-600">
+          {isEditing ? <TranslatableText>Update instance details</TranslatableText> : <TranslatableText>Create a new WhatsApp business instance</TranslatableText>}
+        </p>
         </div>
       </div>
+    </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Form Card */}
@@ -240,7 +240,8 @@ export default function WhatsappForm() {
                         />
                       </FormControl>
                       <p className="text-sm text-slate-500">
-                        Include country code (e.g., +1 for US, +55 for Brazil)
+                        <TranslatableText>Include country code (e.g., +1 for US, +55 for Brazil)</TranslatableText>
+                        
                       </p>
                       <FormMessage />
                     </FormItem>
