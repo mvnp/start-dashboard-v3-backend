@@ -228,9 +228,9 @@ export default function PaymentGatewayForm() {
                     <SelectValue placeholder="Select gateway type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Mercado Pago">Mercado Pago</SelectItem>
-                    <SelectItem value="Asaas">Asaas</SelectItem>
-                    <SelectItem value="Pagbank">Pagbank</SelectItem>
+                    <SelectItem value="Mercado Pago"><TranslatableText>Mercado Pago</TranslatableText></SelectItem>
+                    <SelectItem value="Asaas"><TranslatableText>Asaas</TranslatableText></SelectItem>
+                    <SelectItem value="Pagbank"><TranslatableText>Pagbank</TranslatableText></SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -308,7 +308,9 @@ export default function PaymentGatewayForm() {
                   checked={formData.is_active}
                   onCheckedChange={(checked) => handleInputChange('is_active', !!checked)}
                 />
-                <Label htmlFor="is_active"><TranslatableText>Gateway is active</TranslatableText></Label>
+                <Label htmlFor="is_active">
+                  <TranslatableText>Gateway is active</TranslatableText>
+                </Label>
               </div>
             </div>
 
@@ -318,22 +320,20 @@ export default function PaymentGatewayForm() {
                 disabled={createMutation.isPending || updateMutation.isPending}
                 className="bg-amber-600 hover:bg-amber-700 text-white"
               >
-                <TranslatableText>
-                  {createMutation.isPending || updateMutation.isPending ? (
-                    "Saving..."
-                  ) : isEdit ? (
-                    "Update Gateway"
-                  ) : (
-                    "Create Gateway"
-                  )}
-                </TranslatableText>
+                {createMutation.isPending || updateMutation.isPending ? (
+                  <TranslatableText>Saving...</TranslatableText>
+                ) : isEdit ? (
+                  <TranslatableText>Update Gateway</TranslatableText>
+                ) : (
+                  <TranslatableText>Create Gateway</TranslatableText>
+                )}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setLocation("/payment-gateways")}
               >
-<TranslatableText>Cancel</TranslatableText>
+                <TranslatableText>Cancel</TranslatableText>
               </Button>
             </div>
           </form>
