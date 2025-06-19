@@ -13,6 +13,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useBusinessContext } from "@/lib/business-context";
 import { Service } from "@shared/schema";
+import { TranslatableText } from "@/components/translatable-text";
 
 interface ServiceFormData {
   name: string;
@@ -171,29 +172,29 @@ export default function ServiceForm() {
       <div className="flex items-center gap-4 mb-6">
         <Button variant="ghost" size="sm" onClick={() => setLocation("/services")}>
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Services
+          <TranslatableText>Back to Services</TranslatableText>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">
+          <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
             {isEdit ? "Edit Service" : "Create New Service"}
-          </h1>
-          <p className="text-slate-600">
+          </TranslatableText>
+          <TranslatableText tag="p" className="text-slate-600">
             {isEdit ? "Update the service details" : "Add a new service to your barbershop"}
-          </p>
+          </TranslatableText>
         </div>
       </div>
 
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-xl font-semibold text-slate-900">
+          <TranslatableText tag="div" className="text-xl font-semibold text-slate-900">
             Service Information
-          </CardTitle>
+          </TranslatableText>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="name">Service Name</Label>
+                <Label htmlFor="name"><TranslatableText>Service Name</TranslatableText></Label>
                 <Input
                   id="name"
                   placeholder="Enter service name"
@@ -204,7 +205,7 @@ export default function ServiceForm() {
               </div>
 
               <div>
-                <Label htmlFor="price">Price ($)</Label>
+                <Label htmlFor="price"><TranslatableText>Price ($)</TranslatableText></Label>
                 <Input
                   id="price"
                   type="number"
@@ -218,7 +219,7 @@ export default function ServiceForm() {
               </div>
 
               <div>
-                <Label htmlFor="duration">Duration (minutes)</Label>
+                <Label htmlFor="duration"><TranslatableText>Duration (minutes)</TranslatableText></Label>
                 <Input
                   id="duration"
                   type="number"
@@ -232,7 +233,7 @@ export default function ServiceForm() {
             </div>
 
             <div>
-              <Label htmlFor="description">Service Description (Optional)</Label>
+              <Label htmlFor="description"><TranslatableText>Service Description (Optional)</TranslatableText></Label>
               <Textarea
                 id="description"
                 placeholder="Enter service description (optional)"
@@ -249,7 +250,7 @@ export default function ServiceForm() {
                 onCheckedChange={(checked) => handleInputChange('is_active', checked)}
               />
               <Label htmlFor="is_active" className="text-sm font-medium">
-                Service is active and available for booking
+                <TranslatableText>Service is active and available for booking</TranslatableText>
               </Label>
             </div>
 
@@ -262,11 +263,11 @@ export default function ServiceForm() {
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-primary)'}
               >
                 {createMutation.isPending || updateMutation.isPending ? (
-                  "Saving..."
+                  <TranslatableText>Saving...</TranslatableText>
                 ) : isEdit ? (
-                  "Update Service"
+                  <TranslatableText>Update Service</TranslatableText>
                 ) : (
-                  "Create Service"
+                  <TranslatableText>Create Service</TranslatableText>
                 )}
               </Button>
               <Button
@@ -274,7 +275,7 @@ export default function ServiceForm() {
                 variant="outline"
                 onClick={() => setLocation("/services")}
               >
-                Cancel
+                <TranslatableText>Cancel</TranslatableText>
               </Button>
             </div>
           </form>
