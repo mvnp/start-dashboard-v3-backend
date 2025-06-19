@@ -32,17 +32,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
   const { user, logout } = useAuth();
   const queryClient = useQueryClient();
   
-  // Initialize selectedBusinessId from localStorage
-  const [selectedBusinessId, setSelectedBusinessIdState] = useState<number | null>(() => {
-    if (typeof window !== 'undefined' && user?.email) {
-      const saved = safeGetLocalStorage(`selectedBusinessId_${user.email}`);
-      if (saved && !isNaN(parseInt(saved))) {
-        console.log('Initializing business ID from localStorage:', parseInt(saved), 'for user:', user.email);
-        return parseInt(saved);
-      }
-    }
-    return null;
-  });
+  const [selectedBusinessId, setSelectedBusinessIdState] = useState<number | null>(null);
   
   const [showBusinessModal, setShowBusinessModal] = useState(false);
   const [isInitialSelection, setIsInitialSelection] = useState(false);
@@ -59,6 +49,18 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     !!user && 
     userBusinesses.length > 1 && 
     !selectedBusinessId;
+
+  // Restore business ID from localStorage when user becomes available
+  useEffect(() => {
+    if (user && !selectedBusinessId) {
+      const savedBusinessId = safeGetLocalStorage(`selectedBusinessId_${user.email}`);
+      if (savedBusinessId && !isNaN(parseInt(savedBusinessId))) {
+        const businessId = parseInt(savedBusinessId);
+        setSelectedBusinessIdState(businessId);
+        console.log('Restored business ID from localStorage:', businessId, 'for user:', user.email);
+      }
+    }
+  }, [user?.email]); // Only trigger when user email changes
 
   // Handle business selection and restoration in a single effect
   useEffect(() => {
