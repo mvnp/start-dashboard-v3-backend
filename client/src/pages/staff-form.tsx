@@ -144,8 +144,8 @@ export default function StaffForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/staff", selectedBusinessId] });
       queryClient.invalidateQueries({ queryKey: [`/api/staff/${staffId}`] });
       toast({
-        title: "Staff member updated",
-        description: "The staff member has been successfully updated.",
+        title: <TranslatableText>Staff member updated</TranslatableText>,
+        description: <TranslatableText>The staff member has been successfully updated.</TranslatableText>,
       });
       setLocation("/staff");
     },
@@ -162,14 +162,14 @@ export default function StaffForm() {
       }
       
       // Handle email exists error specifically
-      if (errorData?.error === "Email exists on database") {
-        setErrors({ email: "Email exists on database" });
+      if (errorData?.error === <TranslatableText>Email exists on database</TranslatableText>) {
+        setErrors({ email: <TranslatableText>Email exists on database</TranslatableText> });
         return;
       }
       
-      const errorMessage = errorData?.error || "Failed to update staff member";
+      const errorMessage = errorData?.error || <TranslatableText>Failed to update staff member</TranslatableText>;
       toast({
-        title: "Error",
+        title: <TranslatableText>Error</TranslatableText>,
         description: errorMessage,
         variant: "destructive",
       });
@@ -179,7 +179,7 @@ export default function StaffForm() {
   useEffect(() => {
     console.log("useEffect triggered - staffMember:", staffMember, "isEdit:", isEdit);
     if (staffMember && isEdit && !isLoading) {
-      console.log("Setting form data with staff member:", {
+      console.log(<TranslatableText>Setting form data with staff member:</TranslatableText>, {
         email: staffMember.email,
         business_id: staffMember.business_id,
         role_id: staffMember.role_id
@@ -195,7 +195,7 @@ export default function StaffForm() {
         salary: Number(staffMember.salary) || 0,
         business_id: staffMember.business_id || 0,
       };
-      console.log("New form data being set:", newFormData);
+      console.log(<TranslatableText>New form data being set:</TranslatableText>, newFormData);
       setFormData(newFormData);
       // Clear any previous errors when loading new data
       setErrors({});
@@ -216,41 +216,41 @@ export default function StaffForm() {
     const newErrors: Record<string, string> = {};
     
     if (!formData.first_name.trim()) {
-      newErrors.first_name = "First name is required";
+      newErrors.first_name = <TranslatableText>First name is required</TranslatableText>;
     }
     
     if (!formData.last_name.trim()) {
-      newErrors.last_name = "Last name is required";
+      newErrors.last_name = <TranslatableText>Last name is required</TranslatableText>;
     }
     
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+      newErrors.email = <TranslatableText>Please enter a valid email address</TranslatableText>;
     }
     
     if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
+      newErrors.phone = <TranslatableText>Phone number is required</TranslatableText>;
     }
     
     if (!formData.tax_id.trim()) {
-      newErrors.tax_id = "Tax ID is required";
+      newErrors.tax_id = <TranslatableText>Tax ID is required</TranslatableText>;
     }
     
     if (!formData.role_id || formData.role_id === 0) {
-      newErrors.role_id = "Role is required";
+      newErrors.role_id = <TranslatableText>Role is required</TranslatableText>;
     }
     
     if (!formData.hire_date.trim()) {
-      newErrors.hire_date = "Hire date is required";
+      newErrors.hire_date = <TranslatableText>Hire date is required</TranslatableText>;
     }
     
     if (!formData.salary || formData.salary <= 0) {
-      newErrors.salary = "Salary must be greater than 0";
+      newErrors.salary = <TranslatableText>Salary must be greater than 0</TranslatableText>;
     }
     
     if (!formData.business_id || formData.business_id === 0) {
-      newErrors.business_id = "Business is required";
+      newErrors.business_id = <TranslatableText>Business is required</TranslatableText>;
     }
     
     setErrors(newErrors);
@@ -343,12 +343,12 @@ export default function StaffForm() {
             <User className="w-6 h-6 text-white" />
           </div>
           <div>
-            <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
-              {isEdit ? "Edit Staff Member" : "Add New Staff Member"}
-            </TranslatableText>
-            <TranslatableText tag="p" className="text-slate-600 mt-2">
-              {isEdit ? "Update staff member information" : "Enter details for the new team member"}
-            </TranslatableText>
+          <h1 className="text-3xl font-bold text-slate-900">
+            {isEdit ? <TranslatableText>Edit Staff Member</TranslatableText> : <TranslatableText>Add New Staff Member</TranslatableText>}
+          </h1>
+          <p className="text-slate-600 mt-2">
+            {isEdit ? <TranslatableText>Update staff member information</TranslatableText> : <TranslatableText>Enter details for the new team member</TranslatableText>}
+          </p>
           </div>
         </div>
       </div>
