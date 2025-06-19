@@ -309,7 +309,7 @@ export default function Support() {
                     disabled={isSubmitting}
                     className="w-full bg-barber-primary hover:bg-barber-secondary"
                   >
-                    {isSubmitting ? "Submitting..." : "Submit Support Request"}
+                    {isSubmitting ? <TranslatableText>Submitting...</TranslatableText> : <TranslatableText>Submit Support Request</TranslatableText>}
                   </Button>
                 </form>
               </CardContent>
