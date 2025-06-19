@@ -47,16 +47,14 @@ function Layout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <BusinessProvider>
-      <div className="min-h-screen flex bg-slate-50">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-        
-        <main className="flex-1 lg:ml-0 min-h-screen">
-          <MobileHeader onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
-          {children}
-        </main>
-      </div>
-    </BusinessProvider>
+    <div className="min-h-screen flex bg-slate-50">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      
+      <main className="flex-1 lg:ml-0 min-h-screen">
+        <MobileHeader onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
+        {children}
+      </main>
+    </div>
   );
 }
 
