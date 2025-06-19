@@ -313,7 +313,8 @@ export default function Settings() {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch settings');
+        let message = <TranslatableText>Failed to fetch settings</TranslatableText>
+        throw new Error(message.toString());
       }
       
       return response.json();
@@ -342,14 +343,14 @@ export default function Settings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] });
       toast({
-        title: "Settings updated",
-        description: "Your business settings have been saved successfully.",
+        title: <TranslatableText>Settings updated</TranslatableText>,
+        description: <TranslatableText>Your business settings have been saved successfully.</TranslatableText>,
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update settings",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: error.message || <TranslatableText>Failed to update settings</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -374,7 +375,9 @@ export default function Settings() {
     return (
       <div className="w-full p-6 space-y-6">
         <div className="flex items-center justify-between">
-          <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">Settings</TranslatableText>
+          <h1 className="text-3xl font-bold text-slate-900">
+            <TranslatableText>Settings</TranslatableText>
+          </h1>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
           {[1, 2, 3].map((i) => (
@@ -398,9 +401,9 @@ export default function Settings() {
   return (
     <div className="w-full p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
-          Business Settings
-        </TranslatableText>
+        <h1 className="text-3xl font-bold text-slate-900">
+          <TranslatableText>Business Settings</TranslatableText>
+        </h1>
         {canEdit && (
           <div className="flex items-center gap-3">
             <Edit3 className="w-4 h-4 text-slate-600" />
@@ -462,7 +465,7 @@ export default function Settings() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-barber-primary" />
-                  Timezone Settings
+                  <TranslatableText>Timezone Settings</TranslatableText>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -500,7 +503,7 @@ export default function Settings() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-barber-primary" />
-                  Currency Settings
+                  <TranslatableText>Currency Settings</TranslatableText>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -542,7 +545,7 @@ export default function Settings() {
               className="bg-barber-primary hover:bg-barber-secondary text-white"
             >
               <Save className="w-4 h-4 mr-2" />
-              {updateMutation.isPending ? "Saving..." : "Save Settings"}
+              {updateMutation.isPending ? <TranslatableText>Saving...</TranslatableText> : <TranslatableText>Save Settings</TranslatableText>}
             </Button>
           </div>
         </form>
