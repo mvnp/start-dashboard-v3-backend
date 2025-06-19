@@ -232,13 +232,17 @@ export default function ServiceList() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle><TranslatableText>Delete Service</TranslatableText></AlertDialogTitle>
+            <AlertDialogTitle>
+              <TranslatableText>Delete Service</TranslatableText>
+            </AlertDialogTitle>
             <AlertDialogDescription>
               <TranslatableText>Are you sure you want to delete this service? This action cannot be undone.</TranslatableText>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel><TranslatableText>Cancel</TranslatableText></AlertDialogCancel>
+            <AlertDialogCancel>
+              <TranslatableText>Cancel</TranslatableText>
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-red-600 hover:bg-red-700"

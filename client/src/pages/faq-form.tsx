@@ -207,7 +207,9 @@ export default function FaqForm() {
                 name="question"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel><TranslatableText>Question *</TranslatableText></FormLabel>
+                    <FormLabel>
+                      <TranslatableText>Question *</TranslatableText>
+                    </FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="What is your question?"
@@ -225,7 +227,9 @@ export default function FaqForm() {
                 name="answer"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel><TranslatableText>Answer *</TranslatableText></FormLabel>
+                    <FormLabel>
+                      <TranslatableText>Answer *</TranslatableText>
+                    </FormLabel>
                     <FormControl>
                       <Textarea 
                         placeholder="Provide a detailed answer to the question..."
@@ -245,7 +249,9 @@ export default function FaqForm() {
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Category *</TranslatableText></FormLabel>
+                      <FormLabel>
+                        <TranslatableText>Category *</TranslatableText>
+                      </FormLabel>
                       <Select value={field.value || ""} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger>

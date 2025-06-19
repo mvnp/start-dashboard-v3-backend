@@ -243,13 +243,17 @@ export default function StaffList() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle><TranslatableText>Delete Staff Member</TranslatableText></AlertDialogTitle>
+                              <AlertDialogTitle>
+                                <TranslatableText>Delete Staff Member</TranslatableText>
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
                                 <TranslatableText>Are you sure you want to delete</TranslatableText> {member.first_name} {member.last_name}? <TranslatableText>This action cannot be undone.</TranslatableText>
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel><TranslatableText>Cancel</TranslatableText></AlertDialogCancel>
+                              <AlertDialogCancel>
+                                <TranslatableText>Cancel</TranslatableText>
+                              </AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => deleteStaffMutation.mutate(member.id)}
                                 className="bg-red-600 hover:bg-red-700"

@@ -52,15 +52,15 @@ export default function AppointmentList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
       toast({
-        title: "Success",
-        description: "Appointment deleted successfully",
+        title: <TranslatableText>Success</TranslatableText>,
+        description: <TranslatableText>Appointment deleted successfully</TranslatableText>,
       });
       setDeleteId(null);
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete appointment",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to delete appointment</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -122,8 +122,12 @@ export default function AppointmentList() {
       <div className="w-full p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900"><TranslatableText>Appointments</TranslatableText></h1>
-            <p className="text-slate-600 mt-2"><TranslatableText>Manage barbershop appointments</TranslatableText></p>
+            <h1 className="text-3xl font-bold text-slate-900">
+              <TranslatableText>Appointments</TranslatableText>
+            </h1>
+            <p className="text-slate-600 mt-2">
+              <TranslatableText>Manage barbershop appointments</TranslatableText>
+            </p>
           </div>
         </div>
         <div className="animate-pulse space-y-4">
@@ -139,8 +143,12 @@ export default function AppointmentList() {
     <div className="w-full p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900"><TranslatableText>Appointments</TranslatableText></h1>
-          <p className="text-slate-600 mt-2"><TranslatableText>Manage barbershop appointments</TranslatableText></p>
+          <h1 className="text-3xl font-bold text-slate-900">
+            <TranslatableText>Appointments</TranslatableText>
+          </h1>
+          <p className="text-slate-600 mt-2">
+            <TranslatableText>Manage barbershop appointments</TranslatableText>
+          </p>
         </div>
         <Button
           onClick={() => setLocation("/appointments/new")}
@@ -258,7 +266,9 @@ export default function AppointmentList() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>
+              <TranslatableText>Cancel</TranslatableText>
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-red-600 hover:bg-red-700"

@@ -255,7 +255,9 @@ export default function BarberPlanList() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel><TranslatableText>Cancel</TranslatableText></AlertDialogCancel>
+            <AlertDialogCancel>
+              <TranslatableText>Cancel</TranslatableText>
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-red-600 hover:bg-red-700"

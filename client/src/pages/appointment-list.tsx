@@ -461,7 +461,9 @@ export default function AppointmentList() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel><TranslatableText>Cancel</TranslatableText></AlertDialogCancel>
+            <AlertDialogCancel>
+              <TranslatableText>Cancel</TranslatableText>
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteId && handleDelete(deleteId)}
               className="bg-red-600 hover:bg-red-700"
