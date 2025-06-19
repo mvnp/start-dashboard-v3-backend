@@ -40,6 +40,11 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
   const { data: userBusinesses = [], isLoading } = useQuery<Business[]>({
     queryKey: user?.isSuperAdmin ? ["/api/businesses"] : ["/api/user-businesses"],
     enabled: !!user,
+    staleTime: 0, // Force fresh requests to debug caching issue
+    cacheTime: 0, // Disable caching temporarily for debugging
+    onSuccess: (data) => {
+      console.log('Business query result for user:', user?.email, 'isSuperAdmin:', user?.isSuperAdmin, 'businesses found:', data?.length, data);
+    }
   });
 
   // Check if business selection is required - for all users with multiple businesses (Super Admin, Merchant, Employee)

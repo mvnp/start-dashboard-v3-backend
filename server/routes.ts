@@ -311,11 +311,13 @@ export function registerRoutes(app: Express): void {
   app.get("/api/businesses", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
       const user = req.user!;
+      console.log('Business fetch for user:', user.email, 'isSuperAdmin:', user.isSuperAdmin, 'roleId:', user.roleId);
       
       let businesses;
       // Super Admin (role ID: 1) can see all businesses
       if (user.isSuperAdmin) {
         businesses = await storage.getAllBusinesses();
+        console.log('Super Admin - fetched all businesses:', businesses.length);
       } else {
         // Other users see only their associated businesses
         businesses = [];
@@ -323,6 +325,7 @@ export function registerRoutes(app: Express): void {
           const business = await storage.getBusiness(businessId);
           if (business) businesses.push(business);
         }
+        console.log('Regular user - fetched user businesses:', businesses.length);
       }
       res.json(businesses);
     } catch (error) {
