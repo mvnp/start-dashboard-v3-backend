@@ -17,6 +17,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useBusinessContext } from "@/lib/business-context";
 import { Person, Business, Role } from "@shared/schema";
+import { TranslatableText } from "@/components/translatable-text";
 
 interface StaffFormData {
   first_name: string;
@@ -335,19 +336,19 @@ export default function StaffForm() {
           className="mr-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Staff
+          <TranslatableText>Back to Staff</TranslatableText>
         </Button>
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-barber-primary rounded-xl flex items-center justify-center">
             <User className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">
+            <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
               {isEdit ? "Edit Staff Member" : "Add New Staff Member"}
-            </h1>
-            <p className="text-slate-600 mt-2">
+            </TranslatableText>
+            <TranslatableText tag="p" className="text-slate-600 mt-2">
               {isEdit ? "Update staff member information" : "Enter details for the new team member"}
-            </p>
+            </TranslatableText>
           </div>
         </div>
       </div>
@@ -357,7 +358,7 @@ export default function StaffForm() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <User className="w-5 h-5 mr-2" />
-            Staff Information
+            <TranslatableText>Staff Information</TranslatableText>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -365,7 +366,7 @@ export default function StaffForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="first_name">First Name *</Label>
+                <Label htmlFor="first_name"><TranslatableText>First Name *</TranslatableText></Label>
                 <Input
                   id="first_name"
                   placeholder="Enter first name"
@@ -379,7 +380,7 @@ export default function StaffForm() {
               </div>
 
               <div>
-                <Label htmlFor="last_name">Last Name *</Label>
+                <Label htmlFor="last_name"><TranslatableText>Last Name *</TranslatableText></Label>
                 <Input
                   id="last_name"
                   placeholder="Enter last name"
@@ -393,7 +394,7 @@ export default function StaffForm() {
               </div>
 
               <div>
-                <Label htmlFor="email">Email Address *</Label>
+                <Label htmlFor="email"><TranslatableText>Email Address *</TranslatableText></Label>
                 <Input
                   id="email"
                   type="email"
@@ -408,7 +409,7 @@ export default function StaffForm() {
               </div>
 
               <div>
-                <Label htmlFor="phone">Phone Number *</Label>
+                <Label htmlFor="phone"><TranslatableText>Phone Number *</TranslatableText></Label>
                 <Input
                   id="phone"
                   placeholder="(48) 99189-3313"
@@ -422,7 +423,7 @@ export default function StaffForm() {
               </div>
 
               <div>
-                <Label htmlFor="tax_id">Tax ID *</Label>
+                <Label htmlFor="tax_id"><TranslatableText>Tax ID *</TranslatableText></Label>
                 <Input
                   id="tax_id"
                   placeholder="020.393.261-70 or 33.240.999.0001/03"
@@ -436,7 +437,7 @@ export default function StaffForm() {
               </div>
 
               <div>
-                <Label htmlFor="business_id">Business *</Label>
+                <Label htmlFor="business_id"><TranslatableText>Business *</TranslatableText></Label>
                 <Select 
                   key={`business-${formData.business_id}-${isEdit ? staffId : 'new'}`}
                   onValueChange={(value) => {
@@ -462,7 +463,7 @@ export default function StaffForm() {
               </div>
 
               <div>
-                <Label htmlFor="role_id">Role *</Label>
+                <Label htmlFor="role_id"><TranslatableText>Role *</TranslatableText></Label>
                 <Select 
                   key={`role-${formData.role_id}-${isEdit ? staffId : 'new'}`}
                   onValueChange={(value) => handleInputChange('role_id', Number(value))} 
@@ -485,7 +486,7 @@ export default function StaffForm() {
               </div>
 
               <div>
-                <Label htmlFor="hire_date">Hire Date *</Label>
+                <Label htmlFor="hire_date"><TranslatableText>Hire Date *</TranslatableText></Label>
                 <Input
                   id="hire_date"
                   type="date"
@@ -522,7 +523,7 @@ export default function StaffForm() {
                 variant="outline"
                 onClick={() => setLocation("/staff")}
               >
-                Cancel
+<TranslatableText>Cancel</TranslatableText>
               </Button>
               <Button
                 type="submit"
