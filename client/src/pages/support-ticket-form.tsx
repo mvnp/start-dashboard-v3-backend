@@ -209,7 +209,7 @@ export default function SupportTicketForm() {
           className="mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Support Tickets
+          <TranslatableText>Back to Support Tickets</TranslatableText>
         </Button>
         
         <div className="flex items-center gap-3">
@@ -217,12 +217,12 @@ export default function SupportTicketForm() {
             <Ticket className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">
+            <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
               {isViewing ? "View Ticket" : isEditing ? "Edit Ticket" : "New Support Ticket"}
-            </h1>
-            <p className="text-slate-600">
+            </TranslatableText>
+            <TranslatableText tag="p" className="text-slate-600">
               {isViewing ? "Ticket details and information" : isEditing ? "Update ticket details" : "Create a new customer support ticket"}
-            </p>
+            </TranslatableText>
           </div>
         </div>
       </div>
@@ -230,7 +230,9 @@ export default function SupportTicketForm() {
       <Card>
         <CardHeader>
           <CardTitle>
-            {isViewing ? "Ticket Information" : "Ticket Details"}
+            <TranslatableText>
+              {isViewing ? "Ticket Information" : "Ticket Details"}
+            </TranslatableText>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -243,7 +245,7 @@ export default function SupportTicketForm() {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Title *</FormLabel>
+                      <FormLabel><TranslatableText>Title *</TranslatableText></FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="Brief description of the issue"
@@ -261,7 +263,7 @@ export default function SupportTicketForm() {
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category *</FormLabel>
+                      <FormLabel><TranslatableText>Category *</TranslatableText></FormLabel>
                       <Select 
                         value={field.value} 
                         onValueChange={field.onChange}
@@ -293,7 +295,7 @@ export default function SupportTicketForm() {
                   name="client_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Client Name *</FormLabel>
+                      <FormLabel><TranslatableText>Client Name *</TranslatableText></FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="Customer's full name"
@@ -311,7 +313,7 @@ export default function SupportTicketForm() {
                   name="client_email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Client Email *</FormLabel>
+                      <FormLabel><TranslatableText>Client Email *</TranslatableText></FormLabel>
                       <FormControl>
                         <Input 
                           type="email"
@@ -333,7 +335,7 @@ export default function SupportTicketForm() {
                   name="priority"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Priority *</FormLabel>
+                      <FormLabel><TranslatableText>Priority *</TranslatableText></FormLabel>
                       <Select 
                         value={field.value} 
                         onValueChange={field.onChange}
@@ -362,7 +364,7 @@ export default function SupportTicketForm() {
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Status *</FormLabel>
+                      <FormLabel><TranslatableText>Status *</TranslatableText></FormLabel>
                       <Select 
                         value={field.value} 
                         onValueChange={field.onChange}
@@ -391,7 +393,7 @@ export default function SupportTicketForm() {
                   name="assigned_staff_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Assigned Staff</FormLabel>
+                      <FormLabel><TranslatableText>Assigned Staff</TranslatableText></FormLabel>
                       <Select 
                         value={field.value?.toString() || "none"} 
                         onValueChange={(value) => field.onChange(value === "none" ? undefined : parseInt(value))}
@@ -423,7 +425,7 @@ export default function SupportTicketForm() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description *</FormLabel>
+                    <FormLabel><TranslatableText>Description *</TranslatableText></FormLabel>
                     <FormControl>
                       <Textarea 
                         placeholder="Detailed description of the issue or request..."
