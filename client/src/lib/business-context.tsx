@@ -31,7 +31,19 @@ interface BusinessProviderProps {
 export function BusinessProvider({ children }: BusinessProviderProps) {
   const { user, logout } = useAuth();
   const queryClient = useQueryClient();
-  const [selectedBusinessId, setSelectedBusinessIdState] = useState<number | null>(null);
+  
+  // Initialize selectedBusinessId from localStorage
+  const [selectedBusinessId, setSelectedBusinessIdState] = useState<number | null>(() => {
+    if (typeof window !== 'undefined' && user?.email) {
+      const saved = safeGetLocalStorage(`selectedBusinessId_${user.email}`);
+      if (saved && !isNaN(parseInt(saved))) {
+        console.log('Initializing business ID from localStorage:', parseInt(saved), 'for user:', user.email);
+        return parseInt(saved);
+      }
+    }
+    return null;
+  });
+  
   const [showBusinessModal, setShowBusinessModal] = useState(false);
   const [isInitialSelection, setIsInitialSelection] = useState(false);
   const [modalShownForUser, setModalShownForUser] = useState<number | null>(null);
@@ -48,38 +60,26 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     userBusinesses.length > 1 && 
     !selectedBusinessId;
 
-  // Initialize selected business from localStorage immediately when component mounts
-  useEffect(() => {
-    if (user) {
-      const savedBusinessId = safeGetLocalStorage(`selectedBusinessId_${user.email}`);
-      console.log('Checking for saved business ID:', savedBusinessId, 'for user:', user.email);
-      if (savedBusinessId && !isNaN(parseInt(savedBusinessId))) {
-        const businessId = parseInt(savedBusinessId);
-        setSelectedBusinessIdState(businessId);
-        console.log('Restored selected business from localStorage:', businessId, 'for user:', user.email);
-      } else {
-        console.log('No valid saved business ID found for user:', user.email);
-      }
-    }
-  }, [user]);
-
-  // Handle business selection for all users (Super Admin, Merchant, Employee)
+  // Handle business selection and restoration in a single effect
   useEffect(() => {
     if (!isLoading && user && userBusinesses.length > 0) {
       const savedBusinessId = safeGetLocalStorage(`selectedBusinessId_${user.email}`);
+      console.log('Business selection logic - saved ID:', savedBusinessId, 'current ID:', selectedBusinessId, 'for user:', user.email);
       
       // If user has only one business, automatically select it
       if (userBusinesses.length === 1) {
         const singleBusiness = userBusinesses[0];
-        setSelectedBusinessIdState(singleBusiness.id);
-        safeSetLocalStorage(`selectedBusinessId_${user.email}`, singleBusiness.id.toString());
-        console.log('Auto-selected single business for', user.email, ':', singleBusiness.name);
+        if (selectedBusinessId !== singleBusiness.id) {
+          setSelectedBusinessIdState(singleBusiness.id);
+          safeSetLocalStorage(`selectedBusinessId_${user.email}`, singleBusiness.id.toString());
+          console.log('Auto-selected single business for', user.email, ':', singleBusiness.name);
+        }
         return;
       }
       
       // For users with multiple businesses
       if (userBusinesses.length > 1) {
-        // If we have a saved business ID, validate and restore it
+        // If we have a saved business ID and no current selection, validate and restore it
         if (savedBusinessId && !selectedBusinessId) {
           const savedId = parseInt(savedBusinessId);
           const businessExists = userBusinesses.some(b => b.id === savedId);

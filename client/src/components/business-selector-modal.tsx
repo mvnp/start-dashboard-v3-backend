@@ -41,9 +41,10 @@ export default function BusinessSelectorModal({
   };
 
   const handleConfirm = () => {
-    if (selectedBusinessId) {
-      // Store selected business in sessionStorage
-      sessionStorage.setItem("selectedBusinessId", selectedBusinessId.toString());
+    if (selectedBusinessId && user) {
+      // Store selected business in localStorage with user-specific key
+      localStorage.setItem(`selectedBusinessId_${user.email}`, selectedBusinessId.toString());
+      console.log('Saved business ID to localStorage:', selectedBusinessId, 'for user:', user.email);
       onBusinessSelected(selectedBusinessId);
       toast({
         title: "Business Selected",
