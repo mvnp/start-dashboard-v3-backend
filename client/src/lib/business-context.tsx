@@ -68,6 +68,8 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
       const savedBusinessId = safeGetLocalStorage(`selectedBusinessId_${user.email}`);
       console.log('Business selection logic - saved ID:', savedBusinessId, 'current ID:', selectedBusinessId, 'businesses:', userBusinesses.length, 'for user:', user.email);
       
+      console.log('Business selection logic - selectedBusinessId:', selectedBusinessId, 'userBusinesses.length:', userBusinesses.length, 'user.email:', user.email);
+      
       // Always auto-select the first business if none is selected (for both single and multiple business scenarios)
       if (!selectedBusinessId) {
         // If user has only one business, automatically select it
@@ -75,7 +77,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
           const singleBusiness = userBusinesses[0];
           setSelectedBusinessIdState(singleBusiness.id);
           safeSetLocalStorage(`selectedBusinessId_${user.email}`, singleBusiness.id.toString());
-          console.log('Auto-selected single business for', user.email, ':', singleBusiness.name);
+          console.log('Auto-selected single business for', user.email, ':', singleBusiness.name, 'ID:', singleBusiness.id);
           return;
         }
         
@@ -103,7 +105,17 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
             const firstBusiness = userBusinesses[0];
             setSelectedBusinessIdState(firstBusiness.id);
             safeSetLocalStorage(`selectedBusinessId_${user.email}`, firstBusiness.id.toString());
-            console.log('Auto-selected first business for Super Admin', user.email, ':', firstBusiness.name);
+            console.log('Auto-selected first business for Super Admin', user.email, ':', firstBusiness.name, 'ID:', firstBusiness.id);
+            return;
+          }
+          
+          // For regular users with multiple businesses but no saved selection, auto-select first business
+          if (userBusinesses.length > 0) {
+            const firstBusiness = userBusinesses[0];
+            setSelectedBusinessIdState(firstBusiness.id);
+            safeSetLocalStorage(`selectedBusinessId_${user.email}`, firstBusiness.id.toString());
+            console.log('Auto-selected first business for regular user', user.email, ':', firstBusiness.name, 'ID:', firstBusiness.id);
+            setModalShownForUser(user.userId); // Mark modal as handled
             return;
           }
           
