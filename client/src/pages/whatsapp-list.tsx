@@ -93,13 +93,13 @@ export default function WhatsappList() {
   const getStatusBadge = (status: string | null) => {
     switch (status) {
       case "Connected":
-        return <Badge className="bg-green-100 text-green-800">Connected</Badge>;
+        return <Badge className="bg-green-100 text-green-800"><TranslatableText>Connected</TranslatableText></Badge>;
       case "Error":
-        return <Badge className="bg-yellow-100 text-yellow-800">Error</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800"><TranslatableText>Error</TranslatableText></Badge>;
       case "Disconnected":
-        return <Badge className="bg-red-100 text-red-800">Disconnected</Badge>;
+        return <Badge className="bg-red-100 text-red-800"><TranslatableText>Disconnected</TranslatableText></Badge>;
       default:
-        return <Badge variant="secondary">Unknown</Badge>;
+        return <Badge variant="secondary"><TranslatableText>Unknown</TranslatableText></Badge>;
     }
   };
 
@@ -153,7 +153,7 @@ export default function WhatsappList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Total Instances</p>
+                  <p className="text-sm font-medium text-slate-600"><TranslatableText>Total Instances</TranslatableText></p>
                   <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
                 </div>
                 <Smartphone className="w-8 h-8 text-slate-400" />
@@ -164,7 +164,7 @@ export default function WhatsappList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Connected</p>
+                  <p className="text-sm font-medium text-slate-600"><TranslatableText>Connected</TranslatableText></p>
                   <p className="text-2xl font-bold text-green-600">{stats.connected}</p>
                 </div>
                 <Wifi className="w-8 h-8 text-green-400" />
@@ -175,7 +175,7 @@ export default function WhatsappList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Error</p>
+                  <p className="text-sm font-medium text-slate-600"><TranslatableText>Error</TranslatableText></p>
                   <p className="text-2xl font-bold text-yellow-600">{stats.error}</p>
                 </div>
                 <QrCode className="w-8 h-8 text-yellow-400" />
@@ -186,7 +186,7 @@ export default function WhatsappList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Disconnected</p>
+                  <p className="text-sm font-medium text-slate-600"><TranslatableText>Disconnected</TranslatableText></p>
                   <p className="text-2xl font-bold text-red-600">{stats.disconnected}</p>
                 </div>
                 <WifiOff className="w-8 h-8 text-red-400" />
@@ -211,10 +211,10 @@ export default function WhatsappList() {
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="connected">Connected</SelectItem>
-              <SelectItem value="connecting">Connecting</SelectItem>
-              <SelectItem value="disconnected">Disconnected</SelectItem>
+              <SelectItem value="all"><TranslatableText>All Status</TranslatableText></SelectItem>
+              <SelectItem value="connected"><TranslatableText>Connected</TranslatableText></SelectItem>
+              <SelectItem value="connecting"><TranslatableText>Connecting</TranslatableText></SelectItem>
+              <SelectItem value="disconnected"><TranslatableText>Disconnected</TranslatableText></SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -226,7 +226,7 @@ export default function WhatsappList() {
           <Card>
             <CardContent className="p-8 text-center">
               <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No WhatsApp instances found</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2"><TranslatableText>No WhatsApp instances found</TranslatableText></h3>
               <p className="text-gray-600">
                 {searchTerm || statusFilter !== "all"
                   ? "Try adjusting your search or filters"
@@ -247,20 +247,20 @@ export default function WhatsappList() {
                     </div>
                     <div className="space-y-2 mb-4">
                       <p className="text-slate-600">
-                        <strong>Phone:</strong> {instance.phone_number || 'Not specified'}
+                        <strong><TranslatableText>Phone:</TranslatableText></strong> {instance.phone_number || 'Not specified'}
                       </p>
                       {instance.webhook_url && (
                         <p className="text-slate-600">
-                          <strong>Webhook:</strong> {instance.webhook_url}
+                          <strong><TranslatableText>Webhook:</TranslatableText></strong> {instance.webhook_url}
                         </p>
                       )}
                       {instance.last_seen && (
                         <p className="text-slate-600">
-                          <strong>Last seen:</strong> {new Date(instance.last_seen).toLocaleString()}
+                          <strong><TranslatableText>Last seen:</TranslatableText></strong> {new Date(instance.last_seen).toLocaleString()}
                         </p>
                       )}
                       <p className="text-slate-500 text-sm">
-                        <strong>Created:</strong> {new Date(instance.created_at!).toLocaleDateString()}
+                        <strong><TranslatableText><Created:/TranslatableText></strong> {new Date(instance.created_at!).toLocaleDateString()}
                       </p>
                     </div>
                     {instance.status === "Error" && instance.qr_code && (
@@ -270,12 +270,12 @@ export default function WhatsappList() {
                           <h4 className="font-medium text-yellow-800">QR Code Ready</h4>
                         </div>
                         <p className="text-sm text-yellow-700 mb-3">
-                          Scan this QR code with your WhatsApp to connect this instance.
+                          <TranslatableText>Scan this QR code with your WhatsApp to connect this instance.</TranslatableText>
                         </p>
                         <div className="bg-white p-4 rounded border text-center">
                           <code className="text-xs text-gray-600 break-all">{instance.qr_code}</code>
                           <p className="text-xs text-gray-500 mt-2">
-                            Use a QR code scanner or WhatsApp's "Link Device" feature
+                            <TranslatableText>Use a QR code scanner or WhatsApp's "Link Device" feature</TranslatableText>
                           </p>
                         </div>
                       </div>
@@ -290,7 +290,7 @@ export default function WhatsappList() {
                         disabled={generateQrMutation.isPending}
                       >
                         <QrCode className="w-4 h-4 mr-1" />
-                        Connect
+                        <TranslatableText>Connect</TranslatableText>
                       </Button>
                     )}
                     <Link href={`/whatsapp/${instance.id}/edit`}>
