@@ -10,6 +10,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Person } from "@shared/schema";
 import { useBusinessContext } from "@/lib/business-context";
+import { TranslatableText } from "@/components/translatable-text";
 
 interface ClientFormData {
   first_name: string;
@@ -317,19 +318,19 @@ export default function ClientForm() {
           className="mr-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Clients
+          <TranslatableText>Back to Clients</TranslatableText>
         </Button>
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-barber-primary rounded-xl flex items-center justify-center">
             <UserCheck className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">
+            <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
               {isEdit ? "Edit Client" : "Add New Client"}
-            </h1>
-            <p className="text-slate-600 mt-2">
+            </TranslatableText>
+            <TranslatableText tag="p" className="text-slate-600 mt-2">
               {isEdit ? "Update client information" : "Enter details for the new client"}
-            </p>
+            </TranslatableText>
           </div>
         </div>
       </div>
@@ -339,14 +340,14 @@ export default function ClientForm() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <User className="w-5 h-5 mr-2" />
-            Client Information
+            <TranslatableText>Client Information</TranslatableText>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="first_name">First Name *</Label>
+                <Label htmlFor="first_name"><TranslatableText>First Name *</TranslatableText></Label>
                 <Input
                   id="first_name"
                   placeholder="Enter first name"
@@ -360,7 +361,7 @@ export default function ClientForm() {
               </div>
 
               <div>
-                <Label htmlFor="last_name">Last Name *</Label>
+                <Label htmlFor="last_name"><TranslatableText>Last Name *</TranslatableText></Label>
                 <Input
                   id="last_name"
                   placeholder="Enter last name"
@@ -374,7 +375,7 @@ export default function ClientForm() {
               </div>
 
               <div>
-                <Label htmlFor="email">Email Address *</Label>
+                <Label htmlFor="email"><TranslatableText>Email Address *</TranslatableText></Label>
                 <Input
                   id="email"
                   type="email"
@@ -389,7 +390,7 @@ export default function ClientForm() {
               </div>
 
               <div>
-                <Label htmlFor="phone">Phone Number *</Label>
+                <Label htmlFor="phone"><TranslatableText>Phone Number *</TranslatableText></Label>
                 <Input
                   id="phone"
                   placeholder="Enter phone number"
@@ -403,7 +404,7 @@ export default function ClientForm() {
               </div>
 
               <div>
-                <Label htmlFor="tax_id">Tax ID</Label>
+                <Label htmlFor="tax_id"><TranslatableText>Tax ID</TranslatableText></Label>
                 <Input
                   id="tax_id"
                   placeholder="Enter tax identification number (optional)"
@@ -413,7 +414,7 @@ export default function ClientForm() {
               </div>
 
               <div>
-                <Label htmlFor="address">Address</Label>
+                <Label htmlFor="address"><TranslatableText>Address</TranslatableText></Label>
                 <Input
                   id="address"
                   placeholder="Enter address (optional)"
@@ -430,7 +431,7 @@ export default function ClientForm() {
                 variant="outline"
                 onClick={() => setLocation("/clients")}
               >
-                Cancel
+<TranslatableText>Cancel</TranslatableText>
               </Button>
               <Button
                 type="submit"
@@ -438,10 +439,12 @@ export default function ClientForm() {
                 className="bg-barber-primary hover:bg-barber-secondary"
               >
                 <Save className="w-4 h-4 mr-2" />
-                {isSubmitting 
-                  ? (isEdit ? "Updating..." : "Creating...") 
-                  : (isEdit ? "Update Client" : "Create Client")
-                }
+                <TranslatableText>
+                  {isSubmitting 
+                    ? (isEdit ? "Updating..." : "Creating...") 
+                    : (isEdit ? "Update Client" : "Create Client")
+                  }
+                </TranslatableText>
               </Button>
             </div>
           </form>
