@@ -55,25 +55,25 @@ export default function Support() {
     setTimeout(() => {
       setIsSubmitting(false);
       toast({
-        title: "Support request submitted",
-        description: "We'll get back to you within 24 hours based on your urgency level.",
+        title: <TranslatableText>Support request submitted</TranslatableText>,
+        description: <TranslatableText>We'll get back to you within 24 hours based on your urgency level.</TranslatableText>,
       });
       form.reset();
     }, 1500);
   };
 
   const urgencyOptions = [
-    { value: "low", label: "Low - General inquiry", color: "text-green-600" },
-    { value: "medium", label: "Medium - Issue affecting work", color: "text-yellow-600" },
-    { value: "high", label: "High - Business critical", color: "text-orange-600" },
-    { value: "urgent", label: "Urgent - System down", color: "text-red-600" }
+    { value: "low", label: <TranslatableText>Low - General inquiry</TranslatableText>, color: "text-green-600" },
+    { value: "medium", label: <TranslatableText>Medium - Issue affecting work</TranslatableText>, color: "text-yellow-600" },
+    { value: "high", label: <TranslatableText>High - Business critical</TranslatableText>, color: "text-orange-600" },
+    { value: "urgent", label: <TranslatableText>Urgent - System down</TranslatableText>, color: "text-red-600" }
   ];
 
   const supportStats = [
-    { icon: Clock, label: "Average Response", value: "< 2 hours", color: "bg-blue-500" },
-    { icon: Users, label: "Support Team", value: "24/7", color: "bg-green-500" },
-    { icon: MessageSquare, label: "Tickets Resolved", value: "98.5%", color: "bg-purple-500" },
-    { icon: Headphones, label: "Satisfaction Rate", value: "4.9/5", color: "bg-orange-500" }
+    { icon: Clock, label: <TranslatableText>Average Response</TranslatableText>, value: "< 2 hours", color: "bg-blue-500" },
+    { icon: Users, label: <TranslatableText>Support Team</TranslatableText>, value: "24/7", color: "bg-green-500" },
+    { icon: MessageSquare, label: <TranslatableText>Tickets Resolved</TranslatableText>, value: "98.5%", color: "bg-purple-500" },
+    { icon: Headphones, label: <TranslatableText>Satisfaction Rate</TranslatableText>, value: "4.9/5", color: "bg-orange-500" }
   ];
 
   return (
@@ -89,23 +89,23 @@ export default function Support() {
                   <Crown className="w-8 h-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-slate-900">BarberPro</h1>
-                  <p className="text-lg text-slate-600">Professional Barbershop Management</p>
+                  <h1 className="text-3xl font-bold text-slate-900"><TranslatableText>BarberPro</TranslatableText></h1>
+                  <p className="text-lg text-slate-600"><TranslatableText>Professional Barbershop Management</TranslatableText></p>
                 </div>
               </div>
               
               <div className="space-y-3">
                 <div className="flex items-center text-slate-700">
                   <MapPin className="w-5 h-5 text-barber-primary mr-3" />
-                  <span>123 Business Avenue, Suite 500, New York, NY 10001</span>
+                  <span><TranslatableText>123 Business Avenue, Suite 500, New York, NY 10001</TranslatableText></span>
                 </div>
                 <div className="flex items-center text-slate-700">
                   <Phone className="w-5 h-5 text-barber-primary mr-3" />
-                  <span>+1 (555) 123-4567</span>
+                  <span><TranslatableText>+1 (555) 123-4567</TranslatableText></span>
                 </div>
                 <div className="flex items-center text-slate-700">
                   <Mail className="w-5 h-5 text-barber-primary mr-3" />
-                  <span>support@barberpro.com</span>
+                  <span><TranslatableText>support@barberpro.com</TranslatableText></span>
                 </div>
               </div>
             </div>
@@ -137,10 +137,10 @@ export default function Support() {
       <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-slate-900 mb-4">
-            How can we help you today?
+            <TranslatableText>How can we help you today?</TranslatableText>
           </h2>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-            Get the support you need from our expert team. We're here to help entrepreneurs and collaborators succeed.
+            <TranslatableText>Get the support you need from our expert team. We're here to help entrepreneurs and collaborators succeed.</TranslatableText>
           </p>
         </div>
 
@@ -151,41 +151,41 @@ export default function Support() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Headphones className="w-6 h-6 text-barber-primary mr-2" />
-                  Support Channels
+                  <TranslatableText>Support Channels</TranslatableText>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h3 className="font-semibold text-slate-900 mb-2">Email Support</h3>
-                  <p className="text-slate-600 text-sm mb-2">For general inquiries and documentation</p>
+                  <h3 className="font-semibold text-slate-900 mb-2"><TranslatableText>Email Support</TranslatableText></h3>
+                  <p className="text-slate-600 text-sm mb-2"><TranslatableText>For general inquiries and documentation</TranslatableText></p>
                   <a href="mailto:support@barberpro.com" className="text-barber-primary hover:underline">
-                    support@barberpro.com
+                    <TranslatableText>support@barberpro.com</TranslatableText>
                   </a>
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold text-slate-900 mb-2">Phone Support</h3>
-                  <p className="text-slate-600 text-sm mb-2">For urgent issues and live assistance</p>
+                  <h3 className="font-semibold text-slate-900 mb-2"><TranslatableText>Phone Support</TranslatableText></h3>
+                  <p className="text-slate-600 text-sm mb-2"><TranslatableText>For urgent issues and live assistance</TranslatableText></p>
                   <a href="tel:+15551234567" className="text-barber-primary hover:underline">
-                    +1 (555) 123-4567
+                    <TranslatableText>+1 (555) 123-4567</TranslatableText>
                   </a>
-                  <p className="text-xs text-slate-500 mt-1">Available 24/7</p>
+                  <p className="text-xs text-slate-500 mt-1"><TranslatableText>Available 24/7</TranslatableText></p>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-slate-900 mb-2">Business Hours</h3>
+                  <h3 className="font-semibold text-slate-900 mb-2"><TranslatableText>Business Hours</TranslatableText></h3>
                   <div className="text-sm text-slate-600 space-y-1">
-                    <div>Monday - Friday: 8:00 AM - 8:00 PM EST</div>
-                    <div>Saturday: 9:00 AM - 5:00 PM EST</div>
-                    <div>Sunday: 10:00 AM - 4:00 PM EST</div>
+                    <div><TranslatableText>Monday - Friday: 8:00 AM - 8:00 PM EST</TranslatableText></div>
+                    <div><TranslatableText>Saturday: 9:00 AM - 5:00 PM EST</TranslatableText></div>
+                    <div><TranslatableText>Sunday: 10:00 AM - 4:00 PM EST</TranslatableText></div>
                   </div>
                 </div>
 
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-900 mb-2">Emergency Support</h4>
+                  <h4 className="font-medium text-blue-900 mb-2"><TranslatableText>Emergency Support</TranslatableText></h4>
                   <p className="text-sm text-blue-700">
-                    For system outages or critical issues affecting your business operations, 
-                    call our emergency line available 24/7.
+                    <TranslatableText>For system outages or critical issues affecting your business operations, </TranslatableText>
+                    <TranslatableText>call our emergency line available 24/7.</TranslatableText>
                   </p>
                 </div>
               </CardContent>
@@ -196,16 +196,16 @@ export default function Support() {
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle>Submit a Support Request</CardTitle>
+                <CardTitle><TranslatableText>Submit a Support Request</TranslatableText></CardTitle>
                 <p className="text-slate-600">
-                  Fill out the form below and our support team will get back to you as soon as possible.
+                  <TranslatableText>Fill out the form below and our support team will get back to you as soon as possible.</TranslatableText>
                 </p>
               </CardHeader>
               <CardContent>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="name">Full Name *</Label>
+                      <Label htmlFor="name"><TranslatableText>Full Name *</TranslatableText></Label>
                       <Input
                         id="name"
                         {...form.register("name")}
@@ -218,7 +218,7 @@ export default function Support() {
                     </div>
 
                     <div>
-                      <Label htmlFor="email">Email Address *</Label>
+                      <Label htmlFor="email"><TranslatableText>Email Address *</TranslatableText></Label>
                       <Input
                         id="email"
                         type="email"
@@ -234,7 +234,7 @@ export default function Support() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="phone">Phone Number *</Label>
+                      <Label htmlFor="phone"><TranslatableText>Phone Number *</TranslatableText></Label>
                       <Input
                         id="phone"
                         type="tel"
@@ -248,7 +248,7 @@ export default function Support() {
                     </div>
 
                     <div>
-                      <Label htmlFor="urgency">Problem Urgency *</Label>
+                      <Label htmlFor="urgency"><TranslatableText>Problem Urgency *</TranslatableText></Label>
                       <Select onValueChange={(value) => form.setValue("urgency", value)}>
                         <SelectTrigger className="mt-1">
                           <SelectValue placeholder="Select urgency level" />
@@ -268,7 +268,7 @@ export default function Support() {
                   </div>
 
                   <div>
-                    <Label htmlFor="subject">Subject *</Label>
+                    <Label htmlFor="subject"><TranslatableText>Subject *</TranslatableText></Label>
                     <Input
                       id="subject"
                       {...form.register("subject")}
@@ -281,7 +281,7 @@ export default function Support() {
                   </div>
 
                   <div>
-                    <Label htmlFor="description">Problem Description *</Label>
+                    <Label htmlFor="description"><TranslatableText>Problem Description *</TranslatableText></Label>
                     <Textarea
                       id="description"
                       {...form.register("description")}
@@ -295,12 +295,12 @@ export default function Support() {
                   </div>
 
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h4 className="font-medium text-yellow-800 mb-2">Before submitting:</h4>
+                    <h4 className="font-medium text-yellow-800 mb-2"><TranslatableText>Before submitting:</TranslatableText></h4>
                     <ul className="text-sm text-yellow-700 space-y-1">
-                      <li>• Check our FAQ section for common issues</li>
-                      <li>• Include relevant screenshots or error messages</li>
-                      <li>• Provide your account details or barbershop information</li>
-                      <li>• Mention your operating system and browser version</li>
+                      <li><TranslatableText>• Check our FAQ section for common issues</TranslatableText></li>
+                      <li><TranslatableText>• Include relevant screenshots or error messages</TranslatableText></li>
+                      <li><TranslatableText>• Provide your account details or barbershop information</TranslatableText></li>
+                      <li><TranslatableText>• Mention your operating system and browser version</TranslatableText></li>
                     </ul>
                   </div>
 
@@ -321,41 +321,41 @@ export default function Support() {
         <div className="mt-16">
           <Card>
             <CardHeader>
-              <CardTitle>Frequently Asked Questions</CardTitle>
+              <CardTitle><TranslatableText>Frequently Asked Questions</TranslatableText></CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <h3 className="font-semibold text-slate-900 mb-2">How do I reset my password?</h3>
+                  <h3 className="font-semibold text-slate-900 mb-2"><TranslatableText>How do I reset my password?</TranslatableText></h3>
                   <p className="text-slate-600 text-sm mb-4">
-                    Click on "Forgot Password" on the login page and follow the instructions sent to your email.
+                    <TranslatableText>Click on "Forgot Password" on the login page and follow the instructions sent to your email.</TranslatableText>
                   </p>
 
-                  <h3 className="font-semibold text-slate-900 mb-2">Can I export my appointment data?</h3>
+                  <h3 className="font-semibold text-slate-900 mb-2"><TranslatableText>Can I export my appointment data?</TranslatableText></h3>
                   <p className="text-slate-600 text-sm mb-4">
-                    Yes, you can export your data from the Reports section in CSV or PDF format.
+                    <TranslatableText>Yes, you can export your data from the Reports section in CSV or PDF format.</TranslatableText>
                   </p>
 
-                  <h3 className="font-semibold text-slate-900 mb-2">How do I add new staff members?</h3>
+                  <h3 className="font-semibold text-slate-900 mb-2"><TranslatableText>How do I add new staff members?</TranslatableText></h3>
                   <p className="text-slate-600 text-sm">
-                    Navigate to Staff Management and click "Add New Staff" to create profiles for your team.
+                    <TranslatableText>Navigate to Staff Management and click "Add New Staff" to create profiles for your team.</TranslatableText>
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-slate-900 mb-2">What payment methods do you accept?</h3>
+                  <h3 className="font-semibold text-slate-900 mb-2"><TranslatableText>What payment methods do you accept?</TranslatableText></h3>
                   <p className="text-slate-600 text-sm mb-4">
-                    We accept all major credit cards, PayPal, and bank transfers for subscription payments.
+                    <TranslatableText>We accept all major credit cards, PayPal, and bank transfers for subscription payments.</TranslatableText>
                   </p>
 
-                  <h3 className="font-semibold text-slate-900 mb-2">Is my data secure?</h3>
+                  <h3 className="font-semibold text-slate-900 mb-2"><TranslatableText>Is my data secure?</TranslatableText></h3>
                   <p className="text-slate-600 text-sm mb-4">
-                    Yes, we use enterprise-grade encryption and security measures to protect your business data.
+                    <TranslatableText>Yes, we use enterprise-grade encryption and security measures to protect your business data.</TranslatableText>
                   </p>
 
-                  <h3 className="font-semibold text-slate-900 mb-2">Can I cancel my subscription anytime?</h3>
+                  <h3 className="font-semibold text-slate-900 mb-2"><TranslatableText>Can I cancel my subscription anytime?</TranslatableText></h3>
                   <p className="text-slate-600 text-sm">
-                    Yes, you can cancel your subscription at any time from your account settings.
+                    <TranslatableText>Yes, you can cancel your subscription at any time from your account settings.</TranslatableText>
                   </p>
                 </div>
               </div>
