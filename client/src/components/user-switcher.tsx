@@ -68,7 +68,7 @@ export default function UserSwitcher() {
       <CardHeader className="pb-3">
         <CardTitle className="text-sm flex items-center gap-2">
           <Users className="w-4 h-4" />
-          Current User
+          <TranslatableText>Current User</TranslatableText>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
