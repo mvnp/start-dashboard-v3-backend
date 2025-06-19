@@ -48,7 +48,7 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Get current language from business settings
+  // Get current language from business settings with caching
   const { data: settings } = useQuery({
     queryKey: ['settings', selectedBusinessId],
     queryFn: async () => {
@@ -60,10 +60,28 @@ export function EditionProvider({ children }: { children: ReactNode }) {
         },
       });
       if (!response.ok) return null;
-      return response.json();
+      const settingsData = await response.json();
+      
+      // Cache language setting in localStorage for persistence across page reloads
+      if (settingsData?.language) {
+        localStorage.setItem(`businessLanguage_${selectedBusinessId}`, settingsData.language);
+      }
+      
+      return settingsData;
     },
     enabled: !!selectedBusinessId,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
+
+  // Get cached language while settings are loading
+  const getCachedLanguage = () => {
+    if (selectedBusinessId) {
+      const cached = localStorage.getItem(`businessLanguage_${selectedBusinessId}`);
+      if (cached) return cached;
+    }
+    return 'en';
+  };
 
   // Check if user is Super Admin (Role ID: 1)
   const canEdit = user?.roleId === 1;
@@ -81,7 +99,7 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     <EditionContext.Provider value={{
       isEditionMode: isEditionMode && canEdit,
       toggleEditionMode,
-      currentLanguage: settings?.language || 'en',
+      currentLanguage: settings?.language || getCachedLanguage(),
       canEdit,
       selectedBusinessId,
     }}>

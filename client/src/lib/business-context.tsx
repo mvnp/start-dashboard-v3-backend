@@ -51,7 +51,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
   // Initialize selected business from localStorage immediately when component mounts
   useEffect(() => {
     if (user) {
-      const savedBusinessId = safeGetLocalStorage("selectedBusinessId");
+      const savedBusinessId = safeGetLocalStorage(`selectedBusinessId_${user.email}`);
       console.log('Checking for saved business ID:', savedBusinessId, 'for user:', user.email);
       if (savedBusinessId && !isNaN(parseInt(savedBusinessId))) {
         const businessId = parseInt(savedBusinessId);
@@ -66,13 +66,13 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
   // Handle business selection for all users (Super Admin, Merchant, Employee)
   useEffect(() => {
     if (!isLoading && user && userBusinesses.length > 0) {
-      const savedBusinessId = safeGetLocalStorage("selectedBusinessId");
+      const savedBusinessId = safeGetLocalStorage(`selectedBusinessId_${user.email}`);
       
       // If user has only one business, automatically select it
       if (userBusinesses.length === 1) {
         const singleBusiness = userBusinesses[0];
         setSelectedBusinessIdState(singleBusiness.id);
-        safeSetLocalStorage("selectedBusinessId", singleBusiness.id.toString());
+        safeSetLocalStorage(`selectedBusinessId_${user.email}`, singleBusiness.id.toString());
         console.log('Auto-selected single business for', user.email, ':', singleBusiness.name);
         return;
       }
@@ -92,7 +92,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
           } else {
             // Saved business no longer exists, clear it
             console.log('Saved business not found for', user.email, ', clearing selection');
-            safeRemoveLocalStorage("selectedBusinessId");
+            safeRemoveLocalStorage(`selectedBusinessId_${user.email}`);
             setSelectedBusinessIdState(null);
           }
         }
@@ -114,7 +114,12 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
       setSelectedBusinessIdState(null);
       setShowBusinessModal(false);
       setModalShownForUser(null);
-      safeRemoveLocalStorage("selectedBusinessId");
+      // Clear all user-specific business data on logout
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('selectedBusinessId_') || key.startsWith('businessLanguage_')) {
+          localStorage.removeItem(key);
+        }
+      });
       safeRemoveLocalStorage("lastUserId");
     } else {
       // When user logs in, only clear business selection if it's a different user
