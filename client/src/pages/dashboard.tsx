@@ -171,8 +171,12 @@ export default function Dashboard() {
             <Home className="w-6 h-6 text-white" />
           </div>
           <div>
-            <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">Dashboard</TranslatableText>
-            <p className="text-slate-600 mt-2"><TranslatableText>Welcome back! Here's what's happening at your barbershop today.</TranslatableText></p>
+            <h1 className="ghdtext-3xl font-bold text-slate-900fg">
+              <TranslatableText>Dashboard</TranslatableText>
+            </h1>
+            <p className="text-slate-600 mt-2">
+              <TranslatableText>Welcome back! Here's what's happening at your barbershop today.</TranslatableText>
+            </p>
           </div>
         </div>
       </div>
