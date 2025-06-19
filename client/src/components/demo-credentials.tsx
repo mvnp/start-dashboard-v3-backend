@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { TranslatableText } from "@/components/translatable-text";
 
 interface DemoCredential {
   email: string;
@@ -14,15 +15,15 @@ interface DemoCredential {
 const getRoleDescription = (roleType: string) => {
   switch (roleType) {
     case 'super-admin':
-      return 'Full system access - can see all businesses and data';
+      return <TranslatableText>Full system access - can see all businesses and data</TranslatableText>;
     case 'merchant':
-      return 'Business owner - can manage their business data';
+      return <TranslatableText>Business owner - can manage their business data</TranslatableText>;
     case 'employee':
-      return 'Staff member - limited access to business operations';
+      return <TranslatableText>Staff member - limited access to business operations</TranslatableText>;
     case 'client':
-      return 'Customer - can view and book services';
+      return <TranslatableText>Customer - can view and book services</TranslatableText>;
     default:
-      return 'System user with specific permissions';
+      return <TranslatableText>System user with specific permissions</TranslatableText>;
   }
 };
 
