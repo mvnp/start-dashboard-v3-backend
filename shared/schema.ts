@@ -207,11 +207,20 @@ export const settings = pgTable("settings", {
   business_id: integer("business_id").references(() => businesses.id).notNull(),
 });
 
+// English source strings only
 export const traductions = pgTable("traductions", {
   id: serial("id").primaryKey(),
-  string: text("string").notNull(),
-  traduction: text("traduction").notNull(),
-  language: text("language").notNull(),
+  string: text("string").notNull().unique(), // English source string
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
+// Foreign language translations with FK to traductions
+export const translations = pgTable("translations", {
+  id: serial("id").primaryKey(),
+  traduction_id: integer("traduction_id").references(() => traductions.id).notNull(),
+  traduction: text("traduction").notNull(), // Translated text
+  language: text("language").notNull(), // Target language code
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
@@ -372,6 +381,14 @@ export const insertTraductionSchema = createInsertSchema(traductions).omit({
   updated_at: true,
 }).extend({
   string: z.string().min(1, "Original string is required"),
+});
+
+export const insertTranslationSchema = createInsertSchema(translations).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+}).extend({
+  traduction_id: z.number().min(1, "Traduction ID is required"),
   traduction: z.string().min(1, "Translation is required"),
   language: z.string().min(1, "Language is required"),
 });
@@ -415,6 +432,8 @@ export type InsertSettings = z.infer<typeof insertSettingsSchema>;
 export type Settings = typeof settings.$inferSelect;
 export type InsertTraduction = z.infer<typeof insertTraductionSchema>;
 export type Traduction = typeof traductions.$inferSelect;
+export type InsertTranslation = z.infer<typeof insertTranslationSchema>;
+export type Translation = typeof translations.$inferSelect;
 
 // Dashboard Stats Type
 export interface DashboardStats {
