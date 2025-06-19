@@ -1613,7 +1613,7 @@ export function registerRoutes(app: Express): void {
   app.post("/api/barber-plans", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
       // Get business ID from header (frontend) or body (direct API calls)
-      const headerBusinessId = req.headers['x-selected-business-id'] ? parseInt(req.headers['x-selected-business-id'] as string) : null;
+      const headerBusinessId = req.headers['business-id'] ? parseInt(req.headers['business-id'] as string) : null;
       const bodyBusinessId = req.body.business_id ? parseInt(req.body.business_id) : null;
       const selectedBusinessId = headerBusinessId || bodyBusinessId;
 
@@ -1647,7 +1647,7 @@ export function registerRoutes(app: Express): void {
       const id = parseInt(req.params.id);
       
       // Get business ID from header (frontend) or request body (API tools)
-      const headerBusinessId = req.headers['x-selected-business-id'] ? parseInt(req.headers['x-selected-business-id'] as string) : null;
+      const headerBusinessId = req.headers['business-id'] ? parseInt(req.headers['business-id'] as string) : null;
       const bodyBusinessId = req.body.business_id ? (typeof req.body.business_id === 'number' ? req.body.business_id : parseInt(req.body.business_id)) : null;
       const selectedBusinessId = headerBusinessId || bodyBusinessId;
 
@@ -1699,9 +1699,21 @@ export function registerRoutes(app: Express): void {
   });
 
   // Payment Gateway routes
-  app.get("/api/payment-gateways", async (req, res) => {
+  app.get("/api/payment-gateways", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
-      const gateways = await storage.getAllPaymentGateways();
+      const user = req.user!;
+      const businessIds = getBusinessFilter(user, req);
+      
+      let gateways;
+      // Filter payment gateways by selected business or user's business access
+      if (businessIds && businessIds.length > 0) {
+        gateways = await storage.getPaymentGatewaysByBusinessIds(businessIds);
+      } else if (user.isSuperAdmin) {
+        gateways = await storage.getAllPaymentGateways();
+      } else {
+        gateways = await storage.getPaymentGatewaysByBusinessIds(user.businessIds);
+      }
+      
       res.json(gateways);
     } catch (error) {
       console.error("Payment gateway fetch error:", error);
@@ -1950,7 +1962,7 @@ export function registerRoutes(app: Express): void {
   app.post("/api/accounting-transactions", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       // Get business ID from header (frontend) or request body (API tools)
-      const headerBusinessId = req.headers['x-selected-business-id'] ? parseInt(req.headers['x-selected-business-id'] as string) : null;
+      const headerBusinessId = req.headers['business-id'] ? parseInt(req.headers['business-id'] as string) : null;
       const bodyBusinessId = req.body.business_id ? (typeof req.body.business_id === 'number' ? req.body.business_id : parseInt(req.body.business_id)) : null;
       const selectedBusinessId = headerBusinessId || bodyBusinessId;
 
@@ -2047,7 +2059,7 @@ export function registerRoutes(app: Express): void {
       const id = parseInt(req.params.id);
       
       // Get business ID from header (frontend) or request body (API tools)
-      const headerBusinessId = req.headers['x-selected-business-id'] ? parseInt(req.headers['x-selected-business-id'] as string) : null;
+      const headerBusinessId = req.headers['business-id'] ? parseInt(req.headers['business-id'] as string) : null;
       const bodyBusinessId = req.body.business_id ? (typeof req.body.business_id === 'number' ? req.body.business_id : parseInt(req.body.business_id)) : null;
       const selectedBusinessId = headerBusinessId || bodyBusinessId;
 

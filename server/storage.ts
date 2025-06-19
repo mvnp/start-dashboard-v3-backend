@@ -101,6 +101,7 @@ export interface IStorage {
   // Payment Gateway methods
   getAllPaymentGateways(): Promise<PaymentGateway[]>;
   getPaymentGateway(id: number): Promise<PaymentGateway | undefined>;
+  getPaymentGatewaysByBusinessIds(businessIds: number[] | null): Promise<PaymentGateway[]>;
   createPaymentGateway(gateway: InsertPaymentGateway): Promise<PaymentGateway>;
   updatePaymentGateway(id: number, gateway: Partial<InsertPaymentGateway>): Promise<PaymentGateway | undefined>;
   deletePaymentGateway(id: number): Promise<boolean>;

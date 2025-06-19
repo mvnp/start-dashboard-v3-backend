@@ -11,15 +11,18 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { WhatsappInstance } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
+import { useBusinessContext } from "@/lib/business-context";
 
 export default function WhatsappList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { selectedBusinessId } = useBusinessContext();
 
   const { data: instances = [], isLoading, error } = useQuery<WhatsappInstance[]>({
-    queryKey: ["/api/whatsapp-instances"],
+    queryKey: ["/api/whatsapp-instances", selectedBusinessId],
+    enabled: !!selectedBusinessId,
   });
 
   const deleteMutation = useMutation({
