@@ -168,6 +168,7 @@ export interface IStorage {
   // Translation methods
   getTraduction(string: string, language: string): Promise<Traduction | undefined>;
   getAllTraductions(language: string): Promise<Traduction[]>;
+  getBulkTranslations(language: string): Promise<Record<string, string>>;
   createTraduction(traduction: InsertTraduction): Promise<Traduction>;
   updateTraduction(string: string, language: string, traduction: string): Promise<Traduction | undefined>;
   deleteTraduction(id: number): Promise<boolean>;
@@ -1160,6 +1161,40 @@ class PostgresStorage implements IStorage {
   async deleteTranslation(id: number): Promise<boolean> {
     const result = await this.db.delete(translations).where(eq(translations.id, id));
     return result.rowCount > 0;
+  }
+
+  async getBulkTranslations(language: string): Promise<Record<string, string>> {
+    if (language === 'en') {
+      // For English, get all source strings from traductions table
+      const result = await this.db.select({
+        string: traductions.string,
+        traduction: traductions.string // English source = translation
+      }).from(traductions);
+      
+      const translations: Record<string, string> = {};
+      result.forEach(row => {
+        translations[row.string] = row.traduction;
+      });
+      return translations;
+    } else {
+      // For other languages, join traductions and translations tables
+      const result = await this.db.select({
+        string: traductions.string,
+        traduction: translations.traduction
+      })
+      .from(traductions)
+      .leftJoin(translations, and(
+        eq(translations.traduction_id, traductions.id),
+        eq(translations.language, language)
+      ));
+      
+      const translationsMap: Record<string, string> = {};
+      result.forEach(row => {
+        // Use translation if available, otherwise fall back to English source
+        translationsMap[row.string] = row.traduction || row.string;
+      });
+      return translationsMap;
+    }
   }
 }
 

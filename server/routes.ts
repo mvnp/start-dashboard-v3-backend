@@ -2824,6 +2824,23 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  // Bulk endpoint to get all translations for a language
+  app.get("/api/translations/bulk/:language", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { language } = req.params;
+      
+      if (!language || language.length !== 2) {
+        return res.status(400).json({ error: "Valid 2-letter language code is required" });
+      }
+      
+      const translations = await storage.getBulkTranslations(language);
+      res.json(translations);
+    } catch (error) {
+      console.error("Error fetching bulk translations:", error);
+      res.status(500).json({ error: "Failed to fetch translations" });
+    }
+  });
+
   app.delete("/api/translations/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
