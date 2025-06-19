@@ -32,14 +32,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
   const { user, logout } = useAuth();
   const queryClient = useQueryClient();
   
-  const [selectedBusinessId, setSelectedBusinessIdState] = useState<number | null>(() => {
-    // Initialize from localStorage immediately
-    if (typeof window !== 'undefined' && user?.email) {
-      const saved = localStorage.getItem(`selectedBusinessId_${user.email}`);
-      return saved ? parseInt(saved) : null;
-    }
-    return null;
-  });
+  const [selectedBusinessId, setSelectedBusinessIdState] = useState<number | null>(null);
   
   const [showBusinessModal, setShowBusinessModal] = useState(false);
   const [isInitialSelection, setIsInitialSelection] = useState(false);
@@ -59,18 +52,19 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
 
   // Force business selection immediately when data is available
   useEffect(() => {
-    if (!isLoading && user && userBusinesses.length > 0) {
+    if (!isLoading && user && userBusinesses.length > 0 && !selectedBusinessId) {
       const firstBusiness = userBusinesses[0];
+      console.log(`🔄 Business Context: Auto-selecting business ${firstBusiness.name} (ID: ${firstBusiness.id}) for ${user.email}`);
       
-      // Always set the first business if no business is selected
-      if (!selectedBusinessId) {
-        console.log(`Auto-selecting business ${firstBusiness.name} (ID: ${firstBusiness.id}) for ${user.email}`);
-        setSelectedBusinessIdState(firstBusiness.id);
-        safeSetLocalStorage(`selectedBusinessId_${user.email}`, firstBusiness.id.toString());
-        
-        // Force immediate query invalidation to refresh data with business context
-        setTimeout(() => queryClient.invalidateQueries(), 100);
-      }
+      // Set business ID immediately
+      setSelectedBusinessIdState(firstBusiness.id);
+      safeSetLocalStorage(`selectedBusinessId_${user.email}`, firstBusiness.id.toString());
+      
+      // Force query invalidation after state update
+      setTimeout(() => {
+        queryClient.invalidateQueries();
+        console.log(`✅ Business Context: Business ${firstBusiness.id} selected and queries invalidated`);
+      }, 50);
     }
   }, [user, userBusinesses, isLoading, selectedBusinessId]);
 
@@ -109,9 +103,11 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
   // This useEffect is now redundant as single business auto-selection is handled in the main business selection effect above
 
   const setSelectedBusinessId = (businessId: number | null) => {
+    console.log(`🔧 Business Context: Setting business ID to ${businessId} for user ${user?.email}`);
     setSelectedBusinessIdState(businessId);
     if (businessId && user) {
       safeSetLocalStorage(`selectedBusinessId_${user.email}`, businessId.toString());
+      console.log(`✅ Business Context: Saved business ID ${businessId} to localStorage`);
     } else if (user) {
       safeRemoveLocalStorage(`selectedBusinessId_${user.email}`);
     }
