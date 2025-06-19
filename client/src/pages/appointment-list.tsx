@@ -38,12 +38,12 @@ import { Appointment, Service, Person } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
 
 const statusOptions = [
-  { value: "all", label: "All Statuses" },
-  { value: "Scheduled", label: "Scheduled" },
-  { value: "Confirmed", label: "Confirmed" },
-  { value: "In Progress", label: "In Progress" },
-  { value: "Completed", label: "Completed" },
-  { value: "Canceled", label: "Canceled" }
+  { value: "all", label: <TranslatableText>All Statuses</TranslatableText> },
+  { value: "Scheduled", label: <TranslatableText>Scheduled</TranslatableText> },
+  { value: "Confirmed", label: <TranslatableText>Confirmed</TranslatableText> },
+  { value: "In Progress", label: <TranslatableText>In Progress</TranslatableText> },
+  { value: "Completed", label: <TranslatableText>Completed</TranslatableText> },
+  { value: "Canceled", label: <TranslatableText>Canceled</TranslatableText> }
 ];
 
 export default function AppointmentList() {
