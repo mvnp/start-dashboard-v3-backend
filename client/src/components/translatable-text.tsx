@@ -49,7 +49,7 @@ export function TranslatableText({
       if (!response.ok) return null;
       return response.json();
     },
-    enabled: isEditionMode && currentLanguage !== 'en', // Fetch translations when edition mode is active
+    enabled: currentLanguage !== 'en', // Always fetch translations when language is not English
   });
 
   // Mutation to save translation with business context and foreign key
