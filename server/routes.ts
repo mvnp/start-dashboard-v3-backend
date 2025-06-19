@@ -398,13 +398,17 @@ export function registerRoutes(app: Express): void {
       const businessIds = getBusinessFilter(user, req);
 
       let persons;
-      // Filter staff by selected business or user's business access
-      if (businessIds && businessIds.length > 0) {
-        persons = await storage.getPersonsByRolesAndBusiness([1, 2, 3], businessIds);
-      } else if (user.isSuperAdmin) {
+      // Super Admin can see all data when no business is selected
+      if (user.isSuperAdmin && businessIds === null) {
         persons = await storage.getPersonsByRoles([1, 2, 3]);
-      } else {
-        persons = await storage.getPersonsByRolesAndBusiness([1, 2, 3], user.businessIds);
+      } 
+      // For selected business or non-Super Admin users
+      else if (businessIds && businessIds.length > 0) {
+        persons = await storage.getPersonsByRolesAndBusiness([1, 2, 3], businessIds);
+      } 
+      // Non-Super Admin without selected business gets empty array
+      else {
+        persons = [];
       }
       
       res.json(persons);
@@ -626,15 +630,17 @@ export function registerRoutes(app: Express): void {
       const businessIds = getBusinessFilter(user, req);
 
       let persons;
-      // Filter clients by selected business or user's business access
-      // Always respect selected business context, even for Super Admin
-      if (businessIds && businessIds.length > 0) {
-        persons = await storage.getPersonsByRolesAndBusiness([4], businessIds);
-      } else if (user.isSuperAdmin) {
-        // Super Admin without business selection sees all clients
+      // Super Admin can see all data when no business is selected
+      if (user.isSuperAdmin && businessIds === null) {
         persons = await storage.getPersonsByRoles([4]);
-      } else {
-        persons = await storage.getPersonsByRolesAndBusiness([4], user.businessIds);
+      } 
+      // For selected business or non-Super Admin users
+      else if (businessIds && businessIds.length > 0) {
+        persons = await storage.getPersonsByRolesAndBusiness([4], businessIds);
+      } 
+      // Non-Super Admin without selected business gets empty array
+      else {
+        persons = [];
       }
       
       // Enrich each person with their user email if they have a user_id
@@ -1705,13 +1711,17 @@ export function registerRoutes(app: Express): void {
       const businessIds = getBusinessFilter(user, req);
       
       let gateways;
-      // Filter payment gateways by selected business or user's business access
-      if (businessIds && businessIds.length > 0) {
-        gateways = await storage.getPaymentGatewaysByBusinessIds(businessIds);
-      } else if (user.isSuperAdmin) {
+      // Super Admin can see all data when no business is selected
+      if (user.isSuperAdmin && businessIds === null) {
         gateways = await storage.getAllPaymentGateways();
-      } else {
-        gateways = await storage.getPaymentGatewaysByBusinessIds(user.businessIds);
+      } 
+      // For selected business or non-Super Admin users
+      else if (businessIds && businessIds.length > 0) {
+        gateways = await storage.getPaymentGatewaysByBusinessIds(businessIds);
+      } 
+      // Non-Super Admin without selected business gets empty array
+      else {
+        gateways = [];
       }
       
       res.json(gateways);
@@ -2164,13 +2174,17 @@ export function registerRoutes(app: Express): void {
       const businessIds = getBusinessFilter(user, req);
       
       let tickets;
-      // Filter support tickets by selected business or user's business access
-      if (businessIds && businessIds.length > 0) {
-        tickets = await storage.getSupportTicketsByBusinessIds(businessIds);
-      } else if (user.isSuperAdmin) {
+      // Super Admin can see all data when no business is selected
+      if (user.isSuperAdmin && businessIds === null) {
         tickets = await storage.getAllSupportTickets();
-      } else {
-        tickets = await storage.getSupportTicketsByBusinessIds(user.businessIds);
+      } 
+      // For selected business or non-Super Admin users
+      else if (businessIds && businessIds.length > 0) {
+        tickets = await storage.getSupportTicketsByBusinessIds(businessIds);
+      } 
+      // Non-Super Admin without selected business gets empty array
+      else {
+        tickets = [];
       }
       
       res.json(tickets);

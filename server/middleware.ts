@@ -25,6 +25,7 @@ export const getBusinessFilter = (user: TokenPayload | undefined, req?: Request)
   // Super Admin without business selection can see all businesses
   if (user.isSuperAdmin) return null;
   
-  // Fallback to user's associated businesses
-  return user.businessIds;
+  // For non-Super Admin users, they MUST have a selected business ID
+  // Return empty array to prevent access to any data if no business is selected
+  return [];
 };
