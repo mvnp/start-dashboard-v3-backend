@@ -227,8 +227,12 @@ export default function AppointmentList() {
             <Calendar className="w-6 h-6 text-white" />
           </div>
           <div>
-            <TranslatableText tag="h1" className="text-3xl font-bold text-gray-900">Appointments</TranslatableText>
-            <TranslatableText tag="p" className="text-gray-600">Manage customer appointments</TranslatableText>
+            <h1 className="text-3xl font-bold text-gray-900">
+              <TranslatableText>Appointments</TranslatableText>
+            </h1>
+            <p className="text-gray-600">
+              <TranslatableText>Manage customer appointments</TranslatableText>
+            </p>
           </div>
         </div>
         
