@@ -184,22 +184,22 @@ export default function PaymentGatewayList() {
                 <div className="flex items-center gap-2">
                   <Key className="w-4 h-4 text-green-600" />
                   <span className="text-sm text-slate-600">
-                    <TranslatableText>Key:</TranslatableText> {gateway.api_key.substring(0, 12)}...
+                    <TranslatableText>Key:</TranslatableText> {gateway.api_key ? gateway.api_key.substring(0, 12) + '...' : 'N/A'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-purple-600" />
-                  <span className="text-sm text-slate-600">{gateway.email}</span>
+                  <span className="text-sm text-slate-600">{gateway.email || 'N/A'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-orange-600" />
-                  <span className="text-sm text-slate-600">{getStaffName(gateway.staff_id)}</span>
+                  <span className="text-sm text-slate-600">{gateway.staff_id ? getStaffName(gateway.staff_id) : 'N/A'}</span>
                 </div>
               </div>
 
               <div className="bg-slate-50 p-3 rounded-md">
                 <p className="text-xs text-slate-600">
-                  <TranslatableText>Token:</TranslatableText> {gateway.token.substring(0, 16)}...
+                  <TranslatableText>Token:</TranslatableText> {gateway.token?.substring(0, 16) + '...' || 'N/A'}
                 </p>
               </div>
 
