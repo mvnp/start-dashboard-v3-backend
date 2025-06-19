@@ -109,27 +109,27 @@ export default function BusinessList() {
               <div className="space-y-2">
                 {business.address && (
                   <p className="text-sm text-muted-foreground">
-                    <strong>Address:</strong> {business.address}
+                    <strong><TranslatableText>Address:</TranslatableText></strong> {business.address}
                   </p>
                 )}
                 {business.phone && (
                   <p className="text-sm text-muted-foreground">
-                    <strong>Phone:</strong> {business.phone}
+                    <strong><TranslatableText>Phone:</TranslatableText></strong> {business.phone}
                   </p>
                 )}
                 {business.email && (
                   <p className="text-sm text-muted-foreground">
-                    <strong>Email:</strong> {business.email}
+                    <strong><TranslatableText>Email:</TranslatableText></strong> {business.email}
                   </p>
                 )}
                 {business.tax_id && (
                   <p className="text-sm text-muted-foreground">
-                    <strong>Tax ID:</strong> {business.tax_id}
+                    <strong><TranslatableText>Tax ID:</TranslatableText></strong> {business.tax_id}
                   </p>
                 )}
                 <div className="pt-2">
                   <Badge variant="secondary">
-                    Owner ID: {business.user_id}
+                    <TranslatableText>Owner ID:</TranslatableText> {business.user_id}
                   </Badge>
                 </div>
               </div>
@@ -142,12 +142,12 @@ export default function BusinessList() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
             <Building2 className="h-16 w-16 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No businesses found</h3>
-            <p className="text-muted-foreground mb-4">Get started by creating your first business.</p>
+            <h3 className="text-lg font-semibold mb-2"><TranslatableText>No businesses found</TranslatableText></h3>
+            <p className="text-muted-foreground mb-4"><TranslatableText>Get started by creating your first business.</TranslatableText></p>
             <Link href="/businesses/new">
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Business
+                <TranslatableText>Add Business</TranslatableText>
               </Button>
             </Link>
           </CardContent>
