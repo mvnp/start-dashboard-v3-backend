@@ -1,5 +1,5 @@
 import { useState, KeyboardEvent } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Pen } from 'lucide-react';
 import { useEdition } from '@/lib/edition-context';
 import { useTranslationCache } from '@/lib/translation-cache';
