@@ -156,7 +156,7 @@ export default function ClientList() {
           <CardContent className="p-4">
             <div className="text-center">
               <p className="text-2xl font-bold text-slate-900">{clients.length}</p>
-              <p className="text-sm text-slate-600">Total Clients</p>
+              <p className="text-sm text-slate-600"><TranslatableText>Total Clients</TranslatableText></p>
             </div>
           </CardContent>
         </Card>
@@ -165,7 +165,7 @@ export default function ClientList() {
       {/* Client List */}
       <Card>
         <CardHeader>
-          <CardTitle>Clients</CardTitle>
+          <CardTitle><TranslatableText>Clients</TranslatableText></CardTitle>
         </CardHeader>
         <CardContent>
           {filteredClients.length === 0 ? (
@@ -178,7 +178,7 @@ export default function ClientList() {
                 <Link href="/clients/new">
                   <Button className="mt-4 bg-barber-primary hover:bg-barber-secondary">
                     <Plus className="w-4 h-4 mr-2" />
-                    Add First Client
+                    <TranslatableText>Add First Client</TranslatableText>
                   </Button>
                 </Link>
               )}
@@ -218,13 +218,13 @@ export default function ClientList() {
                       <div className="text-right hidden sm:block">
                         <Badge className="bg-blue-100 text-blue-800 border border-blue-200">
                           <User className="w-3 h-3 mr-1" />
-                          Customer
+                          <TranslatableText>Customer</TranslatableText>
                         </Badge>
                         <p className="text-xs text-slate-500 mt-1">
-                          Tax ID: {client.tax_id}
+                          <TranslatableText>Tax ID:</TranslatableText> {client.tax_id}
                         </p>
                         <p className="text-xs text-slate-500">
-                          Since: {formatDate(client.created_at)}
+                          <TranslatableText>Since:</TranslatableText> {formatDate(client.created_at)}
                         </p>
                       </div>
                       
@@ -243,13 +243,13 @@ export default function ClientList() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Client</AlertDialogTitle>
+                              <AlertDialogTitle><TranslatableText>Delete Client</TranslatableText></AlertDialogTitle>
                               <AlertDialogDescription>
                                 Are you sure you want to delete {client.first_name} {client.last_name}? This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogCancel><TranslatableText>Cancel</TranslatableText></AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => deleteClientMutation.mutate(client.id)}
                                 className="bg-red-600 hover:bg-red-700"

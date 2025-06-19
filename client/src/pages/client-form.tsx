@@ -297,11 +297,11 @@ export default function ClientForm() {
     return (
       <div className="p-6">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-600 mb-2">Client Not Found</h2>
-          <p className="text-gray-600 mb-4">The client you're trying to edit could not be found.</p>
+          <h2 className="text-xl font-semibold text-red-600 mb-2"><TranslatableText>Client Not Found</TranslatableText></h2>
+          <p className="text-gray-600 mb-4"><TranslatableText>The client you're trying to edit could not be found.</TranslatableText></p>
           <Button onClick={() => setLocation("/clients")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Clients
+            <TranslatableText>Back to Clients</TranslatableText>
           </Button>
         </div>
       </div>
