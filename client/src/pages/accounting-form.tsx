@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { AccountingTransaction, AccountingTransactionCategory, Person, Business } from "@shared/schema";
 import { useBusinessContext } from "@/lib/business-context";
+import { TranslatableText } from "@/components/translatable-text";
 import { format } from "date-fns";
 
 const formSchema = z.object({
@@ -239,26 +240,26 @@ export default function AccountingForm() {
           onClick={() => setLocation("/accounting")}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Transactions
+          <TranslatableText>Back to Transactions</TranslatableText>
         </Button>
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-barber-primary rounded-xl flex items-center justify-center">
             <DollarSign className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold">
+            <TranslatableText tag="h1" className="text-3xl font-bold">
               {isEdit ? "Edit Transaction" : "Add New Transaction"}
-            </h1>
-            <p className="text-slate-600">
+            </TranslatableText>
+            <TranslatableText tag="p" className="text-slate-600">
               {isEdit ? "Update transaction details" : "Enter new transaction details"}
-            </p>
+            </TranslatableText>
           </div>
         </div>
       </div>
 
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Transaction Details</CardTitle>
+          <CardTitle><TranslatableText>Transaction Details</TranslatableText></CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -269,7 +270,7 @@ export default function AccountingForm() {
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Type *</FormLabel>
+                      <FormLabel><TranslatableText>Type *</TranslatableText></FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -294,7 +295,7 @@ export default function AccountingForm() {
                   name="amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Amount *</FormLabel>
+                      <FormLabel><TranslatableText>Amount *</TranslatableText></FormLabel>
                       <FormControl>
                         <Input
                           placeholder="0.00"
@@ -315,7 +316,7 @@ export default function AccountingForm() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description *</FormLabel>
+                    <FormLabel><TranslatableText>Description *</TranslatableText></FormLabel>
                     <FormControl>
                       <Input placeholder="Transaction description" {...field} />
                     </FormControl>
@@ -330,7 +331,7 @@ export default function AccountingForm() {
                   name="category_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category *</FormLabel>
+                      <FormLabel><TranslatableText>Category *</TranslatableText></FormLabel>
                       <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
                         <FormControl>
                           <SelectTrigger>
@@ -355,7 +356,7 @@ export default function AccountingForm() {
                   name="payment_method"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Payment Method *</FormLabel>
+                      <FormLabel><TranslatableText>Payment Method *</TranslatableText></FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -384,7 +385,7 @@ export default function AccountingForm() {
                   name="transaction_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Transaction Date *</FormLabel>
+                      <FormLabel><TranslatableText>Transaction Date *</TranslatableText></FormLabel>
                       <FormControl>
                         <Input
                           type="date"
@@ -401,7 +402,7 @@ export default function AccountingForm() {
                   name="reference_number"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Reference Number *</FormLabel>
+                      <FormLabel><TranslatableText>Reference Number *</TranslatableText></FormLabel>
                       <FormControl>
                         <Input placeholder="REF001" {...field} />
                       </FormControl>
