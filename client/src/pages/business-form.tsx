@@ -357,7 +357,9 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                 name="user_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel><TranslatableText>Owner *</TranslatableText></FormLabel>
+                    <FormLabel>
+                      <TranslatableText>Owner *</TranslatableText>
+                    </FormLabel>
                     <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
                       <FormControl>
                         <SelectTrigger>
