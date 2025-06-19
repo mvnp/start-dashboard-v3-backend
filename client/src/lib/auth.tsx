@@ -110,33 +110,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    // Clear all localStorage data
-    try {
-      localStorage.clear();
-    } catch (error) {
-      console.warn('Could not clear localStorage:', error);
-      // Fallback: remove specific keys
-      safeRemoveLocalStorage('accessToken');
-      safeRemoveLocalStorage('refreshToken');
-      safeRemoveLocalStorage('lastUserId');
-      // Remove all business-specific keys
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('selectedBusinessId_') || key.startsWith('businessLanguage_') || key.startsWith('editionMode')) {
-          localStorage.removeItem(key);
-        }
-      });
-    }
-    
-    // Clear all sessionStorage data
-    try {
-      sessionStorage.clear();
-    } catch (error) {
-      console.warn('Could not clear sessionStorage:', error);
-    }
-    
+    safeRemoveLocalStorage('accessToken');
+    safeRemoveLocalStorage('refreshToken');
+    safeRemoveLocalStorage('selectedBusinessId');
+    safeRemoveLocalStorage('lastUserId');
     setUser(null);
     queryClient.clear();
-    console.log('Logout completed - all storage cleared');
     window.location.href = '/login';
   };
 
