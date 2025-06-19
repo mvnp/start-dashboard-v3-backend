@@ -66,45 +66,45 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
   useEffect(() => {
     if (!isLoading && user && userBusinesses.length > 0) {
       const savedBusinessId = safeGetLocalStorage(`selectedBusinessId_${user.email}`);
-      console.log('Business selection logic - saved ID:', savedBusinessId, 'current ID:', selectedBusinessId, 'for user:', user.email);
+      console.log('Business selection logic - saved ID:', savedBusinessId, 'current ID:', selectedBusinessId, 'businesses:', userBusinesses.length, 'for user:', user.email);
       
-      // If user has only one business, automatically select it
-      if (userBusinesses.length === 1) {
-        const singleBusiness = userBusinesses[0];
-        if (selectedBusinessId !== singleBusiness.id) {
+      // Always auto-select the first business if none is selected (for both single and multiple business scenarios)
+      if (!selectedBusinessId) {
+        // If user has only one business, automatically select it
+        if (userBusinesses.length === 1) {
+          const singleBusiness = userBusinesses[0];
           setSelectedBusinessIdState(singleBusiness.id);
           safeSetLocalStorage(`selectedBusinessId_${user.email}`, singleBusiness.id.toString());
           console.log('Auto-selected single business for', user.email, ':', singleBusiness.name);
-        }
-        return;
-      }
-      
-      // For users with multiple businesses
-      if (userBusinesses.length > 1) {
-        // If we have a saved business ID and no current selection, validate and restore it
-        if (savedBusinessId && !selectedBusinessId) {
-          const savedId = parseInt(savedBusinessId);
-          const businessExists = userBusinesses.some(b => b.id === savedId);
-          
-          if (businessExists) {
-            setSelectedBusinessIdState(savedId);
-            setModalShownForUser(user.userId); // Mark modal as shown when restoring
-            console.log('Restored business selection for', user.email, ':', savedId);
-            return;
-          } else {
-            // Saved business no longer exists, clear it
-            console.log('Saved business not found for', user.email, ', clearing selection');
-            safeRemoveLocalStorage(`selectedBusinessId_${user.email}`);
-            setSelectedBusinessIdState(null);
-          }
+          return;
         }
         
-        // Show modal only if no valid selection exists and modal hasn't been shown for this user
-        if (!selectedBusinessId && modalShownForUser !== user.userId && !showBusinessModal) {
-          console.log('Showing business selection modal for', user.email, 'with multiple businesses. Role ID:', user.roleId);
-          setIsInitialSelection(true);
-          setShowBusinessModal(true);
-          setModalShownForUser(user.userId);
+        // For users with multiple businesses
+        if (userBusinesses.length > 1) {
+          // If we have a saved business ID, validate and restore it
+          if (savedBusinessId) {
+            const savedId = parseInt(savedBusinessId);
+            const businessExists = userBusinesses.some(b => b.id === savedId);
+            
+            if (businessExists) {
+              setSelectedBusinessIdState(savedId);
+              setModalShownForUser(user.userId); // Mark modal as shown when restoring
+              console.log('Restored business selection for', user.email, ':', savedId);
+              return;
+            } else {
+              // Saved business no longer exists, clear it
+              console.log('Saved business not found for', user.email, ', clearing selection');
+              safeRemoveLocalStorage(`selectedBusinessId_${user.email}`);
+            }
+          }
+          
+          // Show modal only if no valid selection exists and modal hasn't been shown for this user
+          if (modalShownForUser !== user.userId && !showBusinessModal) {
+            console.log('Showing business selection modal for', user.email, 'with multiple businesses. Role ID:', user.roleId);
+            setIsInitialSelection(true);
+            setShowBusinessModal(true);
+            setModalShownForUser(user.userId);
+          }
         }
       }
     }
