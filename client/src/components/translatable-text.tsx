@@ -21,6 +21,21 @@ export function TranslatableText({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
 
+  // Fetch English string to get the ID for foreign key relationship
+  const { data: englishString } = useQuery({
+    queryKey: ['englishString', children],
+    queryFn: async () => {
+      const response = await fetch(`/api/traductions/${encodeURIComponent(children)}/en`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
+      if (!response.ok) return null;
+      return response.json();
+    },
+    enabled: isEditionMode,
+  });
+
   // Fetch existing translation with business context
   const { data: translation } = useQuery({
     queryKey: ['translation', children, currentLanguage, selectedBusinessId],
@@ -34,12 +49,16 @@ export function TranslatableText({
       if (!response.ok) return null;
       return response.json();
     },
-    enabled: isEditionMode, // Fetch translations when edition mode is active
+    enabled: isEditionMode && currentLanguage !== 'en', // Fetch translations when edition mode is active
   });
 
-  // Mutation to save translation with business context
+  // Mutation to save translation with business context and foreign key
   const saveTranslation = useMutation({
     mutationFn: async (traduction: string) => {
+      if (!englishString?.id) {
+        throw new Error('English string ID not found');
+      }
+      
       const response = await fetch('/api/traductions', {
         method: 'POST',
         headers: {
@@ -49,6 +68,7 @@ export function TranslatableText({
         },
         body: JSON.stringify({
           string: children,
+          traduction_id: englishString.id,
           traduction,
           language: currentLanguage,
         }),
