@@ -19,7 +19,17 @@ export function TranslationCacheProvider({ children }: { children: React.ReactNo
   const [translations, setTranslations] = useState<TranslationCache>({});
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
-  const { selectedBusinessId } = useBusinessContext();
+  
+  // Handle case where component renders before BusinessProvider is ready
+  let businessContext;
+  try {
+    businessContext = useBusinessContext();
+  } catch (error) {
+    // BusinessProvider not available, use fallback
+    businessContext = { selectedBusinessId: null };
+  }
+  
+  const { selectedBusinessId } = businessContext;
 
   const loadTranslations = async (language: string) => {
     const token = localStorage.getItem('accessToken');

@@ -101,7 +101,16 @@ const quickActions = [
 ];
 
 export default function Dashboard() {
-  const { selectedBusinessId } = useBusinessContext();
+  // Handle case where component renders before BusinessProvider is ready
+  let businessContext;
+  try {
+    businessContext = useBusinessContext();
+  } catch (error) {
+    // BusinessProvider not available, use fallback
+    businessContext = { selectedBusinessId: null };
+  }
+  
+  const { selectedBusinessId } = businessContext;
 
   // Fetch dashboard statistics
   const { data: stats, isLoading: isLoadingStats } = useQuery<DashboardStats>({

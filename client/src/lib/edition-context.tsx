@@ -20,7 +20,17 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     return saved === 'true';
   });
   const { user } = useAuth();
-  const { selectedBusinessId } = useBusinessContext();
+  
+  // Handle case where component renders before BusinessProvider is ready
+  let businessContext;
+  try {
+    businessContext = useBusinessContext();
+  } catch (error) {
+    // BusinessProvider not available, use fallback
+    businessContext = { selectedBusinessId: null };
+  }
+  
+  const { selectedBusinessId } = businessContext;
   const queryClient = useQueryClient();
 
   // Get current language from business settings with caching
