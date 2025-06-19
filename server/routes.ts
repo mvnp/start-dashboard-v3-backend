@@ -2158,9 +2158,21 @@ export function registerRoutes(app: Express): void {
   });
 
   // Support Ticket routes
-  app.get("/api/support-tickets", async (req, res) => {
+  app.get("/api/support-tickets", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
-      const tickets = await storage.getAllSupportTickets();
+      const user = req.user!;
+      const businessIds = getBusinessFilter(user, req);
+      
+      let tickets;
+      // Filter support tickets by selected business or user's business access
+      if (businessIds && businessIds.length > 0) {
+        tickets = await storage.getSupportTicketsByBusinessIds(businessIds);
+      } else if (user.isSuperAdmin) {
+        tickets = await storage.getAllSupportTickets();
+      } else {
+        tickets = await storage.getSupportTicketsByBusinessIds(user.businessIds);
+      }
+      
       res.json(tickets);
     } catch (error) {
       console.error("Support ticket fetch error:", error);

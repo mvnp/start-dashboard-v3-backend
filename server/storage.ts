@@ -121,6 +121,7 @@ export interface IStorage {
   // Support Ticket methods
   getAllSupportTickets(): Promise<SupportTicket[]>;
   getSupportTicket(id: number): Promise<SupportTicket | undefined>;
+  getSupportTicketsByBusinessIds(businessIds: number[] | null): Promise<SupportTicket[]>;
   createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
   updateSupportTicket(id: number, ticket: Partial<InsertSupportTicket>): Promise<SupportTicket | undefined>;
   deleteSupportTicket(id: number): Promise<boolean>;
@@ -664,6 +665,15 @@ class PostgresStorage implements IStorage {
     return await this.db.select().from(payment_gateways);
   }
 
+  async getPaymentGatewaysByBusinessIds(businessIds: number[] | null): Promise<PaymentGateway[]> {
+    if (!businessIds || businessIds.length === 0) {
+      return [];
+    }
+    return await this.db.select()
+      .from(payment_gateways)
+      .where(inArray(payment_gateways.business_id, businessIds));
+  }
+
   async getPaymentGateway(id: number): Promise<PaymentGateway | undefined> {
     const result = await this.db.select().from(payment_gateways).where(eq(payment_gateways.id, id));
     return result[0];
@@ -970,6 +980,15 @@ class PostgresStorage implements IStorage {
   // Support Ticket methods
   async getAllSupportTickets(): Promise<SupportTicket[]> {
     return await this.db.select().from(support_tickets);
+  }
+
+  async getSupportTicketsByBusinessIds(businessIds: number[] | null): Promise<SupportTicket[]> {
+    if (!businessIds || businessIds.length === 0) {
+      return [];
+    }
+    return await this.db.select()
+      .from(support_tickets)
+      .where(inArray(support_tickets.business_id, businessIds));
   }
 
   async getSupportTicket(id: number): Promise<SupportTicket | undefined> {

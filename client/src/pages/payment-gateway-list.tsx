@@ -28,21 +28,25 @@ interface Staff {
   role: string;
 }
 import { TranslatableText } from "@/components/translatable-text";
+import { useBusinessContext } from "@/lib/business-context";
 
 export default function PaymentGatewayList() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { toast } = useToast();
+  const { selectedBusinessId } = useBusinessContext();
 
   const { data: gateways = [], isLoading } = useQuery({
-    queryKey: ["/api/payment-gateways"],
+    queryKey: ["/api/payment-gateways", selectedBusinessId],
     select: (data: PaymentGateway[]) => data,
+    enabled: !!selectedBusinessId,
   });
 
   const { data: staff = [] } = useQuery({
-    queryKey: ["/api/staff"],
+    queryKey: ["/api/staff", selectedBusinessId],
     select: (data: Staff[]) => data,
+    enabled: !!selectedBusinessId,
   });
 
   const deleteMutation = useMutation({
