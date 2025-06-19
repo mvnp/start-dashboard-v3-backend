@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/auth";
 import { useMutation } from "@tanstack/react-query";
 import { DemoCredentials } from "@/components/demo-credentials";
 import { queryClient } from "@/lib/queryClient";
+import { TranslatableText } from "@/components/translatable-text";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -44,14 +45,14 @@ export default function Login() {
       // Invalidate all queries to refresh data with new user context
       queryClient.invalidateQueries();
       toast({
-        title: "Login successful",
-        description: "Welcome to BarberPro Dashboard",
+        title: <TranslatableText>Login successful</TranslatableText>,
+        description: <TranslatableText>Welcome to BarberPro Dashboard</TranslatableText>
       });
       setLocation("/");
     },
     onError: (error: Error) => {
       toast({
-        title: "Login failed",
+        title: <TranslatableText>Login failed</TranslatableText>,
         description: error.message,
         variant: "destructive",
       });
@@ -62,8 +63,8 @@ export default function Login() {
     e.preventDefault();
     if (!email || !password) {
       toast({
-        title: "Missing credentials",
-        description: "Please enter both email and password",
+        title: <TranslatableText>Missing credentials</TranslatableText>,
+        description: <TranslatableText>Please enter both email and password</TranslatableText>,
         variant: "destructive",
       });
       return;
@@ -82,15 +83,15 @@ export default function Login() {
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
             </div>
-            <h2 className="mt-6 text-3xl font-bold text-slate-900">Welcome to BarberPro</h2>
-            <p className="mt-2 text-sm text-slate-600">Sign in to your account to continue</p>
+            <h2 className="mt-6 text-3xl font-bold text-slate-900"><TranslatableText>Welcome to BarberPro</TranslatableText></h2>
+            <p className="mt-2 text-sm text-slate-600"><TranslatableText>Sign in to your account to continue</TranslatableText></p>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               <div>
                 <Label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
-                  Email address
+                  <TranslatableText>Email address</TranslatableText>
                 </Label>
                 <Input
                   id="email"
@@ -105,7 +106,7 @@ export default function Login() {
               </div>
               <div>
                 <Label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
-                  Password
+                  <TranslatableText>Password</TranslatableText>
                 </Label>
                 <Input
                   id="password"
@@ -124,12 +125,12 @@ export default function Login() {
               <div className="flex items-center space-x-2">
                 <Checkbox id="remember-me" />
                 <Label htmlFor="remember-me" className="text-sm text-slate-700">
-                  Remember me
+                  <TranslatableText>Remember me</TranslatableText>
                 </Label>
               </div>
               <div className="text-sm">
                 <a href="#" className="font-medium barber-primary hover:text-barber-secondary">
-                  Forgot your password?
+                  <TranslatableText>Forgot your password?</TranslatableText>
                 </a>
               </div>
             </div>
@@ -144,14 +145,14 @@ export default function Login() {
 
             <div className="text-center space-y-3">
               <p className="text-sm text-slate-600">
-                Don't have an account?{" "}
+                <TranslatableText>Don't have an account?</TranslatableText>{" "}
                 <a href="#" className="font-medium barber-primary hover:text-barber-secondary">
-                  Contact your administrator
+                  <TranslatableText>Contact your administrator</TranslatableText>
                 </a>
               </p>
               <p className="text-sm">
                 <Link href="/landing" className="font-medium text-barber-primary hover:text-barber-secondary">
-                  ← Go to home
+                  ← <TranslatableText>Go to home</TranslatableText>
                 </Link>
               </p>
             </div>
