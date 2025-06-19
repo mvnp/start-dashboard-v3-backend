@@ -27,14 +27,14 @@ export default function WhatsappList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances"] });
       toast({
-        title: "Instance deleted",
-        description: "The WhatsApp instance has been successfully deleted.",
+        title: <TranslatableText>Instance deleted</TranslatableText>,
+        description: <TranslatableText>The WhatsApp instance has been successfully deleted.</TranslatableText>,
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete the WhatsApp instance. Please try again.",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to delete the WhatsApp instance. Please try again.</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -45,14 +45,14 @@ export default function WhatsappList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances"] });
       toast({
-        title: "QR Code generated",
-        description: "QR code has been generated. Please scan it with your phone.",
+        title: <TranslatableText>QR Code generated</TranslatableText>,
+        description: <TranslatableText>QR code has been generated. Please scan it with your phone.</TranslatableText>,
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to generate QR code. Please try again.",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to generate QR code. Please try again.</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -108,7 +108,7 @@ export default function WhatsappList() {
   if (error) {
     return (
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4 text-red-600">Error Loading WhatsApp Instances</h1>
+        <h1 className="text-2xl font-bold mb-4 text-red-600"><TranslatableText>Error Loading WhatsApp Instances</TranslatableText></h1>
         <p>{JSON.stringify(error)}</p>
       </div>
     );
@@ -268,7 +268,7 @@ export default function WhatsappList() {
                       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
                         <div className="flex items-center gap-2 mb-2">
                           <QrCode className="w-5 h-5 text-yellow-600" />
-                          <h4 className="font-medium text-yellow-800">QR Code Ready</h4>
+                          <h4 className="font-medium text-yellow-800"><TranslatableText>QR Code Ready</TranslatableText></h4>
                         </div>
                         <p className="text-sm text-yellow-700 mb-3">
                           <TranslatableText>Scan this QR code with your WhatsApp to connect this instance.</TranslatableText>
