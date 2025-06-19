@@ -109,15 +109,19 @@ export function TranslatableText({
         onChange={(e) => setEditValue(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
-        className={`inline-block bg-yellow-100 dark:bg-yellow-900 border border-yellow-300 dark:border-yellow-600 rounded px-1 ${className}`}
+        className={`bg-yellow-100 dark:bg-yellow-900 border border-yellow-300 dark:border-yellow-600 rounded px-1 ${className}`}
         autoFocus
         disabled={saveTranslation.isPending}
       />
     );
   }
 
+  // Determine if this should be block or inline-block based on the tag
+  const isBlockElement = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div'].includes(Tag);
+  const displayClass = isBlockElement ? 'block' : 'inline-block';
+
   return (
-    <Tag className={`relative inline-block group ${className}`}>
+    <Tag className={`relative ${displayClass} group ${className}`}>
       {displayText}
       {isEditionMode && canEdit && (
         <button
