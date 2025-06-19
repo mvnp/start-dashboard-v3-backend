@@ -21,7 +21,7 @@ import {
   Languages
 } from "lucide-react";
 
-import { TranslatableText } from "@/components/TranslatableText";
+import { TranslatableText } from "@/components/translatable-text";
 
 export const navigationItems = [
   {
