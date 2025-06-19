@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Globe, Save, Languages, Plus } from "lucide-react";
+import { Globe, Save, Languages, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { TranslatableText } from "@/components/translatable-text";
 
 // Comprehensive language options (copied from Settings page)
@@ -83,14 +83,25 @@ export default function Traductions() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>('');
   const [editingValues, setEditingValues] = useState<Record<string, string>>({});
   const [newEnglishString, setNewEnglishString] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(25);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Load selected language from localStorage
+  // Load settings from localStorage
   useEffect(() => {
     const savedLanguage = localStorage.getItem('traductions-selected-language');
+    const savedRowsPerPage = localStorage.getItem('traductions-rows-per-page');
+    const savedCurrentPage = localStorage.getItem('traductions-current-page');
+    
     if (savedLanguage) {
       setSelectedLanguage(savedLanguage);
+    }
+    if (savedRowsPerPage) {
+      setRowsPerPage(parseInt(savedRowsPerPage, 10));
+    }
+    if (savedCurrentPage) {
+      setCurrentPage(parseInt(savedCurrentPage, 10));
     }
   }, []);
 
@@ -99,6 +110,23 @@ export default function Traductions() {
     setSelectedLanguage(language);
     localStorage.setItem('traductions-selected-language', language);
     setEditingValues({}); // Clear editing values when language changes
+    setCurrentPage(1); // Reset to first page when language changes
+    localStorage.setItem('traductions-current-page', '1');
+  };
+
+  // Handle rows per page change with persistence
+  const handleRowsPerPageChange = (value: string) => {
+    const newRowsPerPage = parseInt(value, 10);
+    setRowsPerPage(newRowsPerPage);
+    localStorage.setItem('traductions-rows-per-page', value);
+    setCurrentPage(1); // Reset to first page when changing rows per page
+    localStorage.setItem('traductions-current-page', '1');
+  };
+
+  // Handle page change with persistence
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    localStorage.setItem('traductions-current-page', page.toString());
   };
 
   // Fetch all English translations (source strings)
@@ -215,6 +243,20 @@ export default function Traductions() {
     return translation?.traduction || '';
   };
 
+  // Pagination calculations
+  const totalItems = englishTranslations.length;
+  const totalPages = Math.ceil(totalItems / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedTranslations = englishTranslations.slice(startIndex, endIndex);
+
+  // Ensure current page is valid when data changes
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      handlePageChange(1);
+    }
+  }, [totalPages, currentPage]);
+
   const isLoading = isLoadingEnglish || (selectedLanguage && selectedLanguage !== 'en' && isLoadingTarget);
 
   return (
@@ -299,12 +341,32 @@ export default function Traductions() {
       {selectedLanguage && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Save className="h-5 w-5" />
-              <TranslatableText>Translations</TranslatableText>
-              <span className="text-sm font-normal text-slate-500">
-                ({englishTranslations.length} <TranslatableText>strings</TranslatableText>)
-              </span>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Save className="h-5 w-5" />
+                <TranslatableText>Translations</TranslatableText>
+                <span className="text-sm font-normal text-slate-500">
+                  ({englishTranslations.length} <TranslatableText>strings</TranslatableText>)
+                </span>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-600">
+                    <TranslatableText>Rows per page</TranslatableText>:
+                  </span>
+                  <Select value={rowsPerPage.toString()} onValueChange={handleRowsPerPageChange}>
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="25">25</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </CardTitle>
             <p className="text-sm text-slate-600">
               <TranslatableText>Press Enter to save a translation</TranslatableText>
@@ -316,39 +378,120 @@ export default function Traductions() {
                 <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
               </div>
             ) : (
-              <div className="border rounded-lg">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-1/2">
-                        <TranslatableText>English (Source)</TranslatableText>
-                      </TableHead>
-                      <TableHead className="w-1/2">
-                        <TranslatableText>Translation</TranslatableText> ({LANGUAGES.find(l => l.code === selectedLanguage)?.name})
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {englishTranslations.map((englishTranslation) => (
-                      <TableRow key={englishTranslation.id}>
-                        <TableCell className="font-medium">
-                          {englishTranslation.string}
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            value={getTranslationValue(englishTranslation.string)}
-                            onChange={(e) => handleInputChange(englishTranslation.string, e.target.value)}
-                            onKeyPress={(e) => handleKeyPress(e, englishTranslation)}
-                            placeholder={`Enter ${LANGUAGES.find(l => l.code === selectedLanguage)?.name} translation...`}
-                            className="w-full"
-                            disabled={saveTranslationMutation.isPending}
-                          />
-                        </TableCell>
+              <>
+                <div className="border rounded-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-1/2">
+                          <TranslatableText>English (Source)</TranslatableText>
+                        </TableHead>
+                        <TableHead className="w-1/2">
+                          <TranslatableText>Translation</TranslatableText> ({LANGUAGES.find(l => l.code === selectedLanguage)?.name})
+                        </TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {paginatedTranslations.map((englishTranslation) => (
+                        <TableRow key={englishTranslation.id}>
+                          <TableCell className="font-medium">
+                            {englishTranslation.string}
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              value={getTranslationValue(englishTranslation.string)}
+                              onChange={(e) => handleInputChange(englishTranslation.string, e.target.value)}
+                              onKeyPress={(e) => handleKeyPress(e, englishTranslation)}
+                              placeholder={`Enter ${LANGUAGES.find(l => l.code === selectedLanguage)?.name} translation...`}
+                              className="w-full"
+                              disabled={saveTranslationMutation.isPending}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between pt-4">
+                    <div className="text-sm text-slate-600">
+                      <TranslatableText>Showing</TranslatableText> {startIndex + 1} <TranslatableText>to</TranslatableText> {Math.min(endIndex, totalItems)} <TranslatableText>of</TranslatableText> {totalItems} <TranslatableText>entries</TranslatableText>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        <TranslatableText>Previous</TranslatableText>
+                      </Button>
+                      
+                      <div className="flex items-center gap-1">
+                        {/* Show first page */}
+                        {currentPage > 3 && (
+                          <>
+                            <Button
+                              variant={currentPage === 1 ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handlePageChange(1)}
+                            >
+                              1
+                            </Button>
+                            {currentPage > 4 && <span className="text-slate-400">...</span>}
+                          </>
+                        )}
+                        
+                        {/* Show pages around current page */}
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                          const pageNum = Math.max(1, currentPage - 2) + i;
+                          if (pageNum > totalPages) return null;
+                          if (pageNum < Math.max(1, currentPage - 2)) return null;
+                          if (pageNum > Math.min(totalPages, currentPage + 2)) return null;
+                          
+                          return (
+                            <Button
+                              key={pageNum}
+                              variant={currentPage === pageNum ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handlePageChange(pageNum)}
+                            >
+                              {pageNum}
+                            </Button>
+                          );
+                        })}
+                        
+                        {/* Show last page */}
+                        {currentPage < totalPages - 2 && (
+                          <>
+                            {currentPage < totalPages - 3 && <span className="text-slate-400">...</span>}
+                            <Button
+                              variant={currentPage === totalPages ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handlePageChange(totalPages)}
+                            >
+                              {totalPages}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                      >
+                        <TranslatableText>Next</TranslatableText>
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
