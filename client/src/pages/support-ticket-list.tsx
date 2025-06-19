@@ -10,6 +10,7 @@ import { Trash2, Plus, Search, Eye, Edit, AlertCircle, Clock, CheckCircle, XCirc
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { SupportTicket } from "@shared/schema";
+import { TranslatableText } from "@/components/translatable-text";
 
 export default function SupportTicketList() {
   const [searchTerm, setSearchTerm] = useState("");
