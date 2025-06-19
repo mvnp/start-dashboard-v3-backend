@@ -174,6 +174,7 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 19, 2025. Completed comprehensive TranslatableText string audit and database update - scanned entire codebase for all <TranslatableText> wrapped strings and bulk inserted 205 new strings into traductions table. Database now contains 968 total English strings covering all UI text, validation messages, success/error notifications, and user interface elements from current codebase state.
 - June 19, 2025. Removed auto-login functionality to allow switching between different user accounts after logout - login page now requires manual credentials entry for all users in both development and production environments.
 - June 19, 2025. Fixed Super Admin business selection modal issue - updated business selector modal to use correct API endpoint (/api/businesses) for Super Admin users instead of /api/user-businesses, ensuring all 4 businesses are visible during business selection instead of just 1. Server-side logic was working correctly; frontend was using wrong endpoint due to hardcoded query key.
 - June 19, 2025. Implemented session persistence to maintain user authentication across browser refreshes - JWT tokens are now validated on app initialization and user session is restored automatically, eliminating the need to re-login after page refresh.
