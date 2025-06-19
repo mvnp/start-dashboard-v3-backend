@@ -130,8 +130,8 @@ export default function SupportTicketList() {
               <AlertCircle className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">Support Tickets</h1>
-              <p className="text-slate-600">Manage customer support requests and inquiries</p>
+              <h1 className="text-3xl font-bold text-slate-900"><TranslatableText>Support Tickets</TranslatableText></h1>
+              <p className="text-slate-600 mt-2"><TranslatableText>Manage customer support requests and inquiries</TranslatableText></p>
             </div>
           </div>
           <Link href="/support-tickets/new">
