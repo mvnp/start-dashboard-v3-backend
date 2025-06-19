@@ -155,7 +155,7 @@ export default function ServiceList() {
                 <div className="flex items-center gap-2">
                   <Settings className="w-5 h-5 text-amber-600" />
                   <Badge variant="secondary" className="text-xs">
-                    ID: {service.id}
+                    <TranslatableText>ID:</TranslatableText> {service.id}
                   </Badge>
                 </div>
                 <Badge 
@@ -232,13 +232,13 @@ export default function ServiceList() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Service</AlertDialogTitle>
+            <AlertDialogTitle><TranslatableText>Delete Service</TranslatableText></AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this service? This action cannot be undone.
+              <TranslatableText>Are you sure you want to delete this service? This action cannot be undone.</TranslatableText>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel><TranslatableText>Cancel</TranslatableText></AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-red-600 hover:bg-red-700"

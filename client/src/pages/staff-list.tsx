@@ -39,22 +39,22 @@ interface Staff extends Person {
 
 const roleConfig = {
   "super-admin": {
-    label: "Super Admin",
+    label: <TranslatableText>Super Admin</TranslatableText>,
     icon: Shield,
     color: "bg-red-100 text-red-800 border-red-200",
   },
   "merchant": {
-    label: "Merchant",
+    label: <TranslatableText>Merchant</TranslatableText>,
     icon: UserCheck,
     color: "bg-blue-100 text-blue-800 border-blue-200",
   },
   "collaborator": {
-    label: "Collaborator",
+    label: <TranslatableText>Collaborator</TranslatableText>,
     icon: Users,
     color: "bg-green-100 text-green-800 border-green-200",
   },
   "customer": {
-    label: "Customer",
+    label: <TranslatableText>Customer</TranslatableText>,
     icon: User,
     color: "bg-gray-100 text-gray-800 border-gray-200",
   },
@@ -80,14 +80,14 @@ export default function StaffList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/staff", selectedBusinessId] });
       toast({
-        title: "Staff member deleted",
-        description: "The staff member has been successfully removed.",
+        title: <TranslatableText>Staff member deleted</TranslatableText>,
+        description: <TranslatableText>The staff member has been successfully removed.</TranslatableText>,
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete staff member. Please try again.",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to delete staff member. Please try again.</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -176,7 +176,9 @@ export default function StaffList() {
       {/* Staff List */}
       <Card>
         <CardHeader>
-          <CardTitle><TranslatableText>Staff Members</TranslatableText></CardTitle>
+          <CardTitle>
+            <TranslatableText>Staff Members</TranslatableText>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {filteredStaff.length === 0 ? (
@@ -223,7 +225,7 @@ export default function StaffList() {
                           {roleInfo?.label || member.role}
                         </Badge>
                         <p className="text-sm text-slate-600 mt-1">{formatSalary(member.salary)}</p>
-                        <p className="text-xs text-slate-500">Hired: {formatDate(member.hire_date)}</p>
+                        <p className="text-xs text-slate-500"><TranslatableText>Hired:</TranslatableText> {formatDate(member.hire_date)}</p>
                       </div>
                       
                       <div className="flex space-x-2">
@@ -241,13 +243,13 @@ export default function StaffList() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Staff Member</AlertDialogTitle>
+                              <AlertDialogTitle><TranslatableText>Delete Staff Member</TranslatableText></AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete {member.first_name} {member.last_name}? This action cannot be undone.
+                                <TranslatableText>Are you sure you want to delete</TranslatableText> {member.first_name} {member.last_name}? <TranslatableText>This action cannot be undone.</TranslatableText>
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogCancel><TranslatableText>Cancel</TranslatableText></AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => deleteStaffMutation.mutate(member.id)}
                                 className="bg-red-600 hover:bg-red-700"
