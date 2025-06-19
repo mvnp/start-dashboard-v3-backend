@@ -121,8 +121,8 @@ export default function AppointmentList() {
       <div className="w-full p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Appointments</h1>
-            <p className="text-slate-600 mt-2">Manage barbershop appointments</p>
+            <h1 className="text-3xl font-bold text-slate-900"><TranslatableText>Appointments</TranslatableText></h1>
+            <p className="text-slate-600 mt-2"><TranslatableText>Manage barbershop appointments</TranslatableText></p>
           </div>
         </div>
         <div className="animate-pulse space-y-4">
@@ -138,15 +138,15 @@ export default function AppointmentList() {
     <div className="w-full p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Appointments</h1>
-          <p className="text-slate-600 mt-2">Manage barbershop appointments</p>
+          <h1 className="text-3xl font-bold text-slate-900"><TranslatableText>Appointments</TranslatableText></h1>
+          <p className="text-slate-600 mt-2"><TranslatableText>Manage barbershop appointments</TranslatableText></p>
         </div>
         <Button
           onClick={() => setLocation("/appointments/new")}
           className="bg-amber-600 hover:bg-amber-700 text-white"
         >
           <Plus className="w-4 h-4 mr-2" />
-          New Appointment
+          <TranslatableText>New Appointment</TranslatableText>
         </Button>
       </div>
 
@@ -170,7 +170,7 @@ export default function AppointmentList() {
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-amber-600" />
                   <Badge variant="secondary" className="text-xs">
-                    ID: {appointment.id}
+                    <TranslatableText>ID:</TranslatableText> {appointment.id}
                   </Badge>
                 </div>
                 <Badge className={getStatusColor(appointment.status || 'Scheduled')}>
@@ -215,7 +215,7 @@ export default function AppointmentList() {
                   className="flex-1"
                 >
                   <Edit className="w-4 h-4 mr-1" />
-                  Edit
+                  <TranslatableText>Edit</TranslatableText>
                 </Button>
                 <Button
                   variant="outline"
@@ -243,7 +243,7 @@ export default function AppointmentList() {
             className="bg-amber-600 hover:bg-amber-700 text-white"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Create New Appointment
+            <TranslatableText>Create New Appointment</TranslatableText>
           </Button>
         </div>
       )}
@@ -251,9 +251,9 @@ export default function AppointmentList() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Appointment</AlertDialogTitle>
+            <AlertDialogTitle><TranslatableText>Delete Appointment</TranslatableText></AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this appointment? This action cannot be undone.
+              <TranslatableText>Are you sure you want to delete this appointment? This action cannot be undone.</TranslatableText>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

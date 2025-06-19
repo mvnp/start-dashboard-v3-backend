@@ -210,7 +210,7 @@ export default function AccountingForm() {
         <div className="flex justify-center items-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <div className="text-lg">Loading transaction data...</div>
+            <div className="text-lg"><TranslatableText>Loading transaction data...</TranslatableText></div>
           </div>
         </div>
       </div>
@@ -222,7 +222,7 @@ export default function AccountingForm() {
       <div className="min-h-screen w-full p-6">
         <div className="flex justify-center items-center h-64">
           <div className="text-center">
-            <p className="text-red-600 mb-4">Failed to load transaction data</p>
+            <p className="text-red-600 mb-4"><TranslatableText>Failed to load transaction data</TranslatableText></p>
             <Button onClick={() => setLocation("/accounting")}>
               Back to Transactions
             </Button>
@@ -495,7 +495,7 @@ export default function AccountingForm() {
                     <div className="space-y-1 leading-none">
                       <FormLabel><TranslatableText>Recurring Transaction</TranslatableText></FormLabel>
                       <p className="text-sm text-muted-foreground">
-                        Mark this as a recurring transaction
+                        <TranslatableText>Mark this as a recurring transaction</TranslatableText>
                       </p>
                     </div>
                   </FormItem>

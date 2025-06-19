@@ -90,7 +90,7 @@ export default function UserSwitcher() {
           variant="outline"
           className="w-full"
         >
-          Sign Out
+          <TranslatableText>Sign Out</TranslatableText>
         </Button>
       </CardContent>
     </Card>

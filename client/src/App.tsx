@@ -40,6 +40,7 @@ import BusinessForm from "@/pages/business-form";
 import Settings from "@/pages/settings";
 import Support from "@/pages/support";
 import NotFound from "@/pages/not-found";
+import { TranslatableText } from "./components/translatable-text";
 
 function Layout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -224,8 +225,8 @@ function Router() {
       <Route path="/tickets">
         <Layout>
           <div className="p-6">
-            <h1 className="text-3xl font-bold text-slate-900">Support Tickets</h1>
-            <p className="text-slate-600 mt-2">Support ticket management coming soon...</p>
+            <h1 className="text-3xl font-bold text-slate-900"><TranslatableText>Support Tickets</TranslatableText></h1>
+            <p className="text-slate-600 mt-2"><TranslatableText>Support ticket management coming soon...</TranslatableText></p>
           </div>
         </Layout>
       </Route>
