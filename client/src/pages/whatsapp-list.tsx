@@ -260,7 +260,7 @@ export default function WhatsappList() {
                         </p>
                       )}
                       <p className="text-slate-500 text-sm">
-                        <strong><TranslatableText><Created:/TranslatableText></strong> {new Date(instance.created_at!).toLocaleDateString()}
+                        <strong><TranslatableText>Created:</TranslatableText></strong> {new Date(instance.created_at!).toLocaleDateString()}
                       </p>
                     </div>
                     {instance.status === "Error" && instance.qr_code && (
