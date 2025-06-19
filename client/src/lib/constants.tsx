@@ -21,101 +21,99 @@ import {
   Languages
 } from "lucide-react";
 
-import { TranslatableText } from "@/components/translatable-text";
-
 export const navigationItems = [
   {
-    name: <TranslatableText>Dashboard</TranslatableText>,
+    name: "Dashboard",
     href: "/",
     icon: Home,
     current: true,
   },
   {
-    name: <TranslatableText>Businesses</TranslatableText>,
+    name: "Businesses",
     href: "/businesses",
     icon: Building2,
     current: false,
   },
   {
-    name: <TranslatableText>Staff</TranslatableText>,
+    name: "Staff",
     href: "/staff",
     icon: User,
     current: false,
   },
   {
-    name: <TranslatableText>Customers</TranslatableText>,
+    name: "Customers",
     href: "/clients",
     icon: Users,
     current: false,
   },
   {
-    name: <TranslatableText>Appointments</TranslatableText>,
+    name: "Appointments",
     href: "/appointments",
     icon: Calendar,
     current: false,
   },
   {
-    name: <TranslatableText>Services</TranslatableText>,
+    name: "Services",
     href: "/services",
     icon: Settings,
     current: false,
   },
   {
-    name: <TranslatableText>WhatsApp Instances</TranslatableText>,
+    name: "WhatsApp Instances",
     href: "/whatsapp",
     icon: MessageCircle,
     current: false,
   },
   {
-    name: <TranslatableText>Barber Plans</TranslatableText>,
+    name: "Barber Plans",
     href: "/plans",
     icon: Crown,
     current: false,
   },
   {
-    name: <TranslatableText>Payment Gateways</TranslatableText>,
+    name: "Payment Gateways",
     href: "/payment-gateways",
     icon: PaymentIcon,
     current: false,
   },
   {
-    name: <TranslatableText>Support Tickets</TranslatableText>,
+    name: "Support Tickets",
     href: "/support-tickets",
     icon: HelpCircle,
     current: false,
   },
   {
-    name: <TranslatableText>FAQs</TranslatableText>,
+    name: "FAQs",
     href: "/faqs",
     icon: FileText,
     current: false,
   },
   {
-    name: <TranslatableText>Accounting</TranslatableText>,
+    name: "Accounting",
     href: "/accounting",
     icon: Calculator,
     current: false,
   },
   {
-    name: <TranslatableText>Settings</TranslatableText>,
+    name: "Settings",
     href: "/settings",
     icon: Settings,
     current: false,
   },
   {
-    name: <TranslatableText>Traductions</TranslatableText>,
+    name: "Traductions",
     href: "/traductions",
     icon: Languages,
     current: false,
   },
   {
-    name: <TranslatableText>Support</TranslatableText>,
+    name: "Support",
     href: "/support",
     icon: HeadphonesIcon,
     current: false,
   },
   {
-    name: <TranslatableText>Landing Page</TranslatableText>,
+    name: "Landing Page",
     href: "/landing",
     icon: Home,
     current: false,
@@ -125,17 +123,17 @@ export const navigationItems = [
 
 export const quickActions = [
   {
-    name: <TranslatableText>New Appointment</TranslatableText>,
+    name: "New Appointment",
     icon: Plus,
     color: "bg-barber-primary hover:bg-barber-secondary text-white",
   },
   {
-    name: <TranslatableText>Add Client</TranslatableText>,
+    name: "Add Client",
     icon: UserPlus,
     color: "bg-slate-100 hover:bg-slate-200 text-slate-700",
   },
   {
-    name: <TranslatableText>Process Payment</TranslatableText>,
+    name: "Add Revenue or Expense",
     icon: CreditCard,
     color: "bg-slate-100 hover:bg-slate-200 text-slate-700",
   },
