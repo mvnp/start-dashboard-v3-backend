@@ -10,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { PaymentGateway, Staff } from "@shared/schema";
+import { PaymentGateway } from "@shared/schema";
+import { TranslatableText } from "@/components/translatable-text";
 
 interface PaymentGatewayFormData {
   name: string;

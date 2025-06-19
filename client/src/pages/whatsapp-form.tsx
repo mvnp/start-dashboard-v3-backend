@@ -180,7 +180,7 @@ export default function WhatsappForm() {
           className="mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to WhatsApp Instances
+          <TranslatableText>Back to WhatsApp Instances</TranslatableText>
         </Button>
         
         <div className="flex items-center gap-3">
@@ -274,7 +274,7 @@ export default function WhatsappForm() {
                     variant="outline" 
                     onClick={() => setLocation("/whatsapp")}
                   >
-                    Cancel
+    <TranslatableText>Cancel</TranslatableText>
                   </Button>
                   <Button type="submit" disabled={isPending}>
                     {isPending ? "Saving..." : isEditing ? "Update Instance" : "Create Instance"}
