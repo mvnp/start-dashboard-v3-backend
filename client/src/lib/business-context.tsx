@@ -47,15 +47,17 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     userBusinesses.length > 1 && 
     !selectedBusinessId;
 
-  // Load selected business from sessionStorage on mount with enhanced persistence
+  // Initialize selected business from sessionStorage immediately when component mounts
   useEffect(() => {
-    const savedBusinessId = safeGetSessionStorage("selectedBusinessId");
-    if (savedBusinessId && !isNaN(parseInt(savedBusinessId))) {
-      const businessId = parseInt(savedBusinessId);
-      setSelectedBusinessIdState(businessId);
-      console.log('Restored selected business from session:', businessId);
+    if (user) {
+      const savedBusinessId = safeGetSessionStorage("selectedBusinessId");
+      if (savedBusinessId && !isNaN(parseInt(savedBusinessId))) {
+        const businessId = parseInt(savedBusinessId);
+        setSelectedBusinessIdState(businessId);
+        console.log('Restored selected business from session:', businessId);
+      }
     }
-  }, []);
+  }, [user]);
 
   // Handle business selection for all users (Super Admin, Merchant, Employee)
   useEffect(() => {
@@ -71,33 +73,33 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
         return;
       }
       
-      // For users with multiple businesses, only show modal once per user session
-      if (userBusinesses.length > 1 && modalShownForUser !== user.userId && !showBusinessModal) {
-        if (!savedBusinessId) {
-          console.log('Showing business selection modal for', user.email, 'with multiple businesses (initial selection). Role ID:', user.roleId);
+      // For users with multiple businesses
+      if (userBusinesses.length > 1) {
+        // If we have a saved business ID, validate and restore it
+        if (savedBusinessId && !selectedBusinessId) {
+          const savedId = parseInt(savedBusinessId);
+          const businessExists = userBusinesses.some(b => b.id === savedId);
+          
+          if (businessExists) {
+            setSelectedBusinessIdState(savedId);
+            setModalShownForUser(user.userId); // Mark modal as shown when restoring
+            console.log('Restored business selection for', user.email, ':', savedId);
+            return;
+          } else {
+            // Saved business no longer exists, clear it
+            console.log('Saved business not found for', user.email, ', clearing selection');
+            safeRemoveSessionStorage("selectedBusinessId");
+            setSelectedBusinessIdState(null);
+          }
+        }
+        
+        // Show modal only if no valid selection exists and modal hasn't been shown for this user
+        if (!selectedBusinessId && modalShownForUser !== user.userId && !showBusinessModal) {
+          console.log('Showing business selection modal for', user.email, 'with multiple businesses. Role ID:', user.roleId);
           setIsInitialSelection(true);
           setShowBusinessModal(true);
           setModalShownForUser(user.userId);
-          return;
         }
-        
-        // Check if saved business exists in user's accessible businesses
-        const savedId = parseInt(savedBusinessId);
-        const businessExists = userBusinesses.some(b => b.id === savedId);
-        if (!businessExists) {
-          console.log('Saved business not found for', user.email, ', showing selection modal. Role ID:', user.roleId);
-          safeRemoveSessionStorage("selectedBusinessId");
-          setSelectedBusinessIdState(null);
-          setIsInitialSelection(true);
-          setShowBusinessModal(true);
-          setModalShownForUser(user.userId);
-          return;
-        }
-        
-        // If saved business exists, restore it
-        setSelectedBusinessIdState(savedId);
-        setModalShownForUser(user.userId); // Mark modal as shown even when restoring
-        console.log('Restored business selection for', user.email, ':', savedId);
       }
     }
   }, [user, userBusinesses, isLoading, modalShownForUser, showBusinessModal]);
