@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useAuth } from './auth';
-import { safeGetSessionStorage } from './safe-storage';
+import { useBusinessContext } from './business-context';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface EditionContextType {
@@ -20,33 +20,8 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     return saved === 'true';
   });
   const { user } = useAuth();
-  
-  // Get selected business ID from session storage
-  const [selectedBusinessId, setSelectedBusinessId] = useState<number | null>(() => {
-    const saved = safeGetSessionStorage("selectedBusinessId");
-    return saved ? parseInt(saved) : null;
-  });
-
-  // Listen for changes in session storage
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const saved = safeGetSessionStorage("selectedBusinessId");
-      setSelectedBusinessId(saved ? parseInt(saved) : null);
-    };
-
-    // Listen for storage events and custom events
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('sessionStorageChange', handleStorageChange);
-    
-    // Check periodically for changes (fallback)
-    const interval = setInterval(handleStorageChange, 1000);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('sessionStorageChange', handleStorageChange);
-      clearInterval(interval);
-    };
-  }, []);
+  const { selectedBusinessId } = useBusinessContext();
+  const queryClient = useQueryClient();
 
   // Get current language from business settings with caching
   const { data: settings } = useQuery({

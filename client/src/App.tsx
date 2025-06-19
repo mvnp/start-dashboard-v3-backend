@@ -330,14 +330,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <EditionProvider>
-          <BusinessProvider>
+        <BusinessProvider>
+          <EditionProvider>
             <TooltipProvider>
               <Toaster />
               <Router />
             </TooltipProvider>
-          </BusinessProvider>
-        </EditionProvider>
+          </EditionProvider>
+        </BusinessProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
