@@ -58,15 +58,15 @@ export default function PaymentGatewayForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/payment-gateways"] });
       toast({
-        title: "Success",
-        description: "Payment gateway created successfully",
+        title: <TranslatableText>Success</TranslatableText>,
+        description: <TranslatableText>Payment gateway created successfully</TranslatableText>,
       });
       setLocation("/payment-gateways");
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to create payment gateway",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to create payment gateway</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -78,15 +78,15 @@ export default function PaymentGatewayForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/payment-gateways"] });
       queryClient.invalidateQueries({ queryKey: ["/api/payment-gateways", gatewayId] });
       toast({
-        title: "Success",
-        description: "Payment gateway updated successfully",
+        title: <TranslatableText>Success</TranslatableText>,
+        description: <TranslatableText>Payment gateway updated successfully</TranslatableText>,
       });
       setLocation("/payment-gateways");
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update payment gateway",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to update payment gateway</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -112,8 +112,8 @@ export default function PaymentGatewayForm() {
     
     if (formData.staff_id === 0) {
       toast({
-        title: "Error",
-        description: "Please select a staff member",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Please select a staff member</TranslatableText>,
         variant: "destructive",
       });
       return;
@@ -121,8 +121,8 @@ export default function PaymentGatewayForm() {
 
     if (!formData.type) {
       toast({
-        title: "Error",
-        description: "Please select a payment gateway type",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Please select a payment gateway type</TranslatableText>,
         variant: "destructive",
       });
       return;
@@ -169,7 +169,7 @@ export default function PaymentGatewayForm() {
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" size="sm" onClick={() => setLocation("/payment-gateways")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Payment Gateways
+              <TranslatableText>Back to Payment Gateways</TranslatableText>
           </Button>
         </div>
         <div className="animate-pulse space-y-4">
@@ -188,12 +188,12 @@ export default function PaymentGatewayForm() {
           <TranslatableText>Back to Payment Gateways</TranslatableText>
         </Button>
         <div>
-          <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
-            {isEdit ? "Edit Payment Gateway" : "Create New Payment Gateway"}
-          </TranslatableText>
-          <TranslatableText tag="p" className="text-slate-600">
-            {isEdit ? "Update the payment gateway details" : "Add a new payment processing system"}
-          </TranslatableText>
+          <h1 className="text-3xl font-bold text-slate-900">
+            {isEdit ? <TranslatableText>Edit Payment Gateway</TranslatableText> : <TranslatableText>Create New Payment Gateway</TranslatableText>}
+          </h1>
+          <p className="text-slate-600">
+            {isEdit ? <TranslatableText>Update the payment gateway details</TranslatableText> : <TranslatableText>Add a new payment processing system</TranslatableText>}
+          </p>
         </div>
       </div>
 

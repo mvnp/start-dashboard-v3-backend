@@ -155,8 +155,8 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
         queryClient.invalidateQueries({ queryKey: ["/api/businesses", actualBusinessId] });
       }
       toast({
-        title: "Success",
-        description: `Business ${isEditing ? "updated" : "created"} successfully`,
+        title: <TranslatableText>Success</TranslatableText>,
+        description: `Business ${isEditing ? <TranslatableText>updated</TranslatableText> : <TranslatableText>created</TranslatableText>} successfully`,
       });
       navigate("/businesses");
     },
@@ -176,14 +176,14 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
         setErrors({ email: "Email already exists" });
         form.setError("email", { 
           type: "manual", 
-          message: "Email already exists" 
+          message: <TranslatableText>Email already exists</TranslatableText>
         });
         return;
       }
       
       const errorMessage = errorData?.error || `Failed to ${isEditing ? "update" : "create"} business`;
       toast({
-        title: "Error",
+        title: <TranslatableText>Error</TranslatableText>,
         description: errorMessage,
         variant: "destructive",
       });

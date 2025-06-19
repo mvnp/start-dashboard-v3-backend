@@ -79,15 +79,15 @@ export function TranslatableText({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['translation', children, currentLanguage, selectedBusinessId] });
       toast({
-        title: "Translation saved",
-        description: "The translation has been saved successfully.",
+        title: <TranslatableText>Translation saved</TranslatableText>,
+        description: <TranslatableText>The translation has been saved successfully.</TranslatableText>,
       });
       setIsEditing(false);
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to save translation.",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to save translation.</TranslatableText>,
         variant: "destructive",
       });
     },

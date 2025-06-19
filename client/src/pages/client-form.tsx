@@ -91,8 +91,8 @@ export default function ClientForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clients", selectedBusinessId] });
       toast({
-        title: "Client created",
-        description: "The new client has been successfully added.",
+        title: <TranslatableText>Client created</TranslatableText>,
+        description: <TranslatableText>The new client has been successfully added.</TranslatableText>,
       });
       setLocation("/clients");
     },
@@ -126,7 +126,7 @@ export default function ClientForm() {
       
       const errorMessage = errorData?.error || "Failed to create client";
       toast({
-        title: "Error",
+        title: <TranslatableText>Error</TranslatableText>,
         description: errorMessage,
         variant: "destructive",
       });
@@ -143,8 +143,8 @@ export default function ClientForm() {
       queryClient.invalidateQueries({ queryKey: [`/api/clients/${clientId}`, selectedBusinessId] });
       queryClient.invalidateQueries({ queryKey: ["/api/clients", clientId] });
       toast({
-        title: "Client updated",
-        description: "The client has been successfully updated.",
+        title: <TranslatableText>Client updated</TranslatableText>,
+        description: <TranslatableText>The client has been successfully updated.</TranslatableText>,
       });
       setLocation("/clients");
     },
@@ -178,7 +178,7 @@ export default function ClientForm() {
       
       const errorMessage = errorData?.error || "Failed to update client";
       toast({
-        title: "Error",
+        title: <TranslatableText>Error</TranslatableText>,
         description: errorMessage,
         variant: "destructive",
       });

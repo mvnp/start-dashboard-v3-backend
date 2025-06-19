@@ -59,15 +59,15 @@ export default function BarberPlanForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", selectedBusinessId] });
       toast({
-        title: "Success",
-        description: "Barber plan created successfully",
+        title: <TranslatableText>Success</TranslatableText>,
+        description: <TranslatableText>Barber plan created successfully</TranslatableText>,
       });
       setLocation("/plans");
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to create barber plan",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to create barber plan</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -82,15 +82,15 @@ export default function BarberPlanForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", selectedBusinessId] });
       queryClient.invalidateQueries({ queryKey: [`/api/barber-plans/${planId}`, selectedBusinessId] });
       toast({
-        title: "Success",
-        description: "Barber plan updated successfully",
+        title: <TranslatableText>Success</TranslatableText>,
+        description: <TranslatableText>Barber plan updated successfully</TranslatableText>,
       });
       setLocation("/plans");
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update barber plan",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to update barber plan</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -121,8 +121,8 @@ export default function BarberPlanForm() {
     
     if (!selectedBusinessId) {
       toast({
-        title: "Error",
-        description: "Please select a business first",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Please select a business first</TranslatableText>,
         variant: "destructive",
       });
       return;

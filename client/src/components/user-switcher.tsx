@@ -52,8 +52,8 @@ export default function UserSwitcher() {
     setUser(null);
     queryClient.clear();
     toast({
-      title: "Logged out",
-      description: "Successfully logged out of your account",
+      title: <TranslatableText>Logged out</TranslatableText>,
+      description: <TranslatableText>Successfully logged out of your account</TranslatableText>,
     });
     // Redirect to login page
     window.location.href = '/login';

@@ -154,14 +154,14 @@ export default function Traductions() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/traductions/${selectedLanguage}`] });
       toast({
-        title: "Translation saved",
-        description: "The translation has been updated successfully",
+        title: <TranslatableText>Translation saved</TranslatableText>,
+        description: <TranslatableText>The translation has been updated successfully</TranslatableText>,
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error saving translation",
-        description: error.message || "Failed to save translation",
+        title: <TranslatableText>Error saving translation</TranslatableText>,
+        description: error.message || <TranslatableText>Failed to save translation</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -180,14 +180,14 @@ export default function Traductions() {
       queryClient.invalidateQueries({ queryKey: ['/api/traductions/en'] });
       setNewEnglishString('');
       toast({
-        title: "English string added",
-        description: "The new English string has been added successfully",
+        title: <TranslatableText>English string added</TranslatableText>,
+        description: <TranslatableText>The new English string has been added successfully</TranslatableText>,
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error adding English string",
-        description: error.message || "Failed to add English string",
+        title: <TranslatableText>Error adding English string</TranslatableText>,
+        description: error.message || <TranslatableText>Failed to add English string</TranslatableText>,
         variant: "destructive",
       });
     },

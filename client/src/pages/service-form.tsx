@@ -54,15 +54,15 @@ export default function ServiceForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/services", selectedBusinessId] });
       toast({
-        title: "Success",
-        description: "Service created successfully",
+        title: <TranslatableText>Success</TranslatableText>,
+        description: <TranslatableText>Service created successfully</TranslatableText>,
       });
       setLocation("/services");
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to create service",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to create service</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -77,15 +77,15 @@ export default function ServiceForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/services", selectedBusinessId] });
       queryClient.invalidateQueries({ queryKey: [`/api/services/${serviceId}`] });
       toast({
-        title: "Success",
-        description: "Service updated successfully",
+        title: <TranslatableText>Success</TranslatableText>,
+        description: <TranslatableText>Service updated successfully</TranslatableText>,
       });
       setLocation("/services");
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update service",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to update service</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -109,8 +109,8 @@ export default function ServiceForm() {
     // Client-side validation
     if (!formData.name.trim()) {
       toast({
-        title: "Error",
-        description: "Service name is required",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Service name is required</TranslatableText>,
         variant: "destructive",
       });
       return;
@@ -118,8 +118,8 @@ export default function ServiceForm() {
 
     if (!formData.price || parseFloat(formData.price) <= 0) {
       toast({
-        title: "Error",
-        description: "Price must be greater than 0",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Price must be greater than 0</TranslatableText>,
         variant: "destructive",
       });
       return;
@@ -127,8 +127,8 @@ export default function ServiceForm() {
 
     if (!formData.duration || formData.duration < 1) {
       toast({
-        title: "Error",
-        description: "Duration must be at least 1 minute",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Duration must be at least 1 minute</TranslatableText>,
         variant: "destructive",
       });
       return;

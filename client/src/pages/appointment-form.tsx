@@ -95,15 +95,15 @@ export default function AppointmentForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
       toast({
-        title: "Success",
-        description: "Appointment created successfully",
+        title: <TranslatableText>Success</TranslatableText>,
+        description: <TranslatableText>Appointment created successfully</TranslatableText>,
       });
       setLocation("/appointments");
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to create appointment",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to create appointment</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -115,15 +115,15 @@ export default function AppointmentForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
       queryClient.invalidateQueries({ queryKey: ["/api/appointments", appointmentId] });
       toast({
-        title: "Success",
-        description: "Appointment updated successfully",
+        title: <TranslatableText>Success</TranslatableText>,
+        description: <TranslatableText>Appointment updated successfully</TranslatableText>,
       });
       setLocation("/appointments");
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update appointment",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to update appointment</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -171,8 +171,8 @@ export default function AppointmentForm() {
     // Validate required fields
     if (!formData.appointment_date.trim()) {
       toast({
-        title: "Error",
-        description: "Appointment date is required",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Appointment date is required</TranslatableText>,
         variant: "destructive",
       });
       return;
@@ -180,8 +180,8 @@ export default function AppointmentForm() {
 
     if (!formData.appointment_time.trim()) {
       toast({
-        title: "Error",
-        description: "Appointment time is required",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Appointment time is required</TranslatableText>,
         variant: "destructive",
       });
       return;
@@ -189,8 +189,8 @@ export default function AppointmentForm() {
 
     if (!formData.status.trim()) {
       toast({
-        title: "Error",
-        description: "Status is required",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Status is required</TranslatableText>,
         variant: "destructive",
       });
       return;
@@ -198,8 +198,8 @@ export default function AppointmentForm() {
 
     if (formData.client_id === 0) {
       toast({
-        title: "Error",
-        description: "Please select a client",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Please select a client</TranslatableText>,
         variant: "destructive",
       });
       return;
@@ -207,8 +207,8 @@ export default function AppointmentForm() {
 
     if (formData.user_id === 0) {
       toast({
-        title: "Error",
-        description: "Please select a staff member",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Please select a staff member</TranslatableText>,
         variant: "destructive",
       });
       return;
@@ -216,8 +216,8 @@ export default function AppointmentForm() {
 
     if (formData.service_id === 0) {
       toast({
-        title: "Error",
-        description: "Please select a service",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Please select a service</TranslatableText>,
         variant: "destructive",
       });
       return;

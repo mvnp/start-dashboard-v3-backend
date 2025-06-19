@@ -57,8 +57,8 @@ export default function ClientList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clients", selectedBusinessId] });
       toast({
-        title: "Client deleted",
-        description: "The client has been successfully removed.",
+        title: <TranslatableText>Client deleted</TranslatableText>,
+        description: <TranslatableText>The client has been successfully removed.</TranslatableText>,
       });
     },
     onError: async (error: any) => {
@@ -74,10 +74,10 @@ export default function ClientList() {
       }
       
       // Show specific error message if available
-      const errorMessage = errorData?.message || errorData?.error || "Failed to delete client. Please try again.";
-      const errorTitle = errorData?.error === "Cannot delete client with existing appointments" 
-        ? "Cannot Delete Client" 
-        : "Error";
+      const errorMessage = errorData?.message || errorData?.error || <TranslatableText>Failed to delete client. Please try again.</TranslatableText>;
+      const errorTitle = errorData?.error === <TranslatableText>Cannot delete client with existing appointments</TranslatableText> 
+        ? <TranslatableText>Cannot Delete Client</TranslatableText> 
+        : <TranslatableText>Error</TranslatableText>;
       
       toast({
         title: errorTitle,

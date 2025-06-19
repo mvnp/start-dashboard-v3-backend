@@ -30,21 +30,22 @@ export default function BusinessList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/businesses"] });
       toast({
-        title: "Success",
-        description: "Business deleted successfully",
+        title: <TranslatableText>Success</TranslatableText>,
+        description: <TranslatableText>Business deleted successfully</TranslatableText>,
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete business",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to delete business</TranslatableText>,
         variant: "destructive",
       });
     },
   });
 
   const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this business?")) {
+    let alertMessage = <TranslatableText>Are you sure you want to delete this business?</TranslatableText>;
+    if (confirm(alertMessage)) {
       deleteMutation.mutate(id);
     }
   };

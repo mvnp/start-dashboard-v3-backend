@@ -157,15 +157,15 @@ export default function AccountingForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions", selectedBusinessId] });
       toast({
-        title: "Success",
-        description: "Transaction created successfully",
+        title: <TranslatableText>Success</TranslatableText>,
+        description: <TranslatableText>Transaction created successfully</TranslatableText>,
       });
       setLocation("/accounting");
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create transaction",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: error.message || <TranslatableText>Failed to create transaction</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -180,15 +180,15 @@ export default function AccountingForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions", selectedBusinessId] });
       toast({
-        title: "Success",
-        description: "Transaction updated successfully",
+        title: <TranslatableText>Success</TranslatableText>,
+        description: <TranslatableText>Transaction updated successfully</TranslatableText>,
       });
       setLocation("/accounting");
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update transaction",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: error.message || <TranslatableText>Failed to update transaction</TranslatableText>,
         variant: "destructive",
       });
     },

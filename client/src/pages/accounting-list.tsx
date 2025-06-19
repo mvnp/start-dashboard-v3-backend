@@ -34,14 +34,14 @@ export default function AccountingList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions", selectedBusinessId] });
       toast({
-        title: "Success",
-        description: "Transaction deleted successfully",
+        title: <TranslatableText>Success</TranslatableText>,
+        description: <TranslatableText>Transaction deleted successfully</TranslatableText>,
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete transaction",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to delete transaction</TranslatableText>,
         variant: "destructive",
       });
     },

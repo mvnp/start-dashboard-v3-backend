@@ -109,15 +109,15 @@ export default function SupportTicketForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/support-tickets"] });
       toast({
-        title: "Ticket created",
-        description: "The support ticket has been successfully created.",
+        title: <TranslatableText>Ticket created</TranslatableText>,
+        description: <TranslatableText>The support ticket has been successfully created.</TranslatableText>,
       });
       setLocation("/support-tickets");
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to create the ticket. Please try again.",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to create the ticket. Please try again.</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -137,15 +137,15 @@ export default function SupportTicketForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/support-tickets"] });
       queryClient.invalidateQueries({ queryKey: ["/api/support-tickets", ticketId] });
       toast({
-        title: "Ticket updated",
-        description: "The support ticket has been successfully updated.",
+        title: <TranslatableText>Ticket updated</TranslatableText>,
+        description: <TranslatableText>The support ticket has been successfully updated.</TranslatableText>,
       });
       setLocation("/support-tickets");
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update the ticket. Please try again.",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to update the ticket. Please try again.</TranslatableText>,
         variant: "destructive",
       });
     },

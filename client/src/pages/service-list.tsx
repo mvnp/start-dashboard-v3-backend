@@ -46,15 +46,15 @@ export default function ServiceList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/services", selectedBusinessId] });
       toast({
-        title: "Success",
-        description: "Service deleted successfully",
+        title: <TranslatableText>Success</TranslatableText>,
+        description: <TranslatableText>Service deleted successfully</TranslatableText>,
       });
       setDeleteId(null);
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete service",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to delete service</TranslatableText>,
         variant: "destructive",
       });
     },
