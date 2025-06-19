@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertSupportTicketSchema, type SupportTicket } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
+import { useBusinessContext } from "@/lib/business-context";
 import { z } from "zod";
 
 interface SupportTicketFormData {
@@ -28,6 +29,7 @@ interface SupportTicketFormData {
   assigned_staff_id?: number;
   resolution_notes?: string;
   attachments: string[];
+  business_id: number;
 }
 
 const formSchema = insertSupportTicketSchema.extend({
@@ -41,6 +43,7 @@ export default function SupportTicketForm() {
   const [viewMatch] = useRoute("/support-tickets/:id");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { selectedBusinessId } = useBusinessContext();
   
   const ticketId = params?.id ? parseInt(params.id) : null;
   const isEditing = !!match;
@@ -61,20 +64,22 @@ export default function SupportTicketForm() {
       client_name: "",
       assigned_staff_id: undefined,
       resolution_notes: "",
-      attachments: []
+      attachments: [],
+      business_id: selectedBusinessId || 0
     }
   });
 
   // Load ticket data for editing/viewing
   const { data: ticket } = useQuery({
     queryKey: ["/api/support-tickets", ticketId],
-    enabled: !isCreating && !!ticketId,
+    enabled: !isCreating && !!ticketId && !!selectedBusinessId,
     select: (data: SupportTicket) => data,
   });
 
   // Load staff for assignment dropdown
   const { data: staff = [] } = useQuery({
-    queryKey: ["/api/staff"],
+    queryKey: ["/api/staff", selectedBusinessId],
+    enabled: !!selectedBusinessId,
   });
 
   // Update form when ticket data is loaded
