@@ -112,7 +112,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     safeRemoveLocalStorage('accessToken');
     safeRemoveLocalStorage('refreshToken');
-    sessionStorage.removeItem('selectedBusinessId');
+    safeRemoveLocalStorage('selectedBusinessId');
+    safeRemoveLocalStorage('lastUserId');
     setUser(null);
     queryClient.clear();
     window.location.href = '/login';

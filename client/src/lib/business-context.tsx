@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Business } from "@shared/schema";
 import { useAuth } from "@/lib/auth";
 import BusinessSelectorModal from "@/components/business-selector-modal";
@@ -30,6 +30,7 @@ interface BusinessProviderProps {
 
 export function BusinessProvider({ children }: BusinessProviderProps) {
   const { user, logout } = useAuth();
+  const queryClient = useQueryClient();
   const [selectedBusinessId, setSelectedBusinessIdState] = useState<number | null>(null);
   const [showBusinessModal, setShowBusinessModal] = useState(false);
   const [isInitialSelection, setIsInitialSelection] = useState(false);
@@ -139,10 +140,15 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
   const setSelectedBusinessId = (businessId: number | null) => {
     setSelectedBusinessIdState(businessId);
     if (businessId) {
-      safeSetSessionStorage("selectedBusinessId", businessId.toString());
+      safeSetLocalStorage("selectedBusinessId", businessId.toString());
+      console.log('Saved business ID to localStorage:', businessId);
     } else {
-      safeRemoveSessionStorage("selectedBusinessId");
+      safeRemoveLocalStorage("selectedBusinessId");
+      console.log('Removed business ID from localStorage');
     }
+    
+    // Force refresh of queries that depend on business context
+    queryClient.invalidateQueries();
   };
 
   const handleBusinessSelected = (businessId: number) => {
