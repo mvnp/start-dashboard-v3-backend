@@ -229,8 +229,9 @@ export default function WhatsappList() {
               <h3 className="text-lg font-medium text-gray-900 mb-2"><TranslatableText>No WhatsApp instances found</TranslatableText></h3>
               <p className="text-gray-600">
                 {searchTerm || statusFilter !== "all"
-                  ? "Try adjusting your search or filters"
-                  : "Get started by creating your first WhatsApp instance"}
+                  ? <TranslatableText>Try adjusting your search or filters</TranslatableText>
+                  : <TranslatableText>Get started by creating your first WhatsApp instance</TranslatableText>
+                }
               </p>
             </CardContent>
           </Card>
