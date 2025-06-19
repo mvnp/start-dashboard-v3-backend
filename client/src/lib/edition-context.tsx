@@ -54,7 +54,6 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     if (selectedBusinessId) {
       const cached = localStorage.getItem(`businessLanguage_${selectedBusinessId}`);
       if (cached) {
-        console.log('Found cached language:', cached, 'for business:', selectedBusinessId);
         return cached;
       }
     }

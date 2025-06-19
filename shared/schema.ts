@@ -147,15 +147,16 @@ export const payment_gateway_types = pgTable("payment_gateway_types", {
 export const payment_gateways = pgTable("payment_gateways", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  type: text("type").notNull(), // Direct type string instead of foreign key
   api_url: text("api_url"),
   api_key: text("api_key"),
   token: text("token"),
   email: text("email"),
+  staff_id: integer("staff_id").references(() => persons.id), // Add staff relationship
   is_active: boolean("is_active").default(true),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
   business_id: integer("business_id").references(() => businesses.id),
-  type_id: integer("type_id").references(() => payment_gateway_types.id),
 });
 
 export const support_ticket_categories = pgTable("support_ticket_categories", {

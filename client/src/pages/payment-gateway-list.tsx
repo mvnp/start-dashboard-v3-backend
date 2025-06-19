@@ -18,7 +18,15 @@ import {
 import { Plus, Search, Edit, Trash2, CreditCard, Globe, Key, Mail, User } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { PaymentGateway, Staff } from "@shared/schema";
+import { PaymentGateway } from "@shared/schema";
+
+interface Staff {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+}
 import { TranslatableText } from "@/components/translatable-text";
 
 export default function PaymentGatewayList() {
@@ -42,15 +50,15 @@ export default function PaymentGatewayList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/payment-gateways"] });
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: <TranslatableText>Payment gateway deleted successfully</TranslatableText>,
+        title: "Success",
+        description: "Payment gateway deleted successfully",
       });
       setDeleteId(null);
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to delete payment gateway</TranslatableText>,
+        title: "Error",
+        description: "Failed to delete payment gateway",
         variant: "destructive",
       });
     },
@@ -58,7 +66,7 @@ export default function PaymentGatewayList() {
 
   const getStaffName = (staffId: number) => {
     const staffMember = staff.find(s => s.id === staffId);
-    return staffMember ? `${staffMember.first_name} ${staffMember.last_name}` : <TranslatableText>Unknown Staff</TranslatableText>;
+    return staffMember ? `${staffMember.first_name} ${staffMember.last_name}` : "Unknown Staff";
   };
 
   const getTypeColor = (type: string) => {
@@ -71,12 +79,12 @@ export default function PaymentGatewayList() {
   };
 
   const filteredGateways = gateways.filter(gateway => {
-    const staffName = getStaffName(gateway.staff_id).toLowerCase();
+    const staffName = gateway.staff_id ? getStaffName(gateway.staff_id).toLowerCase() : "";
     const searchLower = searchTerm.toLowerCase();
     
     return gateway.name.toLowerCase().includes(searchLower) || 
-           gateway.type.toLowerCase().includes(searchLower) ||
-           gateway.email.toLowerCase().includes(searchLower) ||
+           (gateway.type && gateway.type.toLowerCase().includes(searchLower)) ||
+           (gateway.email && gateway.email.toLowerCase().includes(searchLower)) ||
            staffName.includes(searchLower);
   });
 
