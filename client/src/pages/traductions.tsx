@@ -115,7 +115,7 @@ export default function Traductions() {
   // Create mutation for saving translations
   const saveTranslationMutation = useMutation({
     mutationFn: async ({ string, traduction, language }: { string: string; traduction: string; language: string }) => {
-      return apiRequest('/api/traductions', 'POST', {
+      return apiRequest('POST', '/api/traductions', {
         string,
         traduction,
         language
