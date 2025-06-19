@@ -2760,7 +2760,7 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/traductions", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { string, traduction, language } = req.body;
+      const { string, traduction, language, traduction_id } = req.body;
       
       if (language === 'en') {
         // Creating/updating English source string
@@ -2769,14 +2769,20 @@ export function registerRoutes(app: Express): void {
         return res.status(201).json(result);
       }
       
-      // Find or create the English source string
-      let sourceString = await storage.getTraductionByString(string);
-      if (!sourceString) {
-        sourceString = await storage.createTraduction({ string });
+      // If traduction_id is provided (from TranslatableText component), use it directly
+      let sourceStringId = traduction_id;
+      
+      if (!sourceStringId) {
+        // Fallback: Find or create the English source string
+        let sourceString = await storage.getTraductionByString(string);
+        if (!sourceString) {
+          sourceString = await storage.createTraduction({ string });
+        }
+        sourceStringId = sourceString.id;
       }
       
       // Create or update the translation
-      const translation = await storage.createOrUpdateTranslation(sourceString.id, language, traduction);
+      const translation = await storage.createOrUpdateTranslation(sourceStringId, language, traduction);
       res.json(translation);
     } catch (error) {
       console.error("Error creating/updating translation:", error);
