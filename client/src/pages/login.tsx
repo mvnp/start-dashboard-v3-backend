@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +18,26 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const { toast } = useToast();
   const { setUser } = useAuth();
+
+  // Auto-login in development mode
+  useEffect(() => {
+    const isDevelopment = import.meta.env.DEV;
+    const hasToken = localStorage.getItem('accessToken');
+    
+    if (isDevelopment && !hasToken) {
+      // Auto-login with your credentials in development mode
+      setEmail("mvnpereira@gmail.com");
+      setPassword("Marcos$1986");
+      
+      // Trigger auto-login after a short delay
+      setTimeout(() => {
+        loginMutation.mutate({ 
+          email: "mvnpereira@gmail.com", 
+          password: "Marcos$1986" 
+        });
+      }, 500);
+    }
+  }, []);
 
   const loginMutation = useMutation({
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
