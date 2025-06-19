@@ -19,25 +19,7 @@ export default function Login() {
   const { toast } = useToast();
   const { setUser } = useAuth();
 
-  // Auto-login in development mode
-  useEffect(() => {
-    const isDevelopment = import.meta.env.DEV;
-    const hasToken = localStorage.getItem('accessToken');
-    
-    if (isDevelopment && !hasToken) {
-      // Auto-login with your credentials in development mode
-      setEmail("mvnpereira@gmail.com");
-      setPassword("Marcos$1986");
-      
-      // Trigger auto-login after a short delay
-      setTimeout(() => {
-        loginMutation.mutate({ 
-          email: "mvnpereira@gmail.com", 
-          password: "Marcos$1986" 
-        });
-      }, 500);
-    }
-  }, []);
+
 
   const loginMutation = useMutation({
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
