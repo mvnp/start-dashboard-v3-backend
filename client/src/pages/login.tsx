@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
 import { useMutation } from "@tanstack/react-query";
-import { DemoCredentials } from "@/components/demo-credentials";
+
 import { queryClient } from "@/lib/queryClient";
 import { TranslatableText } from "@/components/translatable-text";
 
@@ -159,10 +159,6 @@ export default function Login() {
           </form>
         </CardContent>
       </Card>
-      
-        <div className="flex-1 max-w-md">
-          <DemoCredentials />
-        </div>
       </div>
     </div>
   );

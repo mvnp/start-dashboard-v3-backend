@@ -129,29 +129,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Enhanced initialization with retry logic
+  // Initialize authentication - clear any existing tokens in development to force clean login
   useEffect(() => {
     const initializeAuth = async () => {
       setLoading(true);
-      try {
-        await getCurrentUser();
-      } catch (error) {
-        console.error('Failed to initialize authentication:', error);
-        // If initialization fails, try refreshing token once
-        const refreshToken = safeGetLocalStorage('refreshToken');
-        if (refreshToken) {
-          try {
-            await refreshAccessToken();
-          } catch (refreshError) {
-            console.error('Failed to refresh token during initialization:', refreshError);
-            setUser(null);
-          }
-        } else {
-          setUser(null);
-        }
-      } finally {
-        setLoading(false);
-      }
+      
+      // Clear all authentication tokens to ensure clean start
+      safeRemoveLocalStorage('accessToken');
+      safeRemoveLocalStorage('refreshToken');
+      sessionStorage.removeItem('selectedBusinessId');
+      sessionStorage.removeItem('lastUserId');
+      
+      // Force user to null to require proper login
+      setUser(null);
+      setLoading(false);
     };
 
     initializeAuth();

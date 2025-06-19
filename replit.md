@@ -112,7 +112,7 @@ This is a comprehensive barbershop management system built with a modern full-st
 - **Development Server**: Vite dev server with HMR
 - **Database**: Neon PostgreSQL serverless instance
 - **Session Storage**: In-memory sessions for development
-- **Auto-authentication**: Automatic Super Admin login for development
+- **Authentication**: Clean login required - no auto-authentication
 
 ### Production Build
 - **Frontend**: Vite production build with code splitting
@@ -173,6 +173,7 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 19, 2025. Removed auto-login behavior and demo credentials - SaaS now requires proper authentication credentials and starts with clean login page
 - June 19, 2025. Added 12 new TranslatableText strings from appointment-list.tsx to database - registered appointment filtering and pagination strings in English for translation system
 - June 19, 2025. Registered 556 TranslatableText strings in database - scanned entire codebase and bulk inserted all TranslatableText wrapped strings as English translations (string=traduction, language='en') for complete translation system functionality
 - June 19, 2025. Fixed TranslatableText display properties to preserve proper block-level layout - headers and paragraphs now maintain natural line breaks while keeping pen icon editing functionality for Super Admin users

@@ -5,7 +5,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryPersistenceManager } from "./lib/persisted-query-client";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/lib/auth";
+import { AuthProvider, useAuth } from "@/lib/auth";
 import { BusinessProvider } from "@/lib/business-context";
 import { EditionProvider } from "@/lib/edition-context";
 
@@ -60,6 +60,35 @@ function Layout({ children }: { children: React.ReactNode }) {
 }
 
 function Router() {
+  const { user, loading } = useAuth();
+
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is not authenticated, only allow access to login, logout, and landing pages
+  if (!user) {
+    return (
+      <Switch>
+        <Route path="/login" component={Login} />
+        <Route path="/logout" component={Logout} />
+        <Route path="/landing" component={Landing} />
+        <Route>
+          <Login />
+        </Route>
+      </Switch>
+    );
+  }
+
+  // If user is authenticated, allow access to all protected routes
   return (
     <Switch>
       <Route path="/login" component={Login} />
