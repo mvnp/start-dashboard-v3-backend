@@ -500,7 +500,7 @@ export default function StaffForm() {
               </div>
 
               <div className="md:col-span-2">
-                <Label htmlFor="salary">Annual Salary (USD) *</Label>
+                <Label htmlFor="salary"><TranslatableText>Annual Salary (USD) *</TranslatableText></Label>
                 <Input
                   id="salary"
                   type="number"
@@ -531,10 +531,12 @@ export default function StaffForm() {
                 className="bg-barber-primary hover:bg-barber-secondary"
               >
                 <Save className="w-4 h-4 mr-2" />
-                {isSubmitting 
-                  ? (isEdit ? "Updating..." : "Creating...") 
-                  : (isEdit ? "Update Staff" : "Create Staff")
-                }
+                <TranslatableText>
+                  {isSubmitting 
+                    ? (isEdit ? "Updating..." : "Creating...") 
+                    : (isEdit ? "Update Staff" : "Create Staff")
+                  }
+                </TranslatableText>
               </Button>
             </div>
           </form>

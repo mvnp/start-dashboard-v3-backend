@@ -11,6 +11,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { BarberPlan } from "@shared/schema";
 import { useBusinessContext } from "@/lib/business-context";
+import { TranslatableText } from "@/components/translatable-text";
 
 interface BarberPlanFormData {
   title: string;
@@ -184,29 +185,29 @@ export default function BarberPlanForm() {
       <div className="flex items-center gap-4 mb-6">
         <Button variant="ghost" size="sm" onClick={() => setLocation("/plans")}>
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Plans
+          <TranslatableText>Back to Plans</TranslatableText>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">
+          <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
             {isEdit ? "Edit Barber Plan" : "Create New Barber Plan"}
-          </h1>
-          <p className="text-slate-600">
+          </TranslatableText>
+          <TranslatableText tag="p" className="text-slate-600">
             {isEdit ? "Update the subscription plan details" : "Create a new subscription plan for barbershops"}
-          </p>
+          </TranslatableText>
         </div>
       </div>
 
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-xl font-semibold text-slate-900">
-            Plan Information
+            <TranslatableText>Plan Information</TranslatableText>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="title">Plan Title</Label>
+                <Label htmlFor="title"><TranslatableText>Plan Title</TranslatableText></Label>
                 <Input
                   id="title"
                   placeholder="Enter plan title"
@@ -217,7 +218,7 @@ export default function BarberPlanForm() {
               </div>
 
               <div>
-                <Label htmlFor="subtitle">Plan Subtitle</Label>
+                <Label htmlFor="subtitle"><TranslatableText>Plan Subtitle</TranslatableText></Label>
                 <Input
                   id="subtitle"
                   placeholder="Enter plan subtitle"
@@ -228,7 +229,7 @@ export default function BarberPlanForm() {
               </div>
 
               <div>
-                <Label htmlFor="image1">Primary Image URL</Label>
+                <Label htmlFor="image1"><TranslatableText>Primary Image URL</TranslatableText></Label>
                 <Input
                   id="image1"
                   placeholder="Enter primary image URL"
@@ -239,7 +240,7 @@ export default function BarberPlanForm() {
               </div>
 
               <div>
-                <Label htmlFor="image2">Secondary Image URL</Label>
+                <Label htmlFor="image2"><TranslatableText>Secondary Image URL</TranslatableText></Label>
                 <Input
                   id="image2"
                   placeholder="Enter secondary image URL"
@@ -250,7 +251,7 @@ export default function BarberPlanForm() {
               </div>
 
               <div>
-                <Label htmlFor="price1m">1 Month Price (cents)</Label>
+                <Label htmlFor="price1m"><TranslatableText>1 Month Price (cents)</TranslatableText></Label>
                 <Input
                   id="price1m"
                   type="number"
@@ -262,7 +263,7 @@ export default function BarberPlanForm() {
               </div>
 
               <div>
-                <Label htmlFor="price3m">3 Month Price (cents)</Label>
+                <Label htmlFor="price3m"><TranslatableText>3 Month Price (cents)</TranslatableText></Label>
                 <Input
                   id="price3m"
                   type="number"
@@ -274,7 +275,7 @@ export default function BarberPlanForm() {
               </div>
 
               <div>
-                <Label htmlFor="price12m">12 Month Price (cents)</Label>
+                <Label htmlFor="price12m"><TranslatableText>12 Month Price (cents)</TranslatableText></Label>
                 <Input
                   id="price12m"
                   type="number"
@@ -286,7 +287,7 @@ export default function BarberPlanForm() {
               </div>
 
               <div>
-                <Label htmlFor="payment_link">Payment Link</Label>
+                <Label htmlFor="payment_link"><TranslatableText>Payment Link</TranslatableText></Label>
                 <Input
                   id="payment_link"
                   placeholder="Enter payment link URL"
@@ -299,10 +300,10 @@ export default function BarberPlanForm() {
 
             <div>
               <div className="flex items-center justify-between mb-4">
-                <Label>Plan Benefits</Label>
+                <Label><TranslatableText>Plan Benefits</TranslatableText></Label>
                 <Button type="button" variant="outline" size="sm" onClick={addBenefit}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Benefit
+                  <TranslatableText>Add Benefit</TranslatableText>
                 </Button>
               </div>
               <div className="space-y-3">
@@ -335,20 +336,22 @@ export default function BarberPlanForm() {
                 disabled={createMutation.isPending || updateMutation.isPending}
                 className="bg-amber-600 hover:bg-amber-700 text-white"
               >
-                {createMutation.isPending || updateMutation.isPending ? (
-                  "Saving..."
-                ) : isEdit ? (
-                  "Update Plan"
-                ) : (
-                  "Create Plan"
-                )}
+                <TranslatableText>
+                  {createMutation.isPending || updateMutation.isPending ? (
+                    "Saving..."
+                  ) : isEdit ? (
+                    "Update Plan"
+                  ) : (
+                    "Create Plan"
+                  )}
+                </TranslatableText>
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setLocation("/plans")}
               >
-                Cancel
+<TranslatableText>Cancel</TranslatableText>
               </Button>
             </div>
           </form>
