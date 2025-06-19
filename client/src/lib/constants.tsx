@@ -17,7 +17,8 @@ import {
   FileText,
   Calculator,
   HeadphonesIcon,
-  Building2
+  Building2,
+  Languages
 } from "lucide-react";
 
 export const navigationItems = [
@@ -97,6 +98,12 @@ export const navigationItems = [
     name: "Settings",
     href: "/settings",
     icon: Settings,
+    current: false,
+  },
+  {
+    name: "Traductions",
+    href: "/traductions",
+    icon: Languages,
     current: false,
   },
   {

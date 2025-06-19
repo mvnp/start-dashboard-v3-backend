@@ -38,6 +38,7 @@ import WhatsappForm from "@/pages/whatsapp-form";
 import BusinessList from "@/pages/business-list";
 import BusinessForm from "@/pages/business-form";
 import Settings from "@/pages/settings";
+import Traductions from "@/pages/traductions";
 import Support from "@/pages/support";
 import NotFound from "@/pages/not-found";
 import { TranslatableText } from "./components/translatable-text";
@@ -292,6 +293,11 @@ function Router() {
       <Route path="/settings">
         <Layout>
           <Settings />
+        </Layout>
+      </Route>
+      <Route path="/traductions">
+        <Layout>
+          <Traductions />
         </Layout>
       </Route>
 
