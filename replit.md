@@ -152,16 +152,17 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 - **Inline Translation Editing**: Toggle-able edition mode that displays pen icons next to translatable text
 - **Real-time String Translation**: Click pen icon to edit translations inline, save with Enter key
 - **Language-based Context**: Automatically uses language from business settings for translation context
-- **Database Persistence**: Translations stored in `traductions` table with string, traduction, language, timestamps
+- **Database Persistence**: English source strings stored in `traductions` table (id, string, timestamps); Foreign language translations stored in `translations` table (id, traduction_id FK, traduction, language, timestamps)
 - **JWT Authentication**: All translation endpoints require Bearer authentication
 - **Smart Fallback**: Shows original English text when no translation exists
 
-### Translation API Endpoints
-- `GET /api/traductions/:language` - Get all translations for a language
+### Translation API Endpoints (New Architecture)
+- `GET /api/traductions/en` - Get all English source strings (traductions table)
+- `GET /api/traductions/:language` - Get all translations for a language (translations table with JOIN)
 - `GET /api/traductions/:string/:language` - Get specific translation
-- `POST /api/traductions` - Create or update translation (upsert functionality)
+- `POST /api/traductions` - Create or update translation (handles both English source and foreign translations)
 - `PUT /api/traductions/:string/:language` - Update existing translation
-- `DELETE /api/traductions/:id` - Delete translation by ID
+- `DELETE /api/translations/:id` - Delete translation by ID (foreign language only)
 
 ### Edition Mode Components
 - **EditionProvider**: Context provider managing edition mode state and current language
@@ -173,7 +174,7 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
-- June 19, 2025. Created comprehensive Traductions management page with language selector, translation table, and Enter key saving functionality - placed after Settings in sidebar navigation. Added 18 new Traductions page strings to database (total: 586 English strings)
+- June 19, 2025. Restructured translation database architecture - separated English source strings (traductions table) from foreign language translations (new translations table with FK relationship). Updated all API endpoints and storage methods to support new two-table structure. Created comprehensive Traductions management page with language selector, translation table, and Enter key saving functionality - placed after Settings in sidebar navigation. Added 18 new Traductions page strings to database (total: 582 English strings after duplicate removal)
 - June 19, 2025. Removed auto-login behavior and demo credentials - SaaS now requires proper authentication credentials and starts with clean login page
 - June 19, 2025. Added 12 new TranslatableText strings from appointment-list.tsx to database - registered appointment filtering and pagination strings in English for translation system
 - June 19, 2025. Registered 556 TranslatableText strings in database - scanned entire codebase and bulk inserted all TranslatableText wrapped strings as English translations (string=traduction, language='en') for complete translation system functionality

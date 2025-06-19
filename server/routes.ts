@@ -2718,8 +2718,16 @@ export function registerRoutes(app: Express): void {
   app.get("/api/traductions/:language", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { language } = req.params;
-      const traductions = await storage.getAllTraductions(language);
-      res.json(traductions);
+      
+      if (language === 'en') {
+        // Return English source strings
+        const englishStrings = await storage.getAllTraductions();
+        res.json(englishStrings);
+      } else {
+        // Return translations for the specified language
+        const translations = await storage.getTranslationsByLanguage(language);
+        res.json(translations);
+      }
     } catch (error) {
       console.error("Error fetching translations:", error);
       res.status(500).json({ error: "Failed to fetch translations" });
@@ -2729,8 +2737,21 @@ export function registerRoutes(app: Express): void {
   app.get("/api/traductions/:string/:language", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { string, language } = req.params;
-      const traduction = await storage.getTraduction(decodeURIComponent(string), language);
-      res.json(traduction);
+      const decodedString = decodeURIComponent(string);
+      
+      if (language === 'en') {
+        const englishString = await storage.getTraductionByString(decodedString);
+        res.json(englishString);
+      } else {
+        // Find the English source string first
+        const sourceString = await storage.getTraductionByString(decodedString);
+        if (!sourceString) {
+          return res.status(404).json({ error: "Source string not found" });
+        }
+        
+        const translation = await storage.getTranslation(sourceString.id, language);
+        res.json(translation);
+      }
     } catch (error) {
       console.error("Error fetching translation:", error);
       res.status(500).json({ error: "Failed to fetch translation" });
@@ -2739,23 +2760,24 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/traductions", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const validatedData = insertTraductionSchema.parse(req.body);
+      const { string, traduction, language } = req.body;
       
-      // Check if translation already exists
-      const existing = await storage.getTraduction(validatedData.string, validatedData.language);
-      if (existing) {
-        // Update existing translation
-        const updated = await storage.updateTraduction(
-          validatedData.string, 
-          validatedData.language, 
-          validatedData.traduction
-        );
-        return res.json(updated);
+      if (language === 'en') {
+        // Creating/updating English source string
+        const validatedData = insertTraductionSchema.parse({ string });
+        const result = await storage.createTraduction(validatedData);
+        return res.status(201).json(result);
       }
       
-      // Create new translation
-      const traduction = await storage.createTraduction(validatedData);
-      res.status(201).json(traduction);
+      // Find or create the English source string
+      let sourceString = await storage.getTraductionByString(string);
+      if (!sourceString) {
+        sourceString = await storage.createTraduction({ string });
+      }
+      
+      // Create or update the translation
+      const translation = await storage.createOrUpdateTranslation(sourceString.id, language, traduction);
+      res.json(translation);
     } catch (error) {
       console.error("Error creating/updating translation:", error);
       if (error instanceof z.ZodError) {
@@ -2769,21 +2791,23 @@ export function registerRoutes(app: Express): void {
     try {
       const { string, language } = req.params;
       const { traduction } = req.body;
+      const decodedString = decodeURIComponent(string);
       
       if (!traduction || typeof traduction !== 'string') {
         return res.status(400).json({ error: "Translation text is required" });
       }
       
-      const updated = await storage.updateTraduction(
-        decodeURIComponent(string), 
-        language, 
-        traduction
-      );
-      
-      if (!updated) {
-        return res.status(404).json({ error: "Translation not found" });
+      if (language === 'en') {
+        return res.status(400).json({ error: "Cannot update English source strings via this endpoint" });
       }
       
+      // Find the English source string
+      const sourceString = await storage.getTraductionByString(decodedString);
+      if (!sourceString) {
+        return res.status(404).json({ error: "Source string not found" });
+      }
+      
+      const updated = await storage.createOrUpdateTranslation(sourceString.id, language, traduction);
       res.json(updated);
     } catch (error) {
       console.error("Error updating translation:", error);
@@ -2791,14 +2815,14 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/traductions/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+  app.delete("/api/translations/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ error: "Invalid translation ID" });
       }
       
-      const success = await storage.deleteTraduction(id);
+      const success = await storage.deleteTranslation(id);
       if (!success) {
         return res.status(404).json({ error: "Translation not found" });
       }
