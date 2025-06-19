@@ -134,6 +134,7 @@ export interface IStorage {
   // WhatsApp Instance methods
   getAllWhatsappInstances(): Promise<WhatsappInstance[]>;
   getWhatsappInstance(id: number): Promise<WhatsappInstance | undefined>;
+  getWhatsappInstancesByBusinessIds(businessIds: number[] | null): Promise<WhatsappInstance[]>;
   createWhatsappInstance(instance: InsertWhatsappInstance): Promise<WhatsappInstance>;
   updateWhatsappInstance(id: number, instance: Partial<InsertWhatsappInstance>): Promise<WhatsappInstance | undefined>;
   deleteWhatsappInstance(id: number): Promise<boolean>;
@@ -1018,6 +1019,15 @@ class PostgresStorage implements IStorage {
   // WhatsApp Instance methods
   async getAllWhatsappInstances(): Promise<WhatsappInstance[]> {
     return await this.db.select().from(whatsapp_instances);
+  }
+
+  async getWhatsappInstancesByBusinessIds(businessIds: number[] | null): Promise<WhatsappInstance[]> {
+    if (!businessIds || businessIds.length === 0) {
+      return [];
+    }
+    return await this.db.select()
+      .from(whatsapp_instances)
+      .where(inArray(whatsapp_instances.business_id, businessIds));
   }
 
   async getWhatsappInstance(id: number): Promise<WhatsappInstance | undefined> {

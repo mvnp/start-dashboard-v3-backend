@@ -2230,15 +2230,17 @@ export function registerRoutes(app: Express): void {
 
   app.get("/api/whatsapp-instances", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      // Get all instances first
-      const allInstances = await storage.getAllWhatsappInstances();
+      const user = req.user!;
+      const businessIds = getBusinessFilter(user, req);
       
-      // Filter by business access unless super admin
-      let instances = allInstances;
-      if (!req.user?.isSuperAdmin) {
-        instances = allInstances.filter(instance => 
-          req.user?.businessIds?.includes(instance.business_id!)
-        );
+      let instances;
+      // Filter WhatsApp instances by selected business or user's business access
+      if (businessIds && businessIds.length > 0) {
+        instances = await storage.getWhatsappInstancesByBusinessIds(businessIds);
+      } else if (user.isSuperAdmin) {
+        instances = await storage.getAllWhatsappInstances();
+      } else {
+        instances = await storage.getWhatsappInstancesByBusinessIds(user.businessIds);
       }
       
       res.json(instances);
