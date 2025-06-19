@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Globe, Save, Languages } from "lucide-react";
+import { Globe, Save, Languages, Plus } from "lucide-react";
 import { TranslatableText } from "@/components/translatable-text";
 
 // Comprehensive language options (copied from Settings page)
@@ -82,6 +82,7 @@ interface Translation {
 export default function Traductions() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>('');
   const [editingValues, setEditingValues] = useState<Record<string, string>>({});
+  const [newEnglishString, setNewEnglishString] = useState<string>('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -138,6 +139,32 @@ export default function Traductions() {
     },
   });
 
+  // Create mutation for adding new English strings
+  const addEnglishStringMutation = useMutation({
+    mutationFn: async (englishString: string) => {
+      return apiRequest('POST', '/api/traductions', {
+        string: englishString,
+        traduction: englishString,
+        language: 'en'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/traductions/en'] });
+      setNewEnglishString('');
+      toast({
+        title: "English string added",
+        description: "The new English string has been added successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error adding English string",
+        description: error.message || "Failed to add English string",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Handle Enter key press to save translation
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, englishString: any) => {
     if (e.key === 'Enter') {
@@ -154,6 +181,16 @@ export default function Traductions() {
           delete newValues[englishString.string];
           return newValues;
         });
+      }
+    }
+  };
+
+  // Handle Enter key press to add new English string
+  const handleAddEnglishString = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      const value = newEnglishString.trim();
+      if (value) {
+        addEnglishStringMutation.mutate(value);
       }
     }
   };
@@ -220,6 +257,39 @@ export default function Traductions() {
             {selectedLanguage && (
               <div className="text-sm text-slate-600">
                 <TranslatableText>Translating to</TranslatableText>: {LANGUAGES.find(l => l.code === selectedLanguage)?.name}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Add New English String Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Plus className="h-5 w-5" />
+            <TranslatableText>Add New English String</TranslatableText>
+          </CardTitle>
+          <p className="text-sm text-slate-600">
+            <TranslatableText>Enter a new English string to add to the translation database. Press Enter to save.</TranslatableText>
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <Input
+                type="text"
+                placeholder="Enter new English string..."
+                value={newEnglishString}
+                onChange={(e) => setNewEnglishString(e.target.value)}
+                onKeyPress={handleAddEnglishString}
+                disabled={addEnglishStringMutation.isPending}
+              />
+            </div>
+            {addEnglishStringMutation.isPending && (
+              <div className="flex items-center gap-2 text-sm text-slate-500">
+                <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
+                <TranslatableText>Adding...</TranslatableText>
               </div>
             )}
           </div>
