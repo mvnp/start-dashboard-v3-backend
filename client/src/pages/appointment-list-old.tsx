@@ -19,6 +19,7 @@ import { Plus, Search, Edit, Trash2, Calendar, Clock, User, Settings, Users } fr
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Appointment, Service, Person } from "@shared/schema";
+import { TranslatableText } from '@/components/translatable-text';
 
 export default function AppointmentList() {
   const [, setLocation] = useLocation();

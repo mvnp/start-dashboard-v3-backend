@@ -5,6 +5,7 @@ import { Users, Shield, Building, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
 import { useQuery } from '@tanstack/react-query';
+import { TranslatableText } from '@/components/translatable-text';
 
 interface RoleUser {
   id: number;
