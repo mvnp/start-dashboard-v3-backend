@@ -64,58 +64,29 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
 
   // Handle business selection and restoration in a single effect
   useEffect(() => {
-    if (!isLoading && user && userBusinesses.length > 0) {
+    if (!isLoading && user && userBusinesses.length > 0 && !selectedBusinessId) {
       const savedBusinessId = safeGetLocalStorage(`selectedBusinessId_${user.email}`);
       
-      // Always auto-select the first business if none is selected (for both single and multiple business scenarios)
-      if (!selectedBusinessId) {
-        // If user has only one business, automatically select it
-        if (userBusinesses.length === 1) {
-          const singleBusiness = userBusinesses[0];
-          setSelectedBusinessIdState(singleBusiness.id);
-          safeSetLocalStorage(`selectedBusinessId_${user.email}`, singleBusiness.id.toString());
-          return;
-        }
+      // Try to restore saved business ID first
+      if (savedBusinessId) {
+        const savedId = parseInt(savedBusinessId);
+        const businessExists = userBusinesses.some(b => b.id === savedId);
         
-        // For users with multiple businesses
-        if (userBusinesses.length > 1) {
-          // If we have a saved business ID, validate and restore it
-          if (savedBusinessId) {
-            const savedId = parseInt(savedBusinessId);
-            const businessExists = userBusinesses.some(b => b.id === savedId);
-            
-            if (businessExists) {
-              setSelectedBusinessIdState(savedId);
-              setModalShownForUser(user.userId); // Mark modal as shown when restoring
-              console.log('Restored business selection for', user.email, ':', savedId);
-              return;
-            } else {
-              // Saved business no longer exists, clear it
-              console.log('Saved business not found for', user.email, ', clearing selection');
-              safeRemoveLocalStorage(`selectedBusinessId_${user.email}`);
-            }
-          }
-          
-          // Auto-select first business for all users (Super Admin and regular users)
-          if (userBusinesses.length > 0) {
-            const firstBusiness = userBusinesses[0];
-            setSelectedBusinessIdState(firstBusiness.id);
-            safeSetLocalStorage(`selectedBusinessId_${user.email}`, firstBusiness.id.toString());
-            setModalShownForUser(user.userId); // Mark modal as handled
-            return;
-          }
-          
-          // Show modal only if no valid selection exists and modal hasn't been shown for this user
-          if (modalShownForUser !== user.userId && !showBusinessModal) {
-            console.log('Showing business selection modal for', user.email, 'with multiple businesses. Role ID:', user.roleId);
-            setIsInitialSelection(true);
-            setShowBusinessModal(true);
-            setModalShownForUser(user.userId);
-          }
+        if (businessExists) {
+          setSelectedBusinessIdState(savedId);
+          return;
+        } else {
+          // Saved business no longer exists, clear it
+          safeRemoveLocalStorage(`selectedBusinessId_${user.email}`);
         }
       }
+      
+      // Auto-select first business for all users
+      const firstBusiness = userBusinesses[0];
+      setSelectedBusinessIdState(firstBusiness.id);
+      safeSetLocalStorage(`selectedBusinessId_${user.email}`, firstBusiness.id.toString());
     }
-  }, [user, userBusinesses, isLoading, modalShownForUser, showBusinessModal, selectedBusinessId]);
+  }, [user, userBusinesses, isLoading, selectedBusinessId]);
 
   // Clear business selection only when user logs out
   useEffect(() => {

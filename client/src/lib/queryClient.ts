@@ -28,9 +28,6 @@ export async function apiRequest(
   
   if (selectedBusinessId) {
     headers["business-id"] = selectedBusinessId;
-    console.log('ApiRequest sending business-id:', selectedBusinessId, 'for URL:', url);
-  } else {
-    console.log('ApiRequest - no business ID found. User:', user.email, 'URL:', url);
   }
 
   const res = await fetch(url, {
@@ -61,9 +58,6 @@ export const getQueryFn: <T>(options: {
     
     if (selectedBusinessId) {
       headers["business-id"] = selectedBusinessId;
-      console.log('Query sending business-id:', selectedBusinessId, 'for URL:', queryKey[0]);
-    } else {
-      console.log('Query - no business ID found. User:', user.email, 'URL:', queryKey[0]);
     }
 
     const res = await fetch(queryKey[0] as string, {
