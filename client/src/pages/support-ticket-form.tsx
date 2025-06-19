@@ -13,7 +13,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { ArrowLeft, Ticket, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { insertSupportTicketSchema, type SupportTicket, type Staff } from "@shared/schema";
+import { insertSupportTicketSchema, type SupportTicket } from "@shared/schema";
+import { TranslatableText } from "@/components/translatable-text";
 import { z } from "zod";
 
 interface SupportTicketFormData {
@@ -532,7 +533,7 @@ export default function SupportTicketForm() {
                     variant="outline" 
                     onClick={() => setLocation("/support-tickets")}
                   >
-                    Cancel
+    <TranslatableText>Cancel</TranslatableText>
                   </Button>
                   <Button type="submit" disabled={isPending}>
                     {isPending ? "Saving..." : isEditing ? "Update Ticket" : "Create Ticket"}
