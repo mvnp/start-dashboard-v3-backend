@@ -1788,15 +1788,18 @@ export function registerRoutes(app: Express): void {
    */
   app.get("/api/user-businesses", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const businessIds = getBusinessFilter(req.user, req);
+      const user = req.user!;
+      console.log('User businesses request for:', user.email, 'Role ID:', user.roleId, 'Business IDs:', user.businessIds);
       
-      if (!businessIds) {
+      if (user.isSuperAdmin) {
         // Super admin gets all businesses
         const businesses = await storage.getAllBusinesses();
+        console.log('Super admin fetching all businesses:', businesses.length);
         res.json(businesses);
       } else {
         // Regular users get only their businesses
-        const businesses = await storage.getBusinessesByIds(businessIds);
+        const businesses = await storage.getBusinessesByIds(user.businessIds);
+        console.log('Regular user fetching businesses:', businesses.length, 'for IDs:', user.businessIds);
         res.json(businesses);
       }
     } catch (error) {
