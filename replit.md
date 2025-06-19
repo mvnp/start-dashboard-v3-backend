@@ -174,6 +174,7 @@ The application now includes comprehensive Swagger/OpenAPI documentation accessi
 
 ```
 Changelog:
+- June 19, 2025. Completed comprehensive TranslatableText string audit and database update - scanned entire codebase for all <TranslatableText> wrapped strings and bulk inserted 169 new strings into traductions table. Fixed Edition Mode inline editing to work with new two-table architecture (proper traduction_id foreign key relationship). Updated server API endpoint to handle traduction_id parameter from TranslatableText component. Fixed import path issue in constants.tsx. Database now contains complete set of translatable strings from current codebase state.
 - June 19, 2025. Restructured translation database architecture - separated English source strings (traductions table) from foreign language translations (new translations table with FK relationship). Updated all API endpoints and storage methods to support new two-table structure. Created comprehensive Traductions management page with language selector, translation table, and Enter key saving functionality - placed after Settings in sidebar navigation. Added 18 new Traductions page strings to database (total: 582 English strings after duplicate removal)
 - June 19, 2025. Removed auto-login behavior and demo credentials - SaaS now requires proper authentication credentials and starts with clean login page
 - June 19, 2025. Added 12 new TranslatableText strings from appointment-list.tsx to database - registered appointment filtering and pagination strings in English for translation system
