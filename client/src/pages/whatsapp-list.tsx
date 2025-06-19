@@ -135,14 +135,18 @@ export default function WhatsappList() {
               <MessageCircle className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-900"><TranslatableText>WhatsApp Instances</TranslatableText></h1>
-              <p className="text-slate-600"><TranslatableText>Manage your WhatsApp business instances</TranslatableText></p>
+              <h1 className="text-3xl font-bold text-slate-900">
+                <TranslatableText>WhatsApp Instances</TranslatableText>
+              </h1>
+              <p className="text-slate-600">
+                <TranslatableText>Manage your WhatsApp business instances</TranslatableText>
+              </p>
             </div>
           </div>
           <Link href="/whatsapp/new">
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              New Instance
+              <TranslatableText>New Instance</TranslatableText>
             </Button>
           </Link>
         </div>
@@ -153,7 +157,9 @@ export default function WhatsappList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600"><TranslatableText>Total Instances</TranslatableText></p>
+                  <p className="text-sm font-medium text-slate-600">
+                    <TranslatableText>Total Instances</TranslatableText>
+                  </p>
                   <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
                 </div>
                 <Smartphone className="w-8 h-8 text-slate-400" />
@@ -164,7 +170,9 @@ export default function WhatsappList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600"><TranslatableText>Connected</TranslatableText></p>
+                  <p className="text-sm font-medium text-slate-600">
+                    <TranslatableText>Connected</TranslatableText>
+                  </p>
                   <p className="text-2xl font-bold text-green-600">{stats.connected}</p>
                 </div>
                 <Wifi className="w-8 h-8 text-green-400" />
@@ -175,7 +183,9 @@ export default function WhatsappList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600"><TranslatableText>Error</TranslatableText></p>
+                  <p className="text-sm font-medium text-slate-600">
+                    <TranslatableText>Error</TranslatableText>
+                  </p>
                   <p className="text-2xl font-bold text-yellow-600">{stats.error}</p>
                 </div>
                 <QrCode className="w-8 h-8 text-yellow-400" />
@@ -186,7 +196,9 @@ export default function WhatsappList() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600"><TranslatableText>Disconnected</TranslatableText></p>
+                  <p className="text-sm font-medium text-slate-600">
+                    <TranslatableText>Disconnected</TranslatableText>
+                  </p>
                   <p className="text-2xl font-bold text-red-600">{stats.disconnected}</p>
                 </div>
                 <WifiOff className="w-8 h-8 text-red-400" />
@@ -211,10 +223,18 @@ export default function WhatsappList() {
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all"><TranslatableText>All Status</TranslatableText></SelectItem>
-              <SelectItem value="connected"><TranslatableText>Connected</TranslatableText></SelectItem>
-              <SelectItem value="connecting"><TranslatableText>Connecting</TranslatableText></SelectItem>
-              <SelectItem value="disconnected"><TranslatableText>Disconnected</TranslatableText></SelectItem>
+              <SelectItem value="all">
+                <TranslatableText>All Status</TranslatableText>
+              </SelectItem>
+              <SelectItem value="connected">
+                <TranslatableText>Connected</TranslatableText>
+              </SelectItem>
+              <SelectItem value="connecting">
+                <TranslatableText>Connecting</TranslatableText>
+              </SelectItem>
+              <SelectItem value="disconnected">
+                <TranslatableText>Disconnected</TranslatableText>
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -226,7 +246,9 @@ export default function WhatsappList() {
           <Card>
             <CardContent className="p-8 text-center">
               <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2"><TranslatableText>No WhatsApp instances found</TranslatableText></h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <TranslatableText>No WhatsApp instances found</TranslatableText>
+              </h3>
               <p className="text-gray-600">
                 {searchTerm || statusFilter !== "all"
                   ? <TranslatableText>Try adjusting your search or filters</TranslatableText>
@@ -248,7 +270,7 @@ export default function WhatsappList() {
                     </div>
                     <div className="space-y-2 mb-4">
                       <p className="text-slate-600">
-                        <strong><TranslatableText>Phone:</TranslatableText></strong> {instance.phone_number || 'Not specified'}
+                        <strong><TranslatableText>Phone:</TranslatableText></strong> {instance.phone_number || <TranslatableText>Not specified</TranslatableText>}
                       </p>
                       {instance.webhook_url && (
                         <p className="text-slate-600">
@@ -268,7 +290,9 @@ export default function WhatsappList() {
                       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
                         <div className="flex items-center gap-2 mb-2">
                           <QrCode className="w-5 h-5 text-yellow-600" />
-                          <h4 className="font-medium text-yellow-800"><TranslatableText>QR Code Ready</TranslatableText></h4>
+                          <h4 className="font-medium text-yellow-800">
+                            <TranslatableText>QR Code Ready</TranslatableText>
+                          </h4>
                         </div>
                         <p className="text-sm text-yellow-700 mb-3">
                           <TranslatableText>Scan this QR code with your WhatsApp to connect this instance.</TranslatableText>
