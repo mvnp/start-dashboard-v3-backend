@@ -65,13 +65,13 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
   // Handle business selection for all users (Super Admin, Merchant, Employee)
   useEffect(() => {
     if (!isLoading && user && userBusinesses.length > 0) {
-      const savedBusinessId = safeGetSessionStorage("selectedBusinessId");
+      const savedBusinessId = safeGetLocalStorage("selectedBusinessId");
       
       // If user has only one business, automatically select it
       if (userBusinesses.length === 1) {
         const singleBusiness = userBusinesses[0];
         setSelectedBusinessIdState(singleBusiness.id);
-        safeSetSessionStorage("selectedBusinessId", singleBusiness.id.toString());
+        safeSetLocalStorage("selectedBusinessId", singleBusiness.id.toString());
         console.log('Auto-selected single business for', user.email, ':', singleBusiness.name);
         return;
       }
@@ -91,7 +91,7 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
           } else {
             // Saved business no longer exists, clear it
             console.log('Saved business not found for', user.email, ', clearing selection');
-            safeRemoveSessionStorage("selectedBusinessId");
+            safeRemoveLocalStorage("selectedBusinessId");
             setSelectedBusinessIdState(null);
           }
         }
@@ -113,24 +113,24 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
       setSelectedBusinessIdState(null);
       setShowBusinessModal(false);
       setModalShownForUser(null);
-      safeRemoveSessionStorage("selectedBusinessId");
-      safeRemoveSessionStorage("lastUserId");
+      safeRemoveLocalStorage("selectedBusinessId");
+      safeRemoveLocalStorage("lastUserId");
     } else {
       // When user logs in, only clear business selection if it's a different user
       const currentUserId = user.userId;
-      const lastUserId = safeGetSessionStorage("lastUserId");
+      const lastUserId = safeGetLocalStorage("lastUserId");
       
       // Only clear if we have a different user ID stored
       if (lastUserId && lastUserId !== currentUserId.toString()) {
         console.log('Different user logged in, clearing business selection for user:', user.email);
-        safeRemoveSessionStorage("selectedBusinessId");
+        safeRemoveLocalStorage("selectedBusinessId");
         setSelectedBusinessIdState(null);
         setShowBusinessModal(false);
         setModalShownForUser(null);
       }
       
       // Always update the last user ID
-      safeSetSessionStorage("lastUserId", currentUserId.toString());
+      safeSetLocalStorage("lastUserId", currentUserId.toString());
     }
   }, [user?.userId]); // Only depend on userId changes, not the entire user object
 
