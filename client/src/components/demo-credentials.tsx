@@ -30,13 +30,13 @@ const getRoleDescription = (roleType: string) => {
 const getRoleDisplayName = (roleType: string) => {
   switch (roleType) {
     case 'super-admin':
-      return 'Super Admin';
+      return <TranslatableText>Super Admin</TranslatableText>;
     case 'merchant':
-      return 'Merchant';
+      return <TranslatableText>Merchant</TranslatableText>;
     case 'employee':
-      return 'Employee';
+      return <TranslatableText>Employee</TranslatableText>;
     case 'client':
-      return 'Client';
+      return <TranslatableText>Client</TranslatableText>;
     default:
       return roleType;
   }
@@ -52,8 +52,8 @@ export function DemoCredentials() {
   const copyCredentials = (email: string, password: string) => {
     navigator.clipboard.writeText(`${email}:${password}`);
     toast({
-      title: "Credentials copied",
-      description: "Email and password copied to clipboard",
+      title: <TranslatableText>Credentials copied</TranslatableText>,
+      description: <TranslatableText>Email and password copied to clipboard</TranslatableText>,
     });
   };
 
@@ -61,8 +61,8 @@ export function DemoCredentials() {
     return (
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-slate-900">Demo Credentials</CardTitle>
-          <p className="text-sm text-slate-600">Loading available test accounts...</p>
+          <CardTitle className="text-lg font-semibold text-slate-900"><TranslatableText>Demo Credentials</TranslatableText></CardTitle>
+          <p className="text-sm text-slate-600"><TranslatableText>Loading available test accounts...</TranslatableText></p>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center p-8">
@@ -86,9 +86,9 @@ export function DemoCredentials() {
   return (
     <Card className="mt-6">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-slate-900">Demo Credentials</CardTitle>
+        <CardTitle className="text-lg font-semibold text-slate-900"><TranslatableText>Demo Credentials</TranslatableText></CardTitle>
         <p className="text-sm text-slate-600">
-          Use these test accounts to explore different user roles and permissions
+          <TranslatableText>Use these test accounts to explore different user roles and permissions</TranslatableText>
         </p>
       </CardHeader>
       <CardContent>
@@ -106,7 +106,7 @@ export function DemoCredentials() {
                   </Badge>
                 </div>
                 <p className="text-sm text-slate-600">{cred.description}</p>
-                <p className="text-xs text-slate-500 mt-1">Password: {cred.password}</p>
+                <p className="text-xs text-slate-500 mt-1"><TranslatableText>Password: </TranslatableText>{cred.password}</p>
               </div>
               <button
                 onClick={() => copyCredentials(cred.email, cred.password)}
