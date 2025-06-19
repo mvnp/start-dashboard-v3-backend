@@ -46,14 +46,14 @@ export default function FaqList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/faqs"] });
       toast({
-        title: "FAQ deleted",
-        description: "The FAQ has been successfully deleted.",
+        title: <TranslatableText>FAQ deleted</TranslatableText>,
+        description: <TranslatableText>The FAQ has been successfully deleted.</TranslatableText>,
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete the FAQ. Please try again.",
+        title: <TranslatableText>Error</TranslatableText>,
+        description: <TranslatableText>Failed to delete the FAQ. Please try again.</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -188,7 +188,7 @@ export default function FaqList() {
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="all"><TranslatableText>All Categories</TranslatableText></SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category} value={category}>
                   {category}
@@ -201,9 +201,9 @@ export default function FaqList() {
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="all"><TranslatableText>All Status</TranslatableText></SelectItem>
+              <SelectItem value="published"><TranslatableText>Published</TranslatableText></SelectItem>
+              <SelectItem value="draft"><TranslatableText>Draft</TranslatableText></SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -215,11 +215,12 @@ export default function FaqList() {
           <Card>
             <CardContent className="p-8 text-center">
               <HelpCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No FAQs found</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2"><TranslatableText>No FAQs found</TranslatableText></h3>
               <p className="text-gray-600">
                 {searchTerm || categoryFilter !== "all" || statusFilter !== "all"
-                  ? "Try adjusting your search or filters"
-                  : "Get started by creating your first FAQ"}
+                  ? <TranslatableText>Try adjusting your search or filters</TranslatableText>
+                  : <TranslatableText>Get started by creating your first FAQ</TranslatableText>
+                }
               </p>
             </CardContent>
           </Card>
@@ -238,9 +239,9 @@ export default function FaqList() {
                     </div>
                     <p className="text-slate-600 mb-3 line-clamp-3">{faq.answer}</p>
                     <div className="flex items-center gap-4 text-sm text-slate-500">
-                      <span><strong>Order:</strong> {faq.order_index}</span>
-                      <span><strong>Created:</strong> {new Date(faq.created_at!).toLocaleDateString()}</span>
-                      <span><strong>Updated:</strong> {new Date(faq.updated_at!).toLocaleDateString()}</span>
+                      <span><strong><TranslatableText>Order:</TranslatableText></strong> {faq.order_index}</span>
+                      <span><strong><TranslatableText>Created:</TranslatableText></strong> {new Date(faq.created_at!).toLocaleDateString()}</span>
+                      <span><strong><TranslatableText>Updated:</TranslatableText></strong> {new Date(faq.updated_at!).toLocaleDateString()}</span>
                     </div>
                   </div>
                   {isSuperAdmin && (
