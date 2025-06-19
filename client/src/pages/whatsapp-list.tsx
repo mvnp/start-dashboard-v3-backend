@@ -10,6 +10,7 @@ import { Trash2, Plus, Search, Edit, MessageCircle, Smartphone, Wifi, WifiOff, Q
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { WhatsappInstance } from "@shared/schema";
+import { TranslatableText } from "@/components/translatable-text";
 
 export default function WhatsappList() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -134,8 +135,8 @@ export default function WhatsappList() {
               <MessageCircle className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">WhatsApp Instances</h1>
-              <p className="text-slate-600">Manage your WhatsApp business instances</p>
+              <h1 className="text-3xl font-bold text-slate-900"><TranslatableText>WhatsApp Instances</TranslatableText></h1>
+              <p className="text-slate-600"><TranslatableText>Manage your WhatsApp business instances</TranslatableText></p>
             </div>
           </div>
           <Link href="/whatsapp/new">
