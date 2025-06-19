@@ -200,27 +200,27 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
         <Link href="/businesses">
           <Button variant="ghost" className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Businesses
+            <TranslatableText>Back to Businesses</TranslatableText>
           </Button>
         </Link>
         <div className="flex items-center gap-3">
           <Building2 className="h-8 w-8 text-primary" />
           <div>
-            <h1 className="text-3xl font-bold">
+            <TranslatableText tag="h1" className="text-3xl font-bold">
               {isEditing ? "Edit Business" : "Add New Business"}
-            </h1>
-            <p className="text-muted-foreground">
+            </TranslatableText>
+            <TranslatableText tag="p" className="text-muted-foreground">
               {isEditing ? "Update business information" : "Create a new business location"}
-            </p>
+            </TranslatableText>
           </div>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Business Information</CardTitle>
+          <CardTitle><TranslatableText>Business Information</TranslatableText></CardTitle>
           <CardDescription>
-            Enter the details for this business location
+            <TranslatableText>Enter the details for this business location</TranslatableText>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -231,7 +231,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Business Name *</FormLabel>
+                    <FormLabel><TranslatableText>Business Name *</TranslatableText></FormLabel>
                     <FormControl>
                       <Input placeholder="Enter business name" {...field} />
                     </FormControl>
@@ -245,7 +245,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel><TranslatableText>Description</TranslatableText></FormLabel>
                     <FormControl>
                       <Textarea 
                         placeholder="Describe your business"
@@ -264,7 +264,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Address</FormLabel>
+                    <FormLabel><TranslatableText>Address</TranslatableText></FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="Enter business address"
@@ -283,7 +283,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone Number *</FormLabel>
+                      <FormLabel><TranslatableText>Phone Number *</TranslatableText></FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="(11) 99999-9999"
@@ -308,7 +308,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email *</FormLabel>
+                      <FormLabel><TranslatableText>Email *</TranslatableText></FormLabel>
                       <FormControl>
                         <Input 
                           type="email" 
@@ -331,7 +331,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                 name="tax_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tax ID *</FormLabel>
+                    <FormLabel><TranslatableText>Tax ID *</TranslatableText></FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="000.000.000-00 or 00.000.000/0000-00"
@@ -356,7 +356,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                 name="user_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Owner *</FormLabel>
+                    <FormLabel><TranslatableText>Owner *</TranslatableText></FormLabel>
                     <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
                       <FormControl>
                         <SelectTrigger>
@@ -385,14 +385,16 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                   disabled={mutation.isPending}
                   className="flex-1"
                 >
-                  {mutation.isPending 
-                    ? (isEditing ? "Updating..." : "Creating...") 
-                    : (isEditing ? "Update Business" : "Create Business")
-                  }
+                  <TranslatableText>
+                    {mutation.isPending 
+                      ? (isEditing ? "Updating..." : "Creating...") 
+                      : (isEditing ? "Update Business" : "Create Business")
+                    }
+                  </TranslatableText>
                 </Button>
                 <Link href="/businesses">
                   <Button type="button" variant="outline">
-                    Cancel
+<TranslatableText>Cancel</TranslatableText>
                   </Button>
                 </Link>
               </div>

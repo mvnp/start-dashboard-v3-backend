@@ -418,7 +418,7 @@ export default function AccountingForm() {
                   name="client_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Client</FormLabel>
+                      <FormLabel><TranslatableText>Client</TranslatableText></FormLabel>
                       <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
                         <FormControl>
                           <SelectTrigger>
@@ -443,7 +443,7 @@ export default function AccountingForm() {
                   name="staff_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Staff Member</FormLabel>
+                      <FormLabel><TranslatableText>Staff Member</TranslatableText></FormLabel>
                       <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
                         <FormControl>
                           <SelectTrigger>
@@ -469,7 +469,7 @@ export default function AccountingForm() {
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Notes</FormLabel>
+                    <FormLabel><TranslatableText>Notes</TranslatableText></FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Additional notes about this transaction"
@@ -493,7 +493,7 @@ export default function AccountingForm() {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Recurring Transaction</FormLabel>
+                      <FormLabel><TranslatableText>Recurring Transaction</TranslatableText></FormLabel>
                       <p className="text-sm text-muted-foreground">
                         Mark this as a recurring transaction
                       </p>
@@ -508,14 +508,16 @@ export default function AccountingForm() {
                   disabled={isPending}
                   className="flex-1"
                 >
+                  <TranslatableText>
                   {isPending ? "Saving..." : isEdit ? "Update Transaction" : "Create Transaction"}
+                </TranslatableText>
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setLocation("/accounting")}
                 >
-                  Cancel
+    <TranslatableText>Cancel</TranslatableText>
                 </Button>
               </div>
             </form>
