@@ -19,14 +19,15 @@ import {
   MessageSquare,
   Headphones
 } from "lucide-react";
+import { TranslatableText } from "@/components/translatable-text";
 
 const supportFormSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  phone: z.string().min(10, "Please enter a valid phone number"),
-  urgency: z.string().min(1, "Please select problem urgency"),
-  subject: z.string().min(5, "Subject must be at least 5 characters"),
-  description: z.string().min(20, "Please provide a detailed description (minimum 20 characters)")
+  name: z.string().min(2, <TranslatableText>Name must be at least 2 characters</TranslatableText>),
+  email: z.string().email(<TranslatableText>Please enter a valid email address</TranslatableText>),
+  phone: z.string().min(10, <TranslatableText>Please enter a valid phone number</TranslatableText>),
+  urgency: z.string().min(1, <TranslatableText>Please select problem urgency</TranslatableText>),
+  subject: z.string().min(5, <TranslatableText>Subject must be at least 5 characters</TranslatableText>),
+  description: z.string().min(20, <TranslatableText>Please provide a detailed description (minimum 20 characters)</TranslatableText>)
 });
 
 type SupportFormData = z.infer<typeof supportFormSchema>;
