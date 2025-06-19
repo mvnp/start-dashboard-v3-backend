@@ -14,6 +14,7 @@ import { ArrowLeft, HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertFaqSchema, type Faq } from "@shared/schema";
+import { TranslatableText } from "@/components/translatable-text";
 import { z } from "zod";
 
 interface AuthUser {
@@ -195,7 +196,7 @@ export default function FaqForm() {
 
       <Card>
         <CardHeader>
-          <CardTitle>FAQ Details</CardTitle>
+          <CardTitle><TranslatableText>FAQ Details</TranslatableText></CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -206,7 +207,7 @@ export default function FaqForm() {
                 name="question"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Question *</FormLabel>
+                    <FormLabel><TranslatableText>Question *</TranslatableText></FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="What is your question?"
@@ -224,7 +225,7 @@ export default function FaqForm() {
                 name="answer"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Answer *</FormLabel>
+                    <FormLabel><TranslatableText>Answer *</TranslatableText></FormLabel>
                     <FormControl>
                       <Textarea 
                         placeholder="Provide a detailed answer to the question..."
@@ -244,7 +245,7 @@ export default function FaqForm() {
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category *</FormLabel>
+                      <FormLabel><TranslatableText>Category *</TranslatableText></FormLabel>
                       <Select value={field.value || ""} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger>
@@ -321,7 +322,9 @@ export default function FaqForm() {
   <TranslatableText>Cancel</TranslatableText>
                 </Button>
                 <Button type="submit" disabled={isPending}>
-                  {isPending ? "Saving..." : isEditing ? "Update FAQ" : "Create FAQ"}
+                  <TranslatableText>
+                    {isPending ? "Saving..." : isEditing ? "Update FAQ" : "Create FAQ"}
+                  </TranslatableText>
                 </Button>
               </div>
             </form>

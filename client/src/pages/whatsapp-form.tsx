@@ -189,12 +189,12 @@ export default function WhatsappForm() {
             <MessageCircle className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">
+            <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
               {isEditing ? "Edit WhatsApp Instance" : "New WhatsApp Instance"}
-            </h1>
-            <p className="text-slate-600">
+            </TranslatableText>
+            <TranslatableText tag="p" className="text-slate-600">
               {isEditing ? "Update instance details" : "Create a new WhatsApp business instance"}
-            </p>
+            </TranslatableText>
           </div>
         </div>
       </div>
@@ -203,7 +203,7 @@ export default function WhatsappForm() {
         {/* Form Card */}
         <Card>
           <CardHeader>
-            <CardTitle>Instance Details</CardTitle>
+            <CardTitle><TranslatableText>Instance Details</TranslatableText></CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -214,7 +214,7 @@ export default function WhatsappForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Instance Name *</FormLabel>
+                      <FormLabel><TranslatableText>Instance Name *</TranslatableText></FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="e.g., Main Business WhatsApp"
@@ -232,7 +232,7 @@ export default function WhatsappForm() {
                   name="phone_number"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone Number *</FormLabel>
+                      <FormLabel><TranslatableText>Phone Number *</TranslatableText></FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="e.g., +1234567890"
@@ -253,7 +253,7 @@ export default function WhatsappForm() {
                   name="webhook_url"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Webhook URL</FormLabel>
+                      <FormLabel><TranslatableText>Webhook URL</TranslatableText></FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="https://yourapi.com/webhook"
