@@ -13,7 +13,9 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   const token = localStorage.getItem('accessToken');
-  const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
+  // Get selected business ID from business context storage
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const selectedBusinessId = user.email ? localStorage.getItem(`selectedBusinessId_${user.email}`) : null;
   const headers: Record<string, string> = {};
   
   if (data) {
@@ -25,7 +27,7 @@ export async function apiRequest(
   }
   
   if (selectedBusinessId) {
-    headers["X-Selected-Business-Id"] = selectedBusinessId;
+    headers["business-id"] = selectedBusinessId;
   }
 
   const res = await fetch(url, {
@@ -45,7 +47,9 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const token = localStorage.getItem('accessToken');
-    const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
+    // Get selected business ID from business context storage
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const selectedBusinessId = user.email ? localStorage.getItem(`selectedBusinessId_${user.email}`) : null;
     const headers: Record<string, string> = {};
     
     if (token) {
@@ -53,7 +57,7 @@ export const getQueryFn: <T>(options: {
     }
     
     if (selectedBusinessId) {
-      headers["X-Selected-Business-Id"] = selectedBusinessId;
+      headers["business-id"] = selectedBusinessId;
     }
 
     const res = await fetch(queryKey[0] as string, {
