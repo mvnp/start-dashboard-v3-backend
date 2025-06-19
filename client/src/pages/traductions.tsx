@@ -102,13 +102,13 @@ export default function Traductions() {
 
   // Fetch all English translations (source strings)
   const { data: englishTranslations = [], isLoading: isLoadingEnglish } = useQuery<Translation[]>({
-    queryKey: ['/api/traductions', 'en'],
+    queryKey: ['/api/traductions/en'],
     enabled: true,
   });
 
   // Fetch translations for selected language
   const { data: targetTranslations = [], isLoading: isLoadingTarget } = useQuery<Translation[]>({
-    queryKey: ['/api/traductions', selectedLanguage],
+    queryKey: [`/api/traductions/${selectedLanguage}`],
     enabled: !!selectedLanguage && selectedLanguage !== 'en',
   });
 
@@ -122,7 +122,7 @@ export default function Traductions() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/traductions', selectedLanguage] });
+      queryClient.invalidateQueries({ queryKey: [`/api/traductions/${selectedLanguage}`] });
       toast({
         title: "Translation saved",
         description: "The translation has been updated successfully",
