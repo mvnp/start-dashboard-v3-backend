@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Business } from "@shared/schema";
 import { useAuth } from "@/lib/auth";
 import BusinessSelectorModal from "@/components/business-selector-modal";
-import { safeGetSessionStorage, safeSetSessionStorage, safeRemoveSessionStorage } from "./safe-storage";
+import { safeGetLocalStorage, safeSetLocalStorage, safeRemoveLocalStorage, safeGetSessionStorage, safeSetSessionStorage, safeRemoveSessionStorage } from "./safe-storage";
 
 interface BusinessContextType {
   selectedBusinessId: number | null;
@@ -47,14 +47,17 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
     userBusinesses.length > 1 && 
     !selectedBusinessId;
 
-  // Initialize selected business from sessionStorage immediately when component mounts
+  // Initialize selected business from localStorage immediately when component mounts
   useEffect(() => {
     if (user) {
-      const savedBusinessId = safeGetSessionStorage("selectedBusinessId");
+      const savedBusinessId = safeGetLocalStorage("selectedBusinessId");
+      console.log('Checking for saved business ID:', savedBusinessId, 'for user:', user.email);
       if (savedBusinessId && !isNaN(parseInt(savedBusinessId))) {
         const businessId = parseInt(savedBusinessId);
         setSelectedBusinessIdState(businessId);
-        console.log('Restored selected business from session:', businessId);
+        console.log('Restored selected business from localStorage:', businessId, 'for user:', user.email);
+      } else {
+        console.log('No valid saved business ID found for user:', user.email);
       }
     }
   }, [user]);
@@ -102,9 +105,9 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
         }
       }
     }
-  }, [user, userBusinesses, isLoading, modalShownForUser, showBusinessModal]);
+  }, [user, userBusinesses, isLoading, modalShownForUser, showBusinessModal, selectedBusinessId]);
 
-  // Clear business selection when user changes (logout/login)
+  // Clear business selection only when user logs out
   useEffect(() => {
     if (!user) {
       setSelectedBusinessIdState(null);
@@ -113,22 +116,23 @@ export function BusinessProvider({ children }: BusinessProviderProps) {
       safeRemoveSessionStorage("selectedBusinessId");
       safeRemoveSessionStorage("lastUserId");
     } else {
-      // When user logs in, clear any previous business selection to force new selection for different users
+      // When user logs in, only clear business selection if it's a different user
       const currentUserId = user.userId;
       const lastUserId = safeGetSessionStorage("lastUserId");
       
+      // Only clear if we have a different user ID stored
       if (lastUserId && lastUserId !== currentUserId.toString()) {
-        // Different user logged in, clear previous business selection
         console.log('Different user logged in, clearing business selection for user:', user.email);
         safeRemoveSessionStorage("selectedBusinessId");
         setSelectedBusinessIdState(null);
         setShowBusinessModal(false);
-        setModalShownForUser(null); // Reset modal tracking
+        setModalShownForUser(null);
       }
       
+      // Always update the last user ID
       safeSetSessionStorage("lastUserId", currentUserId.toString());
     }
-  }, [user]);
+  }, [user?.userId]); // Only depend on userId changes, not the entire user object
 
   // This useEffect is now redundant as single business auto-selection is handled in the main business selection effect above
 

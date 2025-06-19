@@ -143,10 +143,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await getCurrentUser();
         } catch (error) {
           console.error('Failed to restore session:', error);
-          // Clear invalid tokens
+          // Clear invalid tokens but preserve business selection
           safeRemoveLocalStorage('accessToken');
           safeRemoveLocalStorage('refreshToken');
-          sessionStorage.removeItem('selectedBusinessId');
           setUser(null);
         }
       } else {
