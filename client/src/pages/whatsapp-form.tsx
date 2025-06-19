@@ -11,6 +11,7 @@ import { ArrowLeft, MessageCircle, QrCode, Wifi, WifiOff, Smartphone } from "luc
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertWhatsappInstanceSchema, type WhatsappInstance } from "@shared/schema";
+import { TranslatableText } from "@/components/translatable-text";
 import { z } from "zod";
 
 interface WhatsappInstanceFormData {
@@ -277,7 +278,9 @@ export default function WhatsappForm() {
     <TranslatableText>Cancel</TranslatableText>
                   </Button>
                   <Button type="submit" disabled={isPending}>
-                    {isPending ? "Saving..." : isEditing ? "Update Instance" : "Create Instance"}
+                    <TranslatableText>
+                      {isPending ? "Saving..." : isEditing ? "Update Instance" : "Create Instance"}
+                    </TranslatableText>
                   </Button>
                 </div>
               </form>

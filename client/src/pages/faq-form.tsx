@@ -175,7 +175,7 @@ export default function FaqForm() {
           className="mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to FAQs
+          <TranslatableText>Back to FAQs</TranslatableText>
         </Button>
         
         <div className="flex items-center gap-3">
@@ -318,7 +318,7 @@ export default function FaqForm() {
                   variant="outline" 
                   onClick={() => setLocation("/faqs")}
                 >
-                  Cancel
+  <TranslatableText>Cancel</TranslatableText>
                 </Button>
                 <Button type="submit" disabled={isPending}>
                   {isPending ? "Saving..." : isEditing ? "Update FAQ" : "Create FAQ"}
