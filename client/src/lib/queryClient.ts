@@ -13,6 +13,7 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   const token = localStorage.getItem('accessToken');
+  const businessId = localStorage.getItem('x-selected-business-id');
   const headers: Record<string, string> = {};
   
   if (data) {
@@ -23,7 +24,24 @@ export async function apiRequest(
     headers["Authorization"] = `Bearer ${token}`;
   }
   
-  // No business context needed
+  // Add business context for business-scoped endpoints
+  const businessScopedEndpoints = [
+    '/api/staff',
+    '/api/clients', 
+    '/api/appointments',
+    '/api/services',
+    '/api/whatsapp-instances',
+    '/api/payment-gateways',
+    '/api/support-tickets',
+    '/api/accounting-transactions',
+    '/api/settings'
+  ];
+
+  const isBusinessScoped = businessScopedEndpoints.some(endpoint => url.includes(endpoint));
+  
+  if (isBusinessScoped && businessId) {
+    headers["x-selected-business-id"] = businessId;
+  }
 
   const res = await fetch(url, {
     method,
@@ -42,15 +60,34 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const token = localStorage.getItem('accessToken');
+    const businessId = localStorage.getItem('x-selected-business-id');
     const headers: Record<string, string> = {};
     
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
     
-    // No business context needed
+    // Add business context for business-scoped endpoints
+    const url = queryKey[0] as string;
+    const businessScopedEndpoints = [
+      '/api/staff',
+      '/api/clients', 
+      '/api/appointments',
+      '/api/services',
+      '/api/whatsapp-instances',
+      '/api/payment-gateways',
+      '/api/support-tickets',
+      '/api/accounting-transactions',
+      '/api/settings'
+    ];
 
-    const res = await fetch(queryKey[0] as string, {
+    const isBusinessScoped = businessScopedEndpoints.some(endpoint => url.includes(endpoint));
+    
+    if (isBusinessScoped && businessId) {
+      headers["x-selected-business-id"] = businessId;
+    }
+
+    const res = await fetch(url, {
       headers,
     });
 

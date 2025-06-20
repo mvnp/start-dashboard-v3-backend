@@ -30,6 +30,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Person } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
+import { useBusinessContext } from "@/hooks/use-business-context";
 
 interface Staff extends Person {
   role?: string;
@@ -62,20 +63,22 @@ const roleConfig = {
 export default function StaffList() {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  const { selectedBusinessId } = useBusinessContext();
 
   const { data: staff = [], isLoading } = useQuery({
-    queryKey: ["/api/staff"],
+    queryKey: ["/api/staff", selectedBusinessId],
     select: (data: Staff[]) => data,
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window gains focus
+    enabled: !!selectedBusinessId, // Only fetch when business is selected
   });
 
   const deleteStaffMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/staff/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/staff", selectedBusinessId] });
       toast({
         title: <TranslatableText>Staff member deleted</TranslatableText>,
         description: <TranslatableText>The staff member has been successfully removed.</TranslatableText>,

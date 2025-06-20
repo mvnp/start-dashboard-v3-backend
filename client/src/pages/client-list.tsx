@@ -31,6 +31,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Person } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
+import { useBusinessContext } from "@/hooks/use-business-context";
 
 interface Client extends Person {
   email?: string;
