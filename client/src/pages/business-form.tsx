@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { Building2, ArrowLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,27 +16,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { TranslatableText } from "@/components/translatable-text";
+import { useTranslationHelper } from "@/lib/translation-helper";
 
 interface BusinessFormProps {
   businessId?: number;
 }
-
-// Create validation schema with required fields
-const businessFormSchema = insertBusinessSchema.extend({
-  name: z.string().min(1, "Business name is required"),
-  phone: z.string().min(1, "Phone number is required"),
-  email: z.string().email("Valid email is required").min(1, "Email is required"),
-  tax_id: z.string().min(1, "Tax ID is required"),
-  user_id: z.number().min(1, "Owner is required"),
-});
-
-type BusinessFormData = z.infer<typeof businessFormSchema>;
 
 export default function BusinessForm({ businessId }: BusinessFormProps) {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Import translation helper
+  const { t } = useTranslationHelper();
+  
+  // Create validation schema with translated messages
+  const businessFormSchema = useMemo(() => {
+    return insertBusinessSchema.extend({
+      name: z.string().min(1, t("Business name is required")),
+      phone: z.string().min(1, t("Phone number is required")),
+      email: z.string().email(t("Valid email is required")).min(1, t("Email is required")),
+      tax_id: z.string().min(1, t("Tax ID is required")),
+      user_id: z.number().min(1, t("Owner is required")),
+    });
+  }, [t]);
+
+  type BusinessFormData = z.infer<typeof businessFormSchema>;
   
   // Extract ID from URL parameters if not passed as prop
   const [match, params] = useRoute("/businesses/:id/edit");
@@ -155,8 +161,8 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
         queryClient.invalidateQueries({ queryKey: ["/api/businesses", actualBusinessId] });
       }
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: `Business ${isEditing ? <TranslatableText>updated</TranslatableText> : <TranslatableText>created</TranslatableText>} successfully`,
+        title: t("Success"),
+        description: `Business ${isEditing ? t("updated") : t("created")} successfully`,
       });
       navigate("/businesses");
     },
@@ -173,17 +179,17 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
       }
       
       if (errorData?.error === "Email exists on database") {
-        setErrors({ email: "Email already exists" });
+        setErrors({ email: t("Email already exists") });
         form.setError("email", { 
           type: "manual", 
-          message: <TranslatableText>Email already exists</TranslatableText>
+          message: t("Email already exists")
         });
         return;
       }
       
       const errorMessage = errorData?.error || `Failed to ${isEditing ? "update" : "create"} business`;
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
+        title: t("Error"),
         description: errorMessage,
         variant: "destructive",
       });
