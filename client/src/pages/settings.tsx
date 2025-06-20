@@ -292,7 +292,7 @@ export default function Settings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { isEditionMode, toggleEditionMode, canEdit } = useEdition();
-  const { selectedBusinessId } = useBusinessContext();
+  const { selectedBusinessId, updateBusinessLanguage } = useBusinessContext();
   const { loadBusinessLanguage } = useBusinessLanguage();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -325,6 +325,9 @@ export default function Settings() {
       // If language was changed, immediately update the business language context
       const currentLanguage = (settings as any)?.language || 'en';
       if (variables.language && variables.language !== currentLanguage) {
+        // Update business language context immediately
+        updateBusinessLanguage(variables.language);
+        
         // Load translations for the new language immediately
         if (selectedBusinessId) {
           await loadBusinessLanguage(selectedBusinessId, variables.language);
@@ -332,7 +335,7 @@ export default function Settings() {
         
         toast({
           title: "Settings updated",
-          description: `Language changed to ${LANGUAGES.find(l => l.code === variables.language)?.name || variables.language}. Translations loaded successfully.`,
+          description: `Language changed to ${LANGUAGES.find(l => l.code === variables.language)?.name || variables.language}. Translations applied immediately.`,
         });
       } else {
         toast({

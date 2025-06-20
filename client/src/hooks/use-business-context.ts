@@ -72,12 +72,19 @@ export function useBusinessContext() {
     sessionStorage.removeItem('x-selected-business-language');
   };
 
+  const updateBusinessLanguage = (language: string) => {
+    setSelectedBusinessLanguage(language);
+    localStorage.setItem('x-selected-business-language', language);
+    sessionStorage.setItem('x-selected-business-language', language);
+  };
+
   return {
     selectedBusinessId,
     selectedBusinessLanguage,
     updateSelectedBusiness,
     clearSelectedBusiness,
     loadBusinessSettings,
+    updateBusinessLanguage,
     hasSelectedBusiness: selectedBusinessId !== null
   };
 }
