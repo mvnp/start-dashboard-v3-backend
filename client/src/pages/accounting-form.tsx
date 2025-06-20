@@ -36,7 +36,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function AccountingForm() {
-  const [ setLocation] = useLocation();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isEdit, setIsEdit] = useState(false);
   const [transactionId, setTransactionId] = useState<number | null>(null);
@@ -71,7 +71,7 @@ export default function AccountingForm() {
 
   // Fetch transaction data for editing
   const { data: transaction, isLoading: isLoadingTransaction, error: transactionError } = useQuery<AccountingTransaction>({
-    queryKey: [`/api/accounting-transactions/${transactionId}`, 
+    queryKey: [`/api/accounting-transactions/${transactionId}`],
     enabled: !!transactionId && isEdit,
     retry: 3,
     staleTime: 0, // Always fetch fresh data
@@ -84,17 +84,17 @@ export default function AccountingForm() {
 
   // Fetch clients (role ID 4)
   const { data: clients = [] } = useQuery<Person[]>({
-    queryKey: ["/api/clients", 
+    queryKey: ["/api/clients"],
   });
 
   // Fetch staff (role ID 3)
   const { data: staff = [] } = useQuery<Person[]>({
-    queryKey: ["/api/staff", 
+    queryKey: ["/api/staff"],
   });
 
   // Fetch categories
   const { data: categories = [] } = useQuery<AccountingTransactionCategory[]>({
-    queryKey: ["/api/accounting-transaction-categories", 
+    queryKey: ["/api/accounting-transaction-categories"],
   });
 
   // Set form values when editing

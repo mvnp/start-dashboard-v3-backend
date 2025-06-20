@@ -35,7 +35,7 @@ export default function AppointmentForm() {
     client_id: 0,
     user_id: 0,
     service_id: 0,
-    business_id: 
+    business_id: 0,
     appointment_date: "",
     appointment_time: "",
     status: "Scheduled",
@@ -72,9 +72,7 @@ export default function AppointmentForm() {
         headers["Authorization"] = `Bearer ${token}`;
       }
       
-      if (
-        headers["X-Selected-Business-Id"] = 
-      }
+      // No business context needed
 
       const response = await fetch(`/api/appointments/${appointmentId}`, {
         headers,

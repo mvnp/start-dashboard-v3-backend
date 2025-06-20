@@ -44,7 +44,7 @@ export default function BarberPlanForm() {
   });
 
   const { data: planData, isLoading } = useQuery({
-    queryKey: [`/api/barber-plans/${planId}`, 
+    queryKey: [`/api/barber-plans/${planId}`],
     enabled: isEdit && !!planId,
     select: (data: BarberPlan) => data,
   });
