@@ -1,71 +1,57 @@
 import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, DollarSign } from "lucide-react";
+import { useLocation, useParams } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { AccountingTransaction, AccountingTransactionCategory, Person, Business } from "@shared/schema";
-import { TranslatableText } from "@/components/translatable-text";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CalendarIcon, ArrowLeft } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { TranslatableText } from "@/components/translatable-text";
+import type { AccountingTransaction, AccountingTransactionCategory, Person, Business } from "@shared/schema";
 
 const formSchema = z.object({
-  type: z.enum(["revenue", "expense"]),
-  business_id: z.number().min(1, "Business is required"),
-  category_id: z.number().min(1, "Category is required"),
+  type: z.enum(['income', 'expense']),
+  amount: z.string().min(1, "Amount is required"),
   description: z.string().min(1, "Description is required"),
-  amount: z.string().min(1, "Amount is required").regex(/^\d+(\.\d{1,2})?$/, "Invalid amount format"),
-  payment_method: z.string().min(1, "Payment method is required"),
-  transaction_date: z.string().min(1, "Transaction date is required"),
-  reference_number: z.string().min(1, "Reference number is required"),
-  client_id: z.number().optional().nullable(),
-  staff_id: z.number().optional().nullable(),
+  category_id: z.number().optional(),
+  client_id: z.number().optional(),
+  staff_id: z.number().optional(),
+  business_id: z.number().min(1, "Business is required"),
+  transaction_date: z.date({
+    required_error: "Transaction date is required",
+  }),
   notes: z.string().optional(),
-  is_recurring: z.boolean().default(false),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 export default function AccountingForm() {
+  const { transactionId } = useParams();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [isEdit, setIsEdit] = useState(false);
-  const [transactionId, setTransactionId] = useState<number | null>(null);
-
-  // Get transaction ID from URL if editing
-  useEffect(() => {
-    const path = window.location.pathname;
-    const matches = path.match(/\/accounting-form\/(\d+)/);
-    if (matches) {
-      setIsEdit(true);
-      setTransactionId(parseInt(matches[1]));
-    }
-  }, []);
+  const isEdit = !!transactionId && transactionId !== 'new';
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: "revenue",
-      business_id: undefined,
-      category_id: undefined,
-      description: "",
-      amount: "",
-      payment_method: "",
-      transaction_date: format(new Date(), "yyyy-MM-dd"),
-      reference_number: "",
-      client_id: undefined,
-      staff_id: undefined,
-      notes: "",
-      is_recurring: false,
+      type: 'income',
+      amount: '',
+      description: '',
+      notes: '',
+      transaction_date: new Date(),
+      business_id: 1,
     },
   });
 
@@ -74,7 +60,7 @@ export default function AccountingForm() {
     queryKey: [`/api/accounting-transactions/${transactionId}`],
     enabled: !!transactionId && isEdit,
     retry: 3,
-    staleTime: 0, // Always fetch fresh data
+    staleTime: 0,
   });
 
   // Fetch user businesses
@@ -99,61 +85,30 @@ export default function AccountingForm() {
 
   // Set form values when editing
   useEffect(() => {
-    if (transaction && isEdit && !isLoadingTransaction && categories.length > 0) {
-      // Add a small delay to ensure form is fully initialized
-      const timer = setTimeout(() => {
-        const formData = {
-          type: transaction.type as "revenue" | "expense",
-          business_id: transaction.business_id ?? undefined,
-          category_id: transaction.category_id ?? undefined,
-          description: transaction.description,
-          amount: transaction.amount,
-          payment_method: transaction.payment_method,
-          transaction_date: transaction.transaction_date ? transaction.transaction_date.split('T')[0] : format(new Date(), "yyyy-MM-dd"),
-          reference_number: transaction.reference_number,
-          client_id: transaction.client_id ?? undefined,
-          staff_id: transaction.staff_id ?? undefined,
-          notes: transaction.notes || "",
-          is_recurring: transaction.is_recurring || false,
-        };
-        
-        // Reset form with transaction data
-        form.reset(formData);
-        
-        // Force update each field value to ensure UI reflects the data
-        form.setValue("type", formData.type);
-        if (formData.business_id) form.setValue("business_id", formData.business_id);
-        if (formData.category_id) form.setValue("category_id", formData.category_id);
-        form.setValue("description", formData.description);
-        form.setValue("amount", formData.amount);
-        form.setValue("payment_method", formData.payment_method);
-        form.setValue("transaction_date", formData.transaction_date);
-        form.setValue("reference_number", formData.reference_number);
-        if (formData.client_id) form.setValue("client_id", formData.client_id);
-        if (formData.staff_id) form.setValue("staff_id", formData.staff_id);
-        form.setValue("notes", formData.notes);
-        form.setValue("is_recurring", formData.is_recurring);
-      }, 100);
-
-      return () => clearTimeout(timer);
+    if (isEdit && transaction) {
+      form.reset({
+        type: transaction.type as 'income' | 'expense',
+        amount: transaction.amount.toString(),
+        description: transaction.description,
+        category_id: transaction.category_id ?? undefined,
+        client_id: transaction.client_id ?? undefined,
+        staff_id: transaction.staff_id ?? undefined,
+        business_id: transaction.business_id ?? undefined,
+        transaction_date: new Date(transaction.transaction_date),
+        notes: transaction.notes || '',
+      });
     }
-  }, [transaction, isEdit, isLoadingTransaction, categories, form]);
-
-  // Auto-set business_id from selected business context
-  useEffect(() => {
-    if (
-      form.setValue("business_id", 
-    }
-  }, [ form, isEdit]);
+  }, [isEdit, transaction, form]);
 
   const createMutation = useMutation({
     mutationFn: (data: FormData) => 
       apiRequest("POST", "/api/accounting-transactions", {
         ...data,
-        business_id: 
+        amount: parseFloat(data.amount),
+        transaction_date: data.transaction_date.toISOString().split('T')[0],
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions", 
+      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions"] });
       toast({
         title: <TranslatableText>Success</TranslatableText>,
         description: <TranslatableText>Transaction created successfully</TranslatableText>,
@@ -170,13 +125,14 @@ export default function AccountingForm() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: FormData) =>
+    mutationFn: (data: FormData) => 
       apiRequest("PUT", `/api/accounting-transactions/${transactionId}`, {
         ...data,
-        business_id: 
+        amount: parseFloat(data.amount),
+        transaction_date: data.transaction_date.toISOString().split('T')[0],
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions", 
+      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions"] });
       toast({
         title: <TranslatableText>Success</TranslatableText>,
         description: <TranslatableText>Transaction updated successfully</TranslatableText>,
@@ -200,64 +156,53 @@ export default function AccountingForm() {
     }
   };
 
-  const isPending = createMutation.isPending || updateMutation.isPending;
-
-  if (isEdit && (isLoadingTransaction || !transaction)) {
-    return (
-      <div className="min-h-screen w-full p-6">
-        <div className="flex justify-center items-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <div className="text-lg"><TranslatableText>Loading transaction data...</TranslatableText></div>
-          </div>
-        </div>
-      </div>
-    );
+  if (isEdit && isLoadingTransaction) {
+    return <div><TranslatableText>Loading...</TranslatableText></div>;
   }
 
-  if (transactionError) {
+  if (isEdit && transactionError) {
     return (
-      <div className="min-h-screen w-full p-6">
-        <div className="flex justify-center items-center h-64">
-          <div className="text-center">
-            <p className="text-red-600 mb-4"><TranslatableText>Failed to load transaction data</TranslatableText></p>
-            <Button onClick={() => setLocation("/accounting")}>
-              Back to Transactions
-            </Button>
-          </div>
-        </div>
+      <div className="container mx-auto py-6">
+        <Card>
+          <CardHeader>
+            <CardTitle><TranslatableText>Error</TranslatableText></CardTitle>
+            <CardDescription>
+              <TranslatableText>Failed to load transaction data</TranslatableText>
+            </CardDescription>
+          </CardHeader>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full p-6">
+    <div className="container mx-auto py-6">
       <div className="flex items-center gap-4 mb-6">
         <Button
           variant="outline"
+          size="sm"
           onClick={() => setLocation("/accounting")}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          <TranslatableText>Back to Transactions</TranslatableText>
+          <TranslatableText>Back</TranslatableText>
         </Button>
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-barber-primary rounded-xl flex items-center justify-center">
-            <DollarSign className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <TranslatableText tag="h1" className="text-3xl font-bold">
-              {isEdit ? "Edit Transaction" : "Add New Transaction"}
-            </TranslatableText>
-            <TranslatableText tag="p" className="text-slate-600">
-              {isEdit ? "Update transaction details" : "Enter new transaction details"}
-            </TranslatableText>
-          </div>
-        </div>
+        <h1 className="text-2xl font-bold">
+          {isEdit ? (
+            <TranslatableText>Edit Transaction</TranslatableText>
+          ) : (
+            <TranslatableText>Add New Transaction</TranslatableText>
+          )}
+        </h1>
       </div>
 
-      <Card className="w-full">
+      <Card>
         <CardHeader>
-          <CardTitle><TranslatableText>Transaction Details</TranslatableText></CardTitle>
+          <CardTitle>
+            <TranslatableText>Transaction Details</TranslatableText>
+          </CardTitle>
+          <CardDescription>
+            <TranslatableText>Fill in the transaction information below</TranslatableText>
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -268,16 +213,16 @@ export default function AccountingForm() {
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Type *</TranslatableText></FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <FormLabel><TranslatableText>Type</TranslatableText></FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select transaction type" />
+                            <SelectValue placeholder={<TranslatableText>Select type</TranslatableText>} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="revenue">Revenue</SelectItem>
-                          <SelectItem value="expense">Expense</SelectItem>
+                          <SelectItem value="income"><TranslatableText>Income</TranslatableText></SelectItem>
+                          <SelectItem value="expense"><TranslatableText>Expense</TranslatableText></SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -285,23 +230,14 @@ export default function AccountingForm() {
                   )}
                 />
 
-                {/* Business ID is automatically set from session context */}
-                <input type="hidden" {...form.register("business_id")} />
-
                 <FormField
                   control={form.control}
                   name="amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Amount *</TranslatableText></FormLabel>
+                      <FormLabel><TranslatableText>Amount</TranslatableText></FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="0.00"
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          {...field}
-                        />
+                        <Input placeholder="0.00" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -314,9 +250,9 @@ export default function AccountingForm() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel><TranslatableText>Description *</TranslatableText></FormLabel>
+                    <FormLabel><TranslatableText>Description</TranslatableText></FormLabel>
                     <FormControl>
-                      <Input placeholder="Transaction description" {...field} />
+                      <Input placeholder={<TranslatableText>Transaction description</TranslatableText>} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -326,20 +262,20 @@ export default function AccountingForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="category_id"
+                  name="business_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Category *</TranslatableText></FormLabel>
-                      <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
+                      <FormLabel><TranslatableText>Business</TranslatableText></FormLabel>
+                      <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
+                            <SelectValue placeholder={<TranslatableText>Select business</TranslatableText>} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.id.toString()}>
-                              {category.description}
+                          {userBusinesses.map((business) => (
+                            <SelectItem key={business.id} value={business.id.toString()}>
+                              {business.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -351,59 +287,25 @@ export default function AccountingForm() {
 
                 <FormField
                   control={form.control}
-                  name="payment_method"
+                  name="category_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel><TranslatableText>Payment Method *</TranslatableText></FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <FormLabel><TranslatableText>Category</TranslatableText></FormLabel>
+                      <Select onValueChange={(value) => field.onChange(value ? Number(value) : undefined)} value={field.value?.toString()}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select payment method" />
+                            <SelectValue placeholder={<TranslatableText>Select category</TranslatableText>} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="cash">Cash</SelectItem>
-                          <SelectItem value="credit_card">Credit Card</SelectItem>
-                          <SelectItem value="debit_card">Debit Card</SelectItem>
-                          <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                          <SelectItem value="check">Check</SelectItem>
-                          <SelectItem value="digital_wallet">Digital Wallet</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
+                          <SelectItem value=""><TranslatableText>No category</TranslatableText></SelectItem>
+                          {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id.toString()}>
+                              {category.description}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="transaction_date"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel><TranslatableText>Transaction Date *</TranslatableText></FormLabel>
-                      <FormControl>
-                        <Input
-                          type="date"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="reference_number"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel><TranslatableText>Reference Number *</TranslatableText></FormLabel>
-                      <FormControl>
-                        <Input placeholder="REF001" {...field} />
-                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -417,13 +319,14 @@ export default function AccountingForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel><TranslatableText>Client</TranslatableText></FormLabel>
-                      <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
+                      <Select onValueChange={(value) => field.onChange(value ? Number(value) : undefined)} value={field.value?.toString()}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select client" />
+                            <SelectValue placeholder={<TranslatableText>Select client</TranslatableText>} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+                          <SelectItem value=""><TranslatableText>No client</TranslatableText></SelectItem>
                           {clients.map((client) => (
                             <SelectItem key={client.id} value={client.id.toString()}>
                               {client.first_name} {client.last_name}
@@ -442,13 +345,14 @@ export default function AccountingForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel><TranslatableText>Staff Member</TranslatableText></FormLabel>
-                      <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
+                      <Select onValueChange={(value) => field.onChange(value ? Number(value) : undefined)} value={field.value?.toString()}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select staff member" />
+                            <SelectValue placeholder={<TranslatableText>Select staff member</TranslatableText>} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+                          <SelectItem value=""><TranslatableText>No staff member</TranslatableText></SelectItem>
                           {staff.map((member) => (
                             <SelectItem key={member.id} value={member.id.toString()}>
                               {member.first_name} {member.last_name}
@@ -464,13 +368,56 @@ export default function AccountingForm() {
 
               <FormField
                 control={form.control}
+                name="transaction_date"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel><TranslatableText>Transaction Date</TranslatableText></FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span><TranslatableText>Pick a date</TranslatableText></span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel><TranslatableText>Notes</TranslatableText></FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Additional notes about this transaction"
+                      <Textarea 
+                        placeholder={<TranslatableText>Additional notes (optional)</TranslatableText>}
+                        className="resize-none"
                         {...field}
                       />
                     </FormControl>
@@ -479,43 +426,25 @@ export default function AccountingForm() {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="is_recurring"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel><TranslatableText>Recurring Transaction</TranslatableText></FormLabel>
-                      <p className="text-sm text-muted-foreground">
-                        <TranslatableText>Mark this as a recurring transaction</TranslatableText>
-                      </p>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
               <div className="flex gap-4">
                 <Button
                   type="submit"
-                  disabled={isPending}
-                  className="flex-1"
+                  disabled={createMutation.isPending || updateMutation.isPending}
                 >
-                  <TranslatableText>
-                  {isPending ? "Saving..." : isEdit ? "Update Transaction" : "Create Transaction"}
-                </TranslatableText>
+                  {createMutation.isPending || updateMutation.isPending ? (
+                    <TranslatableText>Saving...</TranslatableText>
+                  ) : isEdit ? (
+                    <TranslatableText>Update Transaction</TranslatableText>
+                  ) : (
+                    <TranslatableText>Create Transaction</TranslatableText>
+                  )}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setLocation("/accounting")}
                 >
-    <TranslatableText>Cancel</TranslatableText>
+                  <TranslatableText>Cancel</TranslatableText>
                 </Button>
               </div>
             </form>

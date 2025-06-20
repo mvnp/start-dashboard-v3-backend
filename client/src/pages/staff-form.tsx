@@ -102,7 +102,7 @@ export default function StaffForm() {
   const createStaffMutation = useMutation({
     mutationFn: (data: StaffFormData) => apiRequest("POST", "/api/staff", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/staff", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
       toast({
         title: <TranslatableText>Staff member created</TranslatableText>,
         description: <TranslatableText>The new staff member has been successfully added.</TranslatableText>,

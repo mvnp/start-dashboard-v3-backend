@@ -1,17 +1,24 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useLocation, useParams } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { Appointment, Service, Person } from "@shared/schema";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CalendarIcon, ArrowLeft } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { TranslatableText } from "@/components/translatable-text";
+import type { Appointment, Person, Service, Business } from "@shared/schema";
 
 interface AppointmentFormData {
   client_id: number;
@@ -24,49 +31,49 @@ interface AppointmentFormData {
   notes: string;
 }
 
+const formSchema = z.object({
+  client_id: z.number().min(1, "Client is required"),
+  user_id: z.number().min(1, "Staff member is required"),
+  service_id: z.number().min(1, "Service is required"),
+  business_id: z.number().min(1, "Business is required"),
+  appointment_date: z.date({
+    required_error: "Appointment date is required",
+  }),
+  appointment_time: z.string().min(1, "Appointment time is required"),
+  status: z.string().min(1, "Status is required"),
+  notes: z.string().optional(),
+});
+
+type FormData = z.infer<typeof formSchema>;
+
 export default function AppointmentForm() {
-  const [ setLocation] = useLocation();
-  const params = useParams();
+  const { appointmentId } = useParams();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const isEdit = !!params.id;
-  const appointmentId = params.id ? parseInt(params.id) : null;
+  const isEdit = !!appointmentId && appointmentId !== 'new';
 
-  const [formData, setFormData] = useState<AppointmentFormData>({
-    client_id: 0,
-    user_id: 0,
-    service_id: 0,
-    business_id: 0,
-    appointment_date: "",
-    appointment_time: "",
-    status: "Scheduled",
-    notes: "",
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      client_id: 0,
+      user_id: 0,
+      service_id: 0,
+      business_id: 1,
+      appointment_date: new Date(),
+      appointment_time: '',
+      status: 'scheduled',
+      notes: '',
+    },
   });
 
-  // Load all dependent data first
-  const { data: staff = [], isSuccess: staffLoaded } = useQuery({
-    queryKey: ["/api/staff"],
-    select: (data: Person[]) => data,
-  });
-
-  const { data: services = [], isSuccess: servicesLoaded } = useQuery({
-    queryKey: ["/api/services"],
-    select: (data: Service[]) => data,
-  });
-
-  const { data: clients = [], isSuccess: clientsLoaded } = useQuery({
-    queryKey: ["/api/clients"],
-    select: (data: Person[]) => data,
-  });
-
-  // Only load appointment data after all dependencies are available
-  const { data: appointmentData, isLoading, isSuccess } = useQuery({
-    queryKey: ["/api/appointments", appointmentId],
+  // Load appointment data for editing
+  const { data: appointment, isLoading: appointmentLoading, error: appointmentError } = useQuery<Appointment>({
+    queryKey: [`/api/appointments/${appointmentId}`],
     queryFn: async () => {
-      if (!appointmentId) return null;
-      
-      const token = localStorage.getItem('accessToken');
-      const 
-      const headers: Record<string, string> = {};
+      const token = localStorage.getItem('access_token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
       
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
@@ -80,11 +87,60 @@ export default function AppointmentForm() {
       if (!response.ok) throw new Error('Failed to fetch appointment');
       return response.json();
     },
-    enabled: isEdit && !!appointmentId && staffLoaded && servicesLoaded && clientsLoaded,
+    enabled: isEdit && !!appointmentId,
     staleTime: 0,
     refetchOnMount: true,
     select: (data: Appointment) => data,
   });
+
+  // Load clients
+  const { data: clients = [], isLoading: clientsLoading } = useQuery<Person[]>({
+    queryKey: ["/api/clients"],
+    staleTime: 0,
+    refetchOnMount: true,
+  });
+
+  // Load staff
+  const { data: staff = [], isLoading: staffLoading } = useQuery<Person[]>({
+    queryKey: ["/api/staff"],
+    staleTime: 0,
+    refetchOnMount: true,
+  });
+
+  // Load services
+  const { data: services = [], isLoading: servicesLoading } = useQuery<Service[]>({
+    queryKey: ["/api/services"],
+    staleTime: 0,
+    refetchOnMount: true,
+  });
+
+  // Load businesses
+  const { data: businesses = [] } = useQuery<Business[]>({
+    queryKey: ["/api/user-businesses"],
+  });
+
+  const clientsLoaded = !clientsLoading;
+  const staffLoaded = !staffLoading;
+  const servicesLoaded = !servicesLoading;
+
+  // Set form values when editing
+  useEffect(() => {
+    if (isEdit && appointment && clientsLoaded && staffLoaded && servicesLoaded) {
+      const appointmentDate = new Date(appointment.appointment_date);
+      const timeString = appointment.appointment_time || '09:00';
+      
+      form.reset({
+        client_id: appointment.client_id,
+        user_id: appointment.user_id,
+        service_id: appointment.service_id,
+        business_id: appointment.business_id,
+        appointment_date: appointmentDate,
+        appointment_time: timeString,
+        status: appointment.status,
+        notes: appointment.notes || '',
+      });
+    }
+  }, [isEdit, appointment, form, clientsLoaded, staffLoaded, servicesLoaded]);
 
   const createMutation = useMutation({
     mutationFn: (data: AppointmentFormData) => apiRequest("POST", "/api/appointments", data),
@@ -96,10 +152,10 @@ export default function AppointmentForm() {
       });
       setLocation("/appointments");
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to create appointment</TranslatableText>,
+        description: error.message || <TranslatableText>Failed to create appointment</TranslatableText>,
         variant: "destructive",
       });
     },
@@ -109,312 +165,319 @@ export default function AppointmentForm() {
     mutationFn: (data: AppointmentFormData) => apiRequest("PUT", `/api/appointments/${appointmentId}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/appointments", appointmentId] });
       toast({
         title: <TranslatableText>Success</TranslatableText>,
         description: <TranslatableText>Appointment updated successfully</TranslatableText>,
       });
       setLocation("/appointments");
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to update appointment</TranslatableText>,
+        description: error.message || <TranslatableText>Failed to update appointment</TranslatableText>,
         variant: "destructive",
       });
     },
   });
 
-  useEffect(() => {
-    if (appointmentData && isEdit && isSuccess && staffLoaded && servicesLoaded && clientsLoaded) {
-      // Format time to HH:MM format for input field
-      const formattedTime = appointmentData.appointment_time 
-        ? appointmentData.appointment_time.substring(0, 5) 
-        : "";
-      
-      // Normalize status to proper case for dropdown matching
-      const normalizeStatus = (status: string | null) => {
-        if (!status) return "Scheduled";
-        return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
-      };
-      
-      setFormData({
-        client_id: appointmentData.client_id || 0,
-        user_id: appointmentData.user_id || 0,
-        service_id: appointmentData.service_id || 0,
-        business_id: appointmentData.business_id || 
-        appointment_date: appointmentData.appointment_date || "",
-        appointment_time: formattedTime,
-        status: normalizeStatus(appointmentData.status || ""),
-        notes: appointmentData.notes || "",
-      });
-    }
-  }, [appointmentData, isEdit, isSuccess, staffLoaded, servicesLoaded, clientsLoaded, 
-
-  // Update business_id when selected business changes
-  useEffect(() => {
-    if (
-      setFormData(prev => ({
-        ...prev,
-        business_id: 
-      }));
-    }
-  }, [
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate required fields
-    if (!formData.appointment_date.trim()) {
-      toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Appointment date is required</TranslatableText>,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!formData.appointment_time.trim()) {
-      toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Appointment time is required</TranslatableText>,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!formData.status.trim()) {
-      toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Status is required</TranslatableText>,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (formData.client_id === 0) {
-      toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Please select a client</TranslatableText>,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (formData.user_id === 0) {
-      toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Please select a staff member</TranslatableText>,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (formData.service_id === 0) {
-      toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Please select a service</TranslatableText>,
-        variant: "destructive",
-      });
-      return;
-    }
+  const onSubmit = (data: FormData) => {
+    const formattedData: AppointmentFormData = {
+      client_id: data.client_id,
+      user_id: data.user_id,
+      service_id: data.service_id,
+      business_id: data.business_id,
+      appointment_date: data.appointment_date.toISOString().split('T')[0],
+      appointment_time: data.appointment_time,
+      status: data.status,
+      notes: data.notes || '',
+    };
 
     if (isEdit) {
-      updateMutation.mutate(formData);
+      updateMutation.mutate(formattedData);
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate(formattedData);
     }
   };
 
-  const handleInputChange = (field: keyof AppointmentFormData, value: string | number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  if (isEdit && appointmentLoading) {
+    return <div><TranslatableText>Loading...</TranslatableText></div>;
+  }
 
-  if (isLoading || !staffLoaded || !servicesLoaded || !clientsLoaded) {
+  if (isEdit && appointmentError) {
     return (
-      <div className="w-full p-6">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="sm" onClick={() => setLocation("/appointments")}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Appointments
-          </Button>
-        </div>
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-        </div>
+      <div className="container mx-auto py-6">
+        <Card>
+          <CardHeader>
+            <CardTitle><TranslatableText>Error</TranslatableText></CardTitle>
+            <CardDescription>
+              <TranslatableText>Failed to load appointment data</TranslatableText>
+            </CardDescription>
+          </CardHeader>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="w-full p-6">
+    <div className="container mx-auto py-6">
       <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" size="sm" onClick={() => setLocation("/appointments")}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          <TranslatableText>Back to Appointments</TranslatableText>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setLocation("/appointments")}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          <TranslatableText>Back</TranslatableText>
         </Button>
-        <div>
-          <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
-            {isEdit ? "Edit Appointment" : "Create New Appointment"}
-          </TranslatableText>
-          <TranslatableText tag="p" className="text-slate-600">
-            {isEdit ? "Update the appointment details" : "Schedule a new appointment for a client"}
-          </TranslatableText>
-        </div>
+        <h1 className="text-2xl font-bold">
+          {isEdit ? (
+            <TranslatableText>Edit Appointment</TranslatableText>
+          ) : (
+            <TranslatableText>Schedule New Appointment</TranslatableText>
+          )}
+        </h1>
       </div>
 
-      <Card className="w-full">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-xl font-semibold text-slate-900">
-            <TranslatableText>Appointment Information</TranslatableText>
+          <CardTitle>
+            <TranslatableText>Appointment Details</TranslatableText>
           </CardTitle>
+          <CardDescription>
+            <TranslatableText>Fill in the appointment information below</TranslatableText>
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="client_id"><TranslatableText>Client</TranslatableText></Label>
-                <Select 
-                  value={formData.client_id && formData.client_id > 0 ? formData.client_id.toString() : ""} 
-                  onValueChange={(value) => handleInputChange('client_id', parseInt(value))}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select client" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map((client) => (
-                      <SelectItem key={client.id} value={client.id.toString()}>
-                        {client.first_name} {client.last_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="user_id"><TranslatableText>Staff Member</TranslatableText></Label>
-                <Select 
-                  value={formData.user_id && formData.user_id > 0 ? formData.user_id.toString() : ""} 
-                  onValueChange={(value) => handleInputChange('user_id', parseInt(value))}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select staff member" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {staff.map((staffMember) => (
-                      <SelectItem key={staffMember.id} value={staffMember.user_id?.toString() || ""}>
-                        {staffMember.first_name} {staffMember.last_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="service_id"><TranslatableText>Service</TranslatableText></Label>
-                <Select 
-                  value={formData.service_id && formData.service_id > 0 ? formData.service_id.toString() : ""} 
-                  onValueChange={(value) => handleInputChange('service_id', parseInt(value))}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select service" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {services.filter(service => service.is_active).map((service) => (
-                      <SelectItem key={service.id} value={service.id.toString()}>
-                        {service.name} - ${service.price ? (parseFloat(service.price) / 100).toFixed(2) : '0.00'} ({service.duration}min)
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="status"><TranslatableText>Status</TranslatableText></Label>
-                <Select 
-                  value={formData.status || ""} 
-                  onValueChange={(value) => handleInputChange('status', value)}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Scheduled">Scheduled</SelectItem>
-                    <SelectItem value="Confirmed">Confirmed</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Completed">Completed</SelectItem>
-                    <SelectItem value="Canceled">Canceled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="appointment_date"><TranslatableText>Appointment Date</TranslatableText></Label>
-                <Input
-                  id="appointment_date"
-                  type="date"
-                  value={formData.appointment_date}
-                  onChange={(e) => handleInputChange('appointment_date', e.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="appointment_time"><TranslatableText>Appointment Time</TranslatableText></Label>
-                <Input
-                  id="appointment_time"
-                  type="time"
-                  value={formData.appointment_time}
-                  onChange={(e) => handleInputChange('appointment_time', e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="notes"><TranslatableText>Notes (Optional)</TranslatableText></Label>
-              <Textarea
-                id="notes"
-                placeholder="Enter any special notes or requirements"
-                value={formData.notes}
-                onChange={(e) => handleInputChange('notes', e.target.value)}
-                rows={3}
-              />
-            </div>
-
-            <div className="flex gap-4 pt-6">
-              <Button
-                type="submit"
-                disabled={createMutation.isPending || updateMutation.isPending}
-                className="bg-amber-600 hover:bg-amber-700 text-white"
-              >
-                <TranslatableText>
-                  {createMutation.isPending || updateMutation.isPending ? (
-                    "Saving..."
-                  ) : isEdit ? (
-                    "Update Appointment"
-                  ) : (
-                    "Create Appointment"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="client_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel><TranslatableText>Client</TranslatableText></FormLabel>
+                      <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={<TranslatableText>Select client</TranslatableText>} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {clients.map((client) => (
+                            <SelectItem key={client.id} value={client.id.toString()}>
+                              {client.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </TranslatableText>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setLocation("/appointments")}
-              >
-<TranslatableText>Cancel</TranslatableText>
-              </Button>
-            </div>
-          </form>
+                />
+
+                <FormField
+                  control={form.control}
+                  name="user_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel><TranslatableText>Staff Member</TranslatableText></FormLabel>
+                      <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={<TranslatableText>Select staff member</TranslatableText>} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {staff.map((member) => (
+                            <SelectItem key={member.id} value={member.id.toString()}>
+                              {member.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="service_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel><TranslatableText>Service</TranslatableText></FormLabel>
+                      <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={<TranslatableText>Select service</TranslatableText>} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {services.map((service) => (
+                            <SelectItem key={service.id} value={service.id.toString()}>
+                              {service.name} - ${service.price}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="business_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel><TranslatableText>Business</TranslatableText></FormLabel>
+                      <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={<TranslatableText>Select business</TranslatableText>} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {businesses.map((business) => (
+                            <SelectItem key={business.id} value={business.id.toString()}>
+                              {business.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="appointment_date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel><TranslatableText>Appointment Date</TranslatableText></FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span><TranslatableText>Pick a date</TranslatableText></span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date < new Date()
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="appointment_time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel><TranslatableText>Appointment Time</TranslatableText></FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel><TranslatableText>Status</TranslatableText></FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={<TranslatableText>Select status</TranslatableText>} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="scheduled"><TranslatableText>Scheduled</TranslatableText></SelectItem>
+                        <SelectItem value="confirmed"><TranslatableText>Confirmed</TranslatableText></SelectItem>
+                        <SelectItem value="completed"><TranslatableText>Completed</TranslatableText></SelectItem>
+                        <SelectItem value="cancelled"><TranslatableText>Cancelled</TranslatableText></SelectItem>
+                        <SelectItem value="no-show"><TranslatableText>No Show</TranslatableText></SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel><TranslatableText>Notes</TranslatableText></FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder={<TranslatableText>Additional notes (optional)</TranslatableText>}
+                        className="resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex gap-4">
+                <Button
+                  type="submit"
+                  disabled={createMutation.isPending || updateMutation.isPending}
+                >
+                  {createMutation.isPending || updateMutation.isPending ? (
+                    <TranslatableText>Saving...</TranslatableText>
+                  ) : isEdit ? (
+                    <TranslatableText>Update Appointment</TranslatableText>
+                  ) : (
+                    <TranslatableText>Schedule Appointment</TranslatableText>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setLocation("/appointments")}
+                >
+                  <TranslatableText>Cancel</TranslatableText>
+                </Button>
+              </div>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

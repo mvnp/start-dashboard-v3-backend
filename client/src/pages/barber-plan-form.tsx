@@ -1,16 +1,19 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useLocation, useParams } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Plus, X } from "lucide-react";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { BarberPlan } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
+import type { BarberPlan } from "@shared/schema";
 
 interface BarberPlanFormData {
   title: string;
@@ -24,48 +27,82 @@ interface BarberPlanFormData {
   payment_link: string;
 }
 
-export default function BarberPlanForm() {
-  const [ setLocation] = useLocation();
-  const params = useParams();
-  const { toast } = useToast();
-  const isEdit = !!params.id;
-  const planId = params.id ? parseInt(params.id) : null;
+const formSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  subtitle: z.string().min(1, "Subtitle is required"),
+  benefits: z.array(z.string()).min(1, "At least one benefit is required"),
+  image1: z.string().min(1, "Image 1 URL is required"),
+  image2: z.string().min(1, "Image 2 URL is required"),
+  price1m: z.string().min(1, "1 month price is required"),
+  price3m: z.string().min(1, "3 month price is required"),
+  price12m: z.string().min(1, "12 month price is required"),
+  payment_link: z.string().min(1, "Payment link is required"),
+});
 
-  const [formData, setFormData] = useState<BarberPlanFormData>({
-    title: "",
-    subtitle: "",
-    benefits: [""],
-    image1: "",
-    image2: "",
-    price1m: "0",
-    price3m: "0",
-    price12m: "0",
-    payment_link: "",
+type FormData = z.infer<typeof formSchema>;
+
+export default function BarberPlanForm() {
+  const { planId } = useParams();
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const isEdit = !!planId && planId !== 'new';
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: '',
+      subtitle: '',
+      benefits: [''],
+      image1: '',
+      image2: '',
+      price1m: '',
+      price3m: '',
+      price12m: '',
+      payment_link: '',
+    },
   });
 
-  const { data: planData, isLoading } = useQuery({
+  // Load plan data for editing
+  const { data: plan, isLoading: planLoading, error: planError } = useQuery<BarberPlan>({
     queryKey: [`/api/barber-plans/${planId}`],
     enabled: isEdit && !!planId,
     select: (data: BarberPlan) => data,
   });
 
+  // Set form values when editing
+  useEffect(() => {
+    if (isEdit && plan) {
+      form.reset({
+        title: plan.title,
+        subtitle: plan.subtitle,
+        benefits: plan.benefits || [''],
+        image1: plan.image1,
+        image2: plan.image2,
+        price1m: plan.price1m,
+        price3m: plan.price3m,
+        price12m: plan.price12m,
+        payment_link: plan.payment_link,
+      });
+    }
+  }, [isEdit, plan, form]);
+
   const createMutation = useMutation({
     mutationFn: (data: BarberPlanFormData) => apiRequest("POST", "/api/barber-plans", {
       ...data,
-      business_id: 
+      business_id: 1,
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", 
+      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans"] });
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: <TranslatableText>Barber plan created successfully</TranslatableText>,
+        title: "Success",
+        description: "Plan created successfully",
       });
-      setLocation("/plans");
+      setLocation("/barber-plans");
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to create barber plan</TranslatableText>,
+        title: "Error",
+        description: error.message || "Failed to create plan",
         variant: "destructive",
       });
     },
@@ -74,285 +111,274 @@ export default function BarberPlanForm() {
   const updateMutation = useMutation({
     mutationFn: (data: BarberPlanFormData) => apiRequest("PUT", `/api/barber-plans/${planId}`, {
       ...data,
-      business_id: 
+      business_id: 1,
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", 
-      queryClient.invalidateQueries({ queryKey: [`/api/barber-plans/${planId}`, 
+      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans"] });
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: <TranslatableText>Barber plan updated successfully</TranslatableText>,
+        title: "Success",
+        description: "Plan updated successfully",
       });
-      setLocation("/plans");
+      setLocation("/barber-plans");
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to update barber plan</TranslatableText>,
+        title: "Error",
+        description: error.message || "Failed to update plan",
         variant: "destructive",
       });
     },
   });
 
-  useEffect(() => {
-    if (planData && isEdit) {
-      setFormData({
-        title: planData.title || "",
-        subtitle: planData.subtitle || "",
-        benefits: planData.benefits || [""],
-        image1: planData.image1 || "",
-        image2: planData.image2 || "",
-        price1m: planData.price1m || "0",
-        price3m: planData.price3m || "0",
-        price12m: planData.price12m || "0",
-        payment_link: planData.payment_link || "",
-      });
-    }
-  }, [planData, isEdit]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Debug logging
-    console.log('Form submission -  
-    console.log('Form submission - sessionStorage  sessionStorage.getItem('
-    
-    if (!
-      toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Please select a business first</TranslatableText>,
-        variant: "destructive",
-      });
-      return;
-    }
-    
+  const onSubmit = (data: FormData) => {
     if (isEdit) {
-      updateMutation.mutate(formData);
+      updateMutation.mutate(data);
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate(data);
     }
-  };
-
-  const handleInputChange = (field: keyof BarberPlanFormData, value: string | number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
   };
 
   const addBenefit = () => {
-    setFormData(prev => ({
-      ...prev,
-      benefits: [...(prev.benefits || []), ""]
-    }));
+    const currentBenefits = form.getValues('benefits');
+    form.setValue('benefits', [...currentBenefits, '']);
   };
 
   const removeBenefit = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      benefits: (prev.benefits || []).filter((_, i) => i !== index)
-    }));
+    const currentBenefits = form.getValues('benefits');
+    if (currentBenefits.length > 1) {
+      form.setValue('benefits', currentBenefits.filter((_, i) => i !== index));
+    }
   };
 
   const updateBenefit = (index: number, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      benefits: (prev.benefits || []).map((benefit, i) => i === index ? value : benefit)
-    }));
+    const currentBenefits = form.getValues('benefits');
+    const newBenefits = [...currentBenefits];
+    newBenefits[index] = value;
+    form.setValue('benefits', newBenefits);
   };
 
-  if (isLoading) {
+  if (isEdit && planLoading) {
+    return <div><TranslatableText>Loading...</TranslatableText></div>;
+  }
+
+  if (isEdit && planError) {
     return (
-      <div className="w-full p-6">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="sm" onClick={() => setLocation("/plans")}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Plans
-          </Button>
-        </div>
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-        </div>
+      <div className="container mx-auto py-6">
+        <Card>
+          <CardHeader>
+            <CardTitle><TranslatableText>Error</TranslatableText></CardTitle>
+            <CardDescription>
+              <TranslatableText>Failed to load plan data</TranslatableText>
+            </CardDescription>
+          </CardHeader>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="w-full p-6">
+    <div className="container mx-auto py-6">
       <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" size="sm" onClick={() => setLocation("/plans")}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          <TranslatableText>Back to Plans</TranslatableText>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setLocation("/barber-plans")}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          <TranslatableText>Back</TranslatableText>
         </Button>
-        <div>
-          <TranslatableText tag="h1" className="text-3xl font-bold text-slate-900">
-            {isEdit ? "Edit Barber Plan" : "Create New Barber Plan"}
-          </TranslatableText>
-          <TranslatableText tag="p" className="text-slate-600">
-            {isEdit ? "Update the subscription plan details" : "Create a new subscription plan for barbershops"}
-          </TranslatableText>
-        </div>
+        <h1 className="text-2xl font-bold">
+          {isEdit ? (
+            <TranslatableText>Edit Barber Plan</TranslatableText>
+          ) : (
+            <TranslatableText>Create New Barber Plan</TranslatableText>
+          )}
+        </h1>
       </div>
 
-      <Card className="w-full">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-xl font-semibold text-slate-900">
-            <TranslatableText>Plan Information</TranslatableText>
+          <CardTitle>
+            <TranslatableText>Plan Details</TranslatableText>
           </CardTitle>
+          <CardDescription>
+            <TranslatableText>Fill in the plan information below</TranslatableText>
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="title"><TranslatableText>Plan Title</TranslatableText></Label>
-                <Input
-                  id="title"
-                  placeholder="Enter plan title"
-                  value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
-                  required
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel><TranslatableText>Title</TranslatableText></FormLabel>
+                      <FormControl>
+                        <Input placeholder="Plan title" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="subtitle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel><TranslatableText>Subtitle</TranslatableText></FormLabel>
+                      <FormControl>
+                        <Input placeholder="Plan subtitle" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
 
-              <div>
-                <Label htmlFor="subtitle"><TranslatableText>Plan Subtitle</TranslatableText></Label>
-                <Input
-                  id="subtitle"
-                  placeholder="Enter plan subtitle"
-                  value={formData.subtitle}
-                  onChange={(e) => handleInputChange('subtitle', e.target.value)}
-                  required
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="image1"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel><TranslatableText>Image 1 URL</TranslatableText></FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://example.com/image1.jpg" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="image2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel><TranslatableText>Image 2 URL</TranslatableText></FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://example.com/image2.jpg" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
 
-              <div>
-                <Label htmlFor="image1"><TranslatableText>Primary Image URL</TranslatableText></Label>
-                <Input
-                  id="image1"
-                  placeholder="Enter primary image URL"
-                  value={formData.image1}
-                  onChange={(e) => handleInputChange('image1', e.target.value)}
-                  required
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="price1m"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel><TranslatableText>1 Month Price</TranslatableText></FormLabel>
+                      <FormControl>
+                        <Input placeholder="29.99" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="price3m"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel><TranslatableText>3 Month Price</TranslatableText></FormLabel>
+                      <FormControl>
+                        <Input placeholder="79.99" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="price12m"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel><TranslatableText>12 Month Price</TranslatableText></FormLabel>
+                      <FormControl>
+                        <Input placeholder="299.99" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
 
-              <div>
-                <Label htmlFor="image2"><TranslatableText>Secondary Image URL</TranslatableText></Label>
-                <Input
-                  id="image2"
-                  placeholder="Enter secondary image URL"
-                  value={formData.image2}
-                  onChange={(e) => handleInputChange('image2', e.target.value)}
-                  required
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="payment_link"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel><TranslatableText>Payment Link</TranslatableText></FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://payment-provider.com/plan-link" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              <div>
-                <Label htmlFor="price1m"><TranslatableText>1 Month Price (cents)</TranslatableText></Label>
-                <Input
-                  id="price1m"
-                  type="number"
-                  placeholder="Enter 1 month price in cents"
-                  value={formData.price1m}
-                  onChange={(e) => handleInputChange('price1m', parseInt(e.target.value) || 0)}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="price3m"><TranslatableText>3 Month Price (cents)</TranslatableText></Label>
-                <Input
-                  id="price3m"
-                  type="number"
-                  placeholder="Enter 3 month price in cents"
-                  value={formData.price3m}
-                  onChange={(e) => handleInputChange('price3m', parseInt(e.target.value) || 0)}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="price12m"><TranslatableText>12 Month Price (cents)</TranslatableText></Label>
-                <Input
-                  id="price12m"
-                  type="number"
-                  placeholder="Enter 12 month price in cents"
-                  value={formData.price12m}
-                  onChange={(e) => handleInputChange('price12m', parseInt(e.target.value) || 0)}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="payment_link"><TranslatableText>Payment Link</TranslatableText></Label>
-                <Input
-                  id="payment_link"
-                  placeholder="Enter payment link URL"
-                  value={formData.payment_link}
-                  onChange={(e) => handleInputChange('payment_link', e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <Label><TranslatableText>Plan Benefits</TranslatableText></Label>
-                <Button type="button" variant="outline" size="sm" onClick={addBenefit}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  <TranslatableText>Add Benefit</TranslatableText>
-                </Button>
-              </div>
-              <div className="space-y-3">
-                {formData.benefits?.map((benefit, index) => (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <FormLabel><TranslatableText>Benefits</TranslatableText></FormLabel>
+                  <Button type="button" variant="outline" size="sm" onClick={addBenefit}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    <TranslatableText>Add Benefit</TranslatableText>
+                  </Button>
+                </div>
+                {form.watch('benefits').map((benefit, index) => (
                   <div key={index} className="flex gap-2">
                     <Input
-                      placeholder={`Benefit ${index + 1}`}
+                      placeholder="Benefit description"
                       value={benefit}
                       onChange={(e) => updateBenefit(index, e.target.value)}
-                      required
+                      className="flex-1"
                     />
-                    {formData.benefits && formData.benefits.length > 1 && (
+                    {form.watch('benefits').length > 1 && (
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => removeBenefit(index)}
                       >
-                        <X className="w-4 h-4" />
+                        <X className="h-4 w-4" />
                       </Button>
                     )}
                   </div>
                 ))}
               </div>
-            </div>
 
-            <div className="flex gap-4 pt-6">
-              <Button
-                type="submit"
-                disabled={createMutation.isPending || updateMutation.isPending}
-                className="bg-amber-600 hover:bg-amber-700 text-white"
-              >
-                <TranslatableText>
+              <div className="flex gap-4">
+                <Button
+                  type="submit"
+                  disabled={createMutation.isPending || updateMutation.isPending}
+                >
                   {createMutation.isPending || updateMutation.isPending ? (
-                    "Saving..."
+                    <TranslatableText>Saving...</TranslatableText>
                   ) : isEdit ? (
-                    "Update Plan"
+                    <TranslatableText>Update Plan</TranslatableText>
                   ) : (
-                    "Create Plan"
+                    <TranslatableText>Create Plan</TranslatableText>
                   )}
-                </TranslatableText>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setLocation("/plans")}
-              >
-<TranslatableText>Cancel</TranslatableText>
-              </Button>
-            </div>
-          </form>
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setLocation("/barber-plans")}
+                >
+                  <TranslatableText>Cancel</TranslatableText>
+                </Button>
+              </div>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>
