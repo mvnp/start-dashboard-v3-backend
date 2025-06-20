@@ -46,7 +46,7 @@ export default function ServiceForm() {
   const createMutation = useMutation({
     mutationFn: (data: ServiceFormData) => apiRequest("POST", "/api/services", {
       ...data,
-      business_id: selectedBusinessId
+      business_id: 1
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/services"] });
@@ -68,7 +68,7 @@ export default function ServiceForm() {
   const updateMutation = useMutation({
     mutationFn: (data: ServiceFormData) => apiRequest("PUT", `/api/services/${serviceId}`, {
       ...data,
-      business_id: selectedBusinessId
+      business_id: 1
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/services"] });
