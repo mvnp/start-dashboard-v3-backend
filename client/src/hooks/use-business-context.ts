@@ -18,21 +18,24 @@ export function useBusinessContext() {
 
   const fetchBusinessSettings = async (businessId: number) => {
     try {
-      const response = await fetch('/api/settings', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-          'x-selected-business-id': businessId.toString(),
-        },
-      });
-      
-      if (response.ok) {
-        const settings = await response.json();
-        if (settings?.language) {
-          // Update the language in the edition context
-          updateLanguage(settings.language);
-          console.log('Auto-loaded language from business settings:', settings.language);
+      // Add a small delay to ensure business context is properly set
+      setTimeout(async () => {
+        const response = await fetch('/api/settings', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+            'x-selected-business-id': businessId.toString(),
+          },
+        });
+        
+        if (response.ok) {
+          const settings = await response.json();
+          if (settings?.language) {
+            // Update the language in the edition context
+            updateLanguage(settings.language);
+            console.log('Auto-loaded language from business settings:', settings.language);
+          }
         }
-      }
+      }, 100);
     } catch (error) {
       console.error('Failed to fetch business settings:', error);
     }

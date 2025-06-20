@@ -30,29 +30,9 @@ export function EditionProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Get current language from settings
-  const { data: settings } = useQuery({
-    queryKey: ['settings'],
-    queryFn: async () => {
-      const response = await fetch('/api/settings', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-      });
-      if (!response.ok) return null;
-      const settingsData = await response.json();
-      
-      // Cache language setting in localStorage
-      if (settingsData?.language) {
-        localStorage.setItem('currentLanguage', settingsData.language);
-      }
-      
-      return settingsData;
-    },
-    enabled: !!user,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
-  });
+  // Get current language from settings - disabled to prevent conflicts
+  // Settings are now fetched directly in business context hook
+  const settings = null;
 
   // Get cached language while settings are loading
   const getCachedLanguage = () => {
@@ -74,7 +54,7 @@ export function EditionProvider({ children }: { children: ReactNode }) {
   };
 
   // Current language determination (manual override takes precedence)
-  const currentLanguage = manualLanguage || settings?.language || getCachedLanguage();
+  const currentLanguage = manualLanguage || getCachedLanguage();
 
   // Save edition mode to localStorage when it changes
   useEffect(() => {
@@ -86,10 +66,9 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     console.log('EditionContext language detection:', {
       cachedLanguage: getCachedLanguage(),
       manualLanguage,
-      settingsLanguage: settings?.language,
       currentLanguage,
     });
-  }, [currentLanguage, manualLanguage, settings?.language]);
+  }, [currentLanguage, manualLanguage]);
 
   const contextValue: EditionContextType = {
     isEditionMode,
