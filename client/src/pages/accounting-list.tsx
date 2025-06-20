@@ -54,9 +54,9 @@ export default function AccountingList() {
   );
 
   const getCategoryName = (categoryId: number | null) => {
-    if (!categoryId) return <TranslatableText>No category</TranslatableText>;
+    if (!categoryId) return "No category";
     const category = categories.find(c => c.id === categoryId);
-    return category ? category.name : <TranslatableText>Unknown category</TranslatableText>;
+    return category ? category.description : "Unknown category";
   };
 
   const formatCurrency = (amount: number) => {
@@ -66,15 +66,15 @@ export default function AccountingList() {
     }).format(amount);
   };
 
-  const totalIncome = transactions
-    .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + t.amount, 0);
+  const totalRevenue = transactions
+    .filter(t => t.type === 'revenue')
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
   const totalExpenses = transactions
     .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + t.amount, 0);
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
-  const netIncome = totalIncome - totalExpenses;
+  const netIncome = totalRevenue - totalExpenses;
 
   if (isLoading) {
     return <div><TranslatableText>Loading...</TranslatableText></div>;
@@ -95,12 +95,12 @@ export default function AccountingList() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-green-600">
-              <TranslatableText>Total Income</TranslatableText>
+              <TranslatableText>Total Revenue</TranslatableText>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {formatCurrency(totalIncome)}
+              {formatCurrency(totalRevenue)}
             </div>
           </CardContent>
         </Card>
@@ -174,10 +174,10 @@ export default function AccountingList() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <Badge
-                        variant={transaction.type === 'income' ? 'default' : 'destructive'}
-                        className={transaction.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
+                        variant={transaction.type === 'revenue' ? 'default' : 'destructive'}
+                        className={transaction.type === 'revenue' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
                       >
-                        {transaction.type === 'income' ? <TranslatableText>Income</TranslatableText> : <TranslatableText>Expense</TranslatableText>}
+                        {transaction.type === 'revenue' ? <TranslatableText>Revenue</TranslatableText> : <TranslatableText>Expense</TranslatableText>}
                       </Badge>
                       <span className="font-medium">{transaction.description}</span>
                     </div>
@@ -194,9 +194,9 @@ export default function AccountingList() {
                   </div>
                   <div className="flex items-center gap-4">
                     <span className={`text-lg font-semibold ${
-                      transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                      transaction.type === 'revenue' ? 'text-green-600' : 'text-red-600'
                     }`}>
-                      {transaction.type === 'income' ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount))}
+                      {transaction.type === 'revenue' ? '+' : '-'}{formatCurrency(Math.abs(Number(transaction.amount)))}
                     </span>
                     <div className="flex gap-2">
                       <Button
