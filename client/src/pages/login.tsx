@@ -276,10 +276,10 @@ export default function Login() {
                 <Button
                   type="button"
                   onClick={handleBusinessSelect}
-                  disabled={!selectedBusinessId || completLoginMutation.isPending || loadingBusinesses}
+                  disabled={!selectedBusinessId || completeLoginMutation.isPending || loadingBusinesses}
                   className="w-full bg-barber-primary hover:bg-barber-secondary focus:ring-barber-primary"
                 >
-                  {completLoginMutation.isPending ? "Signing in..." : "Sign in"}
+                  {completeLoginMutation.isPending ? "Signing in..." : "Sign in"}
                 </Button>
               </div>
             </div>
