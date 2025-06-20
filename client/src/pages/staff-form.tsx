@@ -371,7 +371,7 @@ export default function StaffForm() {
                 <Label htmlFor="first_name"><TranslatableText>First Name *</TranslatableText></Label>
                 <Input
                   id="first_name"
-                  placeholder="Enter first name"
+                  placeholder={t("Enter first name")}
                   value={formData.first_name}
                   onChange={(e) => handleInputChange('first_name', e.target.value)}
                   className={errors.first_name ? "border-red-500" : ""}
@@ -385,7 +385,7 @@ export default function StaffForm() {
                 <Label htmlFor="last_name"><TranslatableText>Last Name *</TranslatableText></Label>
                 <Input
                   id="last_name"
-                  placeholder="Enter last name"
+                  placeholder={t("Enter last name")}
                   value={formData.last_name}
                   onChange={(e) => handleInputChange('last_name', e.target.value)}
                   className={errors.last_name ? "border-red-500" : ""}
@@ -400,7 +400,7 @@ export default function StaffForm() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter email address"
+                  placeholder={t("Enter email address")}
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   className={errors.email ? "border-red-500" : ""}
@@ -414,7 +414,7 @@ export default function StaffForm() {
                 <Label htmlFor="phone"><TranslatableText>Phone Number *</TranslatableText></Label>
                 <Input
                   id="phone"
-                  placeholder="(48) 99189-3313"
+                  placeholder={t("(48) 99189-3313")}
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   className={errors.phone ? "border-red-500" : ""}
@@ -428,7 +428,7 @@ export default function StaffForm() {
                 <Label htmlFor="tax_id"><TranslatableText>Tax ID *</TranslatableText></Label>
                 <Input
                   id="tax_id"
-                  placeholder="020.393.261-70 or 33.240.999.0001/03"
+                  placeholder={t("020.393.261-70 or 33.240.999.0001/03")}
                   value={formData.tax_id}
                   onChange={(e) => handleInputChange('tax_id', e.target.value)}
                   className={errors.tax_id ? "border-red-500" : ""}
@@ -449,7 +449,7 @@ export default function StaffForm() {
                   value={formData.business_id > 0 ? formData.business_id.toString() : ""}
                 >
                   <SelectTrigger className={errors.business_id ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select business" />
+                    <SelectValue placeholder={t("Select business")} />
                   </SelectTrigger>
                   <SelectContent>
                     {businesses?.map((business) => (
@@ -472,7 +472,7 @@ export default function StaffForm() {
                   value={formData.role_id?.toString()}
                 >
                   <SelectTrigger className={errors.role_id ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select staff role" />
+                    <SelectValue placeholder={t("Select staff role")} />
                   </SelectTrigger>
                   <SelectContent>
                     {roles?.map((role) => (
@@ -506,7 +506,7 @@ export default function StaffForm() {
                 <Input
                   id="salary"
                   type="number"
-                  placeholder="Enter annual salary"
+                  placeholder={t("Enter annual salary")}
                   min="0"
                   step="1000"
                   value={formData.salary}

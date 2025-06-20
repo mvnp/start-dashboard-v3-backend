@@ -179,7 +179,7 @@ export default function FaqList() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="Search FAQs..."
+              placeholder={t("Search FAQs...")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -187,7 +187,7 @@ export default function FaqList() {
           </div>
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
             <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Filter by category" />
+              <SelectValue placeholder={t("Filter by category")} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all"><TranslatableText>All Categories</TranslatableText></SelectItem>
@@ -200,7 +200,7 @@ export default function FaqList() {
           </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder={t("Filter by status")} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all"><TranslatableText>All Status</TranslatableText></SelectItem>

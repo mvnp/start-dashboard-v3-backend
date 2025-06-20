@@ -212,7 +212,7 @@ export default function PaymentGatewayForm() {
                 <Label htmlFor="name"><TranslatableText>Gateway Name</TranslatableText></Label>
                 <Input
                   id="name"
-                  placeholder="e.g., Main Mercado Pago"
+                  placeholder={t("e.g., Main Mercado Pago")}
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   required
@@ -227,7 +227,7 @@ export default function PaymentGatewayForm() {
                   required
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select gateway type" />
+                    <SelectValue placeholder={t("Select gateway type")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Mercado Pago"><TranslatableText>Mercado Pago</TranslatableText></SelectItem>
@@ -241,7 +241,7 @@ export default function PaymentGatewayForm() {
                 <Label htmlFor="api_url"><TranslatableText>API URL</TranslatableText></Label>
                 <Input
                   id="api_url"
-                  placeholder="https://api.example.com"
+                  placeholder={t("https://api.example.com")}
                   value={formData.api_url}
                   onChange={(e) => handleInputChange('api_url', e.target.value)}
                   required
@@ -253,7 +253,7 @@ export default function PaymentGatewayForm() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="gateway@example.com"
+                  placeholder={t("gateway@example.com")}
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   required
@@ -265,7 +265,7 @@ export default function PaymentGatewayForm() {
                 <Input
                   id="api_key"
                   type="password"
-                  placeholder="Enter your API key"
+                  placeholder={t("Enter your API key")}
                   value={formData.api_key}
                   onChange={(e) => handleInputChange('api_key', e.target.value)}
                   required
@@ -277,7 +277,7 @@ export default function PaymentGatewayForm() {
                 <Input
                   id="token"
                   type="password"
-                  placeholder="Enter your token"
+                  placeholder={t("Enter your token")}
                   value={formData.token}
                   onChange={(e) => handleInputChange('token', e.target.value)}
                   required
@@ -292,7 +292,7 @@ export default function PaymentGatewayForm() {
                   required
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select staff member" />
+                    <SelectValue placeholder={t("Select staff member")} />
                   </SelectTrigger>
                   <SelectContent>
                     {staff.map((staffMember) => (

@@ -214,7 +214,7 @@ export default function FaqForm() {
                     </FormLabel>
                     <FormControl>
                       <Input 
-                        placeholder="What is your question?"
+                        placeholder={t("What is your question?")}
                         {...field}
                       />
                     </FormControl>
@@ -234,7 +234,7 @@ export default function FaqForm() {
                     </FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="Provide a detailed answer to the question..."
+                        placeholder={t("Provide a detailed answer to the question...")}
                         className="min-h-32"
                         {...field}
                       />
@@ -257,7 +257,7 @@ export default function FaqForm() {
                       <Select value={field.value || ""} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
+                            <SelectValue placeholder={t("Select a category")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -284,7 +284,7 @@ export default function FaqForm() {
                       <FormControl>
                         <Input 
                           type="number"
-                          placeholder="0"
+                          placeholder={t("0")}
                           {...field}
                           onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                         />

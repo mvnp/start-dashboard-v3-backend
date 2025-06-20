@@ -211,7 +211,7 @@ export default function Support() {
                       <Input
                         id="name"
                         {...form.register("name")}
-                        placeholder="Enter your full name"
+                        placeholder={t("Enter your full name")}
                         className="mt-1"
                       />
                       {form.formState.errors.name && (
@@ -225,7 +225,7 @@ export default function Support() {
                         id="email"
                         type="email"
                         {...form.register("email")}
-                        placeholder="Enter your email"
+                        placeholder={t("Enter your email")}
                         className="mt-1"
                       />
                       {form.formState.errors.email && (
@@ -241,7 +241,7 @@ export default function Support() {
                         id="phone"
                         type="tel"
                         {...form.register("phone")}
-                        placeholder="Enter your phone number"
+                        placeholder={t("Enter your phone number")}
                         className="mt-1"
                       />
                       {form.formState.errors.phone && (
@@ -253,7 +253,7 @@ export default function Support() {
                       <Label htmlFor="urgency"><TranslatableText>Problem Urgency *</TranslatableText></Label>
                       <Select onValueChange={(value) => form.setValue("urgency", value)}>
                         <SelectTrigger className="mt-1">
-                          <SelectValue placeholder="Select urgency level" />
+                          <SelectValue placeholder={t("Select urgency level")} />
                         </SelectTrigger>
                         <SelectContent>
                           {urgencyOptions.map((option) => (
@@ -274,7 +274,7 @@ export default function Support() {
                     <Input
                       id="subject"
                       {...form.register("subject")}
-                      placeholder="Brief description of your issue"
+                      placeholder={t("Brief description of your issue")}
                       className="mt-1"
                     />
                     {form.formState.errors.subject && (
@@ -289,7 +289,7 @@ export default function Support() {
                     <Textarea
                       id="description"
                       {...form.register("description")}
-                      placeholder="Please provide detailed information about the issue you're experiencing. Include any error messages, steps to reproduce, and your browser/device information if relevant."
+                      placeholder={t("Please provide detailed information about the issue you're experiencing. Include any error messages, steps to reproduce, and your browser/device information if relevant.")}
                       rows={6}
                       className="mt-1"
                     />

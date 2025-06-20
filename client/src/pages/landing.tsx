@@ -417,27 +417,27 @@ export default function Landing() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input 
                   type="text" 
-                  placeholder="First Name"
+                  placeholder={t("First Name")}
                   className="px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-barber-primary"
                 />
                 <input 
                   type="text" 
-                  placeholder="Last Name"
+                  placeholder={t("Last Name")}
                   className="px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-barber-primary"
                 />
               </div>
               <input 
                 type="email" 
-                placeholder="Email Address"
+                placeholder={t("Email Address")}
                 className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-barber-primary"
               />
               <input 
                 type="tel" 
-                placeholder="Phone Number"
+                placeholder={t("Phone Number")}
                 className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-barber-primary"
               />
               <textarea 
-                placeholder="Tell us about your barbershop"
+                placeholder={t("Tell us about your barbershop")}
                 rows={4}
                 className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-barber-primary"
               ></textarea>

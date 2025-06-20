@@ -240,7 +240,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                   <FormItem>
                     <FormLabel><TranslatableText>Business Name *</TranslatableText></FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter business name" {...field} />
+                      <Input placeholder={t("Enter business name")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -255,7 +255,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                     <FormLabel><TranslatableText>Description</TranslatableText></FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="Describe your business"
+                        placeholder={t("Describe your business")}
                         className="min-h-[100px]"
                         {...field}
                         value={field.value || ""}
@@ -274,7 +274,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                     <FormLabel><TranslatableText>Address</TranslatableText></FormLabel>
                     <FormControl>
                       <Input 
-                        placeholder="Enter business address"
+                        placeholder={t("Enter business address")}
                         {...field}
                         value={field.value || ""}
                       />
@@ -293,7 +293,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                       <FormLabel><TranslatableText>Phone Number *</TranslatableText></FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="(11) 99999-9999"
+                          placeholder={t("(11) 99999-9999")}
                           {...field}
                           value={field.value || ""}
                           onChange={(e) => {
@@ -319,7 +319,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                       <FormControl>
                         <Input 
                           type="email" 
-                          placeholder="contact@business.com" 
+                          placeholder={t("contact@business.com")} 
                           {...field}
                           value={field.value || ""}
                         />
@@ -341,7 +341,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                     <FormLabel><TranslatableText>Tax ID *</TranslatableText></FormLabel>
                     <FormControl>
                       <Input 
-                        placeholder="000.000.000-00 or 00.000.000/0000-00"
+                        placeholder={t("000.000.000-00 or 00.000.000/0000-00")}
                         {...field}
                         value={field.value || ""}
                         onChange={(e) => {
@@ -369,7 +369,7 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
                     <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select merchant owner" />
+                          <SelectValue placeholder={t("Select merchant owner")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

@@ -291,6 +291,7 @@ const formSchema = insertSettingsSchema.omit({ business_id: true });
 
 export default function Settings() {
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const queryClient = useQueryClient();
   const { isEditionMode, toggleEditionMode, canEdit } = useEdition();
   const { selectedBusinessId, updateBusinessLanguage } = useBusinessContext();
