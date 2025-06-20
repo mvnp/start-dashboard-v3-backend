@@ -16,22 +16,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { TranslatableText } from "@/components/translatable-text";
-import { useTranslationHelper } from "@/lib/translation-helper";
 
 interface BusinessFormProps {
   businessId?: number;
 }
 
-// Helper for translations
-const { t } = useTranslationHelper();
-
 // Create validation schema with required fields
 const businessFormSchema = insertBusinessSchema.extend({
-  name: z.string().min(1, t("Business name is required")),
-  phone: z.string().min(1, t("Phone number is required")),
-  email: z.string().email(t("Valid email is required")).min(1, t("Email is required")),
-  tax_id: z.string().min(1, t("Tax ID is required")),
-  user_id: z.number().min(1, t("Owner is required")),
+  name: z.string().min(1, "Business name is required"),
+  phone: z.string().min(1, "Phone number is required"),
+  email: z.string().email("Valid email is required").min(1, "Email is required"),
+  tax_id: z.string().min(1, "Tax ID is required"),
+  user_id: z.number().min(1, "Owner is required"),
 });
 
 type BusinessFormData = z.infer<typeof businessFormSchema>;
