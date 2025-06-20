@@ -1636,12 +1636,12 @@ export function registerRoutes(app: Express): void {
   app.post("/api/barber-plans", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
       // Get business ID from header (frontend) or body (direct API calls)
-      const headerBusinessId = req.headers['business-id'] ? parseInt(req.headers['business-id'] as string) : null;
+      const headerBusinessId = req.headers['x-selected-x-selected-business-id'] ? parseInt(req.headers['x-selected-x-selected-business-id'] as string) : null;
       const bodyBusinessId = req.body.business_id ? parseInt(req.body.business_id) : null;
       const selectedBusinessId = headerBusinessId || bodyBusinessId;
 
       if (!selectedBusinessId) {
-        return res.status(400).json({ error: "Business selection required. Provide business_id in request body or X-Selected-Business-Id header" });
+        return res.status(400).json({ error: "Business selection required. Provide business_id in request body or X-Selected-x-selected-business-id header" });
       }
 
       // Validate business access
@@ -1670,7 +1670,7 @@ export function registerRoutes(app: Express): void {
       const id = parseInt(req.params.id);
       
       // Get business ID from header (frontend) or request body (API tools)
-      const headerBusinessId = req.headers['business-id'] ? parseInt(req.headers['business-id'] as string) : null;
+      const headerBusinessId = req.headers['x-selected-business-id'] ? parseInt(req.headers['x-selected-business-id'] as string) : null;
       const bodyBusinessId = req.body.business_id ? (typeof req.body.business_id === 'number' ? req.body.business_id : parseInt(req.body.business_id)) : null;
       const selectedBusinessId = headerBusinessId || bodyBusinessId;
 
@@ -2019,7 +2019,7 @@ export function registerRoutes(app: Express): void {
   app.post("/api/accounting-transactions", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       // Get business ID from header (frontend) or request body (API tools)
-      const headerBusinessId = req.headers['business-id'] ? parseInt(req.headers['business-id'] as string) : null;
+      const headerBusinessId = req.headers['x-selected-business-id'] ? parseInt(req.headers['x-selected-business-id'] as string) : null;
       const bodyBusinessId = req.body.business_id ? (typeof req.body.business_id === 'number' ? req.body.business_id : parseInt(req.body.business_id)) : null;
       const selectedBusinessId = headerBusinessId || bodyBusinessId;
 
@@ -2116,7 +2116,7 @@ export function registerRoutes(app: Express): void {
       const id = parseInt(req.params.id);
       
       // Get business ID from header (frontend) or request body (API tools)
-      const headerBusinessId = req.headers['business-id'] ? parseInt(req.headers['business-id'] as string) : null;
+      const headerBusinessId = req.headers['x-selected-business-id'] ? parseInt(req.headers['x-selected-business-id'] as string) : null;
       const bodyBusinessId = req.body.business_id ? (typeof req.body.business_id === 'number' ? req.body.business_id : parseInt(req.body.business_id)) : null;
       const selectedBusinessId = headerBusinessId || bodyBusinessId;
 
@@ -2706,7 +2706,7 @@ export function registerRoutes(app: Express): void {
   // Settings routes
   app.get("/api/settings", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const businessId = parseInt(req.headers['business-id'] as string);
+      const businessId = parseInt(req.headers['x-selected-business-id'] as string);
       
       if (!businessId || isNaN(businessId)) {
         return res.status(400).json({ error: "Business ID is required" });
@@ -2740,7 +2740,7 @@ export function registerRoutes(app: Express): void {
   app.put("/api/settings", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       // Get business ID from header or body
-      const businessIdFromHeader = parseInt(req.headers['business-id'] as string);
+      const businessIdFromHeader = parseInt(req.headers['x-selected-business-id'] as string);
       const businessIdFromBody = req.body.business_id;
       const businessId = businessIdFromHeader || businessIdFromBody;
       
@@ -2785,7 +2785,7 @@ export function registerRoutes(app: Express): void {
 
   app.delete("/api/settings", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const businessId = parseInt(req.headers['business-id'] as string);
+      const businessId = parseInt(req.headers['x-selected-business-id'] as string);
       
       if (!businessId || isNaN(businessId)) {
         return res.status(400).json({ error: "Business ID is required" });
