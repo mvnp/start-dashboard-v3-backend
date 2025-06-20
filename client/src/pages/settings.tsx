@@ -322,10 +322,9 @@ export default function Settings() {
     onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['settings', selectedBusinessId] });
       
-      // If language was changed, immediately update the business language context
-      const currentLanguage = (settings as any)?.language || 'en';
-      if (variables.language && variables.language !== currentLanguage) {
-        // Update all localStorage and sessionStorage keys immediately
+      // Always check if language was included in the update
+      if (variables.language) {
+        // Update all localStorage and sessionStorage keys immediately for ANY language change
         localStorage.setItem('x-selected-business-language', variables.language);
         sessionStorage.setItem('x-selected-business-language', variables.language);
         localStorage.setItem('traductions-selected-language', variables.language);
@@ -339,7 +338,7 @@ export default function Settings() {
           await loadBusinessLanguage(selectedBusinessId, variables.language);
         }
         
-        // Reload the current page to apply all language changes immediately
+        // Always reload the page to apply all language changes immediately (including English)
         setTimeout(() => {
           window.location.reload();
         }, 500);
