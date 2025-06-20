@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Person } from "@shared/schema";
-import { useBusinessContext } from "@/lib/business-context";
 import { TranslatableText } from "@/components/translatable-text";
 
 interface ClientFormData {

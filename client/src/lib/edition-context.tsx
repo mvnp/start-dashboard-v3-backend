@@ -1,17 +1,23 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useAuth } from './auth';
-import { useBusinessContext } from './business-context';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface EditionContextType {
   isEditionMode: boolean;
-  toggleEditionMode: () => void;
+  setIsEditionMode: (enabled: boolean) => void;
   currentLanguage: string;
   canEdit: boolean;
-  selectedBusinessId: number | null;
 }
 
 const EditionContext = createContext<EditionContextType | undefined>(undefined);
+
+export function useEdition() {
+  const context = useContext(EditionContext);
+  if (context === undefined) {
+    throw new Error('useEdition must be used within an EditionProvider');
+  }
+  return context;
+}
 
 export function EditionProvider({ children }: { children: ReactNode }) {
   const [isEditionMode, setIsEditionMode] = useState(() => {
@@ -20,106 +26,68 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     return saved === 'true';
   });
   const { user } = useAuth();
-  
-  // Handle case where component renders before BusinessProvider is ready
-  let businessContext;
-  try {
-    businessContext = useBusinessContext();
-  } catch (error) {
-    // BusinessProvider not available, use fallback
-    businessContext = { selectedBusinessId: null };
-  }
-  
-  const { selectedBusinessId } = businessContext;
   const queryClient = useQueryClient();
 
-  // Get current language from business settings with caching
+  // Get current language from settings
   const { data: settings } = useQuery({
-    queryKey: ['settings', selectedBusinessId],
+    queryKey: ['settings'],
     queryFn: async () => {
-      if (!selectedBusinessId) return null;
       const response = await fetch('/api/settings', {
         headers: {
-          'business-id': selectedBusinessId.toString(),
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
       if (!response.ok) return null;
       const settingsData = await response.json();
       
-      // Cache language setting in localStorage for persistence across page reloads
+      // Cache language setting in localStorage
       if (settingsData?.language) {
-        localStorage.setItem(`businessLanguage_${selectedBusinessId}`, settingsData.language);
+        localStorage.setItem('currentLanguage', settingsData.language);
       }
       
       return settingsData;
     },
-    enabled: !!selectedBusinessId,
+    enabled: !!user,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   // Get cached language while settings are loading
   const getCachedLanguage = () => {
-    if (selectedBusinessId) {
-      const cached = localStorage.getItem(`businessLanguage_${selectedBusinessId}`);
-      if (cached) {
-        return cached;
-      }
-    }
-    return 'en';
+    const cached = localStorage.getItem('currentLanguage');
+    return cached || 'en';
   };
 
   // Check if user is Super Admin (Role ID: 1)
   const canEdit = user?.roleId === 1;
 
-  const toggleEditionMode = () => {
-    if (canEdit) {
-      const newMode = !isEditionMode;
-      setIsEditionMode(newMode);
-      // Persist edition mode to localStorage
-      localStorage.setItem('editionMode', newMode.toString());
-    }
+  // Current language determination
+  const currentLanguage = settings?.language || getCachedLanguage();
+
+  // Save edition mode to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('editionMode', isEditionMode.toString());
+  }, [isEditionMode]);
+
+  // Debug logging for language detection
+  useEffect(() => {
+    console.log('EditionContext language detection:', {
+      cachedLanguage: getCachedLanguage(),
+      currentLanguage,
+      selectedBusinessId: null,
+    });
+  }, [currentLanguage]);
+
+  const contextValue: EditionContextType = {
+    isEditionMode,
+    setIsEditionMode,
+    currentLanguage,
+    canEdit,
   };
 
-  // Use effect to ensure language updates when business ID changes
-  const [currentLanguage, setCurrentLanguage] = useState('en');
-  
-  useEffect(() => {
-    const newLanguage = settings?.language || getCachedLanguage();
-    if (newLanguage !== currentLanguage) {
-      setCurrentLanguage(newLanguage);
-      console.log('Language updated:', newLanguage, 'for business:', selectedBusinessId);
-      
-      // Force invalidate TranslatableText queries to re-fetch with new language
-      queryClient.invalidateQueries({ queryKey: ['translation'] });
-    }
-  }, [settings?.language, selectedBusinessId, queryClient]);
-  
-  console.log('EditionContext language detection:', {
-    settingsLanguage: settings?.language,
-    cachedLanguage: getCachedLanguage(),
-    currentLanguage,
-    selectedBusinessId
-  });
-
   return (
-    <EditionContext.Provider value={{
-      isEditionMode: isEditionMode && canEdit,
-      toggleEditionMode,
-      currentLanguage,
-      canEdit,
-      selectedBusinessId,
-    }}>
+    <EditionContext.Provider value={contextValue}>
       {children}
     </EditionContext.Provider>
   );
-}
-
-export function useEdition() {
-  const context = useContext(EditionContext);
-  if (context === undefined) {
-    throw new Error('useEdition must be used within an EditionProvider');
-  }
-  return context;
 }

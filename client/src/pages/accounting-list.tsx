@@ -9,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { AccountingTransaction, AccountingTransactionCategory } from "@shared/schema";
 import { format } from "date-fns";
-import { useBusinessContext } from "@/lib/business-context";
 import { TranslatableText } from "@/components/translatable-text";
 
 export default function AccountingList() {

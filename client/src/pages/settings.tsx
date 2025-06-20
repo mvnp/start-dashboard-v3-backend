@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useBusinessContext } from "@/lib/business-context";
 import { apiRequest } from "@/lib/queryClient";
 import { insertSettingsSchema, type Settings } from "@shared/schema";
 import { Save, Globe, Clock, DollarSign, Edit3 } from "lucide-react";

@@ -29,7 +29,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useBusinessContext } from "@/lib/business-context";
 import { Person } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
 

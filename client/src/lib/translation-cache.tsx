@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './auth';
-import { useBusinessContext } from './business-context';
 
 interface TranslationCache {
   [language: string]: Record<string, string>;

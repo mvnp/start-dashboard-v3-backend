@@ -28,7 +28,6 @@ interface Staff {
   role: string;
 }
 import { TranslatableText } from "@/components/translatable-text";
-import { useBusinessContext } from "@/lib/business-context";
 
 export default function PaymentGatewayList() {
   const [, setLocation] = useLocation();

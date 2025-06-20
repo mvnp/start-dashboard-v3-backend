@@ -11,7 +11,6 @@ import { ArrowLeft } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Appointment, Service, Person } from "@shared/schema";
-import { useBusinessContext } from "@/lib/business-context";
 import { TranslatableText } from "@/components/translatable-text";
 
 interface AppointmentFormData {

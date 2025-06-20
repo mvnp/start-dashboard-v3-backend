@@ -19,7 +19,6 @@ import { Plus, Search, Edit, Trash2, ExternalLink, Crown } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { BarberPlan } from "@shared/schema";
-import { useBusinessContext } from "@/lib/business-context";
 import { TranslatableText } from "@/components/translatable-text";
 
 export default function BarberPlanList() {

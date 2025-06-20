@@ -11,7 +11,6 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { SupportTicket } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
-import { useBusinessContext } from "@/lib/business-context";
 
 export default function SupportTicketList() {
   const [searchTerm, setSearchTerm] = useState("");

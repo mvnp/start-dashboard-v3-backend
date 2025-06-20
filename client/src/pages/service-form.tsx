@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useBusinessContext } from "@/lib/business-context";
 import { Service } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
 

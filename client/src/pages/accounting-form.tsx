@@ -15,7 +15,6 @@ import { ArrowLeft, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { AccountingTransaction, AccountingTransactionCategory, Person, Business } from "@shared/schema";
-import { useBusinessContext } from "@/lib/business-context";
 import { TranslatableText } from "@/components/translatable-text";
 import { format } from "date-fns";
 

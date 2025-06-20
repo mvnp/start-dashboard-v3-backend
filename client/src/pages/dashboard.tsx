@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
-import { useBusinessContext } from "@/lib/business-context";
 import { Appointment } from "@shared/schema";
 import { Link } from "wouter";
 import { TranslatableText } from "@/components/translatable-text";

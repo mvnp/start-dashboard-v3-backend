@@ -6,7 +6,6 @@ import { QueryPersistenceManager } from "./lib/persisted-query-client";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth";
-import { BusinessProvider } from "@/lib/business-context";
 import { EditionProvider } from "@/lib/edition-context";
 import { TranslationCacheProvider } from "@/lib/translation-cache";
 
@@ -331,16 +330,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BusinessProvider>
-          <EditionProvider>
-            <TranslationCacheProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Router />
-              </TooltipProvider>
-            </TranslationCacheProvider>
-          </EditionProvider>
-        </BusinessProvider>
+        <EditionProvider>
+          <TranslationCacheProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </TranslationCacheProvider>
+        </EditionProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

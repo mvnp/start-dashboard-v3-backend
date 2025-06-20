@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/select";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useBusinessContext } from "@/lib/business-context";
 import { Person, Business, Role } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
 
