@@ -20,8 +20,8 @@ export default function Logout() {
     setTimeout(() => {
       setIsLoading(false);
       toast({
-        title: <TranslatableText>Logged out successfully</TranslatableText>,
-        description: <TranslatableText>You have been signed out of your account</TranslatableText>,
+        title: t("Logged out successfully"),
+        description: t("You have been signed out of your account"),
       });
       setLocation("/login");
     }, 500);

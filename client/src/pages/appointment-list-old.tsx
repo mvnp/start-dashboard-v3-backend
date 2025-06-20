@@ -55,14 +55,14 @@ export default function AppointmentList() {
       queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
       toast({
         title: t("Success"),
-        description: <TranslatableText>Appointment deleted successfully</TranslatableText>,
+        description: t("Appointment deleted successfully"),
       });
       setDeleteId(null);
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to delete appointment</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to delete appointment"),
         variant: "destructive",
       });
     },
