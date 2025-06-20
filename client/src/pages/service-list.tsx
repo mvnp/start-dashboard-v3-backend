@@ -27,11 +27,8 @@ export default function ServiceList() {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { toast } = useToast();
 
-  // Get selected business ID to include in cache key
-  const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
-
   const { data: services = [], isLoading } = useQuery({
-    queryKey: ["/api/services", selectedBusinessId],
+    queryKey: ["/api/services"],
     select: (data: Service[]) => data,
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
@@ -44,7 +41,7 @@ export default function ServiceList() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/services/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/services", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/services"] });
       toast({
         title: <TranslatableText>Success</TranslatableText>,
         description: <TranslatableText>Service deleted successfully</TranslatableText>,

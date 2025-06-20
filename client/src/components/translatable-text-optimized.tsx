@@ -16,7 +16,7 @@ export function TranslatableText({
   className = '', 
   tag: Tag = 'span' 
 }: TranslatableTextProps) {
-  const { isEditionMode, currentLanguage, canEdit, selectedBusinessId } = useEdition();
+  const { isEditionMode, currentLanguage, canEdit } = useEdition();
   const { getTranslation } = useTranslationCache();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
@@ -52,7 +52,7 @@ export function TranslatableText({
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-          ...(selectedBusinessId && { 'business-id': selectedBusinessId.toString() }),
+          // No business context needed
         },
         body: JSON.stringify({
           string: children,
