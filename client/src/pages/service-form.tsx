@@ -39,7 +39,7 @@ export default function ServiceForm() {
   });
 
   const { data: serviceData, isLoading } = useQuery({
-    queryKey: [`/api/services/${serviceId}`, selectedBusinessId],
+    queryKey: [`/api/services/${serviceId}`],
     select: (data: Service) => data,
   });
 
@@ -49,7 +49,7 @@ export default function ServiceForm() {
       business_id: selectedBusinessId
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/services", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/services"] });
       toast({
         title: <TranslatableText>Success</TranslatableText>,
         description: <TranslatableText>Service created successfully</TranslatableText>,
@@ -71,7 +71,7 @@ export default function ServiceForm() {
       business_id: selectedBusinessId
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/services", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/services"] });
       queryClient.invalidateQueries({ queryKey: [`/api/services/${serviceId}`] });
       toast({
         title: <TranslatableText>Success</TranslatableText>,

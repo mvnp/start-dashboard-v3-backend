@@ -36,12 +36,12 @@ export default function PaymentGatewayList() {
   const { toast } = useToast();
 
   const { data: gateways = [], isLoading } = useQuery({
-    queryKey: ["/api/payment-gateways", selectedBusinessId],
+    queryKey: ["/api/payment-gateways"],
     select: (data: PaymentGateway[]) => data,
   });
 
   const { data: staff = [] } = useQuery({
-    queryKey: ["/api/staff", selectedBusinessId],
+    queryKey: ["/api/staff"],
     select: (data: Staff[]) => data,
   });
 

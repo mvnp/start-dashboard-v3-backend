@@ -75,7 +75,7 @@ export default function SupportTicketForm() {
 
   // Load staff for assignment dropdown
   const { data: staff = [] } = useQuery({
-    queryKey: ["/api/staff", selectedBusinessId],
+    queryKey: ["/api/staff"],
   });
 
   // Update form when ticket data is loaded

@@ -20,14 +20,14 @@ export default function SupportTicketList() {
   const queryClient = useQueryClient();
 
   const { data: tickets = [], isLoading } = useQuery({
-    queryKey: ["/api/support-tickets", selectedBusinessId],
+    queryKey: ["/api/support-tickets"],
     select: (data: SupportTicket[]) => data,
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/support-tickets/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/support-tickets", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/support-tickets"] });
       toast({
         title: <TranslatableText>Ticket deleted</TranslatableText>,
         description: <TranslatableText>The support ticket has been successfully deleted.</TranslatableText>,

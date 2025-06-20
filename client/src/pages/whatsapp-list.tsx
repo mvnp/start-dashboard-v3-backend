@@ -19,7 +19,7 @@ export default function WhatsappList() {
   const queryClient = useQueryClient();
 
   const { data: instances = [], isLoading, error } = useQuery<WhatsappInstance[]>({
-    queryKey: ["/api/whatsapp-instances", selectedBusinessId],
+    queryKey: ["/api/whatsapp-instances"],
   });
 
   const deleteMutation = useMutation({

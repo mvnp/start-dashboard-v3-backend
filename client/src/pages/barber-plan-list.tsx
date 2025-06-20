@@ -28,14 +28,14 @@ export default function BarberPlanList() {
   const { toast } = useToast();
 
   const { data: plans = [], isLoading } = useQuery({
-    queryKey: ["/api/barber-plans", selectedBusinessId],
+    queryKey: ["/api/barber-plans"],
     select: (data: BarberPlan[]) => data,
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/barber-plans/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans"] });
       toast({
         title: <TranslatableText>Success</TranslatableText>,
         description: <TranslatableText>Barber plan deleted successfully</TranslatableText>,

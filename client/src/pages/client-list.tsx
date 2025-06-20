@@ -41,7 +41,7 @@ export default function ClientList() {
   const { toast } = useToast();
 
   const { data: clients = [], isLoading } = useQuery({
-    queryKey: ["/api/clients", selectedBusinessId],
+    queryKey: ["/api/clients"],
     select: (data: Client[]) => data,
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
@@ -52,7 +52,7 @@ export default function ClientList() {
   const deleteClientMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/clients/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/clients", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
       toast({
         title: <TranslatableText>Client deleted</TranslatableText>,
         description: <TranslatableText>The client has been successfully removed.</TranslatableText>,

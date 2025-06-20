@@ -75,7 +75,7 @@ export default function ClientForm() {
   };
 
   const { data: clientMember, isLoading, error } = useQuery<ClientWithUser>({
-    queryKey: [`/api/clients/${clientId}`, selectedBusinessId] as const,
+    queryKey: [`/api/clients/${clientId}`] as const,
   });
 
 
@@ -86,7 +86,7 @@ export default function ClientForm() {
       business_id: selectedBusinessId
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/clients", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
       toast({
         title: <TranslatableText>Client created</TranslatableText>,
         description: <TranslatableText>The new client has been successfully added.</TranslatableText>,
@@ -136,8 +136,8 @@ export default function ClientForm() {
       business_id: selectedBusinessId
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/clients", selectedBusinessId] });
-      queryClient.invalidateQueries({ queryKey: [`/api/clients/${clientId}`, selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/clients/${clientId}`] });
       queryClient.invalidateQueries({ queryKey: ["/api/clients", clientId] });
       toast({
         title: <TranslatableText>Client updated</TranslatableText>,
