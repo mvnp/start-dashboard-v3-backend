@@ -29,6 +29,7 @@ export default function Login() {
   const [step, setStep] = useState<'credentials' | 'business'>('credentials');
   const [validatedUser, setValidatedUser] = useState<any>(null);
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const { setUser } = useAuth();
   const { updateSelectedBusiness } = useBusinessContext();
 

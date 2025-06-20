@@ -4,6 +4,7 @@ import { useBusinessLanguage } from '@/lib/business-language-context';
 import { useBusinessContext } from '@/hooks/use-business-context';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslationHelper } from '@/lib/translation-helper';
 import { Edit3 } from 'lucide-react';
 
 interface TranslatableTextProps {
@@ -57,6 +58,7 @@ export function TranslatableText({
   const { getTranslation } = businessLanguage;
   const { selectedBusinessLanguage } = businessContext;
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
   const queryClient = useQueryClient();

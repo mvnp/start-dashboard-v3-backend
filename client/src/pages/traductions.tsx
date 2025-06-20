@@ -323,7 +323,7 @@ export default function Traductions() {
             <div className="flex-1">
               <Input
                 type="text"
-                placeholder="Enter new English string..."
+                placeholder={t("Enter new English string...")}
                 value={newEnglishString}
                 onChange={(e) => setNewEnglishString(e.target.value)}
                 onKeyPress={handleAddEnglishString}
