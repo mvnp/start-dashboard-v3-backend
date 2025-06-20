@@ -32,7 +32,6 @@ export default function ClientForm() {
   const [editMatch] = useRoute("/clients/edit/:id");
   const [createMatch] = useRoute("/clients/new");
   const { toast } = useToast();
-  const { selectedBusinessId } = useBusinessContext();
   const isEdit = !!editMatch;
   const isCreating = !!createMatch;
   const clientId = isEdit && params.id ? parseInt(params.id) : null;

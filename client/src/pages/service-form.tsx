@@ -27,7 +27,6 @@ export default function ServiceForm() {
   const [, setLocation] = useLocation();
   const params = useParams();
   const { toast } = useToast();
-  const { selectedBusinessId } = useBusinessContext();
   const isEdit = !!params.id;
   const serviceId = params.id ? parseInt(params.id) : null;
 

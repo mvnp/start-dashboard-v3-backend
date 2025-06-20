@@ -18,7 +18,6 @@ export default function SupportTicketList() {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { selectedBusinessId } = useBusinessContext();
 
   const { data: tickets = [], isLoading } = useQuery({
     queryKey: ["/api/support-tickets", selectedBusinessId],

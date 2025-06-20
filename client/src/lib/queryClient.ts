@@ -23,17 +23,7 @@ export async function apiRequest(
     headers["Authorization"] = `Bearer ${token}`;
   }
   
-  // Always try to get business ID from localStorage
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  if (user.email) {
-    const selectedBusinessId = localStorage.getItem(`selectedBusinessId_${user.email}`);
-    if (selectedBusinessId) {
-      headers["business-id"] = selectedBusinessId;
-      console.log(`🔧 API Request [${method}] ${url} - Sending business-id: ${selectedBusinessId}`);
-    } else {
-      console.log(`⚠️ API Request [${method}] ${url} - No business ID found for user: ${user.email}`);
-    }
-  }
+  // No business context needed
 
   const res = await fetch(url, {
     method,

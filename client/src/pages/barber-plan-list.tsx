@@ -26,7 +26,6 @@ export default function BarberPlanList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { toast } = useToast();
-  const { selectedBusinessId } = useBusinessContext();
 
   const { data: plans = [], isLoading } = useQuery({
     queryKey: ["/api/barber-plans", selectedBusinessId],

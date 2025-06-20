@@ -62,7 +62,6 @@ const roleConfig = {
 export default function StaffList() {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
-  const { selectedBusinessId } = useBusinessContext();
 
   const { data: staff = [], isLoading } = useQuery({
     queryKey: ["/api/staff", selectedBusinessId],

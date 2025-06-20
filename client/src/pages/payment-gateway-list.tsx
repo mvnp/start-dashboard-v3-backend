@@ -34,7 +34,6 @@ export default function PaymentGatewayList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { toast } = useToast();
-  const { selectedBusinessId } = useBusinessContext();
 
   const { data: gateways = [], isLoading } = useQuery({
     queryKey: ["/api/payment-gateways", selectedBusinessId],

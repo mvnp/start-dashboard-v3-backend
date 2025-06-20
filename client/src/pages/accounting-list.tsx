@@ -14,7 +14,6 @@ import { TranslatableText } from "@/components/translatable-text";
 export default function AccountingList() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { selectedBusinessId } = useBusinessContext();
 
   const { data: transactions = [], isLoading } = useQuery<AccountingTransaction[]>({
     queryKey: ["/api/accounting-transactions", selectedBusinessId],

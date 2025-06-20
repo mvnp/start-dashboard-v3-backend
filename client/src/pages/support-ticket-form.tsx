@@ -42,7 +42,6 @@ export default function SupportTicketForm() {
   const [viewMatch] = useRoute("/support-tickets/:id");
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { selectedBusinessId } = useBusinessContext();
   
   const ticketId = params?.id ? parseInt(params.id) : null;
   const isEditing = !!match;

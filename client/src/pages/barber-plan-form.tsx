@@ -28,7 +28,6 @@ export default function BarberPlanForm() {
   const [, setLocation] = useLocation();
   const params = useParams();
   const { toast } = useToast();
-  const { selectedBusinessId } = useBusinessContext();
   const isEdit = !!params.id;
   const planId = params.id ? parseInt(params.id) : null;
 

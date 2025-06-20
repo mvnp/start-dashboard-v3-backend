@@ -40,7 +40,6 @@ export default function AccountingForm() {
   const { toast } = useToast();
   const [isEdit, setIsEdit] = useState(false);
   const [transactionId, setTransactionId] = useState<number | null>(null);
-  const { selectedBusinessId } = useBusinessContext();
 
   // Get transaction ID from URL if editing
   useEffect(() => {

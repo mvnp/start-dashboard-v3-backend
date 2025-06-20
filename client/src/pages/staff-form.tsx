@@ -49,7 +49,6 @@ export default function StaffForm() {
   const [, setLocation] = useLocation();
   const params = useParams();
   const { toast } = useToast();
-  const { selectedBusinessId } = useBusinessContext();
   const isEdit = !!params.id;
   const staffId = params.id ? parseInt(params.id) : null;
 

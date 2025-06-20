@@ -8,7 +8,6 @@ interface TranslationCache {
 interface TranslationCacheContextType {
   translations: TranslationCache;
   loadTranslations: (language: string) => Promise<void>;
-  getTranslation: (text: string, language: string) => string;
   isLoading: boolean;
 }
 
@@ -18,17 +17,6 @@ export function TranslationCacheProvider({ children }: { children: React.ReactNo
   const [translations, setTranslations] = useState<TranslationCache>({});
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
-  
-  // Handle case where component renders before BusinessProvider is ready
-  let businessContext;
-  try {
-    businessContext = useBusinessContext();
-  } catch (error) {
-    // BusinessProvider not available, use fallback
-    businessContext = { selectedBusinessId: null };
-  }
-  
-  const { selectedBusinessId } = businessContext;
 
   const loadTranslations = async (language: string) => {
     const token = localStorage.getItem('accessToken');
@@ -41,55 +29,31 @@ export function TranslationCacheProvider({ children }: { children: React.ReactNo
       const response = await fetch(`/api/translations/bulk/${language}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        },
       });
 
       if (response.ok) {
-        const translationData = await response.json();
+        const data = await response.json();
         setTranslations(prev => ({
           ...prev,
-          [language]: translationData
+          [language]: data,
         }));
-      } else {
-        console.error('Failed to load translations:', response.statusText);
       }
     } catch (error) {
-      console.error('Error loading translations:', error);
+      console.error(`Failed to load translations for ${language}:`, error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getTranslation = (text: string, language: string): string => {
-    if (!language || language === 'en') {
-      return text; // Return original text for English
-    }
-
-    const languageTranslations = translations[language];
-    if (!languageTranslations) {
-      return text; // Fallback to original text if language not loaded
-    }
-
-    return languageTranslations[text] || text; // Return translation or fallback to original
+  const contextValue: TranslationCacheContextType = {
+    translations,
+    loadTranslations,
+    isLoading,
   };
 
-  // Auto-load translations when language changes
-  useEffect(() => {
-    if (selectedBusinessId && user) {
-      // Get language from business settings (this will be handled by EditionContext)
-      // For now, we'll load Portuguese as the main non-English language
-      loadTranslations('pt');
-    }
-  }, [selectedBusinessId, user]);
-
   return (
-    <TranslationCacheContext.Provider value={{
-      translations,
-      loadTranslations,
-      getTranslation,
-      isLoading
-    }}>
+    <TranslationCacheContext.Provider value={contextValue}>
       {children}
     </TranslationCacheContext.Provider>
   );

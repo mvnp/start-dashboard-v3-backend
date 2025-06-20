@@ -17,7 +17,6 @@ export default function WhatsappList() {
   const [statusFilter, setStatusFilter] = useState("all");
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { selectedBusinessId } = useBusinessContext();
 
   const { data: instances = [], isLoading, error } = useQuery<WhatsappInstance[]>({
     queryKey: ["/api/whatsapp-instances", selectedBusinessId],

@@ -39,7 +39,6 @@ interface Client extends Person {
 export default function ClientList() {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
-  const { selectedBusinessId } = useBusinessContext();
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ["/api/clients", selectedBusinessId],

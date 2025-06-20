@@ -103,7 +103,6 @@ export default function Dashboard() {
   // Handle case where component renders before BusinessProvider is ready
   let businessContext;
   try {
-    businessContext = useBusinessContext();
   } catch (error) {
     // BusinessProvider not available, use fallback
     businessContext = { selectedBusinessId: null };

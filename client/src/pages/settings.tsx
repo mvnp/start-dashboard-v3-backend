@@ -287,7 +287,6 @@ const CURRENCIES = [
 const formSchema = insertSettingsSchema.omit({ business_id: true });
 
 export default function Settings() {
-  const { selectedBusinessId } = useBusinessContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { isEditionMode, toggleEditionMode, canEdit } = useEdition();

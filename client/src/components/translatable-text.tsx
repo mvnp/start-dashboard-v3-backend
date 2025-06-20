@@ -1,9 +1,9 @@
-import { useState, KeyboardEvent } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { Pen } from 'lucide-react';
+import React, { useState } from 'react';
 import { useEdition } from '@/lib/edition-context';
 import { useTranslationCache } from '@/lib/translation-cache';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
+import { Edit3 } from 'lucide-react';
 
 interface TranslatableTextProps {
   children: string;
@@ -27,8 +27,7 @@ export function TranslatableText({
     editionContext = {
       isEditionMode: false,
       currentLanguage: 'en',
-      canEdit: false,
-      selectedBusinessId: null
+      canEdit: false
     };
   }
   
@@ -37,17 +36,27 @@ export function TranslatableText({
   } catch (error) {
     // TranslationCacheProvider not available, use fallback
     translationCache = {
-      getTranslation: (text: string) => text
+      translations: {},
+      loadTranslations: async () => {},
+      isLoading: false
     };
   }
   
-  const { isEditionMode, currentLanguage, canEdit, selectedBusinessId } = editionContext;
-  const { getTranslation } = translationCache;
+  const { isEditionMode, currentLanguage, canEdit } = editionContext;
+  const { translations } = translationCache;
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
+  const queryClient = useQueryClient();
 
-  // Get cached translation instead of making individual API calls
+  // Get cached translation
+  const getTranslation = (text: string, language: string): string => {
+    if (language === 'en' || !translations[language]) {
+      return text; // Return original text for English or when no translation exists
+    }
+    return translations[language][text] || text;
+  };
+
   const displayText = getTranslation(children, currentLanguage);
 
   // Fetch English string to get the ID for foreign key relationship (only when editing)
@@ -65,103 +74,103 @@ export function TranslatableText({
     enabled: isEditionMode && canEdit,
   });
 
-  // Mutation to save translation with business context and foreign key
+  // Mutation to save translation
   const saveTranslation = useMutation({
     mutationFn: async (traduction: string) => {
       if (!englishString?.id) {
-        throw new Error('English string ID not found');
+        throw new Error('English string not found');
       }
-      
+
       const response = await fetch('/api/traductions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-          ...(selectedBusinessId && { 'business-id': selectedBusinessId.toString() }),
         },
         body: JSON.stringify({
-          string: children,
           traduction_id: englishString.id,
           traduction,
           language: currentLanguage,
         }),
       });
-      if (!response.ok) throw new Error('Failed to save translation');
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+
       return response.json();
     },
     onSuccess: () => {
-      toast({
-        title: "Translation saved",
-        description: "The translation has been saved successfully.",
-      });
+      // Invalidate translation cache to refresh data
+      queryClient.invalidateQueries({ queryKey: ['translations'] });
+      // Reload translations for current language
+      translationCache.loadTranslations(currentLanguage);
+      toast({ title: "Translation saved successfully" });
       setIsEditing(false);
-      // Reload the page to refresh cached translations
-      window.location.reload();
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to save translation.",
-        variant: "destructive",
+    onError: (error: Error) => {
+      toast({ 
+        title: "Error saving translation", 
+        description: error.message,
+        variant: "destructive" 
       });
     },
   });
 
-  const handleEditClick = () => {
+  const handleEdit = () => {
     setEditValue(displayText);
     setIsEditing(true);
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      if (editValue.trim() && editValue !== children) {
-        saveTranslation.mutate(editValue.trim());
-      } else {
-        setIsEditing(false);
-      }
-    } else if (e.key === 'Escape') {
-      setIsEditing(false);
-    }
-  };
-
-  const handleBlur = () => {
-    if (editValue.trim() && editValue !== children) {
-      saveTranslation.mutate(editValue.trim());
+  const handleSave = () => {
+    if (editValue !== displayText) {
+      saveTranslation.mutate(editValue);
     } else {
       setIsEditing(false);
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSave();
+    }
+    if (e.key === 'Escape') {
+      setIsEditing(false);
+      setEditValue('');
+    }
+  };
+
   if (isEditing) {
     return (
-      <input
-        type="text"
-        value={editValue}
-        onChange={(e) => setEditValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onBlur={handleBlur}
-        className={`bg-yellow-100 dark:bg-yellow-900 border border-yellow-300 dark:border-yellow-600 rounded px-1 ${className}`}
-        autoFocus
-        disabled={saveTranslation.isPending}
-      />
+      <Tag className={className}>
+        <input
+          type="text"
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onKeyDown={handleKeyPress}
+          onBlur={handleSave}
+          className="bg-transparent border-b border-dashed border-blue-500 outline-none min-w-[100px] w-full"
+          autoFocus
+        />
+      </Tag>
     );
   }
 
-  // Determine if this should be block or inline-block based on the tag
-  const isBlockElement = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div'].includes(Tag);
-  const displayClass = isBlockElement ? 'block' : 'inline-block';
+  const showEditIcon = isEditionMode && canEdit && currentLanguage !== 'en';
 
   return (
-    <Tag className={`relative ${displayClass} group ${className}`}>
+    <Tag 
+      className={`${className} ${showEditIcon ? 'group inline-flex items-center gap-1 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded px-1 cursor-pointer' : ''}`}
+      onClick={showEditIcon ? handleEdit : undefined}
+    >
       {displayText}
-      {isEditionMode && canEdit && (
-        <button
-          onClick={handleEditClick}
-          className="inline-flex items-center justify-center ml-1 opacity-0 group-hover:opacity-100 transition-opacity w-3 h-3 text-blue-500 hover:text-blue-700"
-          title="Edit translation"
-        >
-          <Pen className="w-2.5 h-2.5" />
-        </button>
+      {showEditIcon && (
+        <Edit3 
+          size={12} 
+          className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" 
+        />
       )}
     </Tag>
   );
