@@ -10,6 +10,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Edit, Plus, Search, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { TranslatableText } from "@/components/translatable-text";
+import { useTranslationHelper } from "@/lib/translation-helper";
 import { useBusinessContext } from "@/hooks/use-business-context";
 import type { AccountingTransaction, AccountingTransactionCategory } from "@shared/schema";
 

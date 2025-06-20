@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import { TranslatableText } from "@/components/translatable-text";
+import { useTranslationHelper } from "@/lib/translation-helper";
 import type { BarberPlan } from "@shared/schema";
 
 interface BarberPlanFormData {

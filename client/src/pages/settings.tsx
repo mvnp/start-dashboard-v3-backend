@@ -13,6 +13,7 @@ import { insertSettingsSchema, type Settings } from "@shared/schema";
 import { Save, Globe, Clock, DollarSign, Edit3 } from "lucide-react";
 import { useEdition } from "@/lib/edition-context";
 import { TranslatableText } from "@/components/translatable-text";
+import { useTranslationHelper } from "@/lib/translation-helper";
 import { Switch } from "@/components/ui/switch";
 import { useBusinessContext } from "@/hooks/use-business-context";
 import { useBusinessLanguage } from "@/lib/business-language-context";

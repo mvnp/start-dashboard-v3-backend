@@ -8,10 +8,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import type { Business } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
+import { useTranslationHelper } from "@/lib/translation-helper";
 
 export default function BusinessList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslationHelper();
 
   const { data: businesses, isLoading } = useQuery<Business[]>({
     queryKey: ["/api/businesses"],
@@ -30,22 +32,21 @@ export default function BusinessList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/businesses"] });
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: <TranslatableText>Business deleted successfully</TranslatableText>,
+        title: t("Success"),
+        description: t("Business deleted successfully"),
       });
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to delete business</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to delete business"),
         variant: "destructive",
       });
     },
   });
 
   const handleDelete = (id: number) => {
-    let alertMessage = <TranslatableText>Are you sure you want to delete this business?</TranslatableText>;
-    if (confirm(alertMessage)) {
+    if (confirm(t("Are you sure you want to delete this business?"))) {
       deleteMutation.mutate(id);
     }
   };

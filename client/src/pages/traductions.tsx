@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Globe, Save, Languages, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { TranslatableText } from "@/components/translatable-text";
+import { useTranslationHelper } from "@/lib/translation-helper";
 
 // Comprehensive language options (copied from Settings page)
 const LANGUAGES = [

@@ -20,6 +20,7 @@ import {
   Headphones
 } from "lucide-react";
 import { TranslatableText } from "@/components/translatable-text";
+import { useTranslationHelper } from "@/lib/translation-helper";
 
 const supportFormSchema = z.object({
   name: z.string().min(2, <TranslatableText>Name must be at least 2 characters</TranslatableText>),

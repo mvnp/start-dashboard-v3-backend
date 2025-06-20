@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { TranslatableText } from "@/components/translatable-text";
+import { useTranslationHelper } from "@/lib/translation-helper";
 
 export default function Logout() {
   const [, setLocation] = useLocation();
