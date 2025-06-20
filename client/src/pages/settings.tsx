@@ -304,8 +304,15 @@ export default function Settings() {
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings', selectedBusinessId],
-    enabled: !!selectedBusinessId && selectedBusinessId > 0,
-    queryFn: () => apiRequest("GET", "/api/settings"),
+    enabled: !!selectedBusinessId && selectedBusinessId > 0 && localStorage.getItem('x-selected-business-id') !== null,
+    queryFn: () => {
+      // Double-check business context is available before making request
+      const businessId = localStorage.getItem('x-selected-business-id');
+      if (!businessId || !selectedBusinessId) {
+        throw new Error('Business context not available');
+      }
+      return apiRequest("GET", "/api/settings");
+    },
   });
 
   const updateMutation = useMutation({

@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 interface EditionContextType {
   isEditionMode: boolean;
   setIsEditionMode: (enabled: boolean) => void;
+  toggleEditionMode: () => void;
   currentLanguage: string;
   canEdit: boolean;
 }
@@ -77,9 +78,14 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     });
   }, [currentLanguage]);
 
+  const toggleEditionMode = () => {
+    setIsEditionMode(!isEditionMode);
+  };
+
   const contextValue: EditionContextType = {
     isEditionMode,
     setIsEditionMode,
+    toggleEditionMode,
     currentLanguage,
     canEdit,
   };
