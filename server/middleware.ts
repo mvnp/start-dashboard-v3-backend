@@ -10,6 +10,7 @@ export const getBusinessFilter = (user: TokenPayload | undefined, req?: Request)
   
   // Check for selected business ID from request headers (frontend business selection)
   const selectedBusinessId = req?.headers['x-selected-business-id'] as string;
+  console.log(selectedBusinessId);
   if (selectedBusinessId) {
     const businessId = parseInt(selectedBusinessId);
     // For Super Admin, allow any business ID selection
