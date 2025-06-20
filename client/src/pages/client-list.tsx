@@ -40,20 +40,22 @@ interface Client extends Person {
 export default function ClientList() {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  const { selectedBusinessId } = useBusinessContext();
 
   const { data: clients = [], isLoading } = useQuery({
-    queryKey: ["/api/clients"],
+    queryKey: ["/api/clients", selectedBusinessId],
     select: (data: Client[]) => data,
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window gains focus
+    enabled: !!selectedBusinessId, // Only fetch when business is selected
   });
 
   const deleteClientMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/clients/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/clients", selectedBusinessId] });
       toast({
         title: <TranslatableText>Client deleted</TranslatableText>,
         description: <TranslatableText>The client has been successfully removed.</TranslatableText>,

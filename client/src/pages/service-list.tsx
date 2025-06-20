@@ -20,28 +20,29 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Service } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
+import { useBusinessContext } from "@/hooks/use-business-context";
 
 export default function ServiceList() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { toast } = useToast();
+  const { selectedBusinessId } = useBusinessContext();
 
   const { data: services = [], isLoading } = useQuery({
-    queryKey: ["/api/services"],
+    queryKey: ["/api/services", selectedBusinessId],
     select: (data: Service[]) => data,
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window gains focus
+    enabled: !!selectedBusinessId,
   });
-
-
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/services/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/services"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/services", selectedBusinessId] });
       toast({
         title: <TranslatableText>Success</TranslatableText>,
         description: <TranslatableText>Service deleted successfully</TranslatableText>,

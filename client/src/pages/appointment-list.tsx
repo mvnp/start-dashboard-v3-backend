@@ -36,6 +36,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Appointment, Service, Person } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
+import { useBusinessContext } from "@/hooks/use-business-context";
 
 const statusOptions = [
   { value: "all", label: <TranslatableText>All Statuses</TranslatableText> },
@@ -50,6 +51,7 @@ export default function AppointmentList() {
   const [, setLocation] = useLocation();
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { toast } = useToast();
+  const { selectedBusinessId } = useBusinessContext();
 
   // Filter and pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -73,7 +75,8 @@ export default function AppointmentList() {
   }, [currentPage, statusFilter, todayFilter, startDate, endDate]);
 
   const { data: appointmentData, isLoading } = useQuery({
-    queryKey: ["/api/appointments", buildQueryParams()],
+    queryKey: ["/api/appointments", selectedBusinessId, buildQueryParams()],
+    enabled: !!selectedBusinessId,
     queryFn: async () => {
       const token = localStorage.getItem('accessToken');
       const headers: Record<string, string> = {};
