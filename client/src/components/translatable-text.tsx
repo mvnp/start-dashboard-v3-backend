@@ -114,12 +114,14 @@ export function TranslatableText({
       queryClient.invalidateQueries({ queryKey: ['translations'] });
       // Refresh business language translations
       businessLanguage.refreshTranslations();
-      toast({ title: "Translation saved successfully" });
+      toast({ 
+        title: t("Translation saved successfully") 
+      });
       setIsEditing(false);
     },
     onError: (error: Error) => {
       toast({ 
-        title: "Error saving translation", 
+        title: t("Error saving translation"), 
         description: error.message,
         variant: "destructive" 
       });

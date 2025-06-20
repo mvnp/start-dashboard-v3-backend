@@ -96,15 +96,15 @@ export default function BarberPlanForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/barber-plans"] });
       toast({
-        title: "Success",
-        description: "Plan created successfully",
+        title: t("Success"),
+        description: t("Plan created successfully"),
       });
       setLocation("/barber-plans");
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create plan",
+        title: t("Error"),
+        description: error.message || t("Failed to create plan"),
         variant: "destructive",
       });
     },
@@ -118,15 +118,15 @@ export default function BarberPlanForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/barber-plans"] });
       toast({
-        title: "Success",
-        description: "Plan updated successfully",
+        title: t("Success"),
+        description: t("Plan updated successfully"),
       });
       setLocation("/barber-plans");
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update plan",
+        title: t("Error"),
+        description: error.message || t("Failed to update plan"),
         variant: "destructive",
       });
     },

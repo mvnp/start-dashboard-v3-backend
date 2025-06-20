@@ -345,20 +345,20 @@ export default function Settings() {
         }, 500);
         
         toast({
-          title: "Settings updated",
+          title: t("Settings updated"),
           description: `Language changed to ${LANGUAGES.find(l => l.code === variables.language)?.name || variables.language}. Translations applied immediately.`,
         });
       } else {
         toast({
-          title: "Settings updated",
-          description: "Your business settings have been saved successfully.",
+          title: t("Settings updated"),
+          description: t("Your business settings have been saved successfully."),
         });
       }
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update settings",
+        title: t("Error"),
+        description: error.message || t("Failed to update settings"),
         variant: "destructive",
       });
     },

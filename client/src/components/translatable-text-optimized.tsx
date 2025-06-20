@@ -66,8 +66,8 @@ export function TranslatableText({
     },
     onSuccess: () => {
       toast({
-        title: "Translation saved",
-        description: "The translation has been saved successfully.",
+        title: t("Translation saved"),
+        description: t("The translation has been saved successfully."),
       });
       setIsEditing(false);
       // Reload the page to refresh cached translations

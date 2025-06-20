@@ -55,15 +55,15 @@ export default function PaymentGatewayList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/payment-gateways", selectedBusinessId] });
       toast({
-        title: "Success",
-        description: "Payment gateway deleted successfully",
+        title: t("Success"),
+        description: t("Payment gateway deleted successfully"),
       });
       setDeleteId(null);
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete payment gateway",
+        title: t("Error"),
+        description: t("Failed to delete payment gateway"),
         variant: "destructive",
       });
     },

@@ -99,12 +99,14 @@ export function TranslatableText({
       // Invalidate translation cache and refresh business translations
       queryClient.invalidateQueries({ queryKey: ['translations'] });
       refreshTranslations();
-      toast({ title: "Translation saved successfully" });
+      toast({ 
+        title: t("Translation saved successfully") 
+      });
       setIsEditing(false);
     },
     onError: (error: Error) => {
       toast({ 
-        title: "Error saving translation", 
+        title: t("Error saving translation"), 
         description: error.message,
         variant: "destructive" 
       });

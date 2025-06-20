@@ -64,13 +64,13 @@ export default function Login() {
       localStorage.setItem('refreshToken', data.refreshToken);
       setStep('business');
       toast({
-        title: "Credentials validated",
-        description: "Please select your business"
+        title: t("Credentials validated"),
+        description: t("Please select your business")
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Login failed",
+        title: t("Login failed"),
         description: error.message,
         variant: "destructive",
       });
@@ -89,14 +89,14 @@ export default function Login() {
       // Invalidate all queries to refresh data with new user context
       queryClient.invalidateQueries();
       toast({
-        title: "Login successful",
-        description: "Welcome to BarberPro Dashboard"
+        title: t("Login successful"),
+        description: t("Welcome to BarberPro Dashboard")
       });
       setLocation("/");
     },
     onError: (error: Error) => {
       toast({
-        title: "Login failed",
+        title: t("Login failed"),
         description: error.message,
         variant: "destructive",
       });
@@ -107,8 +107,8 @@ export default function Login() {
     e.preventDefault();
     if (!email || !password) {
       toast({
-        title: "Missing credentials",
-        description: "Please enter both email and password",
+        title: t("Missing credentials"),
+        description: t("Please enter both email and password"),
         variant: "destructive",
       });
       return;
@@ -119,8 +119,8 @@ export default function Login() {
   const handleBusinessSelect = async () => {
     if (!selectedBusinessId) {
       toast({
-        title: "Business required",
-        description: "Please select a business to continue",
+        title: t("Business required"),
+        description: t("Please select a business to continue"),
         variant: "destructive",
       });
       return;
