@@ -7,7 +7,6 @@ interface EditionContextType {
   setIsEditionMode: (enabled: boolean) => void;
   currentLanguage: string;
   canEdit: boolean;
-  updateLanguage: (language: string) => void;
 }
 
 const EditionContext = createContext<EditionContextType | undefined>(undefined);
@@ -26,13 +25,32 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem('editionMode');
     return saved === 'true';
   });
-  const [manualLanguage, setManualLanguage] = useState<string | null>(null);
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Get current language from settings - disabled to prevent conflicts
-  // Settings are now fetched directly in business context hook
-  const settings = null;
+  // Get current language from settings
+  const { data: settings } = useQuery({
+    queryKey: ['settings'],
+    queryFn: async () => {
+      const response = await fetch('/api/settings', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
+      if (!response.ok) return null;
+      const settingsData = await response.json();
+      
+      // Cache language setting in localStorage
+      if (settingsData?.language) {
+        localStorage.setItem('currentLanguage', settingsData.language);
+      }
+      
+      return settingsData;
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+  });
 
   // Get cached language while settings are loading
   const getCachedLanguage = () => {
@@ -43,18 +61,8 @@ export function EditionProvider({ children }: { children: ReactNode }) {
   // Check if user is Super Admin (Role ID: 1)
   const canEdit = user?.roleId === 1;
 
-  // Method to update language manually (from business context)
-  const updateLanguage = (language: string) => {
-    setManualLanguage(language);
-    localStorage.setItem('currentLanguage', language);
-    console.log('Language updated via business context:', language);
-    
-    // Invalidate translation cache to reload with new language
-    queryClient.invalidateQueries({ queryKey: ['translations'] });
-  };
-
-  // Current language determination (manual override takes precedence)
-  const currentLanguage = manualLanguage || getCachedLanguage();
+  // Current language determination
+  const currentLanguage = settings?.language || getCachedLanguage();
 
   // Save edition mode to localStorage when it changes
   useEffect(() => {
@@ -65,17 +73,15 @@ export function EditionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     console.log('EditionContext language detection:', {
       cachedLanguage: getCachedLanguage(),
-      manualLanguage,
       currentLanguage,
     });
-  }, [currentLanguage, manualLanguage]);
+  }, [currentLanguage]);
 
   const contextValue: EditionContextType = {
     isEditionMode,
     setIsEditionMode,
     currentLanguage,
     canEdit,
-    updateLanguage,
   };
 
   return (
