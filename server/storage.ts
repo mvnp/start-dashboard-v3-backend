@@ -171,7 +171,7 @@ export interface IStorage {
   // Translation methods
   getTraduction(string: string, language: string): Promise<Traduction | undefined>;
   getAllTraductions(language: string): Promise<Traduction[]>;
-  getBulkTranslations(language: string): Promise<any[]>;
+  getBulkTranslations(language: string): Promise<{traduction_id: number, traduction_string: string, traduction: string, language: string}[]>;
   createTraduction(traduction: InsertTraduction): Promise<Traduction>;
   updateTraduction(string: string, language: string, traduction: string): Promise<Traduction | undefined>;
   deleteTraduction(id: number): Promise<boolean>;
@@ -1193,7 +1193,7 @@ class PostgresStorage implements IStorage {
     return result.rowCount > 0;
   }
 
-  async getBulkTranslations(language: string): Promise<any[]> {
+  async getBulkTranslations(language: string): Promise<{traduction_id: number, traduction_string: string, traduction: string, language: string}[]> {
     if (language === 'en') {
       // For English, get all source strings from traductions table
       const result = await this.db.select({

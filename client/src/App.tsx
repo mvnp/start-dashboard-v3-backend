@@ -8,6 +8,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { EditionProvider } from "@/lib/edition-context";
 import { TranslationCacheProvider } from "@/lib/translation-cache";
+import { BusinessProvider } from "@/lib/business-context";
+import { BusinessLanguageProvider } from "@/lib/business-language-context";
 
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
@@ -330,14 +332,18 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <EditionProvider>
-          <TranslationCacheProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Router />
-            </TooltipProvider>
-          </TranslationCacheProvider>
-        </EditionProvider>
+        <BusinessProvider>
+          <BusinessLanguageProvider>
+            <EditionProvider>
+              <TranslationCacheProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Router />
+                </TooltipProvider>
+              </TranslationCacheProvider>
+            </EditionProvider>
+          </BusinessLanguageProvider>
+        </BusinessProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
