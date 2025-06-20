@@ -305,22 +305,6 @@ export default function Settings() {
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings', selectedBusinessId],
     enabled: !!selectedBusinessId && selectedBusinessId > 0,
-    queryFn: () => {
-      // Double-check business context before making request
-      const businessId = localStorage.getItem('x-selected-business-id');
-      if (!businessId) {
-        throw new Error('Business context not available');
-      }
-      return fetch('/api/settings', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-          'x-selected-business-id': businessId,
-        },
-      }).then(res => {
-        if (!res.ok) throw new Error('Failed to fetch settings');
-        return res.json();
-      });
-    },
   });
 
   const updateMutation = useMutation({
