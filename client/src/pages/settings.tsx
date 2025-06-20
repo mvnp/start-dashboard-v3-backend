@@ -301,23 +301,20 @@ export default function Settings() {
   });
 
   const { data: settings, isLoading } = useQuery({
-    queryKey: ['settings', 
+    queryKey: ['settings'],
     queryFn: async () => {
       const response = await fetch('/api/settings', {
         headers: {
-          'business-id': 
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
       
       if (!response.ok) {
-        let message = <TranslatableText>Failed to fetch settings</TranslatableText>
-        throw new Error(message.toString());
+        throw new Error('Failed to fetch settings');
       }
       
       return response.json();
     },
-    enabled: !!
   });
 
   const updateMutation = useMutation({
@@ -326,7 +323,6 @@ export default function Settings() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'business-id': 
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
         },
         body: JSON.stringify(data),
@@ -341,14 +337,14 @@ export default function Settings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] });
       toast({
-        title: <TranslatableText>Settings updated</TranslatableText>,
-        description: <TranslatableText>Your business settings have been saved successfully.</TranslatableText>,
+        title: "Settings updated",
+        description: "Your business settings have been saved successfully.",
       });
     },
     onError: (error: any) => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: error.message || <TranslatableText>Failed to update settings</TranslatableText>,
+        title: "Error",
+        description: error.message || "Failed to update settings",
         variant: "destructive",
       });
     },
