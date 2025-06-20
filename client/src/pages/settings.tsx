@@ -304,39 +304,27 @@ export default function Settings() {
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings', selectedBusinessId],
-    enabled: !!selectedBusinessId,
-    queryFn: async () => {
-      const response = await fetch('/api/settings', {
+    enabled: !!selectedBusinessId && selectedBusinessId > 0,
+    queryFn: () => {
+      // Double-check business context before making request
+      const businessId = localStorage.getItem('x-selected-business-id');
+      if (!businessId) {
+        throw new Error('Business context not available');
+      }
+      return fetch('/api/settings', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'x-selected-business-id': businessId,
         },
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to fetch settings');
+        return res.json();
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch settings');
-      }
-      
-      return response.json();
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof formSchema>) => {
-      const response = await fetch('/api/settings', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to update settings');
-      }
-      
-      return response.json();
-    },
+    mutationFn: (data: z.infer<typeof formSchema>) => apiRequest("PUT", "/api/settings", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings', selectedBusinessId] });
       toast({
