@@ -72,22 +72,14 @@ export default function AppointmentList() {
     return params.toString();
   }, [currentPage, statusFilter, todayFilter, startDate, endDate]);
 
-  // Get selected business ID to include in cache key
-  const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
-
   const { data: appointmentData, isLoading } = useQuery({
-    queryKey: ["/api/appointments", buildQueryParams(), selectedBusinessId],
+    queryKey: ["/api/appointments", buildQueryParams()],
     queryFn: async () => {
       const token = localStorage.getItem('accessToken');
-      const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
       const headers: Record<string, string> = {};
       
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
-      }
-      
-      if (selectedBusinessId) {
-        headers["X-Selected-Business-Id"] = selectedBusinessId;
       }
 
       const response = await fetch(`/api/appointments?${buildQueryParams()}`, {
@@ -103,27 +95,27 @@ export default function AppointmentList() {
   });
 
   const { data: services = [] } = useQuery<Service[]>({
-    queryKey: ["/api/services", selectedBusinessId],
-    staleTime: 0, // Data is immediately stale
-    gcTime: 0, // Don't keep in cache
-    refetchOnMount: true, // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gains focus
+    queryKey: ["/api/services"],
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const { data: staff = [] } = useQuery<Person[]>({
-    queryKey: ["/api/staff", selectedBusinessId],
-    staleTime: 0, // Data is immediately stale
-    gcTime: 0, // Don't keep in cache
-    refetchOnMount: true, // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gains focus
+    queryKey: ["/api/staff"],
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const { data: clients = [] } = useQuery<Person[]>({
-    queryKey: ["/api/clients", selectedBusinessId],
-    staleTime: 0, // Data is immediately stale
-    gcTime: 0, // Don't keep in cache
-    refetchOnMount: true, // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gains focus
+    queryKey: ["/api/clients"],
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const appointments = appointmentData?.appointments || [];
@@ -133,17 +125,17 @@ export default function AppointmentList() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/appointments/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/appointments", buildQueryParams(), selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/appointments", buildQueryParams()] });
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: <TranslatableText>Appointment deleted successfully</TranslatableText>,
+        title: "Success",
+        description: "Appointment deleted successfully",
       });
       setDeleteId(null);
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to delete appointment</TranslatableText>,
+        title: "Error",
+        description: "Failed to delete appointment",
         variant: "destructive",
       });
     },
