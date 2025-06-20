@@ -19,6 +19,7 @@ export default function SupportTicketList() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const queryClient = useQueryClient();
   const { selectedBusinessId } = useBusinessContext();
 

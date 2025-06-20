@@ -18,6 +18,7 @@ export default function WhatsappList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const queryClient = useQueryClient();
   const { selectedBusinessId } = useBusinessContext();
 

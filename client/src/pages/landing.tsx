@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { BarberPlan } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
+import { useTranslationHelper } from "@/lib/translation-helper";
 
 const features = [
   {
@@ -65,6 +66,7 @@ const features = [
 
 export default function Landing() {
   const [isAnnual, setIsAnnual] = useState(false);
+  const { t } = useTranslationHelper();
 
   const { data: plans = [] } = useQuery({
     queryKey: ["/api/barber-plans"],
