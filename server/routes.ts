@@ -970,6 +970,8 @@ export function registerRoutes(app: Express): void {
       const user = req.user!;
       const businessIds = getBusinessFilter(user, req);
 
+      console.log(businessIds);
+
       let services;
       // Super Admin can see all data when no business is selected
       if (user.isSuperAdmin && businessIds === null) {
