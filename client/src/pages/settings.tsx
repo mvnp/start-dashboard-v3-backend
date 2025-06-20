@@ -15,6 +15,7 @@ import { useEdition } from "@/lib/edition-context";
 import { TranslatableText } from "@/components/translatable-text";
 import { Switch } from "@/components/ui/switch";
 import { useBusinessContext } from "@/hooks/use-business-context";
+import { useBusinessLanguage } from "@/lib/business-language-context";
 
 // Comprehensive language options (sorted alphabetically by English name)
 const LANGUAGES = [
@@ -292,6 +293,7 @@ export default function Settings() {
   const queryClient = useQueryClient();
   const { isEditionMode, toggleEditionMode, canEdit } = useEdition();
   const { selectedBusinessId } = useBusinessContext();
+  const { loadBusinessLanguage } = useBusinessLanguage();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -317,12 +319,27 @@ export default function Settings() {
 
   const updateMutation = useMutation({
     mutationFn: (data: z.infer<typeof formSchema>) => apiRequest("PUT", "/api/settings", data),
-    onSuccess: () => {
+    onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['settings', selectedBusinessId] });
-      toast({
-        title: "Settings updated",
-        description: "Your business settings have been saved successfully.",
-      });
+      
+      // If language was changed, immediately update the business language context
+      const currentLanguage = (settings as any)?.language || 'en';
+      if (variables.language && variables.language !== currentLanguage) {
+        // Load translations for the new language immediately
+        if (selectedBusinessId) {
+          await loadBusinessLanguage(selectedBusinessId, variables.language);
+        }
+        
+        toast({
+          title: "Settings updated",
+          description: `Language changed to ${LANGUAGES.find(l => l.code === variables.language)?.name || variables.language}. Translations loaded successfully.`,
+        });
+      } else {
+        toast({
+          title: "Settings updated",
+          description: "Your business settings have been saved successfully.",
+        });
+      }
     },
     onError: (error: any) => {
       toast({

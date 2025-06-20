@@ -18,6 +18,7 @@ interface BusinessLanguageContextType {
   isLoading: boolean;
   getTranslation: (text: string) => string;
   refreshTranslations: () => Promise<void>;
+  loadBusinessLanguage: (businessId: number, language: string) => Promise<void>;
 }
 
 const BusinessLanguageContext = createContext<BusinessLanguageContextType | null>(null);
@@ -94,6 +95,20 @@ export function BusinessLanguageProvider({ children }: { children: React.ReactNo
     }
   };
 
+  const loadBusinessLanguage = async (businessId: number, language: string) => {
+    // Update localStorage and sessionStorage
+    localStorage.setItem('x-selected-business-language', language);
+    sessionStorage.setItem('x-selected-business-language', language);
+    
+    // Load translations for the new language
+    if (language !== 'en') {
+      await loadBulkTranslations(language);
+    } else {
+      // Clear translations for English
+      setTranslations({});
+    }
+  };
+
   return (
     <BusinessLanguageContext.Provider
       value={{
@@ -101,6 +116,7 @@ export function BusinessLanguageProvider({ children }: { children: React.ReactNo
         isLoading,
         getTranslation,
         refreshTranslations,
+        loadBusinessLanguage,
       }}
     >
       {children}
