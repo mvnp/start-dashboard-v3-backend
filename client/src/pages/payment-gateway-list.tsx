@@ -19,6 +19,8 @@ import { Plus, Search, Edit, Trash2, CreditCard, Globe, Key, Mail, User } from "
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { PaymentGateway } from "@shared/schema";
+import { TranslatableText } from "@/components/translatable-text";
+import { useBusinessContext } from "@/hooks/use-business-context";
 
 interface Staff {
   id: number;
@@ -27,28 +29,30 @@ interface Staff {
   email: string;
   role: string;
 }
-import { TranslatableText } from "@/components/translatable-text";
 
 export default function PaymentGatewayList() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { toast } = useToast();
+  const { selectedBusinessId } = useBusinessContext();
 
   const { data: gateways = [], isLoading } = useQuery({
-    queryKey: ["/api/payment-gateways"],
+    queryKey: ["/api/payment-gateways", selectedBusinessId],
     select: (data: PaymentGateway[]) => data,
+    enabled: !!selectedBusinessId,
   });
 
   const { data: staff = [] } = useQuery({
-    queryKey: ["/api/staff"],
+    queryKey: ["/api/staff", selectedBusinessId],
     select: (data: Staff[]) => data,
+    enabled: !!selectedBusinessId,
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/payment-gateways/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/payment-gateways"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/payment-gateways", selectedBusinessId] });
       toast({
         title: "Success",
         description: "Payment gateway deleted successfully",

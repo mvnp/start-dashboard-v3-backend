@@ -14,6 +14,7 @@ import { Save, Globe, Clock, DollarSign, Edit3 } from "lucide-react";
 import { useEdition } from "@/lib/edition-context";
 import { TranslatableText } from "@/components/translatable-text";
 import { Switch } from "@/components/ui/switch";
+import { useBusinessContext } from "@/hooks/use-business-context";
 
 // Comprehensive language options (sorted alphabetically by English name)
 const LANGUAGES = [
@@ -290,6 +291,7 @@ export default function Settings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { isEditionMode, toggleEditionMode, canEdit } = useEdition();
+  const { selectedBusinessId } = useBusinessContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -301,7 +303,8 @@ export default function Settings() {
   });
 
   const { data: settings, isLoading } = useQuery({
-    queryKey: ['settings'],
+    queryKey: ['settings', selectedBusinessId],
+    enabled: !!selectedBusinessId,
     queryFn: async () => {
       const response = await fetch('/api/settings', {
         headers: {
@@ -335,7 +338,7 @@ export default function Settings() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings'] });
+      queryClient.invalidateQueries({ queryKey: ['settings', selectedBusinessId] });
       toast({
         title: "Settings updated",
         description: "Your business settings have been saved successfully.",

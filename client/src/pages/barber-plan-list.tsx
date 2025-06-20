@@ -20,22 +20,25 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { BarberPlan } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
+import { useBusinessContext } from "@/hooks/use-business-context";
 
 export default function BarberPlanList() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { toast } = useToast();
+  const { selectedBusinessId } = useBusinessContext();
 
   const { data: plans = [], isLoading } = useQuery({
-    queryKey: ["/api/barber-plans"],
+    queryKey: ["/api/barber-plans", selectedBusinessId],
     select: (data: BarberPlan[]) => data,
+    enabled: !!selectedBusinessId,
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/barber-plans/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", selectedBusinessId] });
       toast({
         title: <TranslatableText>Success</TranslatableText>,
         description: <TranslatableText>Barber plan deleted successfully</TranslatableText>,

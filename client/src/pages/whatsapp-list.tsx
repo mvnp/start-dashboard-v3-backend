@@ -11,21 +11,24 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { WhatsappInstance } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
+import { useBusinessContext } from "@/hooks/use-business-context";
 
 export default function WhatsappList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { selectedBusinessId } = useBusinessContext();
 
   const { data: instances = [], isLoading, error } = useQuery<WhatsappInstance[]>({
-    queryKey: ["/api/whatsapp-instances"],
+    queryKey: ["/api/whatsapp-instances", selectedBusinessId],
+    enabled: !!selectedBusinessId,
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/whatsapp-instances/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances", selectedBusinessId] });
       toast({
         title: <TranslatableText>Instance deleted</TranslatableText>,
         description: <TranslatableText>The WhatsApp instance has been successfully deleted.</TranslatableText>,
@@ -43,7 +46,7 @@ export default function WhatsappList() {
   const generateQrMutation = useMutation({
     mutationFn: (id: number) => apiRequest("POST", `/api/whatsapp-instances/${id}/generate-qr`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances", selectedBusinessId] });
       toast({
         title: <TranslatableText>QR Code generated</TranslatableText>,
         description: <TranslatableText>QR code has been generated. Please scan it with your phone.</TranslatableText>,
