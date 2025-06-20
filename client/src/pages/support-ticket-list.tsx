@@ -21,7 +21,6 @@ export default function SupportTicketList() {
 
   const { data: tickets = [], isLoading } = useQuery({
     queryKey: ["/api/support-tickets", selectedBusinessId],
-    enabled: !!selectedBusinessId,
     select: (data: SupportTicket[]) => data,
   });
 

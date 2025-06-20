@@ -40,7 +40,6 @@ export default function ServiceForm() {
 
   const { data: serviceData, isLoading } = useQuery({
     queryKey: [`/api/services/${serviceId}`, selectedBusinessId],
-    enabled: isEdit && !!serviceId && !!selectedBusinessId,
     select: (data: Service) => data,
   });
 

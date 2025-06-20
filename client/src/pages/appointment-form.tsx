@@ -25,7 +25,7 @@ interface AppointmentFormData {
 }
 
 export default function AppointmentForm() {
-  const [, setLocation] = useLocation();
+  const [ setLocation] = useLocation();
   const params = useParams();
   const { toast } = useToast();
   const isEdit = !!params.id;
@@ -35,7 +35,7 @@ export default function AppointmentForm() {
     client_id: 0,
     user_id: 0,
     service_id: 0,
-    business_id: selectedBusinessId || 0,
+    business_id: 
     appointment_date: "",
     appointment_time: "",
     status: "Scheduled",
@@ -65,15 +65,15 @@ export default function AppointmentForm() {
       if (!appointmentId) return null;
       
       const token = localStorage.getItem('accessToken');
-      const selectedBusinessId = sessionStorage.getItem('selectedBusinessId');
+      const 
       const headers: Record<string, string> = {};
       
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
       
-      if (selectedBusinessId) {
-        headers["X-Selected-Business-Id"] = selectedBusinessId;
+      if (
+        headers["X-Selected-Business-Id"] = 
       }
 
       const response = await fetch(`/api/appointments/${appointmentId}`, {
@@ -144,24 +144,24 @@ export default function AppointmentForm() {
         client_id: appointmentData.client_id || 0,
         user_id: appointmentData.user_id || 0,
         service_id: appointmentData.service_id || 0,
-        business_id: appointmentData.business_id || selectedBusinessId || 0,
+        business_id: appointmentData.business_id || 
         appointment_date: appointmentData.appointment_date || "",
         appointment_time: formattedTime,
         status: normalizeStatus(appointmentData.status || ""),
         notes: appointmentData.notes || "",
       });
     }
-  }, [appointmentData, isEdit, isSuccess, staffLoaded, servicesLoaded, clientsLoaded, selectedBusinessId]);
+  }, [appointmentData, isEdit, isSuccess, staffLoaded, servicesLoaded, clientsLoaded, 
 
   // Update business_id when selected business changes
   useEffect(() => {
-    if (selectedBusinessId) {
+    if (
       setFormData(prev => ({
         ...prev,
-        business_id: selectedBusinessId
+        business_id: 
       }));
     }
-  }, [selectedBusinessId]);
+  }, [
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

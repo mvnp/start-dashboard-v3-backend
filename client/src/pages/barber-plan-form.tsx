@@ -25,7 +25,7 @@ interface BarberPlanFormData {
 }
 
 export default function BarberPlanForm() {
-  const [, setLocation] = useLocation();
+  const [ setLocation] = useLocation();
   const params = useParams();
   const { toast } = useToast();
   const isEdit = !!params.id;
@@ -44,7 +44,7 @@ export default function BarberPlanForm() {
   });
 
   const { data: planData, isLoading } = useQuery({
-    queryKey: [`/api/barber-plans/${planId}`, selectedBusinessId],
+    queryKey: [`/api/barber-plans/${planId}`, 
     enabled: isEdit && !!planId,
     select: (data: BarberPlan) => data,
   });
@@ -52,10 +52,10 @@ export default function BarberPlanForm() {
   const createMutation = useMutation({
     mutationFn: (data: BarberPlanFormData) => apiRequest("POST", "/api/barber-plans", {
       ...data,
-      business_id: selectedBusinessId
+      business_id: 
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", 
       toast({
         title: <TranslatableText>Success</TranslatableText>,
         description: <TranslatableText>Barber plan created successfully</TranslatableText>,
@@ -74,11 +74,11 @@ export default function BarberPlanForm() {
   const updateMutation = useMutation({
     mutationFn: (data: BarberPlanFormData) => apiRequest("PUT", `/api/barber-plans/${planId}`, {
       ...data,
-      business_id: selectedBusinessId
+      business_id: 
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", selectedBusinessId] });
-      queryClient.invalidateQueries({ queryKey: [`/api/barber-plans/${planId}`, selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", 
+      queryClient.invalidateQueries({ queryKey: [`/api/barber-plans/${planId}`, 
       toast({
         title: <TranslatableText>Success</TranslatableText>,
         description: <TranslatableText>Barber plan updated successfully</TranslatableText>,
@@ -114,10 +114,10 @@ export default function BarberPlanForm() {
     e.preventDefault();
     
     // Debug logging
-    console.log('Form submission - selectedBusinessId:', selectedBusinessId);
-    console.log('Form submission - sessionStorage selectedBusinessId:', sessionStorage.getItem('selectedBusinessId'));
+    console.log('Form submission -  
+    console.log('Form submission - sessionStorage  sessionStorage.getItem('
     
-    if (!selectedBusinessId) {
+    if (!
       toast({
         title: <TranslatableText>Error</TranslatableText>,
         description: <TranslatableText>Please select a business first</TranslatableText>,

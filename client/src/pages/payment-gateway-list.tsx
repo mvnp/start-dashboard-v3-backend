@@ -38,13 +38,11 @@ export default function PaymentGatewayList() {
   const { data: gateways = [], isLoading } = useQuery({
     queryKey: ["/api/payment-gateways", selectedBusinessId],
     select: (data: PaymentGateway[]) => data,
-    enabled: !!selectedBusinessId,
   });
 
   const { data: staff = [] } = useQuery({
     queryKey: ["/api/staff", selectedBusinessId],
     select: (data: Staff[]) => data,
-    enabled: !!selectedBusinessId,
   });
 
   const deleteMutation = useMutation({

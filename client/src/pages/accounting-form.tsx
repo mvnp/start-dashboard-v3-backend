@@ -36,7 +36,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function AccountingForm() {
-  const [, setLocation] = useLocation();
+  const [ setLocation] = useLocation();
   const { toast } = useToast();
   const [isEdit, setIsEdit] = useState(false);
   const [transactionId, setTransactionId] = useState<number | null>(null);
@@ -71,7 +71,7 @@ export default function AccountingForm() {
 
   // Fetch transaction data for editing
   const { data: transaction, isLoading: isLoadingTransaction, error: transactionError } = useQuery<AccountingTransaction>({
-    queryKey: [`/api/accounting-transactions/${transactionId}`, selectedBusinessId],
+    queryKey: [`/api/accounting-transactions/${transactionId}`, 
     enabled: !!transactionId && isEdit,
     retry: 3,
     staleTime: 0, // Always fetch fresh data
@@ -84,17 +84,17 @@ export default function AccountingForm() {
 
   // Fetch clients (role ID 4)
   const { data: clients = [] } = useQuery<Person[]>({
-    queryKey: ["/api/clients", selectedBusinessId],
+    queryKey: ["/api/clients", 
   });
 
   // Fetch staff (role ID 3)
   const { data: staff = [] } = useQuery<Person[]>({
-    queryKey: ["/api/staff", selectedBusinessId],
+    queryKey: ["/api/staff", 
   });
 
   // Fetch categories
   const { data: categories = [] } = useQuery<AccountingTransactionCategory[]>({
-    queryKey: ["/api/accounting-transaction-categories", selectedBusinessId],
+    queryKey: ["/api/accounting-transaction-categories", 
   });
 
   // Set form values when editing
@@ -141,19 +141,19 @@ export default function AccountingForm() {
 
   // Auto-set business_id from selected business context
   useEffect(() => {
-    if (selectedBusinessId && !isEdit && !form.getValues("business_id")) {
-      form.setValue("business_id", selectedBusinessId);
+    if (
+      form.setValue("business_id", 
     }
-  }, [selectedBusinessId, form, isEdit]);
+  }, [ form, isEdit]);
 
   const createMutation = useMutation({
     mutationFn: (data: FormData) => 
       apiRequest("POST", "/api/accounting-transactions", {
         ...data,
-        business_id: selectedBusinessId
+        business_id: 
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions", 
       toast({
         title: <TranslatableText>Success</TranslatableText>,
         description: <TranslatableText>Transaction created successfully</TranslatableText>,
@@ -173,10 +173,10 @@ export default function AccountingForm() {
     mutationFn: (data: FormData) =>
       apiRequest("PUT", `/api/accounting-transactions/${transactionId}`, {
         ...data,
-        business_id: selectedBusinessId
+        business_id: 
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions", 
       toast({
         title: <TranslatableText>Success</TranslatableText>,
         description: <TranslatableText>Transaction updated successfully</TranslatableText>,

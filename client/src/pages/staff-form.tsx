@@ -139,7 +139,7 @@ export default function StaffForm() {
   const updateStaffMutation = useMutation({
     mutationFn: (data: StaffFormData) => apiRequest("PUT", `/api/staff/${staffId}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/staff", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
       queryClient.invalidateQueries({ queryKey: [`/api/staff/${staffId}`] });
       toast({
         title: <TranslatableText>Staff member updated</TranslatableText>,

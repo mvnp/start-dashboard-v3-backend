@@ -12,11 +12,11 @@ import { format } from "date-fns";
 import { TranslatableText } from "@/components/translatable-text";
 
 export default function AccountingList() {
-  const [, setLocation] = useLocation();
+  const [ setLocation] = useLocation();
   const { toast } = useToast();
 
   const { data: transactions = [], isLoading } = useQuery<AccountingTransaction[]>({
-    queryKey: ["/api/accounting-transactions", selectedBusinessId],
+    queryKey: ["/api/accounting-transactions", 
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
@@ -24,13 +24,13 @@ export default function AccountingList() {
   });
 
   const { data: categories = [] } = useQuery<AccountingTransactionCategory[]>({
-    queryKey: ["/api/accounting-transaction-categories", selectedBusinessId],
+    queryKey: ["/api/accounting-transaction-categories", 
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/accounting-transactions/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions", 
       toast({
         title: <TranslatableText>Success</TranslatableText>,
         description: <TranslatableText>Transaction deleted successfully</TranslatableText>,

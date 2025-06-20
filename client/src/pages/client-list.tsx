@@ -43,7 +43,6 @@ export default function ClientList() {
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ["/api/clients", selectedBusinessId],
     select: (data: Client[]) => data,
-    enabled: !!selectedBusinessId,
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts

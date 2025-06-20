@@ -76,7 +76,6 @@ export default function ClientForm() {
 
   const { data: clientMember, isLoading, error } = useQuery<ClientWithUser>({
     queryKey: [`/api/clients/${clientId}`, selectedBusinessId] as const,
-    enabled: isEdit && !!clientId && !!selectedBusinessId,
   });
 
 

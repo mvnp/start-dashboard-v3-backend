@@ -100,26 +100,18 @@ const quickActions = [
 ];
 
 export default function Dashboard() {
-  // Handle case where component renders before BusinessProvider is ready
-  let businessContext;
-  try {
-  } catch (error) {
-    // BusinessProvider not available, use fallback
-    businessContext = { selectedBusinessId: null };
-  }
-  
-  const { selectedBusinessId } = businessContext;
+  // No business context needed
 
   // Fetch dashboard statistics
   const { data: stats, isLoading: isLoadingStats } = useQuery<DashboardStats>({
-    queryKey: ["/api/dashboard/stats", selectedBusinessId],
+    queryKey: ["/api/dashboard/stats"],
     staleTime: 30000, // Cache for 30 seconds
     refetchOnMount: true,
   });
 
   // Fetch recent appointments
   const { data: appointmentsData } = useQuery({
-    queryKey: ["/api/appointments", selectedBusinessId],
+    queryKey: ["/api/appointments"],
     select: (data: any) => data.appointments?.slice(0, 3) || [],
   });
 

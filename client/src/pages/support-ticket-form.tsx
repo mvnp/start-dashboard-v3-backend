@@ -70,14 +70,12 @@ export default function SupportTicketForm() {
   // Load ticket data for editing/viewing
   const { data: ticket } = useQuery({
     queryKey: ["/api/support-tickets", ticketId],
-    enabled: !isCreating && !!ticketId && !!selectedBusinessId,
     select: (data: SupportTicket) => data,
   });
 
   // Load staff for assignment dropdown
   const { data: staff = [] } = useQuery({
     queryKey: ["/api/staff", selectedBusinessId],
-    enabled: !!selectedBusinessId,
   });
 
   // Update form when ticket data is loaded

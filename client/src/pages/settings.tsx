@@ -301,11 +301,11 @@ export default function Settings() {
   });
 
   const { data: settings, isLoading } = useQuery({
-    queryKey: ['settings', selectedBusinessId],
+    queryKey: ['settings', 
     queryFn: async () => {
       const response = await fetch('/api/settings', {
         headers: {
-          'business-id': selectedBusinessId?.toString() || '',
+          'business-id': 
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
@@ -317,7 +317,7 @@ export default function Settings() {
       
       return response.json();
     },
-    enabled: !!selectedBusinessId,
+    enabled: !!
   });
 
   const updateMutation = useMutation({
@@ -326,7 +326,7 @@ export default function Settings() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'business-id': selectedBusinessId?.toString() || '',
+          'business-id': 
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
         },
         body: JSON.stringify(data),
