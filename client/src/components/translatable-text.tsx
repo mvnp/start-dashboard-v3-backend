@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useEdition } from '@/lib/edition-context';
-import { useTranslationCache } from '@/lib/translation-cache';
+import { useBusinessLanguage } from '@/lib/business-language-context';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Edit3 } from 'lucide-react';
@@ -18,7 +18,7 @@ export function TranslatableText({
 }: TranslatableTextProps) {
   // Handle case where component renders before providers are ready
   let editionContext;
-  let translationCache;
+  let businessLanguage;
   
   try {
     editionContext = useEdition();
@@ -32,32 +32,26 @@ export function TranslatableText({
   }
   
   try {
-    translationCache = useTranslationCache();
+    businessLanguage = useBusinessLanguage();
   } catch (error) {
-    // TranslationCacheProvider not available, use fallback
-    translationCache = {
+    // BusinessLanguageProvider not available, use fallback
+    businessLanguage = {
       translations: {},
-      loadTranslations: async () => {},
-      isLoading: false
+      getTranslation: (text: string) => text,
+      isLoading: false,
+      refreshTranslations: async () => {}
     };
   }
   
   const { isEditionMode, currentLanguage, canEdit } = editionContext;
-  const { translations } = translationCache;
+  const { getTranslation } = businessLanguage;
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
   const queryClient = useQueryClient();
 
-  // Get cached translation
-  const getTranslation = (text: string, language: string): string => {
-    if (language === 'en' || !translations[language]) {
-      return text; // Return original text for English or when no translation exists
-    }
-    return translations[language][text] || text;
-  };
-
-  const displayText = getTranslation(children, currentLanguage);
+  // Use business language translation system
+  const displayText = getTranslation(children);
 
   // Fetch English string to get the ID for foreign key relationship (only when editing)
   const { data: englishString } = useQuery({

@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
+import { useBusinessContext } from "@/hooks/use-business-context";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { queryClient } from "@/lib/queryClient";
@@ -28,6 +29,7 @@ export default function Login() {
   const [validatedUser, setValidatedUser] = useState<any>(null);
   const { toast } = useToast();
   const { setUser } = useAuth();
+  const { updateSelectedBusiness } = useBusinessContext();
 
 
 
@@ -113,7 +115,7 @@ export default function Login() {
     validateCredentialsMutation.mutate({ email, password });
   };
 
-  const handleBusinessSelect = () => {
+  const handleBusinessSelect = async () => {
     if (!selectedBusinessId) {
       toast({
         title: "Business required",
@@ -122,6 +124,9 @@ export default function Login() {
       });
       return;
     }
+    
+    // Update business context which automatically loads business language settings
+    await updateSelectedBusiness(selectedBusinessId);
     completeLoginMutation.mutate(selectedBusinessId);
   };
 
