@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useEdition } from '@/lib/edition-context';
 import { useBusinessLanguage } from '@/lib/business-language-context';
+import { useBusinessContext } from '@/hooks/use-business-context';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Edit3 } from 'lucide-react';
@@ -19,6 +20,7 @@ export function TranslatableText({
   // Handle case where component renders before providers are ready
   let editionContext;
   let businessLanguage;
+  let businessContext;
   
   try {
     editionContext = useEdition();
@@ -26,7 +28,6 @@ export function TranslatableText({
     // EditionProvider not available, use fallback values
     editionContext = {
       isEditionMode: false,
-      currentLanguage: 'en',
       canEdit: false
     };
   }
@@ -42,9 +43,19 @@ export function TranslatableText({
       refreshTranslations: async () => {}
     };
   }
+
+  try {
+    businessContext = useBusinessContext();
+  } catch (error) {
+    // BusinessContext not available, use fallback
+    businessContext = {
+      selectedBusinessLanguage: 'en'
+    };
+  }
   
-  const { isEditionMode, currentLanguage, canEdit } = editionContext;
+  const { isEditionMode, canEdit } = editionContext;
   const { getTranslation } = businessLanguage;
+  const { selectedBusinessLanguage } = businessContext;
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
@@ -52,6 +63,9 @@ export function TranslatableText({
 
   // Use business language translation system
   const displayText = getTranslation(children);
+  
+  // Use selected business language for editing
+  const editingLanguage = selectedBusinessLanguage || 'en';
 
   // Fetch English string to get the ID for foreign key relationship (only when editing)
   const { data: englishString } = useQuery({
@@ -65,7 +79,7 @@ export function TranslatableText({
       if (!response.ok) return null;
       return response.json();
     },
-    enabled: isEditionMode && canEdit,
+    enabled: isEditionMode && canEdit && isEditing,
   });
 
   // Mutation to save translation
@@ -84,7 +98,7 @@ export function TranslatableText({
         body: JSON.stringify({
           traduction_id: englishString.id,
           traduction,
-          language: currentLanguage,
+          language: editingLanguage,
         }),
       });
 
@@ -98,8 +112,8 @@ export function TranslatableText({
     onSuccess: () => {
       // Invalidate translation cache to refresh data
       queryClient.invalidateQueries({ queryKey: ['translations'] });
-      // Reload translations for current language
-      translationCache.loadTranslations(currentLanguage);
+      // Refresh business language translations
+      businessLanguage.refreshTranslations();
       toast({ title: "Translation saved successfully" });
       setIsEditing(false);
     },
@@ -127,12 +141,9 @@ export function TranslatableText({
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      e.preventDefault();
       handleSave();
-    }
-    if (e.key === 'Escape') {
+    } else if (e.key === 'Escape') {
       setIsEditing(false);
-      setEditValue('');
     }
   };
 
@@ -152,7 +163,8 @@ export function TranslatableText({
     );
   }
 
-  const showEditIcon = isEditionMode && canEdit && currentLanguage !== 'en';
+  // Only show edit icon for non-English languages when edition mode is active
+  const showEditIcon = isEditionMode && canEdit && editingLanguage !== 'en';
 
   return (
     <Tag 
@@ -163,7 +175,7 @@ export function TranslatableText({
       {showEditIcon && (
         <Edit3 
           size={12} 
-          className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" 
+          className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-500"
         />
       )}
     </Tag>
