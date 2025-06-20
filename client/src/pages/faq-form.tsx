@@ -43,6 +43,7 @@ export default function FaqForm() {
   const [match, params] = useRoute("/faqs/:id/edit");
   const [createMatch] = useRoute("/faqs/new");
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const queryClient = useQueryClient();
   
   const faqId = params?.id ? parseInt(params.id) : null;
@@ -98,15 +99,15 @@ export default function FaqForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/faqs"] });
       toast({
-        title: <TranslatableText>FAQ created</TranslatableText>,
-        description: <TranslatableText>The FAQ has been successfully created.</TranslatableText>,
+        title: t("FAQ created"),
+        description: t("The FAQ has been successfully created."),
       });
       setLocation("/faqs");
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to create the FAQ. Please try again.</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to create the FAQ. Please try again."),
         variant: "destructive",
       });
     },
@@ -118,15 +119,15 @@ export default function FaqForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/faqs"] });
       queryClient.invalidateQueries({ queryKey: ["/api/faqs", faqId] });
       toast({
-        title: <TranslatableText>FAQ updated</TranslatableText>,
-        description: <TranslatableText>The FAQ has been successfully updated.</TranslatableText>,
+        title: t("FAQ updated"),
+        description: t("The FAQ has been successfully updated."),
       });
       setLocation("/faqs");
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to update the FAQ. Please try again.</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to update the FAQ. Please try again."),
         variant: "destructive",
       });
     },

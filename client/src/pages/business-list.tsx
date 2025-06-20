@@ -12,8 +12,8 @@ import { useTranslationHelper } from "@/lib/translation-helper";
 
 export default function BusinessList() {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const { t } = useTranslationHelper();
+  const queryClient = useQueryClient();
 
   const { data: businesses, isLoading } = useQuery<Business[]>({
     queryKey: ["/api/businesses"],

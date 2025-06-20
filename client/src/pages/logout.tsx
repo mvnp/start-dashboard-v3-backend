@@ -11,6 +11,7 @@ export default function Logout() {
   const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
 
   const handleLogout = async () => {
     setIsLoading(true);

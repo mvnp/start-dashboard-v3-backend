@@ -27,6 +27,7 @@ export default function AppointmentList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
 
   const { data: appointments = [], isLoading } = useQuery({
     queryKey: ["/api/appointments"],

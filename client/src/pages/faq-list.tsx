@@ -28,6 +28,7 @@ export default function FaqList() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const queryClient = useQueryClient();
 
   // Get current user information for role-based access control
