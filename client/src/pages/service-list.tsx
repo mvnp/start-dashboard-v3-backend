@@ -28,6 +28,7 @@ export default function ServiceList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const { selectedBusinessId } = useBusinessContext();
 
   const { data: services = [], isLoading } = useQuery({
@@ -45,15 +46,15 @@ export default function ServiceList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/services", selectedBusinessId] });
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: <TranslatableText>Service deleted successfully</TranslatableText>,
+        title: t("Success"),
+        description: t("Service deleted successfully"),
       });
       setDeleteId(null);
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to delete service</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to delete service"),
         variant: "destructive",
       });
     },

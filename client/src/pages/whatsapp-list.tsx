@@ -31,14 +31,14 @@ export default function WhatsappList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances", selectedBusinessId] });
       toast({
-        title: <TranslatableText>Instance deleted</TranslatableText>,
-        description: <TranslatableText>The WhatsApp instance has been successfully deleted.</TranslatableText>,
+        title: t("Instance deleted"),
+        description: t("The WhatsApp instance has been successfully deleted."),
       });
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to delete the WhatsApp instance. Please try again.</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to delete the WhatsApp instance. Please try again."),
         variant: "destructive",
       });
     },
@@ -49,14 +49,14 @@ export default function WhatsappList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances", selectedBusinessId] });
       toast({
-        title: <TranslatableText>QR Code generated</TranslatableText>,
-        description: <TranslatableText>QR code has been generated. Please scan it with your phone.</TranslatableText>,
+        title: t("QR Code generated"),
+        description: t("QR code has been generated. Please scan it with your phone."),
       });
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to generate QR code. Please try again.</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to generate QR code. Please try again."),
         variant: "destructive",
       });
     },

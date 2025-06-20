@@ -46,6 +46,7 @@ export default function BarberPlanForm() {
   const { planId } = useParams();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const isEdit = !!planId && planId !== 'new';
 
   const form = useForm<FormData>({

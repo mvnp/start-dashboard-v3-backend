@@ -42,6 +42,7 @@ export default function SupportTicketForm() {
   const [createMatch] = useRoute("/support-tickets/new");
   const [viewMatch] = useRoute("/support-tickets/:id");
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const queryClient = useQueryClient();
   
   const ticketId = params?.id ? parseInt(params.id) : null;
@@ -111,15 +112,15 @@ export default function SupportTicketForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/support-tickets"] });
       toast({
-        title: <TranslatableText>Ticket created</TranslatableText>,
-        description: <TranslatableText>The support ticket has been successfully created.</TranslatableText>,
+        title: t("Ticket created"),
+        description: t("The support ticket has been successfully created."),
       });
       setLocation("/support-tickets");
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to create the ticket. Please try again.</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to create the ticket. Please try again."),
         variant: "destructive",
       });
     },
@@ -139,15 +140,15 @@ export default function SupportTicketForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/support-tickets"] });
       queryClient.invalidateQueries({ queryKey: ["/api/support-tickets", ticketId] });
       toast({
-        title: <TranslatableText>Ticket updated</TranslatableText>,
-        description: <TranslatableText>The support ticket has been successfully updated.</TranslatableText>,
+        title: t("Ticket updated"),
+        description: t("The support ticket has been successfully updated."),
       });
       setLocation("/support-tickets");
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to update the ticket. Please try again.</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to update the ticket. Please try again."),
         variant: "destructive",
       });
     },

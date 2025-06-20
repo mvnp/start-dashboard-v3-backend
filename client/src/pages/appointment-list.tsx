@@ -52,6 +52,7 @@ export default function AppointmentList() {
   const [, setLocation] = useLocation();
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const { selectedBusinessId } = useBusinessContext();
 
   // Filter and pagination state

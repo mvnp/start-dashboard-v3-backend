@@ -48,14 +48,14 @@ export default function FaqList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/faqs"] });
       toast({
-        title: <TranslatableText>FAQ deleted</TranslatableText>,
-        description: <TranslatableText>The FAQ has been successfully deleted.</TranslatableText>,
+        title: t("FAQ deleted"),
+        description: t("The FAQ has been successfully deleted."),
       });
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to delete the FAQ. Please try again.</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to delete the FAQ. Please try again."),
         variant: "destructive",
       });
     },

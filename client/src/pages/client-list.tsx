@@ -41,6 +41,7 @@ interface Client extends Person {
 export default function ClientList() {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const { selectedBusinessId } = useBusinessContext();
 
   const { data: clients = [], isLoading } = useQuery({
@@ -58,8 +59,8 @@ export default function ClientList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clients", selectedBusinessId] });
       toast({
-        title: <TranslatableText>Client deleted</TranslatableText>,
-        description: <TranslatableText>The client has been successfully removed.</TranslatableText>,
+        title: t("Client deleted"),
+        description: t("The client has been successfully removed."),
       });
     },
     onError: async (error: any) => {

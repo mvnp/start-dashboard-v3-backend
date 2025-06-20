@@ -17,6 +17,7 @@ import type { AccountingTransaction, AccountingTransactionCategory } from "@shar
 export default function AccountingList() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const { selectedBusinessId } = useBusinessContext();
 
   const { data: transactions = [], isLoading } = useQuery<AccountingTransaction[]>({
@@ -38,13 +39,13 @@ export default function AccountingList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions", selectedBusinessId] });
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: <TranslatableText>Transaction deleted successfully</TranslatableText>,
+        title: t("Success"),
+        description: t("Transaction deleted successfully"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
+        title: t("Error"),
         description: error.message || <TranslatableText>Failed to delete transaction</TranslatableText>,
         variant: "destructive",
       });

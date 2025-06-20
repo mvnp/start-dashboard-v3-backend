@@ -30,6 +30,7 @@ export default function WhatsappForm() {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const queryClient = useQueryClient();
   
   const instanceId = params?.id ? parseInt(params.id) : null;
@@ -70,15 +71,15 @@ export default function WhatsappForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances"] });
       toast({
-        title: <TranslatableText>Instance created</TranslatableText>,
-        description: <TranslatableText>The WhatsApp instance has been successfully created.</TranslatableText>,
+        title: t("Instance created"),
+        description: t("The WhatsApp instance has been successfully created."),
       });
       setLocation("/whatsapp");
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to create the WhatsApp instance. Please try again.</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to create the WhatsApp instance. Please try again."),
         variant: "destructive",
       });
     },
@@ -90,15 +91,15 @@ export default function WhatsappForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances"] });
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances", instanceId] });
       toast({
-        title: <TranslatableText>Instance updated</TranslatableText>,
-        description: <TranslatableText>The WhatsApp instance has been successfully updated.</TranslatableText>,
+        title: t("Instance updated"),
+        description: t("The WhatsApp instance has been successfully updated."),
       });
       setLocation("/whatsapp");
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to update the WhatsApp instance. Please try again.</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to update the WhatsApp instance. Please try again."),
         variant: "destructive",
       });
     },
@@ -114,14 +115,14 @@ export default function WhatsappForm() {
       setIsConnecting(true);
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances", instanceId] });
       toast({
-        title: <TranslatableText>QR Code generated</TranslatableText>,
-        description: <TranslatableText>QR code has been generated. Please scan it with your phone to connect.</TranslatableText>,
+        title: t("QR Code generated"),
+        description: t("QR code has been generated. Please scan it with your phone to connect."),
       });
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to generate QR code. Please try again.</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to generate QR code. Please try again."),
         variant: "destructive",
       });
     },
@@ -136,14 +137,14 @@ export default function WhatsappForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances"] });
       queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances", instanceId] });
       toast({
-        title: <TranslatableText>Instance connected</TranslatableText>,
-        description: <TranslatableText>WhatsApp instance has been successfully connected.</TranslatableText>,
+        title: t("Instance connected"),
+        description: t("WhatsApp instance has been successfully connected."),
       });
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to connect the instance. Please try again.</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to connect the instance. Please try again."),
         variant: "destructive",
       });
     },

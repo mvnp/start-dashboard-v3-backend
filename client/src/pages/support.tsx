@@ -36,6 +36,7 @@ type SupportFormData = z.infer<typeof supportFormSchema>;
 export default function Support() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
 
   const form = useForm<SupportFormData>({
     resolver: zodResolver(supportFormSchema),
@@ -56,8 +57,8 @@ export default function Support() {
     setTimeout(() => {
       setIsSubmitting(false);
       toast({
-        title: <TranslatableText>Support request submitted</TranslatableText>,
-        description: <TranslatableText>We'll get back to you within 24 hours based on your urgency level.</TranslatableText>,
+        title: t("Support request submitted"),
+        description: t("We'll get back to you within 24 hours based on your urgency level."),
       });
       form.reset();
     }, 1500);

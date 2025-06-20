@@ -51,6 +51,7 @@ export default function AppointmentForm() {
   const { appointmentId } = useParams();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const isEdit = !!appointmentId && appointmentId !== 'new';
 
   const form = useForm<FormData>({
@@ -148,14 +149,14 @@ export default function AppointmentForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: <TranslatableText>Appointment created successfully</TranslatableText>,
+        title: t("Success"),
+        description: t("Appointment created successfully"),
       });
       setLocation("/appointments");
     },
     onError: (error: any) => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
+        title: t("Error"),
         description: error.message || <TranslatableText>Failed to create appointment</TranslatableText>,
         variant: "destructive",
       });
@@ -167,14 +168,14 @@ export default function AppointmentForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: <TranslatableText>Appointment updated successfully</TranslatableText>,
+        title: t("Success"),
+        description: t("Appointment updated successfully"),
       });
       setLocation("/appointments");
     },
     onError: (error: any) => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
+        title: t("Error"),
         description: error.message || <TranslatableText>Failed to update appointment</TranslatableText>,
         variant: "destructive",
       });

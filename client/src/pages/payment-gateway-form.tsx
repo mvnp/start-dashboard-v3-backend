@@ -29,6 +29,7 @@ export default function PaymentGatewayForm() {
   const [, setLocation] = useLocation();
   const params = useParams();
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const isEdit = !!params.id;
   const gatewayId = params.id ? parseInt(params.id) : null;
 
@@ -59,15 +60,15 @@ export default function PaymentGatewayForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/payment-gateways"] });
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: <TranslatableText>Payment gateway created successfully</TranslatableText>,
+        title: t("Success"),
+        description: t("Payment gateway created successfully"),
       });
       setLocation("/payment-gateways");
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to create payment gateway</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to create payment gateway"),
         variant: "destructive",
       });
     },
@@ -79,15 +80,15 @@ export default function PaymentGatewayForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/payment-gateways"] });
       queryClient.invalidateQueries({ queryKey: ["/api/payment-gateways", gatewayId] });
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: <TranslatableText>Payment gateway updated successfully</TranslatableText>,
+        title: t("Success"),
+        description: t("Payment gateway updated successfully"),
       });
       setLocation("/payment-gateways");
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to update payment gateway</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to update payment gateway"),
         variant: "destructive",
       });
     },
@@ -113,8 +114,8 @@ export default function PaymentGatewayForm() {
     
     if (formData.staff_id === 0) {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Please select a staff member</TranslatableText>,
+        title: t("Error"),
+        description: t("Please select a staff member"),
         variant: "destructive",
       });
       return;
@@ -122,8 +123,8 @@ export default function PaymentGatewayForm() {
 
     if (!formData.type) {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Please select a payment gateway type</TranslatableText>,
+        title: t("Error"),
+        description: t("Please select a payment gateway type"),
         variant: "destructive",
       });
       return;

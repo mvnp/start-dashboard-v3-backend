@@ -42,6 +42,7 @@ export default function AccountingForm() {
   const { transactionId } = useParams();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const isEdit = !!transactionId && transactionId !== 'new';
 
   const form = useForm<FormData>({
@@ -111,14 +112,14 @@ export default function AccountingForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions"] });
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: <TranslatableText>Transaction created successfully</TranslatableText>,
+        title: t("Success"),
+        description: t("Transaction created successfully"),
       });
       setLocation("/accounting");
     },
     onError: (error: any) => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
+        title: t("Error"),
         description: error.message || <TranslatableText>Failed to create transaction</TranslatableText>,
         variant: "destructive",
       });
@@ -135,14 +136,14 @@ export default function AccountingForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions"] });
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: <TranslatableText>Transaction updated successfully</TranslatableText>,
+        title: t("Success"),
+        description: t("Transaction updated successfully"),
       });
       setLocation("/accounting");
     },
     onError: (error: any) => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
+        title: t("Error"),
         description: error.message || <TranslatableText>Failed to update transaction</TranslatableText>,
         variant: "destructive",
       });

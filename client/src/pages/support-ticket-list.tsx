@@ -33,14 +33,14 @@ export default function SupportTicketList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/support-tickets", selectedBusinessId] });
       toast({
-        title: <TranslatableText>Ticket deleted</TranslatableText>,
-        description: <TranslatableText>The support ticket has been successfully deleted.</TranslatableText>,
+        title: t("Ticket deleted"),
+        description: t("The support ticket has been successfully deleted."),
       });
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to delete the ticket. Please try again.</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to delete the ticket. Please try again."),
         variant: "destructive",
       });
     },

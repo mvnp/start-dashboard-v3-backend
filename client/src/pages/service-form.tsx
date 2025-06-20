@@ -28,6 +28,7 @@ export default function ServiceForm() {
   const [, setLocation] = useLocation();
   const params = useParams();
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const isEdit = !!params.id;
   const serviceId = params.id ? parseInt(params.id) : null;
 
@@ -52,15 +53,15 @@ export default function ServiceForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/services"] });
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: <TranslatableText>Service created successfully</TranslatableText>,
+        title: t("Success"),
+        description: t("Service created successfully"),
       });
       setLocation("/services");
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to create service</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to create service"),
         variant: "destructive",
       });
     },
@@ -75,15 +76,15 @@ export default function ServiceForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/services"] });
       queryClient.invalidateQueries({ queryKey: [`/api/services/${serviceId}`] });
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: <TranslatableText>Service updated successfully</TranslatableText>,
+        title: t("Success"),
+        description: t("Service updated successfully"),
       });
       setLocation("/services");
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to update service</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to update service"),
         variant: "destructive",
       });
     },
@@ -107,8 +108,8 @@ export default function ServiceForm() {
     // Client-side validation
     if (!formData.name.trim()) {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Service name is required</TranslatableText>,
+        title: t("Error"),
+        description: t("Service name is required"),
         variant: "destructive",
       });
       return;
@@ -116,8 +117,8 @@ export default function ServiceForm() {
 
     if (!formData.price || parseFloat(formData.price) <= 0) {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Price must be greater than 0</TranslatableText>,
+        title: t("Error"),
+        description: t("Price must be greater than 0"),
         variant: "destructive",
       });
       return;
@@ -125,8 +126,8 @@ export default function ServiceForm() {
 
     if (!formData.duration || formData.duration < 1) {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Duration must be at least 1 minute</TranslatableText>,
+        title: t("Error"),
+        description: t("Duration must be at least 1 minute"),
         variant: "destructive",
       });
       return;

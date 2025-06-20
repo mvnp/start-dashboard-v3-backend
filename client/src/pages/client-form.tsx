@@ -33,6 +33,7 @@ export default function ClientForm() {
   const [editMatch] = useRoute("/clients/edit/:id");
   const [createMatch] = useRoute("/clients/new");
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const isEdit = !!editMatch;
   const isCreating = !!createMatch;
   const clientId = isEdit && params.id ? parseInt(params.id) : null;
@@ -89,8 +90,8 @@ export default function ClientForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
       toast({
-        title: <TranslatableText>Client created</TranslatableText>,
-        description: <TranslatableText>The new client has been successfully added.</TranslatableText>,
+        title: t("Client created"),
+        description: t("The new client has been successfully added."),
       });
       setLocation("/clients");
     },
@@ -124,7 +125,7 @@ export default function ClientForm() {
       
       const errorMessage = errorData?.error || "Failed to create client";
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
+        title: t("Error"),
         description: errorMessage,
         variant: "destructive",
       });
@@ -141,8 +142,8 @@ export default function ClientForm() {
       queryClient.invalidateQueries({ queryKey: [`/api/clients/${clientId}`] });
       queryClient.invalidateQueries({ queryKey: ["/api/clients", clientId] });
       toast({
-        title: <TranslatableText>Client updated</TranslatableText>,
-        description: <TranslatableText>The client has been successfully updated.</TranslatableText>,
+        title: t("Client updated"),
+        description: t("The client has been successfully updated."),
       });
       setLocation("/clients");
     },
@@ -176,7 +177,7 @@ export default function ClientForm() {
       
       const errorMessage = errorData?.error || "Failed to update client";
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
+        title: t("Error"),
         description: errorMessage,
         variant: "destructive",
       });

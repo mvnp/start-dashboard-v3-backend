@@ -64,6 +64,7 @@ const roleConfig = {
 export default function StaffList() {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const { selectedBusinessId } = useBusinessContext();
 
   const { data: staff = [], isLoading } = useQuery({
@@ -81,14 +82,14 @@ export default function StaffList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/staff", selectedBusinessId] });
       toast({
-        title: <TranslatableText>Staff member deleted</TranslatableText>,
-        description: <TranslatableText>The staff member has been successfully removed.</TranslatableText>,
+        title: t("Staff member deleted"),
+        description: t("The staff member has been successfully removed."),
       });
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to delete staff member. Please try again.</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to delete staff member. Please try again."),
         variant: "destructive",
       });
     },

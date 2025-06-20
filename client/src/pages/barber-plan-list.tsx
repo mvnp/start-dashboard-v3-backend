@@ -41,15 +41,15 @@ export default function BarberPlanList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/barber-plans", selectedBusinessId] });
       toast({
-        title: <TranslatableText>Success</TranslatableText>,
-        description: <TranslatableText>Barber plan deleted successfully</TranslatableText>,
+        title: t("Success"),
+        description: t("Barber plan deleted successfully"),
       });
       setDeleteId(null);
     },
     onError: () => {
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
-        description: <TranslatableText>Failed to delete barber plan</TranslatableText>,
+        title: t("Error"),
+        description: t("Failed to delete barber plan"),
         variant: "destructive",
       });
     },
