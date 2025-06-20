@@ -17,6 +17,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Person, Business, Role } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
+import { useTranslationHelper } from "@/lib/translation-helper";
 
 interface StaffFormData {
   first_name: string;
@@ -51,6 +52,9 @@ export default function StaffForm() {
   const { toast } = useToast();
   const isEdit = !!params.id;
   const staffId = params.id ? parseInt(params.id) : null;
+  
+  // Import translation helper
+  const { t } = useTranslationHelper();
 
   const [formData, setFormData] = useState<StaffFormData>({
     first_name: "",
@@ -104,8 +108,8 @@ export default function StaffForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
       toast({
-        title: <TranslatableText>Staff member created</TranslatableText>,
-        description: <TranslatableText>The new staff member has been successfully added.</TranslatableText>,
+        title: t("Staff member created"),
+        description: t("The new staff member has been successfully added."),
       });
       setLocation("/staff");
     },
@@ -122,14 +126,14 @@ export default function StaffForm() {
       }
       
       // Handle email exists error specifically
-      if (errorData?.error === <TranslatableText>Email exists on database</TranslatableText>) {
-        setErrors({ email: <TranslatableText>Email exists on database</TranslatableText> });
+      if (errorData?.error === "Email exists on database") {
+        setErrors({ email: t("Email exists on database") });
         return;
       }
       
-      const errorMessage = errorData?.error || <TranslatableText>Failed to create staff member</TranslatableText>;
+      const errorMessage = errorData?.error || t("Failed to create staff member");
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
+        title: t("Error"),
         description: errorMessage,
         variant: "destructive",
       });
@@ -142,8 +146,8 @@ export default function StaffForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
       queryClient.invalidateQueries({ queryKey: [`/api/staff/${staffId}`] });
       toast({
-        title: <TranslatableText>Staff member updated</TranslatableText>,
-        description: <TranslatableText>The staff member has been successfully updated.</TranslatableText>,
+        title: t("Staff member updated"),
+        description: t("The staff member has been successfully updated."),
       });
       setLocation("/staff");
     },
@@ -160,14 +164,14 @@ export default function StaffForm() {
       }
       
       // Handle email exists error specifically
-      if (errorData?.error === <TranslatableText>Email exists on database</TranslatableText>) {
-        setErrors({ email: <TranslatableText>Email exists on database</TranslatableText> });
+      if (errorData?.error === "Email exists on database") {
+        setErrors({ email: t("Email exists on database") });
         return;
       }
       
-      const errorMessage = errorData?.error || <TranslatableText>Failed to update staff member</TranslatableText>;
+      const errorMessage = errorData?.error || t("Failed to update staff member");
       toast({
-        title: <TranslatableText>Error</TranslatableText>,
+        title: t("Error"),
         description: errorMessage,
         variant: "destructive",
       });
@@ -193,7 +197,7 @@ export default function StaffForm() {
         salary: Number(staffMember.salary) || 0,
         business_id: staffMember.business_id || 0,
       };
-      console.log(<TranslatableText>New form data being set:</TranslatableText>, newFormData);
+      console.log("New form data being set:", newFormData);
       setFormData(newFormData);
       // Clear any previous errors when loading new data
       setErrors({});
@@ -214,41 +218,41 @@ export default function StaffForm() {
     const newErrors: Record<string, string> = {};
     
     if (!formData.first_name.trim()) {
-      newErrors.first_name = <TranslatableText>First name is required</TranslatableText>;
+      newErrors.first_name = t("First name is required");
     }
     
     if (!formData.last_name.trim()) {
-      newErrors.last_name = <TranslatableText>Last name is required</TranslatableText>;
+      newErrors.last_name = t("Last name is required");
     }
     
     if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
+      newErrors.email = t("Email is required");
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = <TranslatableText>Please enter a valid email address</TranslatableText>;
+      newErrors.email = t("Please enter a valid email address");
     }
     
     if (!formData.phone.trim()) {
-      newErrors.phone = <TranslatableText>Phone number is required</TranslatableText>;
+      newErrors.phone = t("Phone number is required");
     }
     
     if (!formData.tax_id.trim()) {
-      newErrors.tax_id = <TranslatableText>Tax ID is required</TranslatableText>;
+      newErrors.tax_id = t("Tax ID is required");
     }
     
     if (!formData.role_id || formData.role_id === 0) {
-      newErrors.role_id = <TranslatableText>Role is required</TranslatableText>;
+      newErrors.role_id = t("Role is required");
     }
     
     if (!formData.hire_date.trim()) {
-      newErrors.hire_date = <TranslatableText>Hire date is required</TranslatableText>;
+      newErrors.hire_date = t("Hire date is required");
     }
     
     if (!formData.salary || formData.salary <= 0) {
-      newErrors.salary = <TranslatableText>Salary must be greater than 0</TranslatableText>;
+      newErrors.salary = t("Salary must be greater than 0");
     }
     
     if (!formData.business_id || formData.business_id === 0) {
-      newErrors.business_id = <TranslatableText>Business is required</TranslatableText>;
+      newErrors.business_id = t("Business is required");
     }
     
     setErrors(newErrors);
