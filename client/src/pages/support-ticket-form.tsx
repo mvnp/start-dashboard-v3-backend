@@ -63,7 +63,7 @@ export default function SupportTicketForm() {
       assigned_staff_id: undefined,
       resolution_notes: "",
       attachments: [],
-      business_id: selectedBusinessId || 0
+      business_id: 1
     }
   });
 
