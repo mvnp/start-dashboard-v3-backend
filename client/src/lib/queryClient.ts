@@ -48,17 +48,7 @@ export const getQueryFn: <T>(options: {
       headers["Authorization"] = `Bearer ${token}`;
     }
     
-    // Always try to get business ID from localStorage
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (user.email) {
-      const selectedBusinessId = localStorage.getItem(`selectedBusinessId_${user.email}`);
-      if (selectedBusinessId) {
-        headers["business-id"] = selectedBusinessId;
-        console.log(`🔧 Query [GET] ${queryKey[0]} - Sending business-id: ${selectedBusinessId}`);
-      } else {
-        console.log(`⚠️ Query [GET] ${queryKey[0]} - No business ID found for user: ${user.email}`);
-      }
-    }
+    // No business context needed
 
     const res = await fetch(queryKey[0] as string, {
       headers,

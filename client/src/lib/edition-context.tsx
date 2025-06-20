@@ -74,7 +74,6 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     console.log('EditionContext language detection:', {
       cachedLanguage: getCachedLanguage(),
       currentLanguage,
-      selectedBusinessId: null,
     });
   }, [currentLanguage]);
 
