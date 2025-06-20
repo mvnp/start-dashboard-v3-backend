@@ -325,6 +325,12 @@ export default function Settings() {
       // If language was changed, immediately update the business language context
       const currentLanguage = (settings as any)?.language || 'en';
       if (variables.language && variables.language !== currentLanguage) {
+        // Update all localStorage and sessionStorage keys immediately
+        localStorage.setItem('x-selected-business-language', variables.language);
+        sessionStorage.setItem('x-selected-business-language', variables.language);
+        localStorage.setItem('traductions-selected-language', variables.language);
+        sessionStorage.setItem('traductions-selected-language', variables.language);
+        
         // Update business language context immediately
         updateBusinessLanguage(variables.language);
         
@@ -332,6 +338,11 @@ export default function Settings() {
         if (selectedBusinessId) {
           await loadBusinessLanguage(selectedBusinessId, variables.language);
         }
+        
+        // Reload the current page to apply all language changes immediately
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
         
         toast({
           title: "Settings updated",
