@@ -305,6 +305,7 @@ export default function Settings() {
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings', selectedBusinessId],
     enabled: !!selectedBusinessId && selectedBusinessId > 0,
+    queryFn: () => apiRequest("GET", "/api/settings"),
   });
 
   const updateMutation = useMutation({
