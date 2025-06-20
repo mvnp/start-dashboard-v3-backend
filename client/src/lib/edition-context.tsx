@@ -7,6 +7,7 @@ interface EditionContextType {
   setIsEditionMode: (enabled: boolean) => void;
   currentLanguage: string;
   canEdit: boolean;
+  updateLanguage: (language: string) => void;
 }
 
 const EditionContext = createContext<EditionContextType | undefined>(undefined);
@@ -25,6 +26,7 @@ export function EditionProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem('editionMode');
     return saved === 'true';
   });
+  const [manualLanguage, setManualLanguage] = useState<string | null>(null);
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -61,8 +63,18 @@ export function EditionProvider({ children }: { children: ReactNode }) {
   // Check if user is Super Admin (Role ID: 1)
   const canEdit = user?.roleId === 1;
 
-  // Current language determination
-  const currentLanguage = settings?.language || getCachedLanguage();
+  // Method to update language manually (from business context)
+  const updateLanguage = (language: string) => {
+    setManualLanguage(language);
+    localStorage.setItem('currentLanguage', language);
+    console.log('Language updated via business context:', language);
+    
+    // Invalidate translation cache to reload with new language
+    queryClient.invalidateQueries({ queryKey: ['translations'] });
+  };
+
+  // Current language determination (manual override takes precedence)
+  const currentLanguage = manualLanguage || settings?.language || getCachedLanguage();
 
   // Save edition mode to localStorage when it changes
   useEffect(() => {
@@ -73,15 +85,18 @@ export function EditionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     console.log('EditionContext language detection:', {
       cachedLanguage: getCachedLanguage(),
+      manualLanguage,
+      settingsLanguage: settings?.language,
       currentLanguage,
     });
-  }, [currentLanguage]);
+  }, [currentLanguage, manualLanguage, settings?.language]);
 
   const contextValue: EditionContextType = {
     isEditionMode,
     setIsEditionMode,
     currentLanguage,
     canEdit,
+    updateLanguage,
   };
 
   return (
