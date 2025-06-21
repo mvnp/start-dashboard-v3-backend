@@ -544,8 +544,6 @@ export function registerRoutes(app: Express): void {
       const user = req.user!;
       const { email, business_id, role_id, ...personData } = req.body;
       
-      console.log(`Staff creation request: User ${user?.userId}, Role ${user?.roleId}, SuperAdmin: ${user?.isSuperAdmin}, Business ID: ${business_id}`);
-
       // Validate business access for non-Super Admin users
       if (!user.isSuperAdmin) {
         if (!business_id) {
@@ -560,8 +558,6 @@ export function registerRoutes(app: Express): void {
         }
 
         const businessIdNum = typeof business_id === 'string' ? parseInt(business_id) : business_id;
-        console.log(`Staff creation access check: User ${user.userId} (Role ${user.roleId}) trying to create staff in business ${businessIdNum}. User business IDs: [${userBusinessIds.join(', ')}]`);
-        
         if (!userBusinessIds.includes(businessIdNum)) {
           return res.status(403).json({ 
             error: "Access denied. You can only create staff in businesses you have access to." 
