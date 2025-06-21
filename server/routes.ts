@@ -317,9 +317,15 @@ export function registerRoutes(app: Express): void {
       if (user.isSuperAdmin) {
         businesses = await storage.getAllBusinesses();
       } else {
-        // Other users see only their associated businesses
+        // For non-Super Admin users, fetch fresh business associations from database
+        // This ensures we get current business access even if JWT token is outdated
+        const userData = await storage.getUserWithRoleAndBusiness(user.userId);
+        if (!userData) {
+          return res.status(401).json({ error: "User not found" });
+        }
+        
         businesses = [];
-        for (const businessId of user.businessIds) {
+        for (const businessId of userData.businessIds) {
           const business = await storage.getBusiness(businessId);
           if (business) businesses.push(business);
         }
