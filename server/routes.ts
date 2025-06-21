@@ -337,13 +337,36 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/businesses/:id", async (req, res) => {
+  app.get("/api/businesses/:id", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
       const id = parseInt(req.params.id);
+      const user = req.user!;
+      
       const business = await storage.getBusiness(id);
       if (!business) {
         return res.status(404).json({ error: "Business not found" });
       }
+
+      // Super Admin can access any business
+      if (user.isSuperAdmin) {
+        return res.json(business);
+      }
+
+      // For merchants (Role ID 2), fetch fresh business associations from database
+      let userBusinessIds = user.businessIds;
+      if (user.roleId === 2) {
+        const userData = await storage.getUserWithRoleAndBusiness(user.userId);
+        userBusinessIds = userData?.businessIds || [];
+      }
+
+      // For merchants and other users, check if they have access to this business
+      console.log(`Business access check: User ${user.userId} trying to access business ${id}. User business IDs: [${userBusinessIds.join(', ')}]`);
+      if (!userBusinessIds.includes(id)) {
+        return res.status(403).json({ 
+          error: "Access denied. You can only view businesses you have access to." 
+        });
+      }
+
       res.json(business);
     } catch (error) {
       console.error("Business fetch error:", error);
