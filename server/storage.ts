@@ -386,7 +386,12 @@ class PostgresStorage implements IStorage {
       .innerJoin(users_business, eq(users.id, users_business.user_id))
       .where(and(roleWhereCondition, businessWhereCondition));
     
-    return result;
+    // Remove duplicates by person ID at application level
+    const uniquePersons = result.filter((person, index, arr) => 
+      arr.findIndex(p => p.id === person.id) === index
+    );
+    
+    return uniquePersons;
   }
 
   async getPerson(id: number): Promise<Person | undefined> {
