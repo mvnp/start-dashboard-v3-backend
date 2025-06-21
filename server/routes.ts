@@ -808,7 +808,8 @@ export function registerRoutes(app: Express): void {
       
       // Get business context from selected business
       const businessIds = getBusinessFilter(user, req);
-      if (!businessIds || businessIds.length === 0) {
+      // Super Admin has unrestricted access (businessIds === null)
+      if (!user.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
         return res.status(403).json({ error: "No business access" });
       }
 
@@ -928,7 +929,8 @@ export function registerRoutes(app: Express): void {
 
       // Get business context from selected business
       const businessIds = getBusinessFilter(req.user!, req);
-      if (!businessIds || businessIds.length === 0) {
+      // Super Admin has unrestricted access (businessIds === null)
+      if (!req.user!.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
         return res.status(403).json({ error: "No business access" });
       }
 
@@ -1144,7 +1146,7 @@ export function registerRoutes(app: Express): void {
       }
 
       // Verify service belongs to user's accessible businesses
-      if (!user.isSuperAdmin && service.business_id && !businessIds.includes(service.business_id)) {
+      if (!user.isSuperAdmin && service.business_id && businessIds && !businessIds.includes(service.business_id)) {
         return res.status(403).json({ error: "Access denied to this service" });
       }
 
