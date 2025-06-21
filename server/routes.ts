@@ -539,9 +539,35 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/staff", async (req, res) => {
+  app.post("/api/staff", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
+      const user = req.user!;
       const { email, business_id, role_id, ...personData } = req.body;
+      
+      console.log(`Staff creation request: User ${user?.userId}, Role ${user?.roleId}, SuperAdmin: ${user?.isSuperAdmin}, Business ID: ${business_id}`);
+
+      // Validate business access for non-Super Admin users
+      if (!user.isSuperAdmin) {
+        if (!business_id) {
+          return res.status(400).json({ error: "Business ID is required" });
+        }
+
+        // For merchants (Role ID 2), fetch fresh business associations from database
+        let userBusinessIds = user.businessIds;
+        if (user.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(user.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+
+        const businessIdNum = typeof business_id === 'string' ? parseInt(business_id) : business_id;
+        console.log(`Staff creation access check: User ${user.userId} (Role ${user.roleId}) trying to create staff in business ${businessIdNum}. User business IDs: [${userBusinessIds.join(', ')}]`);
+        
+        if (!userBusinessIds.includes(businessIdNum)) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only create staff in businesses you have access to." 
+          });
+        }
+      }
       
       // Check for email uniqueness if email is provided
       if (email && email.trim()) {
@@ -610,12 +636,51 @@ export function registerRoutes(app: Express): void {
   app.put("/api/staff/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      const user = req.user!;
       const { email, business_id, role_id, ...personData } = req.body;
       
       // Get current person data
       const currentPerson = await storage.getPerson(id);
       if (!currentPerson) {
         return res.status(404).json({ error: "Staff member not found" });
+      }
+
+      // Validate business access for non-Super Admin users
+      if (!user.isSuperAdmin) {
+        if (business_id) {
+          // For merchants (Role ID 2), fetch fresh business associations from database
+          let userBusinessIds = user.businessIds;
+          if (user.roleId === 2) {
+            const userData = await storage.getUserWithRoleAndBusiness(user.userId);
+            userBusinessIds = userData?.businessIds || [];
+          }
+
+          const businessIdNum = typeof business_id === 'string' ? parseInt(business_id) : business_id;
+          if (!userBusinessIds.includes(businessIdNum)) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only edit staff in businesses you have access to." 
+            });
+          }
+        }
+
+        // Also check if the staff member being edited belongs to user's businesses
+        if (currentPerson.user_id) {
+          const staffUserData = await storage.getUserWithRoleAndBusiness(currentPerson.user_id);
+          if (staffUserData) {
+            // For merchants, ensure staff belongs to their businesses
+            if (user.roleId === 2) {
+              const userData = await storage.getUserWithRoleAndBusiness(user.userId);
+              const userBusinessIds = userData?.businessIds || [];
+              const hasCommonBusiness = staffUserData.businessIds.some(bid => userBusinessIds.includes(bid));
+              
+              if (!hasCommonBusiness) {
+                return res.status(403).json({ 
+                  error: "Access denied. You can only edit staff from businesses you have access to." 
+                });
+              }
+            }
+          }
+        }
       }
 
       // Check for email uniqueness if email is being updated
