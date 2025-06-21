@@ -15,7 +15,7 @@ export default function BusinessList() {
   const { toast } = useToast();
   const { t } = useTranslationHelper();
   const queryClient = useQueryClient();
-  const { user } = useUser();
+  const { user } = useAuth();
 
   const { data: businesses, isLoading } = useQuery<Business[]>({
     queryKey: ["/api/businesses"],
@@ -84,16 +84,18 @@ export default function BusinessList() {
             <p className="text-slate-600 mt-2"><TranslatableText>Manage your business locations and details</TranslatableText></p>
           </div>
         </div>
-        <Link href="/businesses/new">
-          <Button
-            style={{backgroundColor: 'var(--barber-primary)', color: 'white'}}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-secondary)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-primary)'}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            <TranslatableText>Add Business</TranslatableText>
-          </Button>
-        </Link>
+        {canCreateBusiness && (
+          <Link href="/businesses/new">
+            <Button
+              style={{backgroundColor: 'var(--barber-primary)', color: 'white'}}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-secondary)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--barber-primary)'}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              <TranslatableText>Add Business</TranslatableText>
+            </Button>
+          </Link>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -103,19 +105,23 @@ export default function BusinessList() {
               <div className="flex items-center justify-between">
                 <Building2 className="h-8 w-8 text-primary" />
                 <div className="flex gap-2">
-                  <Link href={`/businesses/${business.id}/edit`}>
-                    <Button variant="ghost" size="sm">
-                      <Pencil className="h-4 w-4" />
+                  {canEditBusiness(business.id) && (
+                    <Link href={`/businesses/${business.id}/edit`}>
+                      <Button variant="ghost" size="sm">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  )}
+                  {canDeleteBusiness && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(business.id)}
+                      disabled={deleteMutation.isPending}
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(business.id)}
-                    disabled={deleteMutation.isPending}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  )}
                 </div>
               </div>
               <CardTitle className="text-xl">{business.name}</CardTitle>
