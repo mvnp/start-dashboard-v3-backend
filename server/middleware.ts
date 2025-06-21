@@ -26,7 +26,12 @@ export const getBusinessFilter = (user: TokenPayload | undefined, req?: Request)
   // Super Admin without business selection can see all businesses
   if (user.isSuperAdmin) return null;
   
-  // For non-Super Admin users, they MUST have a selected business ID
+  // For merchants (Role ID 2), return all their business IDs for comprehensive access
+  if (user.roleId === 2) {
+    return user.businessIds.length > 0 ? user.businessIds : [];
+  }
+  
+  // For other non-Super Admin users, they MUST have a selected business ID
   // Return empty array to prevent access to any data if no business is selected
   return [];
 };

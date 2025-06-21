@@ -453,7 +453,7 @@ export function registerRoutes(app: Express): void {
       if (user.isSuperAdmin && businessIds === null) {
         persons = await storage.getPersonsByRoles([1, 2, 3]);
       } 
-      // For selected business or non-Super Admin users
+      // For selected business or non-Super Admin users (including merchants)
       else if (businessIds && businessIds.length > 0) {
         persons = await storage.getPersonsByRolesAndBusiness([1, 2, 3], businessIds);
       } 
