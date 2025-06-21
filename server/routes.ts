@@ -360,7 +360,6 @@ export function registerRoutes(app: Express): void {
       }
 
       // For merchants and other users, check if they have access to this business
-      console.log(`Business access check: User ${user.userId} trying to access business ${id}. User business IDs: [${userBusinessIds.join(', ')}]`);
       if (!userBusinessIds.includes(id)) {
         return res.status(403).json({ 
           error: "Access denied. You can only view businesses you have access to." 
