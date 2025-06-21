@@ -1133,7 +1133,8 @@ export function registerRoutes(app: Express): void {
       
       // Get business context from selected business
       const businessIds = getBusinessFilter(user, req);
-      if (!businessIds || businessIds.length === 0) {
+      // Super Admin has unrestricted access (businessIds === null)
+      if (!user.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
         return res.status(403).json({ error: "No business access" });
       }
 
@@ -1213,7 +1214,8 @@ export function registerRoutes(app: Express): void {
       
       // Get business context from selected business
       const businessIds = getBusinessFilter(user, req);
-      if (!businessIds || businessIds.length === 0) {
+      // Super Admin has unrestricted access (businessIds === null)
+      if (!user.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
         return res.status(403).json({ error: "No business access" });
       }
 
@@ -1224,12 +1226,19 @@ export function registerRoutes(app: Express): void {
       }
 
       // Verify service belongs to user's accessible businesses
-      if (!user.isSuperAdmin && existingService.business_id && !businessIds.includes(existingService.business_id)) {
+      if (!user.isSuperAdmin && existingService.business_id && businessIds && !businessIds.includes(existingService.business_id)) {
         return res.status(403).json({ error: "Access denied to this service" });
       }
       
       // Get business context for update data
-      const businessId = businessIds[0] || req.body.business_id;
+      // For Super Admin without business selection, preserve existing business_id or use from request body
+      let businessId;
+      if (user.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
+        businessId = req.body.business_id || existingService.business_id;
+      } else {
+        businessId = (businessIds && businessIds[0]) || req.body.business_id;
+      }
+      
       const updateData = {
         ...req.body,
         business_id: businessId
