@@ -9,15 +9,29 @@ import { Link } from "wouter";
 import type { Business } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
+import { useAuth } from "@/lib/auth";
 
 export default function BusinessList() {
   const { toast } = useToast();
   const { t } = useTranslationHelper();
   const queryClient = useQueryClient();
+  const { user } = useUser();
 
   const { data: businesses, isLoading } = useQuery<Business[]>({
     queryKey: ["/api/businesses"],
   });
+
+  // Role-based access control
+  const isSuperAdmin = user?.isSuperAdmin;
+  const isMerchant = user?.roleId === 2;
+  const canCreateBusiness = isSuperAdmin;
+  const canDeleteBusiness = isSuperAdmin;
+  
+  const canEditBusiness = (businessId: number) => {
+    if (isSuperAdmin) return true;
+    if (isMerchant && user?.businessIds.includes(businessId)) return true;
+    return false;
+  };
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {

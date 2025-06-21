@@ -345,8 +345,17 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/businesses", async (req, res) => {
+  app.post("/api/businesses", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
+      const user = req.user!;
+      
+      // Only Super Admin (role ID: 1) can create businesses
+      if (!user.isSuperAdmin) {
+        return res.status(403).json({ 
+          error: "Access denied. Only Super Admin can create businesses." 
+        });
+      }
+      
       const validatedData = insertBusinessSchema.parse(req.body);
       const business = await storage.createBusiness(validatedData);
       res.status(201).json(business);
@@ -359,15 +368,42 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/businesses/:id", async (req, res) => {
+  app.put("/api/businesses/:id", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
       const id = parseInt(req.params.id);
-      const validatedData = insertBusinessSchema.partial().parse(req.body);
-      const business = await storage.updateBusiness(id, validatedData);
-      if (!business) {
-        return res.status(404).json({ error: "Business not found" });
+      const user = req.user!;
+      
+      // Super Admin can edit any business
+      if (user.isSuperAdmin) {
+        const validatedData = insertBusinessSchema.partial().parse(req.body);
+        const business = await storage.updateBusiness(id, validatedData);
+        if (!business) {
+          return res.status(404).json({ error: "Business not found" });
+        }
+        return res.json(business);
       }
-      res.json(business);
+      
+      // Merchant can only edit their own businesses
+      if (user.roleId === 2) {
+        if (!user.businessIds.includes(id)) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only edit your own businesses." 
+          });
+        }
+        
+        const validatedData = insertBusinessSchema.partial().parse(req.body);
+        const business = await storage.updateBusiness(id, validatedData);
+        if (!business) {
+          return res.status(404).json({ error: "Business not found" });
+        }
+        return res.json(business);
+      }
+      
+      // Other roles (employee, client, financials) cannot manage businesses
+      return res.status(403).json({ 
+        error: "Access denied. You don't have permission to manage businesses." 
+      });
+      
     } catch (error) {
       console.error("Business update error:", error);
       if (error instanceof z.ZodError) {
@@ -377,9 +413,18 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.delete("/api/businesses/:id", async (req, res) => {
+  app.delete("/api/businesses/:id", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
       const id = parseInt(req.params.id);
+      const user = req.user!;
+      
+      // Only Super Admin can delete businesses
+      if (!user.isSuperAdmin) {
+        return res.status(403).json({ 
+          error: "Access denied. Only Super Admin can delete businesses." 
+        });
+      }
+      
       const deleted = await storage.deleteBusiness(id);
       if (!deleted) {
         return res.status(404).json({ error: "Business not found" });
