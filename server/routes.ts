@@ -1006,7 +1006,8 @@ export function registerRoutes(app: Express): void {
       
       // Get business context from selected business
       const businessIds = getBusinessFilter(req.user!, req);
-      if (!businessIds || businessIds.length === 0) {
+      // Super Admin has unrestricted access (businessIds === null)
+      if (!req.user!.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
         return res.status(403).json({ error: "No business access" });
       }
 
@@ -1290,7 +1291,8 @@ export function registerRoutes(app: Express): void {
       
       // Get business context from selected business
       const businessIds = getBusinessFilter(user, req);
-      if (!businessIds || businessIds.length === 0) {
+      // Super Admin has unrestricted access (businessIds === null)
+      if (!user.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
         return res.status(403).json({ error: "No business access" });
       }
 
