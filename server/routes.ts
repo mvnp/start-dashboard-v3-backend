@@ -2063,6 +2063,16 @@ export function registerRoutes(app: Express): void {
         return res.status(400).json({ error: "Invalid barber plan ID" });
       }
       
+      // For merchants (Role ID: 2), business context is MANDATORY
+      if (currentUser.roleId === 2) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (!selectedBusinessId) {
+          return res.status(400).json({ 
+            error: "Business ID is required in x-selected-business-id header for merchant operations" 
+          });
+        }
+      }
+      
       const plan = await storage.getBarberPlan(id);
       if (!plan) {
         return res.status(404).json({ error: "Barber plan not found" });
@@ -2843,6 +2853,16 @@ export function registerRoutes(app: Express): void {
         return res.status(400).json({ error: "Invalid support ticket ID" });
       }
       
+      // For merchants (Role ID: 2), business context is MANDATORY
+      if (currentUser.roleId === 2) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (!selectedBusinessId) {
+          return res.status(400).json({ 
+            error: "Business ID is required in x-selected-business-id header for merchant operations" 
+          });
+        }
+      }
+      
       const ticket = await storage.getSupportTicket(id);
       if (!ticket) {
         return res.status(404).json({ error: "Support ticket not found" });
@@ -3015,6 +3035,16 @@ export function registerRoutes(app: Express): void {
       // Validate ID parameter
       if (isNaN(id) || id <= 0) {
         return res.status(400).json({ error: "Invalid WhatsApp instance ID" });
+      }
+      
+      // For merchants (Role ID: 2), business context is MANDATORY
+      if (currentUser.roleId === 2) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (!selectedBusinessId) {
+          return res.status(400).json({ 
+            error: "Business ID is required in x-selected-business-id header for merchant operations" 
+          });
+        }
       }
       
       const instance = await storage.getWhatsappInstance(id);
