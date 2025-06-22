@@ -39,11 +39,12 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function AccountingForm() {
-  const { transactionId } = useParams();
+  const { transactionId, id } = useParams();
+  const actualId = id || transactionId; // Support both routing patterns
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { t } = useTranslationHelper();
-  const isEdit = !!transactionId && transactionId !== 'new';
+  const isEdit = !!actualId && actualId !== 'new';
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -59,8 +60,8 @@ export default function AccountingForm() {
 
   // Fetch transaction data for editing
   const { data: transaction, isLoading: isLoadingTransaction, error: transactionError } = useQuery<AccountingTransaction>({
-    queryKey: [`/api/accounting-transactions/${transactionId}`],
-    enabled: !!transactionId && isEdit,
+    queryKey: [`/api/accounting-transactions/${actualId}`],
+    enabled: !!actualId && isEdit,
     retry: 3,
     staleTime: 0,
   });
@@ -128,7 +129,7 @@ export default function AccountingForm() {
 
   const updateMutation = useMutation({
     mutationFn: (data: FormData) => 
-      apiRequest("PUT", `/api/accounting-transactions/${transactionId}`, {
+      apiRequest("PUT", `/api/accounting-transactions/${actualId}`, {
         ...data,
         amount: parseFloat(data.amount),
         transaction_date: data.transaction_date.toISOString().split('T')[0],
