@@ -100,9 +100,6 @@ export default function AccountingForm() {
     enabled: user?.isSuperAdmin || !!selectedBusinessId,
   });
 
-  // Debug: Log categories data
-  console.log('Categories loaded:', categories);
-
   // Set form values when editing
   useEffect(() => {
     if (isEdit && transaction) {
@@ -198,7 +195,7 @@ export default function AccountingForm() {
   }
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto p-6">
       <div className="flex items-center gap-4 mb-6">
         <Button
           variant="outline"

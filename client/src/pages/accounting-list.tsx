@@ -90,7 +90,7 @@ export default function AccountingList() {
   }
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold"><TranslatableText>Accounting Transactions</TranslatableText></h1>
         <Button onClick={() => setLocation("/accounting-transactions/new")}>
