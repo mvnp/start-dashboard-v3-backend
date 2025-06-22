@@ -973,6 +973,15 @@ export function registerRoutes(app: Express): void {
         });
       }
 
+      // Validate that the business exists
+      const businessExists = await storage.getBusiness(business_id);
+      if (!businessExists) {
+        return res.status(400).json({
+          error: "Invalid business ID",
+          details: [{ path: ["business_id"], message: "Business does not exist" }]
+        });
+      }
+
       // Check email uniqueness
       const existingUser = await storage.getUserByEmail(email.trim());
       if (existingUser) {
@@ -1040,14 +1049,12 @@ export function registerRoutes(app: Express): void {
         return res.status(404).json({ error: "Client not found" });
       }
 
-      // Check if the client's user has access to the selected business
-      if (existingClient.user_id) {
+      // Check if the client's user has access to the selected business (only for non-Super Admin)
+      if (!req.user!.isSuperAdmin && existingClient.user_id && businessIds) {
         const userWithBusiness = await storage.getUserWithRoleAndBusiness(existingClient.user_id);
         if (!userWithBusiness || !userWithBusiness.businessIds.some(bid => businessIds.includes(bid))) {
           return res.status(404).json({ error: "Client not found" });
         }
-      } else {
-        return res.status(404).json({ error: "Client not found" });
       }
 
       // Validate required fields
