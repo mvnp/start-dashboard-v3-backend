@@ -1177,6 +1177,9 @@ export function registerRoutes(app: Express): void {
         req.body.business_id = contextBusinessId;
       }
 
+      // Get the final business_id to use (from request body or context)
+      const finalBusinessId = req.body.business_id;
+
       // Validate business access for non-Super Admin users
       if (!user.isSuperAdmin) {
         // For merchants (Role ID 2), fetch fresh business associations from database
@@ -1186,7 +1189,7 @@ export function registerRoutes(app: Express): void {
           userBusinessIds = userData?.businessIds || [];
         }
 
-        const businessIdNum = typeof businessId === 'string' ? parseInt(businessId) : businessId;
+        const businessIdNum = typeof finalBusinessId === 'string' ? parseInt(finalBusinessId) : finalBusinessId;
         if (!userBusinessIds.includes(businessIdNum)) {
           return res.status(403).json({ 
             error: "Access denied. You can only create services in businesses you have access to." 
@@ -1196,7 +1199,7 @@ export function registerRoutes(app: Express): void {
       
       const serviceData = {
         ...req.body,
-        business_id: businessId
+        business_id: finalBusinessId
       };
       
       // Validate required fields
