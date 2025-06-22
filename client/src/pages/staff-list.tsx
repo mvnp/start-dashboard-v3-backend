@@ -5,6 +5,7 @@ import {
   Plus, 
   Edit, 
   Trash2, 
+  Copy,
   Search,
   UserCheck,
   Shield,
@@ -92,6 +93,44 @@ export default function StaffList() {
       toast({
         title: t("Error"),
         description: t("Failed to delete staff member. Please try again."),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const cloneStaffMutation = useMutation({
+    mutationFn: async (staffMember: Staff) => {
+      // Generate random email
+      const randomId = Math.floor(Math.random() * 10000);
+      const randomEmail = `${staffMember.first_name.toLowerCase()}.${staffMember.last_name.toLowerCase()}.${randomId}@business.com`;
+      
+      const clonedStaff = {
+        first_name: `${staffMember.first_name} (Copy)`,
+        last_name: staffMember.last_name,
+        email: randomEmail,
+        phone: staffMember.phone,
+        address: staffMember.address,
+        salary: staffMember.salary,
+        hire_date: new Date().toISOString().split('T')[0], // Today's date
+        business_id: selectedBusinessId,
+        role_id: 3, // Employee role
+        password: "default123" // Default password for cloned staff
+      };
+      
+      return apiRequest("POST", "/api/staff", clonedStaff);
+    },
+    onSuccess: () => {
+      const queryKey = user?.isSuperAdmin ? ["/api/staff"] : ["/api/staff", selectedBusinessId];
+      queryClient.invalidateQueries({ queryKey });
+      toast({
+        title: t("Success"),
+        description: t("Staff member cloned successfully"),
+      });
+    },
+    onError: () => {
+      toast({
+        title: t("Error"),
+        description: t("Failed to clone staff member"),
         variant: "destructive",
       });
     },
@@ -268,6 +307,16 @@ export default function StaffList() {
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => cloneStaffMutation.mutate(member)}
+                          disabled={cloneStaffMutation.isPending}
+                          className="text-blue-600 hover:text-blue-700"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>
