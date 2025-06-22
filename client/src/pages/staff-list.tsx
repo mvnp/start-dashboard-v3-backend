@@ -94,11 +94,11 @@ export default function StaffList() {
     },
   });
 
-  const filteredStaff = staff.filter(member =>
+  const filteredStaff = Array.isArray(staff) ? staff.filter(member =>
     `${member.first_name} ${member.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (member.email || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
     (member.role || "").toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) : [];
 
   const formatSalary = (salary: string | null) => {
     if (!salary) return "N/A";

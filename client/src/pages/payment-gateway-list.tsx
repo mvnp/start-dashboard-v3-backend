@@ -38,15 +38,13 @@ export default function PaymentGatewayList() {
   const { toast } = useToast();
   const { selectedBusinessId } = useBusinessContext();
 
-  const { data: gateways = [], isLoading } = useQuery({
+  const { data: gateways, isLoading } = useQuery({
     queryKey: ["/api/payment-gateways", selectedBusinessId],
-    select: (data: PaymentGateway[]) => data,
     enabled: !!selectedBusinessId,
   });
 
-  const { data: staff = [] } = useQuery({
+  const { data: staff } = useQuery({
     queryKey: ["/api/staff", selectedBusinessId],
-    select: (data: Staff[]) => data,
     enabled: !!selectedBusinessId,
   });
 
@@ -70,7 +68,7 @@ export default function PaymentGatewayList() {
   });
 
   const getStaffName = (staffId: number) => {
-    const staffMember = staff.find(s => s.id === staffId);
+    const staffMember = Array.isArray(staff) ? staff.find(s => s.id === staffId) : null;
     return staffMember ? `${staffMember.first_name} ${staffMember.last_name}` : "Unknown Staff";
   };
 

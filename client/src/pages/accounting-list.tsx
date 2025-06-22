@@ -54,10 +54,10 @@ export default function AccountingList() {
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredTransactions = transactions.filter(transaction =>
+  const filteredTransactions = Array.isArray(transactions) ? transactions.filter(transaction =>
     transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     transaction.type.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) : [];
 
   const getCategoryName = (categoryId: number | null) => {
     if (!categoryId) return "No category";
@@ -72,13 +72,13 @@ export default function AccountingList() {
     }).format(amount);
   };
 
-  const totalRevenue = transactions
+  const totalRevenue = Array.isArray(transactions) ? transactions
     .filter(t => t.type === 'revenue')
-    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0) : 0;
 
-  const totalExpenses = transactions
+  const totalExpenses = Array.isArray(transactions) ? transactions
     .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0) : 0;
 
   const netIncome = totalRevenue - totalExpenses;
 
