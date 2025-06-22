@@ -33,6 +33,7 @@ import { Person } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
 import { useBusinessContext } from "@/hooks/use-business-context";
+import { useAuth } from "@/lib/auth";
 
 interface Client extends Person {
   email?: string;
@@ -43,6 +44,7 @@ export default function ClientList() {
   const { toast } = useToast();
   const { t } = useTranslationHelper();
   const { selectedBusinessId } = useBusinessContext();
+  const { user } = useAuth();
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ["/api/clients", selectedBusinessId],
@@ -51,7 +53,7 @@ export default function ClientList() {
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window gains focus
-    enabled: !!selectedBusinessId, // Only fetch when business is selected
+    enabled: user?.isSuperAdmin || !!selectedBusinessId, // Super Admin can fetch without business selection
   });
 
   const deleteClientMutation = useMutation({

@@ -22,6 +22,7 @@ import { Service } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
 import { useBusinessContext } from "@/hooks/use-business-context";
+import { useAuth } from "@/lib/auth";
 
 export default function ServiceList() {
   const [, setLocation] = useLocation();
@@ -30,6 +31,7 @@ export default function ServiceList() {
   const { toast } = useToast();
   const { t } = useTranslationHelper();
   const { selectedBusinessId } = useBusinessContext();
+  const { user } = useAuth();
 
   const { data: services = [], isLoading } = useQuery({
     queryKey: ["/api/services", selectedBusinessId],
@@ -38,7 +40,7 @@ export default function ServiceList() {
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window gains focus
-    enabled: !!selectedBusinessId,
+    enabled: user?.isSuperAdmin || !!selectedBusinessId,
   });
 
   const deleteMutation = useMutation({
