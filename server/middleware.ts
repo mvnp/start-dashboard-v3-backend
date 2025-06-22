@@ -13,21 +13,26 @@ export const getBusinessFilter = (user: TokenPayload | undefined, req?: Request)
   console.log(selectedBusinessId);
   if (selectedBusinessId) {
     const businessId = parseInt(selectedBusinessId);
-    // For Super Admin, allow any business ID selection
-    if (user.isSuperAdmin) {
-      return [businessId];
-    }
-    // For regular users, verify they have access to this business
-    if (user.businessIds.includes(businessId)) {
-      return [businessId];
+    if (!isNaN(businessId)) {
+      // For Super Admin, allow any business ID selection
+      if (user.isSuperAdmin) {
+        return [businessId];
+      }
+      // For regular users, verify they have access to this business
+      if (user.businessIds.includes(businessId)) {
+        return [businessId];
+      }
+      // If business ID is provided but user doesn't have access, return empty array
+      return [];
     }
   }
   
   // Super Admin without business selection can see all businesses
   if (user.isSuperAdmin) return null;
   
-  // For merchants (Role ID 2), return all their business IDs for comprehensive access
+  // For merchants (Role ID 2), return all their business IDs when no specific business is selected
   if (user.roleId === 2) {
+    console.log('Merchant business IDs:', user.businessIds);
     return user.businessIds.length > 0 ? user.businessIds : [];
   }
   
