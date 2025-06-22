@@ -2667,6 +2667,44 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  app.delete("/api/payment-gateways/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const user = req.user!;
+      
+      // Merchants (Role ID 2) require mandatory business context
+      if (user.roleId === 2 && !req.headers['x-selected-business-id']) {
+        return res.status(400).json({ error: "Business ID is required" });
+      }
+      
+      // Get business context for access validation
+      const businessIds = getBusinessFilter(user, req);
+      if (!user.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
+        return res.status(403).json({ error: "No business access" });
+      }
+      
+      // Get existing payment gateway to verify business access
+      const existingGateway = await storage.getPaymentGateway(id);
+      if (!existingGateway) {
+        return res.status(404).json({ error: "Payment gateway not found" });
+      }
+      
+      // Verify gateway belongs to user's accessible businesses
+      if (!user.isSuperAdmin && existingGateway.business_id && !businessIds!.includes(existingGateway.business_id)) {
+        return res.status(403).json({ error: "Access denied to this payment gateway" });
+      }
+      
+      const success = await storage.deletePaymentGateway(id);
+      if (!success) {
+        return res.status(404).json({ error: "Payment gateway not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error("Payment gateway deletion error:", error);
+      res.status(500).json({ error: "Failed to delete payment gateway" });
+    }
+  });
+
   // Accounting Transaction routes
   app.get("/api/accounting", async (req, res) => {
     try {
@@ -3322,6 +3360,44 @@ export function registerRoutes(app: Express): void {
         return res.status(400).json({ error: "Invalid data", details: error.errors });
       }
       res.status(500).json({ error: "Failed to create support ticket" });
+    }
+  });
+
+  app.delete("/api/support-tickets/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const user = req.user!;
+      
+      // Merchants (Role ID 2) require mandatory business context
+      if (user.roleId === 2 && !req.headers['x-selected-business-id']) {
+        return res.status(400).json({ error: "Business ID is required" });
+      }
+      
+      // Get business context for access validation
+      const businessIds = getBusinessFilter(user, req);
+      if (!user.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
+        return res.status(403).json({ error: "No business access" });
+      }
+      
+      // Get existing support ticket to verify business access
+      const existingTicket = await storage.getSupportTicket(id);
+      if (!existingTicket) {
+        return res.status(404).json({ error: "Support ticket not found" });
+      }
+      
+      // Verify ticket belongs to user's accessible businesses
+      if (!user.isSuperAdmin && existingTicket.business_id && !businessIds!.includes(existingTicket.business_id)) {
+        return res.status(403).json({ error: "Access denied to this support ticket" });
+      }
+      
+      const success = await storage.deleteSupportTicket(id);
+      if (!success) {
+        return res.status(404).json({ error: "Support ticket not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error("Support ticket deletion error:", error);
+      res.status(500).json({ error: "Failed to delete support ticket" });
     }
   });
 
