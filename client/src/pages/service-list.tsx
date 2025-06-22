@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Search, Edit, Trash2, Settings, Clock, DollarSign, User } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Copy, Settings, Clock, DollarSign, User } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Service } from "@shared/schema";
@@ -57,6 +57,36 @@ export default function ServiceList() {
       toast({
         title: t("Error"),
         description: t("Failed to delete service"),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const cloneServiceMutation = useMutation({
+    mutationFn: async (service: Service) => {
+      const clonedService = {
+        name: `${service.name} (Copy)`,
+        description: service.description,
+        price: service.price,
+        duration: service.duration,
+        is_active: service.is_active,
+        business_id: selectedBusinessId
+      };
+      
+      return apiRequest("POST", "/api/services", clonedService);
+    },
+    onSuccess: () => {
+      const queryKey = user?.isSuperAdmin ? ["/api/services"] : ["/api/services", selectedBusinessId];
+      queryClient.invalidateQueries({ queryKey });
+      toast({
+        title: t("Success"),
+        description: t("Service cloned successfully"),
+      });
+    },
+    onError: () => {
+      toast({
+        title: t("Error"),
+        description: t("Failed to clone service"),
         variant: "destructive",
       });
     },
@@ -205,6 +235,15 @@ export default function ServiceList() {
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => cloneServiceMutation.mutate(service)}
+                  disabled={cloneServiceMutation.isPending}
+                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                >
+                  <Copy className="w-4 h-4" />
                 </Button>
               </div>
             </CardContent>
