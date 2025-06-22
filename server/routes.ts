@@ -1285,10 +1285,18 @@ export function registerRoutes(app: Express): void {
           return res.status(403).json({ error: "Access denied to this service" });
         }
       }
+
+      // Prevent moving services between businesses - applies to all users including Super Admin
+      if (business_id && business_id !== existingService.business_id) {
+        return res.status(400).json({ 
+          error: "Cannot change business_id of existing service. Services must remain in their original business." 
+        });
+      }
       
+      // Always use existing service's business_id to prevent business transfer
       const updateData = {
         ...req.body,
-        business_id: business_id
+        business_id: existingService.business_id
       };
       
       // Validate required fields for updates
