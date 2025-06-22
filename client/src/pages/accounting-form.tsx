@@ -100,6 +100,12 @@ export default function AccountingForm() {
     enabled: user?.isSuperAdmin || !!selectedBusinessId,
   });
 
+  // Helper function to find user_id from person_id using existing data
+  const getUserIdFromPersonId = (personId: number, dataSet: Person[]): number | null => {
+    const person = dataSet.find(p => p.id === personId);
+    return person?.user_id || null;
+  };
+
   // Set form values when editing
   useEffect(() => {
     if (isEdit && transaction) {
@@ -168,10 +174,27 @@ export default function AccountingForm() {
   });
 
   const onSubmit = (data: FormData) => {
+    // Map person IDs to user IDs for foreign key constraints
+    const submissionData = { ...data };
+    
+    if (data.client_id) {
+      const clientUserId = getUserIdFromPersonId(data.client_id, clients);
+      if (clientUserId) {
+        submissionData.client_id = clientUserId;
+      }
+    }
+    
+    if (data.staff_id) {
+      const staffUserId = getUserIdFromPersonId(data.staff_id, staff);
+      if (staffUserId) {
+        submissionData.staff_id = staffUserId;
+      }
+    }
+
     if (isEdit) {
-      updateMutation.mutate(data);
+      updateMutation.mutate(submissionData);
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(submissionData);
     }
   };
 
