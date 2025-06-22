@@ -109,9 +109,9 @@ export default function AppointmentList() {
     refetchOnWindowFocus: true,
   });
 
-  const appointments = appointmentData?.appointments || [];
-  const totalPages = appointmentData?.totalPages || 1;
-  const total = appointmentData?.total || 0;
+  const appointments = (appointmentData && typeof appointmentData === 'object' && Array.isArray(appointmentData.appointments)) ? appointmentData.appointments : [];
+  const totalPages = (appointmentData && typeof appointmentData === 'object' && appointmentData.totalPages) ? appointmentData.totalPages : 1;
+  const total = (appointmentData && typeof appointmentData === 'object' && appointmentData.total) ? appointmentData.total : 0;
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/appointments/${id}`),

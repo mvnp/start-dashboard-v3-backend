@@ -56,10 +56,10 @@ export default function BarberPlanList() {
     },
   });
 
-  const filteredPlans = plans.filter(plan =>
+  const filteredPlans = Array.isArray(plans) ? plans.filter(plan =>
     plan.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (plan.subtitle && plan.subtitle.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  ) : [];
 
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat('en-US', {

@@ -47,7 +47,7 @@ export default function SupportTicketList() {
     },
   });
 
-  const filteredTickets = tickets.filter((ticket: SupportTicket) => {
+  const filteredTickets = Array.isArray(tickets) ? tickets.filter((ticket: SupportTicket) => {
     const matchesSearch = 
       ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -58,7 +58,7 @@ export default function SupportTicketList() {
     const matchesPriority = priorityFilter === "all" || ticket.priority === priorityFilter;
     
     return matchesSearch && matchesStatus && matchesPriority;
-  });
+  }) : [];
 
   const getStatusIcon = (status: string) => {
     switch (status) {
