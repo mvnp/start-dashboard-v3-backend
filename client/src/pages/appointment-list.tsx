@@ -77,22 +77,8 @@ export default function AppointmentList() {
   }, [currentPage, statusFilter, todayFilter, startDate, endDate]);
 
   const { data: appointmentData, isLoading } = useQuery({
-    queryKey: ["/api/appointments", selectedBusinessId, buildQueryParams()],
+    queryKey: [`/api/appointments?${buildQueryParams()}`, selectedBusinessId],
     enabled: !!selectedBusinessId,
-    queryFn: async () => {
-      const token = localStorage.getItem('accessToken');
-      const headers: Record<string, string> = {};
-      
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(`/api/appointments?${buildQueryParams()}`, {
-        headers,
-      });
-      if (!response.ok) throw new Error('Failed to fetch appointments');
-      return response.json();
-    },
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
