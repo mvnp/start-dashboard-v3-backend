@@ -70,7 +70,7 @@ export default function StaffList() {
   const { user } = useAuth();
 
   const { data: staff, isLoading } = useQuery({
-    queryKey: user?.isSuperAdmin ? ["/api/staff", "super-admin-all"] : ["/api/staff", selectedBusinessId],
+    queryKey: ["/api/staff", user?.isSuperAdmin ? "all-businesses" : selectedBusinessId],
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
