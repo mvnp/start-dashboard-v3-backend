@@ -1036,25 +1036,58 @@ export function registerRoutes(app: Express): void {
       const id = parseInt(req.params.id);
       const { email, first_name, last_name, phone, tax_id, address } = req.body;
 
-      // Get business context from selected business
-      const businessIds = getBusinessFilter(req.user!, req);
-      // Super Admin has unrestricted access (businessIds === null)
-      if (!req.user!.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
-        return res.status(403).json({ error: "No business access" });
+      // Get business_id from request body or header - MANDATORY for all users including Super Admin
+      let business_id = req.body.business_id;
+      if (!business_id) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (selectedBusinessId) {
+          business_id = parseInt(selectedBusinessId);
+        }
+      }
+      
+      if (!business_id) {
+        return res.status(400).json({ 
+          error: "Business ID is required in request body or x-selected-business-id header" 
+        });
       }
 
-      // Get existing client data with business filtering
+      // Validate business access for non-Super Admin users
+      if (!req.user!.isSuperAdmin) {
+        // For merchants (Role ID 2), fetch fresh business associations from database
+        let userBusinessIds = req.user!.businessIds;
+        if (req.user!.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(req.user!.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+        
+        if (!userBusinessIds.includes(business_id)) {
+          return res.status(403).json({ error: "No access to this business" });
+        }
+      }
+
+      // Validate that the business exists
+      const businessExists = await storage.getBusiness(business_id);
+      if (!businessExists) {
+        return res.status(400).json({
+          error: "Invalid business ID",
+          details: [{ path: ["business_id"], message: "Business does not exist" }]
+        });
+      }
+
+      // Get existing client data
       const existingClient = await storage.getPerson(id);
       if (!existingClient) {
         return res.status(404).json({ error: "Client not found" });
       }
 
-      // Check if the client's user has access to the selected business (only for non-Super Admin)
-      if (!req.user!.isSuperAdmin && existingClient.user_id && businessIds) {
+      // Validate that the client belongs to the specified business
+      if (existingClient.user_id) {
         const userWithBusiness = await storage.getUserWithRoleAndBusiness(existingClient.user_id);
-        if (!userWithBusiness || !userWithBusiness.businessIds.some(bid => businessIds.includes(bid))) {
-          return res.status(404).json({ error: "Client not found" });
+        if (!userWithBusiness || !userWithBusiness.businessIds.includes(business_id)) {
+          return res.status(404).json({ error: "Client not found in this business" });
         }
+      } else {
+        return res.status(404).json({ error: "Client has no business association" });
       }
 
       // Validate required fields
