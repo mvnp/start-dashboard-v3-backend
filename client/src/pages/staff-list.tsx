@@ -32,6 +32,7 @@ import { Person } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
 import { useBusinessContext } from "@/hooks/use-business-context";
+import { useAuth } from "@/lib/auth";
 
 interface Staff extends Person {
   role?: string;
@@ -66,6 +67,7 @@ export default function StaffList() {
   const { toast } = useToast();
   const { t } = useTranslationHelper();
   const { selectedBusinessId } = useBusinessContext();
+  const { user } = useAuth();
 
   const { data: staff, isLoading } = useQuery({
     queryKey: ["/api/staff", selectedBusinessId],
@@ -73,7 +75,7 @@ export default function StaffList() {
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window gains focus
-    enabled: !!selectedBusinessId, // Only fetch when business is selected
+    enabled: user?.isSuperAdmin || !!selectedBusinessId, // Super Admin can fetch without business selection
   });
 
   const deleteStaffMutation = useMutation({
