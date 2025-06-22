@@ -1251,17 +1251,30 @@ export function registerRoutes(app: Express): void {
     try {
       const user = req.user!;
       
-      // Get business_id from request body or header (flexible approach for services)
+      // Get business_id from request body or header - MANDATORY for all users including Super Admin
       let business_id = req.body.business_id;
+      console.log('Services POST DEBUG - Initial business_id from body:', business_id);
+      
       if (!business_id) {
         const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        console.log('Services POST DEBUG - Header x-selected-business-id:', selectedBusinessId);
         if (selectedBusinessId) {
           business_id = parseInt(selectedBusinessId);
+          console.log('Services POST DEBUG - Parsed business_id from header:', business_id);
         }
       }
       
-      // For non-Super Admin users, require business context and validate access
-      if (!user.isSuperAdmin && business_id) {
+      console.log('Services POST DEBUG - Final business_id:', business_id);
+      
+      if (!business_id) {
+        console.log('Services POST DEBUG - No business_id found, returning 400 error');
+        return res.status(400).json({ 
+          error: "Business ID is required in request body or x-selected-business-id header" 
+        });
+      }
+
+      // Validate business access for non-Super Admin users
+      if (!user.isSuperAdmin) {
         // For merchants (Role ID 2), fetch fresh business associations from database
         let userBusinessIds = user.businessIds;
         if (user.roleId === 2) {
