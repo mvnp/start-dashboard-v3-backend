@@ -294,14 +294,14 @@ export default function AccountingForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel><TranslatableText>Category</TranslatableText></FormLabel>
-                      <Select onValueChange={(value) => field.onChange(value ? Number(value) : undefined)} value={field.value?.toString()}>
+                      <Select onValueChange={(value) => field.onChange(value === "0" ? undefined : Number(value))} value={field.value?.toString()}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder={<TranslatableText>Select category</TranslatableText>} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value=""><TranslatableText>No category</TranslatableText></SelectItem>
+                          <SelectItem value="0"><TranslatableText>No category</TranslatableText></SelectItem>
                           {categories.map((category) => (
                             <SelectItem key={category.id} value={category.id.toString()}>
                               {category.description}
