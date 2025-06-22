@@ -34,6 +34,7 @@ export async function apiRequest(
     '/api/payment-gateways',
     '/api/support-tickets',
     '/api/accounting-transactions',
+    '/api/accounting-transaction-categories',
     '/api/settings'
   ];
 

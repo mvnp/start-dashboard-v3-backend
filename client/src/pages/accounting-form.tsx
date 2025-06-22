@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
 import { useBusinessContext } from "@/hooks/use-business-context";
+import { useAuth } from "@/lib/auth";
 import type { AccountingTransaction, AccountingTransactionCategory, Person, Business } from "@shared/schema";
 
 const formSchema = z.object({
@@ -53,6 +54,7 @@ export default function AccountingForm() {
   const { toast } = useToast();
   const { t } = useTranslationHelper();
   const { selectedBusinessId } = useBusinessContext();
+  const { user } = useAuth();
   const isEdit = !!actualId && actualId !== 'new';
 
   const form = useForm<FormData>({
@@ -94,8 +96,8 @@ export default function AccountingForm() {
 
   // Fetch categories with business context
   const { data: categories = [] } = useQuery<AccountingTransactionCategory[]>({
-    queryKey: ["/api/accounting-transaction-categories", selectedBusinessId],
-    enabled: !!selectedBusinessId,
+    queryKey: ["/api/accounting-transaction-categories"],
+    enabled: user?.isSuperAdmin || !!selectedBusinessId,
   });
 
   // Set form values when editing
