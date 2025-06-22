@@ -19,6 +19,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
+import { useBusinessContext } from "@/hooks/use-business-context";
 import type { Appointment, Person, Service, Business } from "@shared/schema";
 
 interface AppointmentFormData {
@@ -52,6 +53,7 @@ export default function AppointmentForm() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { t } = useTranslationHelper();
+  const { selectedBusinessId } = useBusinessContext();
   const isEdit = !!appointmentId && appointmentId !== 'new';
 
   const form = useForm<FormData>({
@@ -60,7 +62,7 @@ export default function AppointmentForm() {
       client_id: 0,
       user_id: 0,
       service_id: 0,
-      business_id: 1,
+      business_id: selectedBusinessId || 0,
       appointment_date: new Date(),
       appointment_time: '',
       status: 'scheduled',
@@ -70,48 +72,32 @@ export default function AppointmentForm() {
 
   // Load appointment data for editing
   const { data: appointment, isLoading: appointmentLoading, error: appointmentError } = useQuery<Appointment>({
-    queryKey: [`/api/appointments/${appointmentId}`],
-    queryFn: async () => {
-      const token = localStorage.getItem('access_token');
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-      
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      
-      // No business context needed
-
-      const response = await fetch(`/api/appointments/${appointmentId}`, {
-        headers,
-      });
-      if (!response.ok) throw new Error('Failed to fetch appointment');
-      return response.json();
-    },
-    enabled: isEdit && !!appointmentId,
+    queryKey: [`/api/appointments/${appointmentId}`, selectedBusinessId],
+    enabled: isEdit && !!appointmentId && !!selectedBusinessId,
     staleTime: 0,
     refetchOnMount: true,
-    select: (data: Appointment) => data,
   });
 
-  // Load clients
+  // Load clients (business-scoped)
   const { data: clients = [], isLoading: clientsLoading } = useQuery<Person[]>({
-    queryKey: ["/api/clients"],
+    queryKey: ["/api/clients", selectedBusinessId],
+    enabled: !!selectedBusinessId,
     staleTime: 0,
     refetchOnMount: true,
   });
 
-  // Load staff
+  // Load staff (business-scoped)
   const { data: staff = [], isLoading: staffLoading } = useQuery<Person[]>({
-    queryKey: ["/api/staff"],
+    queryKey: ["/api/staff", selectedBusinessId],
+    enabled: !!selectedBusinessId,
     staleTime: 0,
     refetchOnMount: true,
   });
 
-  // Load services
+  // Load services (business-scoped)
   const { data: services = [], isLoading: servicesLoading } = useQuery<Service[]>({
-    queryKey: ["/api/services"],
+    queryKey: ["/api/services", selectedBusinessId],
+    enabled: !!selectedBusinessId,
     staleTime: 0,
     refetchOnMount: true,
   });
@@ -132,17 +118,17 @@ export default function AppointmentForm() {
       const timeString = appointment.appointment_time || '09:00';
       
       form.reset({
-        client_id: appointment.client_id,
-        user_id: appointment.user_id,
-        service_id: appointment.service_id,
-        business_id: appointment.business_id,
+        client_id: appointment.client_id || 0,
+        user_id: appointment.user_id || 0,
+        service_id: appointment.service_id || 0,
+        business_id: appointment.business_id || selectedBusinessId || 0,
         appointment_date: appointmentDate,
         appointment_time: timeString,
-        status: appointment.status,
+        status: appointment.status || 'scheduled',
         notes: appointment.notes || '',
       });
     }
-  }, [isEdit, appointment, form, clientsLoaded, staffLoaded, servicesLoaded]);
+  }, [isEdit, appointment, form, clientsLoaded, staffLoaded, servicesLoaded, selectedBusinessId]);
 
   const createMutation = useMutation({
     mutationFn: (data: AppointmentFormData) => apiRequest("POST", "/api/appointments", data),
@@ -268,7 +254,7 @@ export default function AppointmentForm() {
                         <SelectContent>
                           {clients.map((client) => (
                             <SelectItem key={client.id} value={client.id.toString()}>
-                              {client.name}
+                              {`${client.first_name} ${client.last_name}`}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -293,7 +279,7 @@ export default function AppointmentForm() {
                         <SelectContent>
                           {staff.map((member) => (
                             <SelectItem key={member.id} value={member.id.toString()}>
-                              {member.name}
+                              {`${member.first_name} ${member.last_name}`}
                             </SelectItem>
                           ))}
                         </SelectContent>
