@@ -89,7 +89,7 @@ export default function ClientList() {
     },
   });
 
-  const filteredClients = clients.filter(client =>
+  const filteredClients = (clients || []).filter(client =>
     `${client.first_name} ${client.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (client.email || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
     (client.phone || "").toLowerCase().includes(searchTerm.toLowerCase()) ||

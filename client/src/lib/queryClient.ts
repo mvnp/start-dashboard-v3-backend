@@ -67,8 +67,22 @@ export const getQueryFn: <T>(options: {
       headers["Authorization"] = `Bearer ${token}`;
     }
     
+    // Construct URL from queryKey
+    let url = queryKey[0] as string;
+    
+    // Handle parameterized URLs like ["/api/businesses", id]
+    if (queryKey.length > 1 && queryKey[1] !== null && queryKey[1] !== undefined) {
+      // For business endpoints with ID parameter
+      if (url === "/api/businesses") {
+        url = `${url}/${queryKey[1]}`;
+      }
+      // Add other parameterized endpoints as needed
+      else if (url.startsWith('/api/') && !url.includes('?')) {
+        url = `${url}/${queryKey[1]}`;
+      }
+    }
+    
     // Add business context for business-scoped endpoints
-    const url = queryKey[0] as string;
     const businessScopedEndpoints = [
       '/api/staff',
       '/api/clients', 
