@@ -523,31 +523,55 @@ export function registerRoutes(app: Express): void {
 
       // Validate business access for non-Super Admin users
       if (!currentUser.isSuperAdmin) {
-        // Get staff member's business associations
-        let staffBusinessIds: number[] = [];
-        if (person.user_id) {
-          const userBusinessRole = await storage.getUserWithRoleAndBusiness(person.user_id);
-          if (userBusinessRole) {
-            staffBusinessIds = userBusinessRole.businessIds || [];
-          }
-        }
-
-        // Get current user's business access
-        let userBusinessIds = currentUser.businessIds;
+        // For merchants (Role ID: 2), enforce strict business context validation
         if (currentUser.roleId === 2) {
+          const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+          const selectedBusinessIdNum = selectedBusinessId ? parseInt(selectedBusinessId) : null;
+          
+          // Get staff member's business associations
+          let staffBusinessIds: number[] = [];
+          if (person.user_id) {
+            const userBusinessRole = await storage.getUserWithRoleAndBusiness(person.user_id);
+            if (userBusinessRole) {
+              staffBusinessIds = userBusinessRole.businessIds || [];
+            }
+          }
+          
+          // Check if staff member belongs to the selected business context
+          if (!selectedBusinessIdNum || !staffBusinessIds.includes(selectedBusinessIdNum)) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view staff members from the selected business context." 
+            });
+          }
+          
+          // Verify user has access to the selected business
           const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
-          userBusinessIds = userData?.businessIds || [];
-        }
+          const userBusinessIds = userData?.businessIds || [];
+          if (!userBusinessIds.includes(selectedBusinessIdNum)) {
+            return res.status(403).json({ 
+              error: "Access denied. You don't have access to this business." 
+            });
+          }
+        } else {
+          // For other non-Super Admin users, use general business access validation
+          let staffBusinessIds: number[] = [];
+          if (person.user_id) {
+            const userBusinessRole = await storage.getUserWithRoleAndBusiness(person.user_id);
+            if (userBusinessRole) {
+              staffBusinessIds = userBusinessRole.businessIds || [];
+            }
+          }
 
-        // Check if current user has access to any business the staff member belongs to
-        const hasCommonBusiness = staffBusinessIds.some(businessId => 
-          userBusinessIds.includes(businessId)
-        );
+          let userBusinessIds = currentUser.businessIds;
+          const hasCommonBusiness = staffBusinessIds.some(businessId => 
+            userBusinessIds.includes(businessId)
+          );
 
-        if (!hasCommonBusiness) {
-          return res.status(403).json({ 
-            error: "Access denied. You can only view staff members from businesses you have access to." 
-          });
+          if (!hasCommonBusiness) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view staff members from businesses you have access to." 
+            });
+          }
         }
       }
 
@@ -898,31 +922,55 @@ export function registerRoutes(app: Express): void {
 
       // Validate business access for non-Super Admin users
       if (!user.isSuperAdmin) {
-        // Get client's business associations
-        let clientBusinessIds: number[] = [];
-        if (person.user_id) {
-          const userBusinessRole = await storage.getUserWithRoleAndBusiness(person.user_id);
-          if (userBusinessRole) {
-            clientBusinessIds = userBusinessRole.businessIds || [];
-          }
-        }
-
-        // Get current user's business access
-        let userBusinessIds = user.businessIds;
+        // For merchants (Role ID: 2), enforce strict business context validation
         if (user.roleId === 2) {
+          const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+          const selectedBusinessIdNum = selectedBusinessId ? parseInt(selectedBusinessId) : null;
+          
+          // Get client's business associations
+          let clientBusinessIds: number[] = [];
+          if (person.user_id) {
+            const userBusinessRole = await storage.getUserWithRoleAndBusiness(person.user_id);
+            if (userBusinessRole) {
+              clientBusinessIds = userBusinessRole.businessIds || [];
+            }
+          }
+          
+          // Check if client belongs to the selected business context
+          if (!selectedBusinessIdNum || !clientBusinessIds.includes(selectedBusinessIdNum)) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view clients from the selected business context." 
+            });
+          }
+          
+          // Verify user has access to the selected business
           const userData = await storage.getUserWithRoleAndBusiness(user.userId);
-          userBusinessIds = userData?.businessIds || [];
-        }
+          const userBusinessIds = userData?.businessIds || [];
+          if (!userBusinessIds.includes(selectedBusinessIdNum)) {
+            return res.status(403).json({ 
+              error: "Access denied. You don't have access to this business." 
+            });
+          }
+        } else {
+          // For other non-Super Admin users, use general business access validation
+          let clientBusinessIds: number[] = [];
+          if (person.user_id) {
+            const userBusinessRole = await storage.getUserWithRoleAndBusiness(person.user_id);
+            if (userBusinessRole) {
+              clientBusinessIds = userBusinessRole.businessIds || [];
+            }
+          }
 
-        // Check if current user has access to any business the client belongs to
-        const hasCommonBusiness = clientBusinessIds.some(businessId => 
-          userBusinessIds.includes(businessId)
-        );
+          let userBusinessIds = user.businessIds;
+          const hasCommonBusiness = clientBusinessIds.some(businessId => 
+            userBusinessIds.includes(businessId)
+          );
 
-        if (!hasCommonBusiness) {
-          return res.status(403).json({ 
-            error: "Access denied. You can only view clients from businesses you have access to." 
-          });
+          if (!hasCommonBusiness) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view clients from businesses you have access to." 
+            });
+          }
         }
       }
 
@@ -1316,18 +1364,34 @@ export function registerRoutes(app: Express): void {
 
       // Validate business access for non-Super Admin users
       if (!user.isSuperAdmin) {
-        // Get current user's business access
-        let userBusinessIds = user.businessIds;
+        // For merchants (Role ID: 2), enforce strict business context validation
         if (user.roleId === 2) {
+          const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+          const selectedBusinessIdNum = selectedBusinessId ? parseInt(selectedBusinessId) : null;
+          
+          // Check if service belongs to the selected business context
+          if (!selectedBusinessIdNum || service.business_id !== selectedBusinessIdNum) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view services from the selected business context." 
+            });
+          }
+          
+          // Verify user has access to the selected business
           const userData = await storage.getUserWithRoleAndBusiness(user.userId);
-          userBusinessIds = userData?.businessIds || [];
-        }
-
-        // Check if service belongs to user's business
-        if (!userBusinessIds.includes(service.business_id)) {
-          return res.status(403).json({ 
-            error: "Access denied. You can only view services from businesses you have access to." 
-          });
+          const userBusinessIds = userData?.businessIds || [];
+          if (!userBusinessIds.includes(selectedBusinessIdNum)) {
+            return res.status(403).json({ 
+              error: "Access denied. You don't have access to this business." 
+            });
+          }
+        } else {
+          // For other non-Super Admin users, use general business access validation
+          let userBusinessIds = user.businessIds;
+          if (!userBusinessIds.includes(service.business_id)) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view services from businesses you have access to." 
+            });
+          }
         }
       }
 
@@ -1749,18 +1813,34 @@ export function registerRoutes(app: Express): void {
 
       // Validate business access for non-Super Admin users
       if (!currentUser.isSuperAdmin) {
-        // Get current user's business access
-        let userBusinessIds = currentUser.businessIds;
+        // For merchants (Role ID: 2), enforce strict business context validation
         if (currentUser.roleId === 2) {
+          const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+          const selectedBusinessIdNum = selectedBusinessId ? parseInt(selectedBusinessId) : null;
+          
+          // Check if appointment belongs to the selected business context
+          if (!selectedBusinessIdNum || appointment.business_id !== selectedBusinessIdNum) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view appointments from the selected business context." 
+            });
+          }
+          
+          // Verify user has access to the selected business
           const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
-          userBusinessIds = userData?.businessIds || [];
-        }
-
-        // Check if appointment belongs to user's business
-        if (!userBusinessIds.includes(appointment.business_id)) {
-          return res.status(403).json({ 
-            error: "Access denied. You can only view appointments from businesses you have access to." 
-          });
+          const userBusinessIds = userData?.businessIds || [];
+          if (!userBusinessIds.includes(selectedBusinessIdNum)) {
+            return res.status(403).json({ 
+              error: "Access denied. You don't have access to this business." 
+            });
+          }
+        } else {
+          // For other non-Super Admin users, use general business access validation
+          let userBusinessIds = currentUser.businessIds;
+          if (!userBusinessIds.includes(appointment.business_id)) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view appointments from businesses you have access to." 
+            });
+          }
         }
       }
 
@@ -2263,18 +2343,34 @@ export function registerRoutes(app: Express): void {
 
       // Validate business access for non-Super Admin users
       if (!currentUser.isSuperAdmin) {
-        // Get current user's business access
-        let userBusinessIds = currentUser.businessIds;
+        // For merchants (Role ID: 2), enforce strict business context validation
         if (currentUser.roleId === 2) {
+          const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+          const selectedBusinessIdNum = selectedBusinessId ? parseInt(selectedBusinessId) : null;
+          
+          // Check if gateway belongs to the selected business context
+          if (!selectedBusinessIdNum || gateway.business_id !== selectedBusinessIdNum) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view payment gateways from the selected business context." 
+            });
+          }
+          
+          // Verify user has access to the selected business
           const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
-          userBusinessIds = userData?.businessIds || [];
-        }
-
-        // Check if gateway belongs to user's business
-        if (!userBusinessIds.includes(gateway.business_id)) {
-          return res.status(403).json({ 
-            error: "Access denied. You can only view payment gateways from businesses you have access to." 
-          });
+          const userBusinessIds = userData?.businessIds || [];
+          if (!userBusinessIds.includes(selectedBusinessIdNum)) {
+            return res.status(403).json({ 
+              error: "Access denied. You don't have access to this business." 
+            });
+          }
+        } else {
+          // For other non-Super Admin users, use general business access validation
+          let userBusinessIds = currentUser.businessIds;
+          if (!userBusinessIds.includes(gateway.business_id)) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view payment gateways from businesses you have access to." 
+            });
+          }
         }
       }
 
@@ -2596,18 +2692,34 @@ export function registerRoutes(app: Express): void {
 
       // Validate business access for non-Super Admin users
       if (!currentUser.isSuperAdmin) {
-        // Get current user's business access
-        let userBusinessIds = currentUser.businessIds;
+        // For merchants (Role ID: 2), enforce strict business context validation
         if (currentUser.roleId === 2) {
+          const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+          const selectedBusinessIdNum = selectedBusinessId ? parseInt(selectedBusinessId) : null;
+          
+          // Check if transaction belongs to the selected business context
+          if (!selectedBusinessIdNum || transaction.business_id !== selectedBusinessIdNum) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view transactions from the selected business context." 
+            });
+          }
+          
+          // Verify user has access to the selected business
           const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
-          userBusinessIds = userData?.businessIds || [];
-        }
-
-        // Check if transaction belongs to user's business
-        if (!userBusinessIds.includes(transaction.business_id)) {
-          return res.status(403).json({ 
-            error: "Access denied. You can only view transactions from businesses you have access to." 
-          });
+          const userBusinessIds = userData?.businessIds || [];
+          if (!userBusinessIds.includes(selectedBusinessIdNum)) {
+            return res.status(403).json({ 
+              error: "Access denied. You don't have access to this business." 
+            });
+          }
+        } else {
+          // For other non-Super Admin users, use general business access validation
+          let userBusinessIds = currentUser.businessIds;
+          if (!userBusinessIds.includes(transaction.business_id)) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view transactions from businesses you have access to." 
+            });
+          }
         }
       }
       
@@ -2870,18 +2982,34 @@ export function registerRoutes(app: Express): void {
 
       // Validate business access for non-Super Admin users
       if (!currentUser.isSuperAdmin) {
-        // Get current user's business access
-        let userBusinessIds = currentUser.businessIds;
+        // For merchants (Role ID: 2), enforce strict business context validation
         if (currentUser.roleId === 2) {
+          const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+          const selectedBusinessIdNum = selectedBusinessId ? parseInt(selectedBusinessId) : null;
+          
+          // Check if ticket belongs to the selected business context
+          if (!selectedBusinessIdNum || ticket.business_id !== selectedBusinessIdNum) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view support tickets from the selected business context." 
+            });
+          }
+          
+          // Verify user has access to the selected business
           const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
-          userBusinessIds = userData?.businessIds || [];
-        }
-
-        // Check if ticket belongs to user's business
-        if (!userBusinessIds.includes(ticket.business_id)) {
-          return res.status(403).json({ 
-            error: "Access denied. You can only view support tickets from businesses you have access to." 
-          });
+          const userBusinessIds = userData?.businessIds || [];
+          if (!userBusinessIds.includes(selectedBusinessIdNum)) {
+            return res.status(403).json({ 
+              error: "Access denied. You don't have access to this business." 
+            });
+          }
+        } else {
+          // For other non-Super Admin users, use general business access validation
+          let userBusinessIds = currentUser.businessIds;
+          if (!userBusinessIds.includes(ticket.business_id)) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view support tickets from businesses you have access to." 
+            });
+          }
         }
       }
 
@@ -3054,18 +3182,34 @@ export function registerRoutes(app: Express): void {
 
       // Validate business access for non-Super Admin users
       if (!currentUser.isSuperAdmin) {
-        // Get current user's business access
-        let userBusinessIds = currentUser.businessIds;
+        // For merchants (Role ID: 2), enforce strict business context validation
         if (currentUser.roleId === 2) {
+          const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+          const selectedBusinessIdNum = selectedBusinessId ? parseInt(selectedBusinessId) : null;
+          
+          // Check if instance belongs to the selected business context
+          if (!selectedBusinessIdNum || instance.business_id !== selectedBusinessIdNum) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view WhatsApp instances from the selected business context." 
+            });
+          }
+          
+          // Verify user has access to the selected business
           const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
-          userBusinessIds = userData?.businessIds || [];
-        }
-
-        // Check if instance belongs to user's business
-        if (!userBusinessIds.includes(instance.business_id)) {
-          return res.status(403).json({ 
-            error: "Access denied. You can only view WhatsApp instances from businesses you have access to." 
-          });
+          const userBusinessIds = userData?.businessIds || [];
+          if (!userBusinessIds.includes(selectedBusinessIdNum)) {
+            return res.status(403).json({ 
+              error: "Access denied. You don't have access to this business." 
+            });
+          }
+        } else {
+          // For other non-Super Admin users, use general business access validation
+          let userBusinessIds = currentUser.businessIds;
+          if (!userBusinessIds.includes(instance.business_id)) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view WhatsApp instances from businesses you have access to." 
+            });
+          }
         }
       }
 
