@@ -2144,13 +2144,10 @@ export function registerRoutes(app: Express): void {
         }
       }
       
-      // Convert user_id to person_id for staff member if user_id is being updated
+      // The frontend sends user_id but it's actually a person ID if user_id is being updated
       if (updateData.user_id !== undefined) {
-        // Include all staff roles: 1=super-admin, 2=merchant, 3=employee
-        const staffPersons = await storage.getPersonsByRoles([1, 2, 3]);
-        const staffMember = staffPersons.find(person => person.user_id === updateData.user_id);
-        
-        if (!staffMember) {
+        const staffPerson = await storage.getPerson(updateData.user_id);
+        if (!staffPerson || !staffPerson.user_id) {
           return res.status(400).json({ 
             error: "Validation failed", 
             details: [{ path: ["user_id"], message: "Invalid staff member selected" }]
@@ -2158,18 +2155,17 @@ export function registerRoutes(app: Express): void {
         }
         
         // Validate staff member belongs to the business context through user-business relationship
-        if (staffMember.user_id) {
-          const staffUserData = await storage.getUserWithRoleAndBusiness(staffMember.user_id);
-          const staffBusinessIds = staffUserData?.businessIds || [];
-          if (!staffBusinessIds.includes(businessId)) {
-            return res.status(400).json({ 
-              error: "Validation failed", 
-              details: [{ path: ["user_id"], message: "Staff member must belong to the selected business context" }]
-            });
-          }
+        const staffUserData = await storage.getUserWithRoleAndBusiness(staffPerson.user_id);
+        const staffBusinessIds = staffUserData?.businessIds || [];
+        if (!staffBusinessIds.includes(businessId)) {
+          return res.status(400).json({ 
+            error: "Validation failed", 
+            details: [{ path: ["user_id"], message: "Staff member must belong to the selected business context" }]
+          });
         }
         
-        updateData.user_id = staffMember.id; // Use person ID instead of user ID
+        // Keep the person ID as sent from frontend
+        updateData.user_id = updateData.user_id;
       }
       
       // Validate client belongs to the business context if being updated
