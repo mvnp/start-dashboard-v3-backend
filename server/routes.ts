@@ -342,13 +342,6 @@ export function registerRoutes(app: Express): void {
       const id = parseInt(req.params.id);
       const user = req.user!;
       
-      console.log('Business GET request:', {
-        businessId: id,
-        userId: user?.userId,
-        isSuperAdmin: user?.isSuperAdmin,
-        roleId: user?.roleId
-      });
-      
       // Validate ID parameter
       if (isNaN(id) || id <= 0) {
         return res.status(400).json({ error: "Invalid business ID" });
@@ -361,7 +354,6 @@ export function registerRoutes(app: Express): void {
 
       // Super Admin can access any business
       if (user.isSuperAdmin) {
-        console.log('Super Admin accessing business:', id);
         return res.json(business);
       }
 

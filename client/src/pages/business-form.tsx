@@ -51,31 +51,12 @@ export default function BusinessForm({ businessId }: BusinessFormProps) {
 
   const { data: business, isLoading: businessLoading } = useQuery<Business>({
     queryKey: ["/api/businesses", actualBusinessId],
-    queryFn: async () => {
-      if (!actualBusinessId) throw new Error("No business ID");
-      const response = await fetch(`/api/businesses/${actualBusinessId}`, {
-        credentials: "include",
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to fetch business: ${response.statusText}`);
-      }
-      return response.json();
-    },
     enabled: isEditing && !!actualBusinessId,
   });
 
   // Query for merchant users (role_id = 2)
   const { data: merchantUsers } = useQuery<User[]>({
     queryKey: ["/api/users/by-role"],
-    queryFn: async () => {
-      const response = await fetch("/api/users/by-role?role=merchant", {
-        credentials: "include",
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to fetch merchant users: ${response.statusText}`);
-      }
-      return response.json();
-    },
   });
 
   const form = useForm<BusinessFormData>({

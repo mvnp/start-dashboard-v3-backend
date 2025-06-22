@@ -68,7 +68,6 @@ export async function authenticateJWT(req: AuthenticatedRequest, res: Response, 
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.log('Auth failed - missing or invalid header:', req.path, authHeader ? 'present' : 'missing');
     return res.status(401).json({ 
       error: 'Access denied',
       message: 'Authorization header missing or invalid format'
@@ -81,7 +80,6 @@ export async function authenticateJWT(req: AuthenticatedRequest, res: Response, 
     const decoded = verifyAccessToken(token);
     
     if (!decoded) {
-      console.log('Auth failed - token verification failed:', req.path);
       return res.status(401).json({ 
         error: 'Invalid token',
         message: 'Token is invalid or expired'
@@ -91,7 +89,6 @@ export async function authenticateJWT(req: AuthenticatedRequest, res: Response, 
     // Verify user still exists in database
     const user = await storage.getUser(decoded.userId);
     if (!user) {
-      console.log('Auth failed - user not found:', decoded.userId, req.path);
       return res.status(401).json({ 
         error: 'User not found',
         message: 'User associated with token no longer exists'
@@ -101,7 +98,7 @@ export async function authenticateJWT(req: AuthenticatedRequest, res: Response, 
     req.user = decoded;
     next();
   } catch (error) {
-    console.error('JWT verification error:', error, 'Path:', req.path);
+    console.error('JWT verification error:', error);
     return res.status(401).json({ 
       error: 'Token verification failed',
       message: 'Unable to verify authentication token'
