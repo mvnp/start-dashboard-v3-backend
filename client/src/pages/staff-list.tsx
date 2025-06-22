@@ -67,9 +67,8 @@ export default function StaffList() {
   const { t } = useTranslationHelper();
   const { selectedBusinessId } = useBusinessContext();
 
-  const { data: staff = [], isLoading } = useQuery({
+  const { data: staff, isLoading } = useQuery({
     queryKey: ["/api/staff", selectedBusinessId],
-    select: (data: Staff[]) => data,
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts

@@ -33,9 +33,8 @@ export default function ServiceList() {
   const { selectedBusinessId } = useBusinessContext();
   const { user } = useAuth();
 
-  const { data: services = [], isLoading } = useQuery({
+  const { data: services, isLoading } = useQuery({
     queryKey: ["/api/services", selectedBusinessId],
-    select: (data: Service[]) => data,
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
@@ -62,10 +61,10 @@ export default function ServiceList() {
     },
   });
 
-  const filteredServices = services.filter(service =>
+  const filteredServices = Array.isArray(services) ? services.filter(service =>
     service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (service.description && service.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  ) : [];
 
   const formatPrice = (price: string | null) => {
     if (!price) return "$0.00";

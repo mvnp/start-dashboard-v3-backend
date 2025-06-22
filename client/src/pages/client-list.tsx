@@ -46,9 +46,8 @@ export default function ClientList() {
   const { selectedBusinessId } = useBusinessContext();
   const { user } = useAuth();
 
-  const { data: clients = [], isLoading } = useQuery({
+  const { data: clients, isLoading } = useQuery({
     queryKey: ["/api/clients", selectedBusinessId],
-    select: (data: Client[]) => data,
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
@@ -91,12 +90,12 @@ export default function ClientList() {
     },
   });
 
-  const filteredClients = (clients || []).filter(client =>
+  const filteredClients = Array.isArray(clients) ? clients.filter(client =>
     `${client.first_name} ${client.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (client.email || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
     (client.phone || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
     (client.address || "").toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) : [];
 
   const formatDate = (dateString: string | Date | null) => {
     if (!dateString) return "N/A";
