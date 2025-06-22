@@ -1729,34 +1729,43 @@ export function registerRoutes(app: Express): void {
       let appointments;
       const businessIds = getBusinessFilter(user, req);
       
-      // Super Admin can see all data when no business is selected
-      if (user.isSuperAdmin && businessIds === null) {
-        appointments = await storage.getFilteredAppointments({
-          page,
-          limit,
-          status,
-          today,
-          startDate,
-          endDate,
-          businessIds: null
+      // Check for explicit business selection header
+      const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+      
+      // Require explicit business context for ALL users (Super Admin and Merchants)
+      if (!selectedBusinessId) {
+        return res.status(400).json({ 
+          error: "Business ID is required in x-selected-business-id header for appointments access" 
         });
-      } 
-      // For selected business or non-Super Admin users
-      else if (businessIds && businessIds.length > 0) {
-        appointments = await storage.getFilteredAppointments({
-          page,
-          limit,
-          status,
-          today,
-          startDate,
-          endDate,
-          businessIds: businessIds
-        });
-      } 
-      // Non-Super Admin without selected business gets empty array
-      else {
-        appointments = { appointments: [], total: 0, totalPages: 0, currentPage: page };
       }
+      
+      const explicitBusinessId = parseInt(selectedBusinessId);
+      if (isNaN(explicitBusinessId)) {
+        return res.status(400).json({ 
+          error: "Invalid business ID format" 
+        });
+      }
+      
+      // Verify business access for non-Super Admin users
+      if (!user.isSuperAdmin && !user.businessIds.includes(explicitBusinessId)) {
+        return res.status(403).json({ 
+          error: "Access denied to selected business" 
+        });
+      }
+      
+      // Use the explicitly selected business
+      const explicitBusinessIds = [explicitBusinessId];
+      
+      // All users with valid business context can access appointments
+      appointments = await storage.getFilteredAppointments({
+        page,
+        limit,
+        status,
+        today,
+        startDate,
+        endDate,
+        businessIds: explicitBusinessIds
+      });
 
       // Map person IDs back to user IDs for staff members in all appointments
       if (appointments.appointments && appointments.appointments.length > 0) {
