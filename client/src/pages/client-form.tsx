@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Person } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
+import { useBusinessContext } from "@/hooks/use-business-context";
 
 interface ClientFormData {
   first_name: string;
@@ -34,6 +35,7 @@ export default function ClientForm() {
   const [createMatch] = useRoute("/clients/new");
   const { toast } = useToast();
   const { t } = useTranslationHelper();
+  const { selectedBusinessId } = useBusinessContext();
   const isEdit = !!editMatch;
   const isCreating = !!createMatch;
   const clientId = isEdit && params.id ? parseInt(params.id) : null;
