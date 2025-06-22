@@ -1882,24 +1882,43 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/barber-plans", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
-      // Get business ID from header (frontend) or body (direct API calls)
-      const headerBusinessId = req.headers['x-selected-x-selected-business-id'] ? parseInt(req.headers['x-selected-x-selected-business-id'] as string) : null;
-      const bodyBusinessId = req.body.business_id ? parseInt(req.body.business_id) : null;
-      const selectedBusinessId = headerBusinessId || bodyBusinessId;
-
-      if (!selectedBusinessId) {
-        return res.status(400).json({ error: "Business selection required. Provide business_id in request body or X-Selected-x-selected-business-id header" });
+      const user = req.user!;
+      
+      // Get business_id from request body or header - MANDATORY for all users including Super Admin
+      let business_id = req.body.business_id;
+      if (!business_id) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (selectedBusinessId) {
+          business_id = parseInt(selectedBusinessId);
+        }
+      }
+      
+      if (!business_id) {
+        return res.status(400).json({ 
+          error: "Business ID is required in request body or x-selected-business-id header" 
+        });
       }
 
-      // Validate business access
-      const businessIds = getBusinessFilter(req.user, req);
-      if (businessIds && !businessIds.includes(selectedBusinessId)) {
-        return res.status(403).json({ error: "Access denied to this business" });
+      // Validate business access for non-Super Admin users
+      if (!user.isSuperAdmin) {
+        // For merchants (Role ID 2), fetch fresh business associations from database
+        let userBusinessIds = user.businessIds;
+        if (user.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(user.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+
+        const businessIdNum = typeof business_id === 'string' ? parseInt(business_id) : business_id;
+        if (!userBusinessIds.includes(businessIdNum)) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only create barber plans in businesses you have access to." 
+          });
+        }
       }
 
       const validatedData = insertBarberPlanSchema.parse({
         ...req.body,
-        business_id: selectedBusinessId
+        business_id: business_id
       });
       const plan = await storage.createBarberPlan(validatedData);
       res.status(201).json(plan);
@@ -2676,17 +2695,47 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/whatsapp-instances", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const validatedData = insertWhatsappInstanceSchema.parse(req.body);
+      const user = req.user!;
       
-      // Add business_id from user's first business (or default to business 1 for super admin)
-      const businessId = req.user?.businessIds?.[0] || 1;
-      const instanceData = {
-        ...validatedData,
-        business_id: businessId,
+      // Get business_id from request body or header - MANDATORY for all users including Super Admin
+      let business_id = req.body.business_id;
+      if (!business_id) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (selectedBusinessId) {
+          business_id = parseInt(selectedBusinessId);
+        }
+      }
+      
+      if (!business_id) {
+        return res.status(400).json({ 
+          error: "Business ID is required in request body or x-selected-business-id header" 
+        });
+      }
+
+      // Validate business access for non-Super Admin users
+      if (!user.isSuperAdmin) {
+        // For merchants (Role ID 2), fetch fresh business associations from database
+        let userBusinessIds = user.businessIds;
+        if (user.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(user.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+
+        const businessIdNum = typeof business_id === 'string' ? parseInt(business_id) : business_id;
+        if (!userBusinessIds.includes(businessIdNum)) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only create WhatsApp instances in businesses you have access to." 
+          });
+        }
+      }
+      
+      const validatedData = insertWhatsappInstanceSchema.parse({
+        ...req.body,
+        business_id: business_id,
         status: 'Disconnected' as const
-      };
+      });
       
-      const instance = await storage.createWhatsappInstance(instanceData);
+      const instance = await storage.createWhatsappInstance(validatedData);
       res.status(201).json(instance);
     } catch (error) {
       console.error("WhatsApp instance creation error:", error);
