@@ -24,7 +24,12 @@ import type { AccountingTransaction, AccountingTransactionCategory, Person, Busi
 
 const formSchema = z.object({
   type: z.enum(['revenue', 'expense']),
-  amount: z.string().min(1, "Amount is required"),
+  amount: z.string().min(1, "Amount is required").refine((val) => {
+    // Allow decimal numbers with comma or dot as decimal separator
+    const normalizedVal = val.replace(',', '.');
+    const num = parseFloat(normalizedVal);
+    return !isNaN(num) && num > 0;
+  }, "Amount must be a valid decimal number greater than 0"),
   description: z.string().min(1, "Description is required"),
   category_id: z.number().optional(),
   client_id: z.number().optional(),
@@ -107,7 +112,7 @@ export default function AccountingForm() {
     mutationFn: (data: FormData) => 
       apiRequest("POST", "/api/accounting-transactions", {
         ...data,
-        amount: parseFloat(data.amount),
+        amount: parseFloat(data.amount.replace(',', '.')),
         transaction_date: data.transaction_date.toISOString().split('T')[0],
       }),
     onSuccess: () => {
@@ -131,7 +136,7 @@ export default function AccountingForm() {
     mutationFn: (data: FormData) => 
       apiRequest("PUT", `/api/accounting-transactions/${actualId}`, {
         ...data,
-        amount: parseFloat(data.amount),
+        amount: parseFloat(data.amount.replace(',', '.')),
         transaction_date: data.transaction_date.toISOString().split('T')[0],
       }),
     onSuccess: () => {
@@ -240,7 +245,7 @@ export default function AccountingForm() {
                     <FormItem>
                       <FormLabel><TranslatableText>Amount</TranslatableText></FormLabel>
                       <FormControl>
-                        <Input placeholder="0.00" {...field} />
+                        <Input placeholder={t("Ex: 39.70 or 39,70")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
