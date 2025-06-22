@@ -23,7 +23,7 @@ import { useTranslationHelper } from "@/lib/translation-helper";
 import type { AccountingTransaction, AccountingTransactionCategory, Person, Business } from "@shared/schema";
 
 const formSchema = z.object({
-  type: z.enum(['income', 'expense']),
+  type: z.enum(['revenue', 'expense']),
   amount: z.string().min(1, "Amount is required"),
   description: z.string().min(1, "Description is required"),
   category_id: z.number().optional(),
@@ -49,7 +49,7 @@ export default function AccountingForm() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: 'income',
+      type: 'revenue',
       amount: '',
       description: '',
       notes: '',
@@ -90,7 +90,7 @@ export default function AccountingForm() {
   useEffect(() => {
     if (isEdit && transaction) {
       form.reset({
-        type: transaction.type as 'income' | 'expense',
+        type: transaction.type as 'revenue' | 'expense',
         amount: transaction.amount.toString(),
         description: transaction.description,
         category_id: transaction.category_id ?? undefined,
@@ -224,7 +224,7 @@ export default function AccountingForm() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="income"><TranslatableText>Income</TranslatableText></SelectItem>
+                          <SelectItem value="revenue"><TranslatableText>Revenue</TranslatableText></SelectItem>
                           <SelectItem value="expense"><TranslatableText>Expense</TranslatableText></SelectItem>
                         </SelectContent>
                       </Select>
