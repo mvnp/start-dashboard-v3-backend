@@ -142,11 +142,21 @@ export default function AppointmentList() {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       
+      // Get available staff from current business context
+      const availableStaff = (staff as Person[]).filter(s => s.user_id);
+      const randomStaff = availableStaff.length > 0 
+        ? availableStaff[Math.floor(Math.random() * availableStaff.length)]
+        : null;
+      
+      if (!randomStaff) {
+        throw new Error("No staff members available in current business");
+      }
+      
       const clonedAppointment = {
         appointment_date: tomorrow.toISOString().split('T')[0],
         appointment_time: appointment.appointment_time,
         service_id: appointment.service_id,
-        user_id: appointment.user_id,
+        user_id: randomStaff.user_id,
         client_id: appointment.client_id,
         status: "Scheduled" as const,
         notes: appointment.notes ? `${appointment.notes} (Cloned)` : "Cloned appointment",
