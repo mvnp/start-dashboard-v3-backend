@@ -117,9 +117,14 @@ export default function AppointmentForm() {
       const appointmentDate = new Date(appointment.appointment_date);
       const timeString = appointment.appointment_time || '09:00';
       
+      // Find the correct user_id for the staff member
+      // appointment.user_id is actually a person_id, need to find the corresponding user_id
+      const staffMember = staff.find(s => s.id === appointment.user_id);
+      const correctUserId = staffMember?.user_id || appointment.user_id || 0;
+      
       form.reset({
         client_id: appointment.client_id || 0,
-        user_id: appointment.user_id || 0,
+        user_id: correctUserId,
         service_id: appointment.service_id || 0,
         business_id: appointment.business_id || selectedBusinessId || 0,
         appointment_date: appointmentDate,
@@ -128,12 +133,13 @@ export default function AppointmentForm() {
         notes: appointment.notes || '',
       });
     }
-  }, [isEdit, appointment, form, clientsLoaded, staffLoaded, servicesLoaded, selectedBusinessId]);
+  }, [isEdit, appointment, form, clientsLoaded, staffLoaded, servicesLoaded, selectedBusinessId, staff]);
 
   const createMutation = useMutation({
     mutationFn: (data: AppointmentFormData) => apiRequest("POST", "/api/appointments", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/appointments", selectedBusinessId] });
       toast({
         title: t("Success"),
         description: t("Appointment created successfully"),
@@ -153,6 +159,8 @@ export default function AppointmentForm() {
     mutationFn: (data: AppointmentFormData) => apiRequest("PUT", `/api/appointments/${appointmentId}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/appointments", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/appointments/${appointmentId}`, selectedBusinessId] });
       toast({
         title: t("Success"),
         description: t("Appointment updated successfully"),
@@ -169,11 +177,16 @@ export default function AppointmentForm() {
   });
 
   const onSubmit = (data: FormData) => {
+    // For staff selection, we need to convert user_id back to person_id for the API
+    // The dropdown shows user_id but the API expects the person_id (user_id field in appointments)
+    const staffMember = staff.find(s => (s.user_id || s.id) === data.user_id);
+    const personId = staffMember?.id || data.user_id;
+    
     const formattedData: AppointmentFormData = {
       client_id: data.client_id,
-      user_id: data.user_id,
+      user_id: personId, // This is actually person_id for the API
       service_id: data.service_id,
-      business_id: data.business_id,
+      business_id: selectedBusinessId || data.business_id,
       appointment_date: data.appointment_date.toISOString().split('T')[0],
       appointment_time: data.appointment_time,
       status: data.status,
@@ -278,7 +291,7 @@ export default function AppointmentForm() {
                         </FormControl>
                         <SelectContent>
                           {staff.map((member) => (
-                            <SelectItem key={member.id} value={member.id.toString()}>
+                            <SelectItem key={member.id} value={(member.user_id || member.id).toString()}>
                               {`${member.first_name} ${member.last_name}`}
                             </SelectItem>
                           ))}
@@ -433,7 +446,7 @@ export default function AppointmentForm() {
                     <FormLabel><TranslatableText>Notes</TranslatableText></FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder={<TranslatableText>Additional notes (optional)</TranslatableText>}
+                        placeholder={t("Additional notes (optional)")}
                         className="resize-none"
                         {...field}
                       />
