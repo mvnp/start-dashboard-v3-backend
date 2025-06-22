@@ -342,6 +342,11 @@ export function registerRoutes(app: Express): void {
       const id = parseInt(req.params.id);
       const user = req.user!;
       
+      // Validate ID parameter
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid business ID" });
+      }
+      
       const business = await storage.getBusiness(id);
       if (!business) {
         return res.status(404).json({ error: "Business not found" });
@@ -1972,6 +1977,12 @@ export function registerRoutes(app: Express): void {
     try {
       const currentUser = req.user!;
       const id = parseInt(req.params.id);
+      
+      // Validate ID parameter
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid barber plan ID" });
+      }
+      
       const plan = await storage.getBarberPlan(id);
       if (!plan) {
         return res.status(404).json({ error: "Barber plan not found" });
@@ -2422,6 +2433,12 @@ export function registerRoutes(app: Express): void {
     try {
       const currentUser = req.user!;
       const id = parseInt(req.params.id);
+      
+      // Validate ID parameter
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid transaction ID" });
+      }
+      
       const transaction = await storage.getAccountingTransaction(id);
       
       if (!transaction) {
@@ -3147,6 +3164,12 @@ export function registerRoutes(app: Express): void {
   app.get("/api/faqs/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      
+      // Validate ID parameter
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid FAQ ID" });
+      }
+      
       const faq = await storage.getFaq(id);
       
       if (!faq) {
