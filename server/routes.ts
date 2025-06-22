@@ -2019,6 +2019,7 @@ export function registerRoutes(app: Express): void {
       if (staffMember.user_id) {
         const staffUserData = await storage.getUserWithRoleAndBusiness(staffMember.user_id);
         const staffBusinessIds = staffUserData?.businessIds || [];
+        console.log(`Staff validation - user_id: ${staffMember.user_id}, businessIds: [${staffBusinessIds.join(', ')}], selectedBusiness: ${businessIdNum}`);
         if (!staffBusinessIds.includes(businessIdNum)) {
           return res.status(400).json({ 
             error: "Validation failed", 
