@@ -47,7 +47,7 @@ export default function ClientList() {
   const { user } = useAuth();
 
   const { data: clients, isLoading } = useQuery({
-    queryKey: ["/api/clients", selectedBusinessId],
+    queryKey: user?.isSuperAdmin ? ["/api/clients"] : ["/api/clients", selectedBusinessId],
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
@@ -58,7 +58,8 @@ export default function ClientList() {
   const deleteClientMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/clients/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/clients", selectedBusinessId] });
+      const queryKey = user?.isSuperAdmin ? ["/api/clients"] : ["/api/clients", selectedBusinessId];
+      queryClient.invalidateQueries({ queryKey });
       toast({
         title: t("Client deleted"),
         description: t("The client has been successfully removed."),

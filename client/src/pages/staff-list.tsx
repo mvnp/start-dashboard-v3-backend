@@ -70,7 +70,7 @@ export default function StaffList() {
   const { user } = useAuth();
 
   const { data: staff, isLoading } = useQuery({
-    queryKey: ["/api/staff", selectedBusinessId],
+    queryKey: user?.isSuperAdmin ? ["/api/staff"] : ["/api/staff", selectedBusinessId],
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
@@ -81,7 +81,8 @@ export default function StaffList() {
   const deleteStaffMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/staff/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/staff", selectedBusinessId] });
+      const queryKey = user?.isSuperAdmin ? ["/api/staff"] : ["/api/staff", selectedBusinessId];
+      queryClient.invalidateQueries({ queryKey });
       toast({
         title: t("Staff member deleted"),
         description: t("The staff member has been successfully removed."),

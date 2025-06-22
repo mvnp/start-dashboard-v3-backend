@@ -34,7 +34,7 @@ export default function ServiceList() {
   const { user } = useAuth();
 
   const { data: services, isLoading } = useQuery({
-    queryKey: ["/api/services", selectedBusinessId],
+    queryKey: user?.isSuperAdmin ? ["/api/services"] : ["/api/services", selectedBusinessId],
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
@@ -45,7 +45,8 @@ export default function ServiceList() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/services/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/services", selectedBusinessId] });
+      const queryKey = user?.isSuperAdmin ? ["/api/services"] : ["/api/services", selectedBusinessId];
+      queryClient.invalidateQueries({ queryKey });
       toast({
         title: t("Success"),
         description: t("Service deleted successfully"),

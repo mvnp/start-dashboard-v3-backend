@@ -77,8 +77,8 @@ export default function AppointmentList() {
   }, [currentPage, statusFilter, todayFilter, startDate, endDate]);
 
   const { data: appointmentData, isLoading } = useQuery({
-    queryKey: [`/api/appointments?${buildQueryParams()}`, selectedBusinessId],
-    enabled: !!selectedBusinessId,
+    queryKey: user?.isSuperAdmin ? [`/api/appointments?${buildQueryParams()}`] : [`/api/appointments?${buildQueryParams()}`, selectedBusinessId],
+    enabled: user?.isSuperAdmin || !!selectedBusinessId,
     staleTime: 0, // Data is immediately stale
     gcTime: 0, // Don't keep in cache
     refetchOnMount: true, // Always refetch when component mounts
