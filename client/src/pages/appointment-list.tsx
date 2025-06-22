@@ -22,6 +22,7 @@ import {
   Search, 
   Edit, 
   Trash2, 
+  Copy,
   Calendar, 
   Clock, 
   User, 
@@ -130,6 +131,42 @@ export default function AppointmentList() {
       toast({
         title: t("Error"),
         description: t("Failed to delete appointment"),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const cloneMutation = useMutation({
+    mutationFn: async (appointment: Appointment) => {
+      // Create a copy without the ID and update the date to tomorrow
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const clonedAppointment = {
+        appointment_date: tomorrow.toISOString().split('T')[0],
+        appointment_time: appointment.appointment_time,
+        service_id: appointment.service_id,
+        user_id: appointment.user_id,
+        client_id: appointment.client_id,
+        status: "Scheduled" as const,
+        notes: appointment.notes ? `${appointment.notes} (Cloned)` : "Cloned appointment",
+        business_id: selectedBusinessId
+      };
+      
+      return apiRequest("POST", "/api/appointments", clonedAppointment);
+    },
+    onSuccess: () => {
+      const queryKey = user?.isSuperAdmin ? [`/api/appointments?${buildQueryParams()}`] : [`/api/appointments?${buildQueryParams()}`, selectedBusinessId];
+      queryClient.invalidateQueries({ queryKey });
+      toast({
+        title: t("Success"),
+        description: t("Appointment cloned successfully for tomorrow"),
+      });
+    },
+    onError: () => {
+      toast({
+        title: t("Error"),
+        description: t("Failed to clone appointment"),
         variant: "destructive",
       });
     },
@@ -392,6 +429,16 @@ export default function AppointmentList() {
                         className="text-red-600 hover:text-red-700"
                       >
                         <Trash2 className="w-4 h-4" />
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => cloneMutation.mutate(appointment)}
+                        disabled={cloneMutation.isPending}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        <Copy className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
