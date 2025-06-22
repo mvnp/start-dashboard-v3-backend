@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Service } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
+import { useBusinessContext } from "@/hooks/use-business-context";
 
 interface ServiceFormData {
   name: string;
@@ -29,6 +30,7 @@ export default function ServiceForm() {
   const params = useParams();
   const { toast } = useToast();
   const { t } = useTranslationHelper();
+  const { selectedBusinessId } = useBusinessContext();
   const isEdit = !!params.id;
   const serviceId = params.id ? parseInt(params.id) : null;
 
@@ -41,17 +43,18 @@ export default function ServiceForm() {
   });
 
   const { data: serviceData, isLoading } = useQuery({
-    queryKey: [`/api/services/${serviceId}`],
+    queryKey: [`/api/services/${serviceId}`, selectedBusinessId],
     select: (data: Service) => data,
+    enabled: !!serviceId && !!selectedBusinessId,
   });
 
   const createMutation = useMutation({
     mutationFn: (data: ServiceFormData) => apiRequest("POST", "/api/services", {
       ...data,
-      business_id: 1
+      business_id: selectedBusinessId
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/services"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/services", selectedBusinessId] });
       toast({
         title: t("Success"),
         description: t("Service created successfully"),
@@ -70,11 +73,11 @@ export default function ServiceForm() {
   const updateMutation = useMutation({
     mutationFn: (data: ServiceFormData) => apiRequest("PUT", `/api/services/${serviceId}`, {
       ...data,
-      business_id: 1
+      business_id: selectedBusinessId
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/services"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/services/${serviceId}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/services", selectedBusinessId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/services/${serviceId}`, selectedBusinessId] });
       toast({
         title: t("Success"),
         description: t("Service updated successfully"),
@@ -104,6 +107,16 @@ export default function ServiceForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Business context validation
+    if (!selectedBusinessId) {
+      toast({
+        title: t("Error"),
+        description: t("Please select a business first"),
+        variant: "destructive",
+      });
+      return;
+    }
 
     // Client-side validation
     if (!formData.name.trim()) {
@@ -148,6 +161,32 @@ export default function ServiceForm() {
   };
 
 
+
+  // Business context protection
+  if (!selectedBusinessId) {
+    return (
+      <div className="w-full p-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Button variant="ghost" size="sm" onClick={() => setLocation("/services")}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            <TranslatableText>Back to Services</TranslatableText>
+          </Button>
+        </div>
+        <Card className="w-full">
+          <CardContent className="p-6">
+            <div className="text-center">
+              <h3 className="text-lg font-medium text-slate-900 mb-2">
+                <TranslatableText>Business Required</TranslatableText>
+              </h3>
+              <p className="text-slate-600">
+                <TranslatableText>Please select a business to manage services</TranslatableText>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
