@@ -93,7 +93,7 @@ export default function AccountingList() {
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold"><TranslatableText>Accounting Transactions</TranslatableText></h1>
-        <Button onClick={() => setLocation("/accounting/new")}>
+        <Button onClick={() => setLocation("/accounting-transactions/new")}>
           <Plus className="h-4 w-4 mr-2" />
           <TranslatableText>Add Transaction</TranslatableText>
         </Button>
@@ -168,7 +168,7 @@ export default function AccountingList() {
               <p className="text-gray-500 mb-4">
                 <TranslatableText>No transactions found</TranslatableText>
               </p>
-              <Button onClick={() => setLocation("/accounting/new")}>
+              <Button onClick={() => setLocation("/accounting-transactions/new")}>
                 <Plus className="h-4 w-4 mr-2" />
                 <TranslatableText>Add First Transaction</TranslatableText>
               </Button>
@@ -211,7 +211,7 @@ export default function AccountingList() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setLocation(`/accounting/${transaction.id}`)}
+                        onClick={() => setLocation(`/accounting-transactions/edit/${transaction.id}`)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>

@@ -278,7 +278,7 @@ export default function Dashboard() {
                   </Button>
                 </Link>
                 
-                <Link href="/accounting-form/new">
+                <Link href="/accounting-transactions/new">
                   <Button 
                     className="w-full justify-center transition-colors bg-slate-100 hover:bg-slate-200 text-slate-700"
                     size="lg"

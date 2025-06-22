@@ -217,6 +217,21 @@ function Router() {
           <AccountingList />
         </Layout>
       </Route>
+      <Route path="/accounting-transactions">
+        <Layout>
+          <AccountingList />
+        </Layout>
+      </Route>
+      <Route path="/accounting-transactions/new">
+        <Layout>
+          <AccountingForm />
+        </Layout>
+      </Route>
+      <Route path="/accounting-transactions/edit/:id">
+        <Layout>
+          <AccountingForm />
+        </Layout>
+      </Route>
       <Route path="/accounting-form">
         <Layout>
           <AccountingForm />
