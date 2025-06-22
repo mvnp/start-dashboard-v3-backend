@@ -265,6 +265,12 @@ export const insertAccountingTransactionSchema = createInsertSchema(accounting_t
   id: true,
   created_at: true,
   updated_at: true,
+}).extend({
+  amount: z.union([z.string(), z.number()]).transform((val) => {
+    if (typeof val === 'number') return val.toString();
+    if (typeof val === 'string') return val.replace(',', '.');
+    return '0';
+  }),
 });
 
 export const insertServiceSchema = createInsertSchema(services).omit({
