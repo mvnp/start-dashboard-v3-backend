@@ -47,6 +47,10 @@ export default function Login() {
   >({
     queryKey: ["/api/user-businesses"],
     enabled: step === "business" && !!validatedUser,
+    staleTime: 0, // Data is immediately stale
+    gcTime: 0, // Don't keep in cache
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: false, // Don't refetch on window focus for login
   });
 
   const validateCredentialsMutation = useMutation({
@@ -74,6 +78,8 @@ export default function Login() {
     },
     onSuccess: (data) => {
       setValidatedUser(data);
+      // Clear all cached data to ensure fresh login
+      queryClient.clear();
       // Store JWT tokens temporarily for fetching businesses
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
