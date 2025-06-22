@@ -476,11 +476,11 @@ export function registerRoutes(app: Express): void {
       const businessIds = getBusinessFilter(user, req);
 
       let persons;
-      // Super Admin can see all data when no business is selected
-      if (user.isSuperAdmin && businessIds === null) {
+      // Super Admin always sees all staff across all businesses (regardless of business selection)
+      if (user.isSuperAdmin) {
         persons = await storage.getPersonsByRoles([1, 2, 3]);
       } 
-      // For selected business or non-Super Admin users (including merchants)
+      // For non-Super Admin users (merchants, employees)
       else if (businessIds && businessIds.length > 0) {
         persons = await storage.getPersonsByRolesAndBusiness([1, 2, 3], businessIds);
       } 
