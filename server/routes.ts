@@ -2763,6 +2763,11 @@ export function registerRoutes(app: Express): void {
       const user = req.user!;
       const businessIds = getBusinessFilter(user, req);
       
+      // Merchants (Role ID 2) require mandatory business context
+      if (user.roleId === 2 && !req.headers['x-selected-business-id']) {
+        return res.status(400).json({ error: "Business ID is required" });
+      }
+      
       let transactions;
       // Super Admin can see all data when no business is selected
       if (user.isSuperAdmin && businessIds === null) {
@@ -2882,6 +2887,13 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/accounting-transactions", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      const user = req.user!;
+      
+      // Merchants (Role ID 2) require mandatory business context
+      if (user.roleId === 2 && !req.headers['x-selected-business-id']) {
+        return res.status(400).json({ error: "Business ID is required" });
+      }
+      
       // Get business ID from header (frontend) or request body (API tools)
       const headerBusinessId = req.headers['x-selected-business-id'] ? parseInt(req.headers['x-selected-business-id'] as string) : null;
       const bodyBusinessId = req.body.business_id ? (typeof req.body.business_id === 'number' ? req.body.business_id : parseInt(req.body.business_id)) : null;
