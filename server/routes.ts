@@ -1260,12 +1260,15 @@ export function registerRoutes(app: Express): void {
         return res.status(404).json({ error: "Service not found" });
       }
 
+      // Prevent moving services between businesses - applies to all users including Super Admin
+      if (business_id && business_id !== existingService.business_id) {
+        return res.status(400).json({ 
+          error: "Cannot change business_id of existing service. Services must remain in their original business." 
+        });
+      }
+
       // Validate business access for non-Super Admin users
       if (!user.isSuperAdmin) {
-        if (!business_id) {
-          return res.status(400).json({ error: "Business ID is required in request body or x-selected-business-id header" });
-        }
-
         // For merchants (Role ID 2), fetch fresh business associations from database
         let userBusinessIds = user.businessIds;
         if (user.roleId === 2) {
@@ -1273,24 +1276,20 @@ export function registerRoutes(app: Express): void {
           userBusinessIds = userData?.businessIds || [];
         }
 
-        const businessIdNum = typeof business_id === 'string' ? parseInt(business_id) : business_id;
-        if (!userBusinessIds.includes(businessIdNum)) {
-          return res.status(403).json({ 
-            error: "Access denied. You can only update services in businesses you have access to." 
-          });
-        }
-
-        // Also verify the existing service belongs to user's accessible businesses
+        // Verify the existing service belongs to user's accessible businesses
         if (existingService.business_id && !userBusinessIds.includes(existingService.business_id)) {
           return res.status(403).json({ error: "Access denied to this service" });
         }
-      }
 
-      // Prevent moving services between businesses - applies to all users including Super Admin
-      if (business_id && business_id !== existingService.business_id) {
-        return res.status(400).json({ 
-          error: "Cannot change business_id of existing service. Services must remain in their original business." 
-        });
+        // If business_id is provided, validate user has access to it
+        if (business_id) {
+          const businessIdNum = typeof business_id === 'string' ? parseInt(business_id) : business_id;
+          if (!userBusinessIds.includes(businessIdNum)) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only update services in businesses you have access to." 
+            });
+          }
+        }
       }
       
       // Always use existing service's business_id to prevent business transfer
