@@ -2186,6 +2186,45 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  app.get("/api/payment-gateways/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const currentUser = req.user!;
+      const id = parseInt(req.params.id);
+      
+      // Validate ID parameter
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid payment gateway ID" });
+      }
+      
+      const gateway = await storage.getPaymentGateway(id);
+      if (!gateway) {
+        return res.status(404).json({ error: "Payment gateway not found" });
+      }
+
+      // Validate business access for non-Super Admin users
+      if (!currentUser.isSuperAdmin) {
+        // Get current user's business access
+        let userBusinessIds = currentUser.businessIds;
+        if (currentUser.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+
+        // Check if gateway belongs to user's business
+        if (!userBusinessIds.includes(gateway.business_id)) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only view payment gateways from businesses you have access to." 
+          });
+        }
+      }
+
+      res.json(gateway);
+    } catch (error) {
+      console.error("Payment gateway fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch payment gateway" });
+    }
+  });
+
   app.post("/api/payment-gateways", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const user = req.user!;
@@ -2734,6 +2773,45 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  app.get("/api/support-tickets/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const currentUser = req.user!;
+      const id = parseInt(req.params.id);
+      
+      // Validate ID parameter
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid support ticket ID" });
+      }
+      
+      const ticket = await storage.getSupportTicket(id);
+      if (!ticket) {
+        return res.status(404).json({ error: "Support ticket not found" });
+      }
+
+      // Validate business access for non-Super Admin users
+      if (!currentUser.isSuperAdmin) {
+        // Get current user's business access
+        let userBusinessIds = currentUser.businessIds;
+        if (currentUser.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+
+        // Check if ticket belongs to user's business
+        if (!userBusinessIds.includes(ticket.business_id)) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only view support tickets from businesses you have access to." 
+          });
+        }
+      }
+
+      res.json(ticket);
+    } catch (error) {
+      console.error("Support ticket fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch support ticket" });
+    }
+  });
+
   app.post("/api/support-tickets", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const user = req.user!;
@@ -2866,6 +2944,45 @@ export function registerRoutes(app: Express): void {
     } catch (error) {
       console.error("WhatsApp instance fetch error:", error);
       res.status(500).json({ error: "Failed to fetch WhatsApp instances" });
+    }
+  });
+
+  app.get("/api/whatsapp-instances/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const currentUser = req.user!;
+      const id = parseInt(req.params.id);
+      
+      // Validate ID parameter
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid WhatsApp instance ID" });
+      }
+      
+      const instance = await storage.getWhatsappInstance(id);
+      if (!instance) {
+        return res.status(404).json({ error: "WhatsApp instance not found" });
+      }
+
+      // Validate business access for non-Super Admin users
+      if (!currentUser.isSuperAdmin) {
+        // Get current user's business access
+        let userBusinessIds = currentUser.businessIds;
+        if (currentUser.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+
+        // Check if instance belongs to user's business
+        if (!userBusinessIds.includes(instance.business_id)) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only view WhatsApp instances from businesses you have access to." 
+          });
+        }
+      }
+
+      res.json(instance);
+    } catch (error) {
+      console.error("WhatsApp instance fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch WhatsApp instance" });
     }
   });
 
