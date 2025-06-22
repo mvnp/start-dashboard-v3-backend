@@ -74,7 +74,7 @@ export const accounting_transactions = pgTable("accounting_transactions", {
   description: text("description").notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   payment_method: text("payment_method").notNull(),
-  reference_number: text("reference_number").notNull(),
+  reference_number: text("reference_number"),
   transaction_date: date("transaction_date").notNull(),
   notes: text("notes"),
   is_recurring: boolean("is_recurring").default(false),

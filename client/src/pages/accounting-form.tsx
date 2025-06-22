@@ -33,7 +33,7 @@ const formSchema = z.object({
   }, "Amount must be a valid decimal number greater than 0"),
   description: z.string().min(1, "Description is required"),
   payment_method: z.string().min(1, "Payment method is required"),
-  reference_number: z.string().min(1, "Reference number is required"),
+  reference_number: z.string().optional(),
   category_id: z.number().optional(),
   client_id: z.number().optional(),
   staff_id: z.number().optional(),
