@@ -2003,12 +2003,10 @@ export function registerRoutes(app: Express): void {
         });
       }
       
-      // Convert user_id to person_id for staff member
-      // Include all staff roles: 1=super-admin, 2=merchant, 3=employee
-      const staffPersons = await storage.getPersonsByRoles([1, 2, 3]);
-      const staffMember = staffPersons.find(person => person.user_id === appointmentData.user_id);
-      
-      if (!staffMember) {
+      // The frontend sends user_id but it's actually a person ID
+      // Find the person record to get the actual user_id
+      const staffPerson = await storage.getPerson(appointmentData.user_id);
+      if (!staffPerson || !staffPerson.user_id) {
         return res.status(400).json({ 
           error: "Validation failed", 
           details: [{ path: ["user_id"], message: "Invalid staff member selected" }]
@@ -2016,16 +2014,13 @@ export function registerRoutes(app: Express): void {
       }
 
       // Validate staff member belongs to the selected business through user-business relationship
-      if (staffMember.user_id) {
-        const staffUserData = await storage.getUserWithRoleAndBusiness(staffMember.user_id);
-        const staffBusinessIds = staffUserData?.businessIds || [];
-        console.log(`Staff validation - user_id: ${staffMember.user_id}, businessIds: [${staffBusinessIds.join(', ')}], selectedBusiness: ${businessIdNum}`);
-        if (!staffBusinessIds.includes(businessIdNum)) {
-          return res.status(400).json({ 
-            error: "Validation failed", 
-            details: [{ path: ["user_id"], message: "Staff member must belong to the selected business context" }]
-          });
-        }
+      const staffUserData = await storage.getUserWithRoleAndBusiness(staffPerson.user_id);
+      const staffBusinessIds = staffUserData?.businessIds || [];
+      if (!staffBusinessIds.includes(businessIdNum)) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["user_id"], message: "Staff member must belong to the selected business context" }]
+        });
       }
 
       // Verify client_id exists in persons table - client_id should already be a person ID
@@ -2052,7 +2047,7 @@ export function registerRoutes(app: Express): void {
       // Create appointment data with correct person ID for staff
       const appointmentDataWithPersonId = {
         ...appointmentData,
-        user_id: staffMember.id // Use person ID instead of user ID
+        user_id: appointmentData.user_id // Keep the person ID as sent from frontend
       };
       
       const validatedData = insertAppointmentSchema.parse(appointmentDataWithPersonId);
