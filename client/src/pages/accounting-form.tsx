@@ -20,6 +20,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
+import { useBusinessContext } from "@/hooks/use-business-context";
 import type { AccountingTransaction, AccountingTransactionCategory, Person, Business } from "@shared/schema";
 
 const formSchema = z.object({
@@ -31,6 +32,8 @@ const formSchema = z.object({
     return !isNaN(num) && num > 0;
   }, "Amount must be a valid decimal number greater than 0"),
   description: z.string().min(1, "Description is required"),
+  payment_method: z.string().min(1, "Payment method is required"),
+  reference_number: z.string().min(1, "Reference number is required"),
   category_id: z.number().optional(),
   client_id: z.number().optional(),
   staff_id: z.number().optional(),
@@ -49,6 +52,7 @@ export default function AccountingForm() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { t } = useTranslationHelper();
+  const { selectedBusinessId } = useBusinessContext();
   const isEdit = !!actualId && actualId !== 'new';
 
   const form = useForm<FormData>({
@@ -57,6 +61,8 @@ export default function AccountingForm() {
       type: 'revenue',
       amount: '',
       description: '',
+      payment_method: 'Cash',
+      reference_number: '',
       notes: '',
       transaction_date: new Date(),
       business_id: 1,
@@ -86,9 +92,10 @@ export default function AccountingForm() {
     queryKey: ["/api/staff"],
   });
 
-  // Fetch categories
+  // Fetch categories with business context
   const { data: categories = [] } = useQuery<AccountingTransactionCategory[]>({
-    queryKey: ["/api/accounting-transaction-categories"],
+    queryKey: ["/api/accounting-transaction-categories", selectedBusinessId],
+    enabled: !!selectedBusinessId,
   });
 
   // Set form values when editing
@@ -98,6 +105,8 @@ export default function AccountingForm() {
         type: transaction.type as 'revenue' | 'expense',
         amount: transaction.amount.toString(),
         description: transaction.description,
+        payment_method: transaction.payment_method || 'Cash',
+        reference_number: transaction.reference_number || '',
         category_id: transaction.category_id ?? undefined,
         client_id: transaction.client_id ?? undefined,
         staff_id: transaction.staff_id ?? undefined,
@@ -266,6 +275,49 @@ export default function AccountingForm() {
                   </FormItem>
                 )}
               />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="payment_method"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel><TranslatableText>Payment Method</TranslatableText></FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t("Select payment method")} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Cash"><TranslatableText>Cash</TranslatableText></SelectItem>
+                          <SelectItem value="Credit Card"><TranslatableText>Credit Card</TranslatableText></SelectItem>
+                          <SelectItem value="Debit Card"><TranslatableText>Debit Card</TranslatableText></SelectItem>
+                          <SelectItem value="Bank Transfer"><TranslatableText>Bank Transfer</TranslatableText></SelectItem>
+                          <SelectItem value="Check"><TranslatableText>Check</TranslatableText></SelectItem>
+                          <SelectItem value="Digital Wallet"><TranslatableText>Digital Wallet</TranslatableText></SelectItem>
+                          <SelectItem value="PIX"><TranslatableText>PIX</TranslatableText></SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="reference_number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel><TranslatableText>Reference Number</TranslatableText></FormLabel>
+                      <FormControl>
+                        <Input placeholder={t("Transaction reference or receipt number")} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
