@@ -506,6 +506,16 @@ export function registerRoutes(app: Express): void {
         return res.status(400).json({ error: "Invalid staff ID" });
       }
       
+      // For merchants (Role ID: 2), business context is MANDATORY
+      if (currentUser.roleId === 2) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (!selectedBusinessId) {
+          return res.status(400).json({ 
+            error: "Business ID is required in x-selected-business-id header for merchant operations" 
+          });
+        }
+      }
+      
       const person = await storage.getPerson(id);
       if (!person) {
         return res.status(404).json({ error: "Staff member not found" });
@@ -862,6 +872,16 @@ export function registerRoutes(app: Express): void {
       // Validate ID parameter
       if (isNaN(id) || id <= 0) {
         return res.status(400).json({ error: "Invalid client ID" });
+      }
+      
+      // For merchants (Role ID: 2), business context is MANDATORY
+      if (user.roleId === 2) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (!selectedBusinessId) {
+          return res.status(400).json({ 
+            error: "Business ID is required in x-selected-business-id header for merchant operations" 
+          });
+        }
       }
       
       // Get business context from selected business
@@ -1277,6 +1297,16 @@ export function registerRoutes(app: Express): void {
       // Validate ID parameter
       if (isNaN(id) || id <= 0) {
         return res.status(400).json({ error: "Invalid service ID" });
+      }
+      
+      // For merchants (Role ID: 2), business context is MANDATORY
+      if (user.roleId === 2) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (!selectedBusinessId) {
+          return res.status(400).json({ 
+            error: "Business ID is required in x-selected-business-id header for merchant operations" 
+          });
+        }
       }
       
       const service = await storage.getService(id);
@@ -1700,6 +1730,16 @@ export function registerRoutes(app: Express): void {
       // Validate ID parameter
       if (isNaN(id) || id <= 0) {
         return res.status(400).json({ error: "Invalid appointment ID" });
+      }
+      
+      // For merchants (Role ID: 2), business context is MANDATORY
+      if (currentUser.roleId === 2) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (!selectedBusinessId) {
+          return res.status(400).json({ 
+            error: "Business ID is required in x-selected-business-id header for merchant operations" 
+          });
+        }
       }
       
       const appointment = await storage.getAppointment(id);
@@ -2196,6 +2236,16 @@ export function registerRoutes(app: Express): void {
         return res.status(400).json({ error: "Invalid payment gateway ID" });
       }
       
+      // For merchants (Role ID: 2), business context is MANDATORY
+      if (currentUser.roleId === 2) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (!selectedBusinessId) {
+          return res.status(400).json({ 
+            error: "Business ID is required in x-selected-business-id header for merchant operations" 
+          });
+        }
+      }
+      
       const gateway = await storage.getPaymentGateway(id);
       if (!gateway) {
         return res.status(404).json({ error: "Payment gateway not found" });
@@ -2516,6 +2566,16 @@ export function registerRoutes(app: Express): void {
       // Validate ID parameter
       if (isNaN(id) || id <= 0) {
         return res.status(400).json({ error: "Invalid transaction ID" });
+      }
+      
+      // For merchants (Role ID: 2), business context is MANDATORY
+      if (currentUser.roleId === 2) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (!selectedBusinessId) {
+          return res.status(400).json({ 
+            error: "Business ID is required in x-selected-business-id header for merchant operations" 
+          });
+        }
       }
       
       const transaction = await storage.getAccountingTransaction(id);
