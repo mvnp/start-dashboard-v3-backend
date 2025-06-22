@@ -856,7 +856,40 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/clients", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      const currentUser = req.user!;
       const { email, first_name, last_name, phone, tax_id, address } = req.body;
+      
+      // Get business_id from request body or header - MANDATORY for all users including Super Admin
+      let business_id = req.body.business_id;
+      if (!business_id) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (selectedBusinessId) {
+          business_id = parseInt(selectedBusinessId);
+        }
+      }
+      
+      if (!business_id) {
+        return res.status(400).json({ 
+          error: "Business ID is required in request body or x-selected-business-id header" 
+        });
+      }
+
+      // Validate business access for non-Super Admin users
+      if (!currentUser.isSuperAdmin) {
+        // For merchants (Role ID 2), fetch fresh business associations from database
+        let userBusinessIds = currentUser.businessIds;
+        if (currentUser.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+
+        const businessIdNum = typeof business_id === 'string' ? parseInt(business_id) : business_id;
+        if (!userBusinessIds.includes(businessIdNum)) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only create clients in businesses you have access to." 
+          });
+        }
+      }
       
       // Validate required fields
       if (!first_name || !last_name || !email || !phone) {
@@ -877,17 +910,6 @@ export function registerRoutes(app: Express): void {
         return res.status(400).json({
           error: "Email already exists",
           details: [{ path: ["email"], message: "This email address is already registered" }]
-        });
-      }
-
-      // Get business context from selected business or request body
-      const businessIds = getBusinessFilter(req.user!, req);
-      const businessId = businessIds?.[0] || req.body.business_id;
-      
-      if (!businessId) {
-        return res.status(400).json({ 
-          error: "Validation failed", 
-          details: [{ path: ["business_id"], message: "Business context is required" }]
         });
       }
       
@@ -913,7 +935,7 @@ export function registerRoutes(app: Express): void {
       // Create user-business relationship (assign to client role - role 4)
       await storage.createUserBusiness(insertUserBusinessSchema.parse({
         user_id: user.id,
-        business_id: businessId
+        business_id: business_id
       }));
 
       await storage.createUserRole(insertUserRoleSchema.parse({
@@ -1576,20 +1598,43 @@ export function registerRoutes(app: Express): void {
 
   app.post("/api/appointments", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      // Get business context from selected business or request body
-      const businessIds = getBusinessFilter(req.user, req);
-      const businessId = businessIds?.[0] || req.body.business_id;
+      const user = req.user!;
       
-      if (!businessId) {
+      // Get business_id from request body or header - MANDATORY for all users including Super Admin
+      let business_id = req.body.business_id;
+      if (!business_id) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (selectedBusinessId) {
+          business_id = parseInt(selectedBusinessId);
+        }
+      }
+      
+      if (!business_id) {
         return res.status(400).json({ 
-          error: "Validation failed", 
-          details: [{ path: ["business_id"], message: "Business context is required" }]
+          error: "Business ID is required in request body or x-selected-business-id header" 
         });
+      }
+
+      // Validate business access for non-Super Admin users
+      if (!user.isSuperAdmin) {
+        // For merchants (Role ID 2), fetch fresh business associations from database
+        let userBusinessIds = user.businessIds;
+        if (user.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(user.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+
+        const businessIdNum = typeof business_id === 'string' ? parseInt(business_id) : business_id;
+        if (!userBusinessIds.includes(businessIdNum)) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only create appointments in businesses you have access to." 
+          });
+        }
       }
       
       const appointmentData = {
         ...req.body,
-        business_id: businessId
+        business_id: business_id
       };
       
       // Validate required fields
