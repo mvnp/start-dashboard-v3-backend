@@ -495,6 +495,12 @@ export function registerRoutes(app: Express): void {
     try {
       const currentUser = req.user!;
       const id = parseInt(req.params.id);
+      
+      // Validate ID parameter
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid staff ID" });
+      }
+      
       const person = await storage.getPerson(id);
       if (!person) {
         return res.status(404).json({ error: "Staff member not found" });
@@ -847,6 +853,11 @@ export function registerRoutes(app: Express): void {
     try {
       const id = parseInt(req.params.id);
       const user = req.user!;
+      
+      // Validate ID parameter
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid client ID" });
+      }
       
       // Get business context from selected business
       const businessIds = getBusinessFilter(user, req);
@@ -1218,6 +1229,11 @@ export function registerRoutes(app: Express): void {
       const id = parseInt(req.params.id);
       const user = req.user!;
       
+      // Validate ID parameter
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid service ID" });
+      }
+      
       const service = await storage.getService(id);
       if (!service) {
         return res.status(404).json({ error: "Service not found" });
@@ -1421,6 +1437,11 @@ export function registerRoutes(app: Express): void {
     try {
       const id = parseInt(req.params.id);
       const user = req.user!;
+      
+      // Validate ID parameter
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid service ID" });
+      }
       
       // Get business context from selected business
       const businessIds = getBusinessFilter(user, req);
@@ -1630,6 +1651,12 @@ export function registerRoutes(app: Express): void {
     try {
       const currentUser = req.user!;
       const id = parseInt(req.params.id);
+      
+      // Validate ID parameter
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid appointment ID" });
+      }
+      
       const appointment = await storage.getAppointment(id);
       if (!appointment) {
         return res.status(404).json({ error: "Appointment not found" });
