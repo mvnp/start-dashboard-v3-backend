@@ -49,12 +49,22 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function AppointmentForm() {
-  const { appointmentId } = useParams();
+  const { id: appointmentId } = useParams();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { t } = useTranslationHelper();
   const { selectedBusinessId } = useBusinessContext();
   const isEdit = !!appointmentId && appointmentId !== 'new';
+  
+  // Debug URL parsing
+  useEffect(() => {
+    console.log('AppointmentForm URL Debug:', {
+      appointmentId,
+      isEdit,
+      selectedBusinessId,
+      currentPath: window.location.pathname
+    });
+  }, [appointmentId, isEdit, selectedBusinessId]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -72,11 +82,25 @@ export default function AppointmentForm() {
 
   // Load appointment data for editing
   const { data: appointment, isLoading: appointmentLoading, error: appointmentError } = useQuery<Appointment>({
-    queryKey: [`/api/appointments/${appointmentId}`, selectedBusinessId],
+    queryKey: [`/api/appointments/${appointmentId}`],
     enabled: isEdit && !!appointmentId,
     staleTime: 0,
     refetchOnMount: true,
+    retry: 3,
   });
+
+  // Debug logging for appointment loading
+  useEffect(() => {
+    if (isEdit) {
+      console.log('Appointment Edit Mode Debug:', {
+        isEdit,
+        appointmentId,
+        appointmentLoading,
+        hasAppointmentData: !!appointment,
+        appointmentError: appointmentError?.message
+      });
+    }
+  }, [isEdit, appointmentId, appointmentLoading, appointment, appointmentError]);
 
   // Load clients (business-scoped)
   const { data: clients = [], isLoading: clientsLoading } = useQuery<Person[]>({
