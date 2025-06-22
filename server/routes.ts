@@ -830,6 +830,33 @@ export function registerRoutes(app: Express): void {
   app.delete("/api/staff/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      const user = req.user!;
+      
+      // Merchants (Role ID 2) require mandatory business context
+      if (user.roleId === 2 && !req.headers['x-selected-business-id']) {
+        return res.status(400).json({ error: "Business ID is required" });
+      }
+      
+      // Get business context for access validation
+      const businessIds = getBusinessFilter(user, req);
+      if (!user.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
+        return res.status(403).json({ error: "No business access" });
+      }
+      
+      // Get existing staff member to verify business access
+      const existingStaff = await storage.getPerson(id);
+      if (!existingStaff) {
+        return res.status(404).json({ error: "Staff member not found" });
+      }
+      
+      // Verify staff member belongs to user's accessible businesses
+      if (!user.isSuperAdmin && existingStaff.user_id) {
+        const userWithBusiness = await storage.getUserWithRoleAndBusiness(existingStaff.user_id);
+        if (!userWithBusiness || !userWithBusiness.businessIds.some(bid => businessIds!.includes(bid))) {
+          return res.status(404).json({ error: "Staff member not found" });
+        }
+      }
+      
       const deleted = await storage.deletePerson(id);
       if (!deleted) {
         return res.status(404).json({ error: "Staff member not found" });
@@ -1230,11 +1257,17 @@ export function registerRoutes(app: Express): void {
   app.delete("/api/clients/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      const user = req.user!;
+      
+      // Merchants (Role ID 2) require mandatory business context
+      if (user.roleId === 2 && !req.headers['x-selected-business-id']) {
+        return res.status(400).json({ error: "Business ID is required" });
+      }
       
       // Get business context from selected business
-      const businessIds = getBusinessFilter(req.user!, req);
+      const businessIds = getBusinessFilter(user, req);
       // Super Admin has unrestricted access (businessIds === null)
-      if (!req.user!.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
+      if (!user.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
         return res.status(403).json({ error: "No business access" });
       }
 
