@@ -544,7 +544,7 @@ export function registerRoutes(app: Express): void {
       const user = req.user!;
       const { email, role_id, ...personData } = req.body;
       
-      // Get business_id from request body or header
+      // Get business_id from request body or header - MANDATORY for all users including Super Admin
       let business_id = req.body.business_id;
       if (!business_id) {
         const selectedBusinessId = req.headers['x-selected-business-id'] as string;
@@ -553,12 +553,14 @@ export function registerRoutes(app: Express): void {
         }
       }
       
+      if (!business_id) {
+        return res.status(400).json({ 
+          error: "Business ID is required in request body or x-selected-business-id header" 
+        });
+      }
+
       // Validate business access for non-Super Admin users
       if (!user.isSuperAdmin) {
-        if (!business_id) {
-          return res.status(400).json({ error: "Business ID is required in request body or x-selected-business-id header" });
-        }
-
         // For merchants (Role ID 2), fetch fresh business associations from database
         let userBusinessIds = user.businessIds;
         if (user.roleId === 2) {
@@ -919,7 +921,7 @@ export function registerRoutes(app: Express): void {
         email: email.trim(), 
         password: generatedPassword 
       });
-      const user = await storage.createUser(userData);
+      const newUser = await storage.createUser(userData);
 
       // Create person record with address
       const validatedPersonData = insertPersonSchema.parse({
@@ -928,22 +930,22 @@ export function registerRoutes(app: Express): void {
         phone: phone.trim(),
         tax_id: tax_id?.trim() || null,
         address: address?.trim() || null,
-        user_id: user.id
+        user_id: newUser.id
       });
       const person = await storage.createPerson(validatedPersonData);
 
       // Create user-business relationship (assign to client role - role 4)
       await storage.createUserBusiness(insertUserBusinessSchema.parse({
-        user_id: user.id,
+        user_id: newUser.id,
         business_id: business_id
       }));
 
       await storage.createUserRole(insertUserRoleSchema.parse({
-        user_id: user.id,
+        user_id: newUser.id,
         role_id: 4 // Client role
       }));
 
-      res.status(201).json({ ...person, user: { email: user.email } });
+      res.status(201).json({ ...person, user: { email: newUser.email } });
     } catch (error) {
       console.error("Client creation error:", error);
       if (error instanceof z.ZodError) {
@@ -1993,9 +1995,46 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/payment-gateways", async (req, res) => {
+  app.post("/api/payment-gateways", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const validatedData = insertPaymentGatewaySchema.parse(req.body);
+      const user = req.user!;
+      
+      // Get business_id from request body or header - MANDATORY for all users including Super Admin
+      let business_id = req.body.business_id;
+      if (!business_id) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (selectedBusinessId) {
+          business_id = parseInt(selectedBusinessId);
+        }
+      }
+      
+      if (!business_id) {
+        return res.status(400).json({ 
+          error: "Business ID is required in request body or x-selected-business-id header" 
+        });
+      }
+
+      // Validate business access for non-Super Admin users
+      if (!user.isSuperAdmin) {
+        // For merchants (Role ID 2), fetch fresh business associations from database
+        let userBusinessIds = user.businessIds;
+        if (user.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(user.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+
+        const businessIdNum = typeof business_id === 'string' ? parseInt(business_id) : business_id;
+        if (!userBusinessIds.includes(businessIdNum)) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only create payment gateways in businesses you have access to." 
+          });
+        }
+      }
+      
+      const validatedData = insertPaymentGatewaySchema.parse({
+        ...req.body,
+        business_id: business_id
+      });
       const gateway = await storage.createPaymentGateway(validatedData);
       res.status(201).json(gateway);
     } catch (error) {
@@ -2486,9 +2525,46 @@ export function registerRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/support-tickets", async (req, res) => {
+  app.post("/api/support-tickets", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const validatedData = insertSupportTicketSchema.parse(req.body);
+      const user = req.user!;
+      
+      // Get business_id from request body or header - MANDATORY for all users including Super Admin
+      let business_id = req.body.business_id;
+      if (!business_id) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (selectedBusinessId) {
+          business_id = parseInt(selectedBusinessId);
+        }
+      }
+      
+      if (!business_id) {
+        return res.status(400).json({ 
+          error: "Business ID is required in request body or x-selected-business-id header" 
+        });
+      }
+
+      // Validate business access for non-Super Admin users
+      if (!user.isSuperAdmin) {
+        // For merchants (Role ID 2), fetch fresh business associations from database
+        let userBusinessIds = user.businessIds;
+        if (user.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(user.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+
+        const businessIdNum = typeof business_id === 'string' ? parseInt(business_id) : business_id;
+        if (!userBusinessIds.includes(businessIdNum)) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only create support tickets in businesses you have access to." 
+          });
+        }
+      }
+      
+      const validatedData = insertSupportTicketSchema.parse({
+        ...req.body,
+        business_id: business_id
+      });
       const ticket = await storage.createSupportTicket(validatedData);
       res.status(201).json(ticket);
     } catch (error) {
