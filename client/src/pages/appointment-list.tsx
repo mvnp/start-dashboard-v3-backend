@@ -143,7 +143,7 @@ export default function AppointmentList() {
       tomorrow.setDate(tomorrow.getDate() + 1);
       
       // Get available staff from current business context
-      const availableStaff = (staff as Person[]).filter(s => s.user_id);
+      const availableStaff = (staff as Person[]).filter(s => s.user_id && s.id);
       const randomStaff = availableStaff.length > 0 
         ? availableStaff[Math.floor(Math.random() * availableStaff.length)]
         : null;
@@ -156,7 +156,7 @@ export default function AppointmentList() {
         appointment_date: tomorrow.toISOString().split('T')[0],
         appointment_time: appointment.appointment_time,
         service_id: appointment.service_id,
-        user_id: randomStaff.user_id,
+        user_id: randomStaff.id, // Use person.id, not user_id
         client_id: appointment.client_id,
         status: "Scheduled" as const,
         notes: appointment.notes ? `${appointment.notes} (Cloned)` : "Cloned appointment",
