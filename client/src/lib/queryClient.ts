@@ -70,13 +70,13 @@ export const getQueryFn: <T>(options: {
     // Construct URL from queryKey
     let url = queryKey[0] as string;
     
-    // Handle parameterized URLs like ["/api/businesses", id]
+    // Handle parameterized URLs like ["/api/businesses", id] or ["/api/services/123", businessId]
     if (queryKey.length > 1 && queryKey[1] !== null && queryKey[1] !== undefined) {
       // For business endpoints with ID parameter
       if (url === "/api/businesses") {
         url = `${url}/${queryKey[1]}`;
       }
-      // For business-scoped endpoints, don't append business ID to URL - use headers instead
+      // For business-scoped list endpoints, don't append business ID to URL - use headers instead
       else if (url === "/api/staff" || 
                url === "/api/clients" || 
                url === "/api/services" || 
@@ -87,6 +87,10 @@ export const getQueryFn: <T>(options: {
                url === "/api/accounting-transactions" ||
                url === "/api/barber-plans") {
         // Keep URL as-is, business ID is handled via headers not URL parameters
+      }
+      // For individual resource endpoints (already have ID in URL), don't append anything
+      else if (url.match(/^\/api\/(services|clients|staff|appointments|payment-gateways|whatsapp-instances|support-tickets|accounting-transactions|barber-plans)\/\d+$/)) {
+        // URL already has resource ID, don't append business ID - use headers instead
       }
       // Add other parameterized endpoints as needed
       else if (url.startsWith('/api/') && !url.includes('?')) {
