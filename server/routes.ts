@@ -493,10 +493,41 @@ export function registerRoutes(app: Express): void {
 
   app.get("/api/staff/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      const currentUser = req.user!;
       const id = parseInt(req.params.id);
       const person = await storage.getPerson(id);
       if (!person) {
         return res.status(404).json({ error: "Staff member not found" });
+      }
+
+      // Validate business access for non-Super Admin users
+      if (!currentUser.isSuperAdmin) {
+        // Get staff member's business associations
+        let staffBusinessIds: number[] = [];
+        if (person.user_id) {
+          const userBusinessRole = await storage.getUserWithRoleAndBusiness(person.user_id);
+          if (userBusinessRole) {
+            staffBusinessIds = userBusinessRole.businessIds || [];
+          }
+        }
+
+        // Get current user's business access
+        let userBusinessIds = currentUser.businessIds;
+        if (currentUser.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+
+        // Check if current user has access to any business the staff member belongs to
+        const hasCommonBusiness = staffBusinessIds.some(businessId => 
+          userBusinessIds.includes(businessId)
+        );
+
+        if (!hasCommonBusiness) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only view staff members from businesses you have access to." 
+          });
+        }
       }
 
       // Get associated user email and business if exists
@@ -829,14 +860,34 @@ export function registerRoutes(app: Express): void {
         return res.status(404).json({ error: "Client not found" });
       }
 
-      // Check if the client's user has access to the selected business
-      if (person.user_id) {
-        const userWithBusiness = await storage.getUserWithRoleAndBusiness(person.user_id);
-        if (!userWithBusiness || !userWithBusiness.businessIds.some(bid => businessIds.includes(bid))) {
-          return res.status(404).json({ error: "Client not found" });
+      // Validate business access for non-Super Admin users
+      if (!user.isSuperAdmin) {
+        // Get client's business associations
+        let clientBusinessIds: number[] = [];
+        if (person.user_id) {
+          const userBusinessRole = await storage.getUserWithRoleAndBusiness(person.user_id);
+          if (userBusinessRole) {
+            clientBusinessIds = userBusinessRole.businessIds || [];
+          }
         }
-      } else {
-        return res.status(404).json({ error: "Client not found" });
+
+        // Get current user's business access
+        let userBusinessIds = user.businessIds;
+        if (user.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(user.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+
+        // Check if current user has access to any business the client belongs to
+        const hasCommonBusiness = clientBusinessIds.some(businessId => 
+          userBusinessIds.includes(businessId)
+        );
+
+        if (!hasCommonBusiness) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only view clients from businesses you have access to." 
+          });
+        }
       }
 
       // Get associated user email if exists
@@ -1167,21 +1218,26 @@ export function registerRoutes(app: Express): void {
       const id = parseInt(req.params.id);
       const user = req.user!;
       
-      // Get business context from selected business
-      const businessIds = getBusinessFilter(user, req);
-      // Super Admin has unrestricted access (businessIds === null)
-      if (!user.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
-        return res.status(403).json({ error: "No business access" });
-      }
-
       const service = await storage.getService(id);
       if (!service) {
         return res.status(404).json({ error: "Service not found" });
       }
 
-      // Verify service belongs to user's accessible businesses
-      if (!user.isSuperAdmin && service.business_id && businessIds && !businessIds.includes(service.business_id)) {
-        return res.status(403).json({ error: "Access denied to this service" });
+      // Validate business access for non-Super Admin users
+      if (!user.isSuperAdmin) {
+        // Get current user's business access
+        let userBusinessIds = user.businessIds;
+        if (user.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(user.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+
+        // Check if service belongs to user's business
+        if (!userBusinessIds.includes(service.business_id)) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only view services from businesses you have access to." 
+          });
+        }
       }
 
       res.json(service);
@@ -1570,10 +1626,28 @@ export function registerRoutes(app: Express): void {
 
   app.get("/api/appointments/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      const currentUser = req.user!;
       const id = parseInt(req.params.id);
       const appointment = await storage.getAppointment(id);
       if (!appointment) {
         return res.status(404).json({ error: "Appointment not found" });
+      }
+
+      // Validate business access for non-Super Admin users
+      if (!currentUser.isSuperAdmin) {
+        // Get current user's business access
+        let userBusinessIds = currentUser.businessIds;
+        if (currentUser.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+
+        // Check if appointment belongs to user's business
+        if (!userBusinessIds.includes(appointment.business_id)) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only view appointments from businesses you have access to." 
+          });
+        }
       }
 
       // Map person ID back to user ID for staff member dropdown
@@ -2299,17 +2373,29 @@ export function registerRoutes(app: Express): void {
    */
   app.get("/api/accounting-transactions/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      const currentUser = req.user!;
       const id = parseInt(req.params.id);
-      const businessIds = getBusinessFilter(req.user, req);
       const transaction = await storage.getAccountingTransaction(id);
       
       if (!transaction) {
         return res.status(404).json({ error: "Transaction not found" });
       }
 
-      // Verify user has access to this transaction's business
-      if (businessIds && transaction.business_id && !businessIds.includes(transaction.business_id)) {
-        return res.status(403).json({ error: "Access denied to this transaction" });
+      // Validate business access for non-Super Admin users
+      if (!currentUser.isSuperAdmin) {
+        // Get current user's business access
+        let userBusinessIds = currentUser.businessIds;
+        if (currentUser.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+
+        // Check if transaction belongs to user's business
+        if (!userBusinessIds.includes(transaction.business_id)) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only view transactions from businesses you have access to." 
+          });
+        }
       }
       
       res.json(transaction);
