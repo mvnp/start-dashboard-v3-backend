@@ -1941,12 +1941,30 @@ export function registerRoutes(app: Express): void {
 
   app.get("/api/barber-plans/:id", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
+      const currentUser = req.user!;
       const id = parseInt(req.params.id);
-      const businessIds = getBusinessFilter(req.user, req);
-      const plan = await storage.getBarberPlan(id, businessIds);
+      const plan = await storage.getBarberPlan(id);
       if (!plan) {
         return res.status(404).json({ error: "Barber plan not found" });
       }
+
+      // Validate business access for non-Super Admin users
+      if (!currentUser.isSuperAdmin) {
+        // Get current user's business access
+        let userBusinessIds = currentUser.businessIds;
+        if (currentUser.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
+          userBusinessIds = userData?.businessIds || [];
+        }
+
+        // Check if barber plan belongs to user's business
+        if (!userBusinessIds.includes(plan.business_id)) {
+          return res.status(403).json({ 
+            error: "Access denied. You can only view barber plans from businesses you have access to." 
+          });
+        }
+      }
+
       res.json(plan);
     } catch (error) {
       console.error("Barber plan fetch error:", error);
