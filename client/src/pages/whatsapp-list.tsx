@@ -13,6 +13,7 @@ import type { WhatsappInstance } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
 import { useBusinessContext } from "@/hooks/use-business-context";
+import { useAuth } from "@/lib/auth";
 
 export default function WhatsappList() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,16 +22,18 @@ export default function WhatsappList() {
   const { t } = useTranslationHelper();
   const queryClient = useQueryClient();
   const { selectedBusinessId } = useBusinessContext();
+  const { user } = useAuth();
 
   const { data: instances = [], isLoading, error } = useQuery<WhatsappInstance[]>({
-    queryKey: ["/api/whatsapp-instances", selectedBusinessId],
-    enabled: !!selectedBusinessId,
+    queryKey: user?.isSuperAdmin ? ["/api/whatsapp-instances"] : ["/api/whatsapp-instances", selectedBusinessId],
+    enabled: user?.isSuperAdmin || !!selectedBusinessId,
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/whatsapp-instances/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/whatsapp-instances", selectedBusinessId] });
+      const queryKey = user?.isSuperAdmin ? ["/api/whatsapp-instances"] : ["/api/whatsapp-instances", selectedBusinessId];
+      queryClient.invalidateQueries({ queryKey });
       toast({
         title: t("Instance deleted"),
         description: t("The WhatsApp instance has been successfully deleted."),

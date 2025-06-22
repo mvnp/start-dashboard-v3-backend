@@ -13,6 +13,7 @@ import type { SupportTicket } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
 import { useBusinessContext } from "@/hooks/use-business-context";
+import { useAuth } from "@/lib/auth";
 
 export default function SupportTicketList() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,17 +23,19 @@ export default function SupportTicketList() {
   const { t } = useTranslationHelper();
   const queryClient = useQueryClient();
   const { selectedBusinessId } = useBusinessContext();
+  const { user } = useAuth();
 
   const { data: tickets = [], isLoading } = useQuery({
-    queryKey: ["/api/support-tickets", selectedBusinessId],
+    queryKey: user?.isSuperAdmin ? ["/api/support-tickets"] : ["/api/support-tickets", selectedBusinessId],
     select: (data: SupportTicket[]) => data,
-    enabled: !!selectedBusinessId,
+    enabled: user?.isSuperAdmin || !!selectedBusinessId,
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/support-tickets/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/support-tickets", selectedBusinessId] });
+      const queryKey = user?.isSuperAdmin ? ["/api/support-tickets"] : ["/api/support-tickets", selectedBusinessId];
+      queryClient.invalidateQueries({ queryKey });
       toast({
         title: t("Ticket deleted"),
         description: t("The support ticket has been successfully deleted."),

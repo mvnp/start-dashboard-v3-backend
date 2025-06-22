@@ -54,7 +54,8 @@ export default function PaymentGatewayList() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/payment-gateways/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/payment-gateways", selectedBusinessId] });
+      const queryKey = user?.isSuperAdmin ? ["/api/payment-gateways"] : ["/api/payment-gateways", selectedBusinessId];
+      queryClient.invalidateQueries({ queryKey });
       toast({
         title: t("Success"),
         description: t("Payment gateway deleted successfully"),
