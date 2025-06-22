@@ -1838,39 +1838,31 @@ export function registerRoutes(app: Express): void {
         return res.status(404).json({ error: "Appointment not found" });
       }
 
-      // Enhanced business context validation for both Super Admin and Merchants
+      // Enhanced business context validation - appointment must belong to selected business
       const selectedBusinessId = req.headers['x-selected-business-id'] as string;
       
-      // For Super Admin with business context, validate appointment belongs to selected business
-      if (currentUser.isSuperAdmin && selectedBusinessId) {
+      if (selectedBusinessId) {
         const selectedBusinessIdNum = parseInt(selectedBusinessId);
+        
+        // When business context is provided, appointment MUST belong to that business
         if (isNaN(selectedBusinessIdNum) || appointment.business_id !== selectedBusinessIdNum) {
           return res.status(403).json({ 
             error: "Access denied. You can only view appointments from the selected business context." 
           });
         }
-      }
-      // For merchants, enforce strict business context validation
-      else if (currentUser.roleId === 2) {
-        const selectedBusinessIdNum = parseInt(selectedBusinessId);
         
-        // Check if appointment belongs to the selected business context
-        if (appointment.business_id !== selectedBusinessIdNum) {
-          return res.status(403).json({ 
-            error: "Access denied. You can only view appointments from the selected business context." 
-          });
-        }
-        
-        // Verify user has access to the selected business
-        const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
-        const userBusinessIds = userData?.businessIds || [];
-        if (!userBusinessIds.includes(selectedBusinessIdNum)) {
-          return res.status(403).json({ 
-            error: "Access denied. You don't have access to this business." 
-          });
+        // For merchants, also verify they have access to the selected business
+        if (currentUser.roleId === 2) {
+          const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
+          const userBusinessIds = userData?.businessIds || [];
+          if (!userBusinessIds.includes(selectedBusinessIdNum)) {
+            return res.status(403).json({ 
+              error: "Access denied. You don't have access to this business." 
+            });
+          }
         }
       }
-      // For other non-Super Admin users, use general business access validation
+      // If no business context provided, use general business access validation for non-Super Admin
       else if (!currentUser.isSuperAdmin) {
         let userBusinessIds = currentUser.businessIds;
         if (!userBusinessIds.includes(appointment.business_id)) {
