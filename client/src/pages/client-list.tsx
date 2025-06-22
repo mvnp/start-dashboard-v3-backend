@@ -5,6 +5,7 @@ import {
   Plus, 
   Edit, 
   Trash2, 
+  Copy,
   Search,
   User,
   UserCheck,
@@ -86,6 +87,43 @@ export default function ClientList() {
       toast({
         title: errorTitle,
         description: errorMessage,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const cloneClientMutation = useMutation({
+    mutationFn: async (client: Client) => {
+      // Generate valid email format
+      const timestamp = Date.now();
+      const randomId = Math.floor(Math.random() * 1000);
+      const emailDomain = "@client.com";
+      const validEmail = `${client.first_name.toLowerCase()}.${client.last_name.toLowerCase()}.${timestamp}.${randomId}${emailDomain}`;
+      
+      const clonedClient = {
+        first_name: `${client.first_name} (Copy)`,
+        last_name: client.last_name,
+        email: validEmail,
+        phone: client.phone,
+        address: client.address,
+        date_of_birth: client.date_of_birth,
+        business_id: selectedBusinessId
+      };
+      
+      return apiRequest("POST", "/api/clients", clonedClient);
+    },
+    onSuccess: () => {
+      const queryKey = user?.isSuperAdmin ? ["/api/clients"] : ["/api/clients", selectedBusinessId];
+      queryClient.invalidateQueries({ queryKey });
+      toast({
+        title: t("Success"),
+        description: t("Client cloned successfully"),
+      });
+    },
+    onError: () => {
+      toast({
+        title: t("Error"),
+        description: t("Failed to clone client"),
         variant: "destructive",
       });
     },
@@ -266,6 +304,16 @@ export default function ClientList() {
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => cloneClientMutation.mutate(client)}
+                          disabled={cloneClientMutation.isPending}
+                          className="text-blue-600 hover:text-blue-700"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>
