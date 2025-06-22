@@ -1634,6 +1634,11 @@ export function registerRoutes(app: Express): void {
         return res.status(400).json({ error: "Invalid service ID" });
       }
       
+      // Merchants (Role ID 2) require mandatory business context
+      if (user.roleId === 2 && !req.headers['x-selected-business-id']) {
+        return res.status(400).json({ error: "Business ID is required" });
+      }
+      
       // Get business context from selected business
       const businessIds = getBusinessFilter(user, req);
       // Super Admin has unrestricted access (businessIds === null)
@@ -2265,6 +2270,30 @@ export function registerRoutes(app: Express): void {
   app.delete("/api/appointments/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      const user = req.user!;
+      
+      // Merchants (Role ID 2) require mandatory business context
+      if (user.roleId === 2 && !req.headers['x-selected-business-id']) {
+        return res.status(400).json({ error: "Business ID is required" });
+      }
+      
+      // Get business context for access validation
+      const businessIds = getBusinessFilter(user, req);
+      if (!user.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
+        return res.status(403).json({ error: "No business access" });
+      }
+      
+      // Get existing appointment to verify business access
+      const existingAppointment = await storage.getAppointment(id);
+      if (!existingAppointment) {
+        return res.status(404).json({ error: "Appointment not found" });
+      }
+      
+      // Verify appointment belongs to user's accessible businesses
+      if (!user.isSuperAdmin && existingAppointment.business_id && !businessIds!.includes(existingAppointment.business_id)) {
+        return res.status(403).json({ error: "Access denied to this appointment" });
+      }
+      
       await storage.deleteAppointment(id);
       res.status(204).send();
     } catch (error) {
@@ -2460,7 +2489,30 @@ export function registerRoutes(app: Express): void {
   app.delete("/api/barber-plans/:id", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
       const id = parseInt(req.params.id);
-      const businessIds = getBusinessFilter(req.user, req);
+      const user = req.user!;
+      
+      // Merchants (Role ID 2) require mandatory business context
+      if (user.roleId === 2 && !req.headers['x-selected-business-id']) {
+        return res.status(400).json({ error: "Business ID is required" });
+      }
+      
+      // Get business context for access validation
+      const businessIds = getBusinessFilter(user, req);
+      if (!user.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
+        return res.status(403).json({ error: "No business access" });
+      }
+      
+      // Get existing barber plan to verify business access
+      const existingPlan = await storage.getBarberPlan(id);
+      if (!existingPlan) {
+        return res.status(404).json({ error: "Barber plan not found" });
+      }
+      
+      // Verify plan belongs to user's accessible businesses
+      if (!user.isSuperAdmin && existingPlan.business_id && !businessIds!.includes(existingPlan.business_id)) {
+        return res.status(403).json({ error: "Access denied to this barber plan" });
+      }
+      
       const success = await storage.deleteBarberPlan(id, businessIds);
       if (!success) {
         return res.status(404).json({ error: "Barber plan not found" });
@@ -3099,7 +3151,14 @@ export function registerRoutes(app: Express): void {
   app.delete("/api/accounting-transactions/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const businessIds = getBusinessFilter(req.user, req);
+      const user = req.user!;
+      
+      // Merchants (Role ID 2) require mandatory business context
+      if (user.roleId === 2 && !req.headers['x-selected-business-id']) {
+        return res.status(400).json({ error: "Business ID is required" });
+      }
+      
+      const businessIds = getBusinessFilter(user, req);
       
       // First check if transaction exists and user has access
       const existingTransaction = await storage.getAccountingTransaction(id);
@@ -3512,11 +3571,28 @@ export function registerRoutes(app: Express): void {
   app.delete("/api/whatsapp-instances/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      const user = req.user!;
+      
+      // Merchants (Role ID 2) require mandatory business context
+      if (user.roleId === 2 && !req.headers['x-selected-business-id']) {
+        return res.status(400).json({ error: "Business ID is required" });
+      }
+      
+      // Get business context for access validation
+      const businessIds = getBusinessFilter(user, req);
+      if (!user.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
+        return res.status(403).json({ error: "No business access" });
+      }
       
       // Verify the instance exists and user has access
       const existingInstance = await storage.getWhatsappInstance(id);
       if (!existingInstance) {
         return res.status(404).json({ error: "WhatsApp instance not found" });
+      }
+      
+      // Verify instance belongs to user's accessible businesses
+      if (!user.isSuperAdmin && existingInstance.business_id && !businessIds!.includes(existingInstance.business_id)) {
+        return res.status(403).json({ error: "Access denied to this WhatsApp instance" });
       }
       
       // Check business access unless super admin
