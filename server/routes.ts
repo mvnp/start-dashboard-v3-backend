@@ -1986,6 +1986,23 @@ export function registerRoutes(app: Express): void {
         });
       }
       
+      // Validate service_id belongs to the selected business
+      const service = await storage.getService(appointmentData.service_id);
+      if (!service) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["service_id"], message: "Invalid service selected" }]
+        });
+      }
+      
+      const businessIdNum = typeof business_id === 'string' ? parseInt(business_id) : business_id;
+      if (service.business_id !== businessIdNum) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ path: ["service_id"], message: "Service must belong to the selected business context" }]
+        });
+      }
+      
       // Convert user_id to person_id for staff member
       // Include all staff roles: 1=super-admin, 2=merchant, 3=employee
       const staffPersons = await storage.getPersonsByRoles([1, 2, 3]);
@@ -1998,6 +2015,18 @@ export function registerRoutes(app: Express): void {
         });
       }
 
+      // Validate staff member belongs to the selected business through user-business relationship
+      if (staffMember.user_id) {
+        const staffUserData = await storage.getUserWithRoleAndBusiness(staffMember.user_id);
+        const staffBusinessIds = staffUserData?.businessIds || [];
+        if (!staffBusinessIds.includes(businessIdNum)) {
+          return res.status(400).json({ 
+            error: "Validation failed", 
+            details: [{ path: ["user_id"], message: "Staff member must belong to the selected business context" }]
+          });
+        }
+      }
+
       // Verify client_id exists in persons table - client_id should already be a person ID
       const clientPerson = await storage.getPerson(appointmentData.client_id);
       if (!clientPerson) {
@@ -2005,6 +2034,18 @@ export function registerRoutes(app: Express): void {
           error: "Validation failed", 
           details: [{ path: ["client_id"], message: "Invalid client selected" }]
         });
+      }
+      
+      // Validate client belongs to the selected business through user-business relationship
+      if (clientPerson.user_id) {
+        const clientUserData = await storage.getUserWithRoleAndBusiness(clientPerson.user_id);
+        const clientBusinessIds = clientUserData?.businessIds || [];
+        if (!clientBusinessIds.includes(businessIdNum)) {
+          return res.status(400).json({ 
+            error: "Validation failed", 
+            details: [{ path: ["client_id"], message: "Client must belong to the selected business context" }]
+          });
+        }
       }
       
       // Create appointment data with correct person ID for staff
@@ -2089,6 +2130,24 @@ export function registerRoutes(app: Express): void {
         });
       }
       
+      // Validate service_id belongs to the business context if being updated
+      if (updateData.service_id !== undefined) {
+        const service = await storage.getService(updateData.service_id);
+        if (!service) {
+          return res.status(400).json({ 
+            error: "Validation failed", 
+            details: [{ path: ["service_id"], message: "Invalid service selected" }]
+          });
+        }
+        
+        if (service.business_id !== businessId) {
+          return res.status(400).json({ 
+            error: "Validation failed", 
+            details: [{ path: ["service_id"], message: "Service must belong to the selected business context" }]
+          });
+        }
+      }
+      
       // Convert user_id to person_id for staff member if user_id is being updated
       if (updateData.user_id !== undefined) {
         // Include all staff roles: 1=super-admin, 2=merchant, 3=employee
@@ -2102,7 +2161,42 @@ export function registerRoutes(app: Express): void {
           });
         }
         
+        // Validate staff member belongs to the business context through user-business relationship
+        if (staffMember.user_id) {
+          const staffUserData = await storage.getUserWithRoleAndBusiness(staffMember.user_id);
+          const staffBusinessIds = staffUserData?.businessIds || [];
+          if (!staffBusinessIds.includes(businessId)) {
+            return res.status(400).json({ 
+              error: "Validation failed", 
+              details: [{ path: ["user_id"], message: "Staff member must belong to the selected business context" }]
+            });
+          }
+        }
+        
         updateData.user_id = staffMember.id; // Use person ID instead of user ID
+      }
+      
+      // Validate client belongs to the business context if being updated
+      if (updateData.client_id !== undefined) {
+        const clientPerson = await storage.getPerson(updateData.client_id);
+        if (!clientPerson) {
+          return res.status(400).json({ 
+            error: "Validation failed", 
+            details: [{ path: ["client_id"], message: "Invalid client selected" }]
+          });
+        }
+        
+        // Validate client belongs to the selected business through user-business relationship
+        if (clientPerson.user_id) {
+          const clientUserData = await storage.getUserWithRoleAndBusiness(clientPerson.user_id);
+          const clientBusinessIds = clientUserData?.businessIds || [];
+          if (!clientBusinessIds.includes(businessId)) {
+            return res.status(400).json({ 
+              error: "Validation failed", 
+              details: [{ path: ["client_id"], message: "Client must belong to the selected business context" }]
+            });
+          }
+        }
       }
 
       // Verify client_id exists in persons table if client_id is being updated
