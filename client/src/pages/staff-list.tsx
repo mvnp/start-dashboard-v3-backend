@@ -167,7 +167,7 @@ export default function StaffList() {
         <Card>
           <CardContent className="p-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-slate-900">{staff.length}</p>
+              <p className="text-2xl font-bold text-slate-900">{Array.isArray(staff) ? staff.length : 0}</p>
               <TranslatableText tag="p" className="text-sm text-slate-600">Total Staff</TranslatableText>
             </div>
           </CardContent>

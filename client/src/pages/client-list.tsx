@@ -158,7 +158,7 @@ export default function ClientList() {
         <Card>
           <CardContent className="p-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-slate-900">{clients.length}</p>
+              <p className="text-2xl font-bold text-slate-900">{Array.isArray(clients) ? clients.length : 0}</p>
               <p className="text-sm text-slate-600"><TranslatableText>Total Clients</TranslatableText></p>
             </div>
           </CardContent>

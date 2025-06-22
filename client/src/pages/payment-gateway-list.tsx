@@ -36,6 +36,7 @@ export default function PaymentGatewayList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { toast } = useToast();
+  const { t } = useTranslationHelper();
   const { selectedBusinessId } = useBusinessContext();
 
   const { data: gateways, isLoading } = useQuery({
@@ -81,7 +82,7 @@ export default function PaymentGatewayList() {
     }
   };
 
-  const filteredGateways = gateways.filter(gateway => {
+  const filteredGateways = Array.isArray(gateways) ? gateways.filter(gateway => {
     const staffName = gateway.staff_id ? getStaffName(gateway.staff_id).toLowerCase() : "";
     const searchLower = searchTerm.toLowerCase();
     
@@ -89,7 +90,7 @@ export default function PaymentGatewayList() {
            (gateway.type && gateway.type.toLowerCase().includes(searchLower)) ||
            (gateway.email && gateway.email.toLowerCase().includes(searchLower)) ||
            staffName.includes(searchLower);
-  });
+  }) : [];
 
   const handleDelete = (id: number) => {
     setDeleteId(id);
