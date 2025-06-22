@@ -1739,12 +1739,7 @@ export function registerRoutes(app: Express): void {
       // If merchant provided business context, validate access
       if (user.roleId === 2 && selectedBusinessId) {
         const businessId = parseInt(selectedBusinessId);
-        console.log('Merchant business validation:', {
-          userId: user.userId,
-          requestedBusinessId: businessId,
-          userBusinessIds: user.businessIds,
-          hasAccess: user.businessIds.includes(businessId)
-        });
+
         if (!user.businessIds.includes(businessId)) {
           return res.status(403).json({ 
             error: "Access denied to selected business" 
