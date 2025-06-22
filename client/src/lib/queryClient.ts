@@ -76,6 +76,10 @@ export const getQueryFn: <T>(options: {
       if (url === "/api/businesses") {
         url = `${url}/${queryKey[1]}`;
       }
+      // For staff endpoint, don't append query parameters to URL - they're for cache keys only
+      else if (url === "/api/staff") {
+        // Keep URL as /api/staff, ignore additional query key parameters
+      }
       // Add other parameterized endpoints as needed
       else if (url.startsWith('/api/') && !url.includes('?')) {
         url = `${url}/${queryKey[1]}`;
