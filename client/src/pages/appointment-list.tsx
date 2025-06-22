@@ -38,6 +38,7 @@ import { Appointment, Service, Person } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
 import { useBusinessContext } from "@/hooks/use-business-context";
+import { useAuth } from "@/lib/auth";
 
 const statusOptions = [
   { value: "all", label: <TranslatableText>All Statuses</TranslatableText> },
@@ -54,6 +55,7 @@ export default function AppointmentList() {
   const { toast } = useToast();
   const { t } = useTranslationHelper();
   const { selectedBusinessId } = useBusinessContext();
+  const { user } = useAuth();
 
   // Filter and pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -116,7 +118,8 @@ export default function AppointmentList() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/appointments/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/appointments", buildQueryParams()] });
+      const queryKey = user?.isSuperAdmin ? [`/api/appointments?${buildQueryParams()}`] : [`/api/appointments?${buildQueryParams()}`, selectedBusinessId];
+      queryClient.invalidateQueries({ queryKey });
       toast({
         title: t("Success"),
         description: t("Appointment deleted successfully"),

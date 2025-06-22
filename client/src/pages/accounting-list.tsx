@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
 import { useBusinessContext } from "@/hooks/use-business-context";
+import { useAuth } from "@/lib/auth";
 import type { AccountingTransaction, AccountingTransactionCategory } from "@shared/schema";
 
 export default function AccountingList() {
@@ -19,25 +20,27 @@ export default function AccountingList() {
   const { toast } = useToast();
   const { t } = useTranslationHelper();
   const { selectedBusinessId } = useBusinessContext();
+  const { user } = useAuth();
 
   const { data: transactions = [], isLoading } = useQuery<AccountingTransaction[]>({
-    queryKey: ["/api/accounting-transactions", selectedBusinessId],
+    queryKey: user?.isSuperAdmin ? ["/api/accounting-transactions"] : ["/api/accounting-transactions", selectedBusinessId],
     staleTime: 0,
     gcTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    enabled: !!selectedBusinessId,
+    enabled: user?.isSuperAdmin || !!selectedBusinessId,
   });
 
   const { data: categories = [] } = useQuery<AccountingTransactionCategory[]>({
-    queryKey: ["/api/accounting-transaction-categories", selectedBusinessId],
-    enabled: !!selectedBusinessId,
+    queryKey: user?.isSuperAdmin ? ["/api/accounting-transaction-categories"] : ["/api/accounting-transaction-categories", selectedBusinessId],
+    enabled: user?.isSuperAdmin || !!selectedBusinessId,
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/accounting-transactions/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/accounting-transactions", selectedBusinessId] });
+      const queryKey = user?.isSuperAdmin ? ["/api/accounting-transactions"] : ["/api/accounting-transactions", selectedBusinessId];
+      queryClient.invalidateQueries({ queryKey });
       toast({
         title: t("Success"),
         description: t("Transaction deleted successfully"),

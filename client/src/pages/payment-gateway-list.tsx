@@ -22,6 +22,7 @@ import { PaymentGateway } from "@shared/schema";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
 import { useBusinessContext } from "@/hooks/use-business-context";
+import { useAuth } from "@/lib/auth";
 
 interface Staff {
   id: number;
@@ -38,15 +39,16 @@ export default function PaymentGatewayList() {
   const { toast } = useToast();
   const { t } = useTranslationHelper();
   const { selectedBusinessId } = useBusinessContext();
+  const { user } = useAuth();
 
   const { data: gateways, isLoading } = useQuery({
-    queryKey: ["/api/payment-gateways", selectedBusinessId],
-    enabled: !!selectedBusinessId,
+    queryKey: user?.isSuperAdmin ? ["/api/payment-gateways"] : ["/api/payment-gateways", selectedBusinessId],
+    enabled: user?.isSuperAdmin || !!selectedBusinessId,
   });
 
   const { data: staff } = useQuery({
-    queryKey: ["/api/staff", selectedBusinessId],
-    enabled: !!selectedBusinessId,
+    queryKey: user?.isSuperAdmin ? ["/api/staff"] : ["/api/staff", selectedBusinessId],
+    enabled: user?.isSuperAdmin || !!selectedBusinessId,
   });
 
   const deleteMutation = useMutation({
