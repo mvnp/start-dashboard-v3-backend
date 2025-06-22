@@ -1161,27 +1161,14 @@ export function registerRoutes(app: Express): void {
   app.post("/api/services", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const user = req.user!;
-      // Prioritize explicit business_id from request body for multi-business support
-      const businessId = req.body.business_id;
+      const { business_id } = req.body;
       
-      // If no explicit business_id, fall back to business context
-      if (!businessId) {
-        const businessIds = getBusinessFilter(user, req);
-        const contextBusinessId = businessIds && businessIds[0];
-        if (!contextBusinessId) {
-          return res.status(400).json({ 
-            error: "Validation failed", 
-            details: [{ path: ["business_id"], message: "Business ID is required - please specify business_id in request or select a business" }]
-          });
-        }
-        req.body.business_id = contextBusinessId;
-      }
-
-      // Get the final business_id to use (from request body or context)
-      const finalBusinessId = req.body.business_id;
-
-      // Validate business access for non-Super Admin users
+      // Validate business access for non-Super Admin users - same logic as Staff endpoint
       if (!user.isSuperAdmin) {
+        if (!business_id) {
+          return res.status(400).json({ error: "Business ID is required" });
+        }
+
         // For merchants (Role ID 2), fetch fresh business associations from database
         let userBusinessIds = user.businessIds;
         if (user.roleId === 2) {
@@ -1189,7 +1176,7 @@ export function registerRoutes(app: Express): void {
           userBusinessIds = userData?.businessIds || [];
         }
 
-        const businessIdNum = typeof finalBusinessId === 'string' ? parseInt(finalBusinessId) : finalBusinessId;
+        const businessIdNum = typeof business_id === 'string' ? parseInt(business_id) : business_id;
         if (!userBusinessIds.includes(businessIdNum)) {
           return res.status(403).json({ 
             error: "Access denied. You can only create services in businesses you have access to." 
@@ -1199,7 +1186,7 @@ export function registerRoutes(app: Express): void {
       
       const serviceData = {
         ...req.body,
-        business_id: finalBusinessId
+        business_id: business_id
       };
       
       // Validate required fields
@@ -1240,40 +1227,20 @@ export function registerRoutes(app: Express): void {
     try {
       const id = parseInt(req.params.id);
       const user = req.user!;
-      
-      // Get business context from selected business
-      const businessIds = getBusinessFilter(user, req);
-      // Super Admin has unrestricted access (businessIds === null)
-      if (!user.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
-        return res.status(403).json({ error: "No business access" });
-      }
+      const { business_id } = req.body;
 
-      // Get existing service to verify business access
+      // Get existing service to verify it exists
       const existingService = await storage.getService(id);
       if (!existingService) {
         return res.status(404).json({ error: "Service not found" });
       }
 
-      // Verify service belongs to user's accessible businesses
-      if (!user.isSuperAdmin && existingService.business_id && businessIds && !businessIds.includes(existingService.business_id)) {
-        return res.status(403).json({ error: "Access denied to this service" });
-      }
-      
-      // Get business context for update data
-      // Prioritize business_id from request body, then fallback to business context
-      let businessId = req.body.business_id;
-      
-      // For Super Admin without explicit business_id, preserve existing or use business context
-      if (!businessId) {
-        if (user.isSuperAdmin && (!businessIds || businessIds.length === 0)) {
-          businessId = existingService.business_id;
-        } else {
-          businessId = businessIds && businessIds[0];
+      // Validate business access for non-Super Admin users - same logic as Staff endpoint
+      if (!user.isSuperAdmin) {
+        if (!business_id) {
+          return res.status(400).json({ error: "Business ID is required" });
         }
-      }
 
-      // Validate business access for non-Super Admin users when business_id is specified
-      if (!user.isSuperAdmin && businessId && businessId !== existingService.business_id) {
         // For merchants (Role ID 2), fetch fresh business associations from database
         let userBusinessIds = user.businessIds;
         if (user.roleId === 2) {
@@ -1281,17 +1248,22 @@ export function registerRoutes(app: Express): void {
           userBusinessIds = userData?.businessIds || [];
         }
 
-        const businessIdNum = typeof businessId === 'string' ? parseInt(businessId) : businessId;
+        const businessIdNum = typeof business_id === 'string' ? parseInt(business_id) : business_id;
         if (!userBusinessIds.includes(businessIdNum)) {
           return res.status(403).json({ 
             error: "Access denied. You can only update services in businesses you have access to." 
           });
         }
+
+        // Also verify the existing service belongs to user's accessible businesses
+        if (existingService.business_id && !userBusinessIds.includes(existingService.business_id)) {
+          return res.status(403).json({ error: "Access denied to this service" });
+        }
       }
       
       const updateData = {
         ...req.body,
-        business_id: businessId
+        business_id: business_id
       };
       
       // Validate required fields for updates
