@@ -489,7 +489,26 @@ export function registerRoutes(app: Express): void {
         persons = [];
       }
       
-      res.json(persons);
+      // Enrich each person with their user email and role information
+      const enrichedPersons = await Promise.all(
+        persons.map(async (person: any) => {
+          if (person.user_id) {
+            const user = await storage.getUser(person.user_id);
+            return {
+              ...person,
+              email: user?.email || null,
+              role: person.role_type || null
+            };
+          }
+          return {
+            ...person,
+            email: null,
+            role: person.role_type || null
+          };
+        })
+      );
+      
+      res.json(enrichedPersons);
     } catch (error) {
       console.error("Staff fetch error:", error);
       res.status(500).json({ error: "Failed to fetch staff" });
