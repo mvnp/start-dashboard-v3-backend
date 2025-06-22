@@ -1727,11 +1727,36 @@ export function registerRoutes(app: Express): void {
       const endDate = req.query.endDate as string;
       
       let appointments;
-      const businessIds = getBusinessFilter(user, req);
-      console.log('Appointments endpoint - businessIds:', businessIds, 'isSuperAdmin:', user.isSuperAdmin);
+      const selectedBusinessId = req.headers['x-selected-business-id'] as string;
       
-      // Super Admin can see all data when no business is selected
-      if (user.isSuperAdmin && businessIds === null) {
+      // For merchants (Role ID 2), require explicit business selection
+      if (user.roleId === 2 && !selectedBusinessId) {
+        return res.status(400).json({ 
+          error: "Business ID is required in x-selected-business-id header for merchant operations" 
+        });
+      }
+      
+      // If merchant provided business context, validate access
+      if (user.roleId === 2 && selectedBusinessId) {
+        const businessId = parseInt(selectedBusinessId);
+        if (!user.businessIds.includes(businessId)) {
+          return res.status(403).json({ 
+            error: "Access denied to selected business" 
+          });
+        }
+        // Use explicit merchant business selection
+        appointments = await storage.getFilteredAppointments({
+          page,
+          limit,
+          status,
+          today,
+          startDate,
+          endDate,
+          businessIds: [businessId]
+        });
+      }
+      // Super Admin without business selection sees all data
+      else if (user.isSuperAdmin && !selectedBusinessId) {
         appointments = await storage.getFilteredAppointments({
           page,
           limit,
@@ -1742,8 +1767,9 @@ export function registerRoutes(app: Express): void {
           businessIds: null
         });
       } 
-      // For selected business or non-Super Admin users
-      else if (businessIds && businessIds.length > 0) {
+      // Super Admin with business selection sees filtered data
+      else if (user.isSuperAdmin && selectedBusinessId) {
+        const businessId = parseInt(selectedBusinessId);
         appointments = await storage.getFilteredAppointments({
           page,
           limit,
@@ -1751,14 +1777,12 @@ export function registerRoutes(app: Express): void {
           today,
           startDate,
           endDate,
-          businessIds: businessIds
+          businessIds: [businessId]
         });
       } 
-      // Non-Super Admin without selected business requires business context
+      // Other users without business context get empty results
       else {
-        return res.status(400).json({ 
-          error: "Business ID is required in x-selected-business-id header for merchant operations" 
-        });
+        appointments = { appointments: [], total: 0, totalPages: 0, currentPage: page };
       }
 
       // Map person IDs back to user IDs for staff members in all appointments
