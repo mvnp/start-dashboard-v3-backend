@@ -542,12 +542,21 @@ export function registerRoutes(app: Express): void {
   app.post("/api/staff", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
       const user = req.user!;
-      const { email, business_id, role_id, ...personData } = req.body;
+      const { email, role_id, ...personData } = req.body;
+      
+      // Get business_id from request body or header
+      let business_id = req.body.business_id;
+      if (!business_id) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (selectedBusinessId) {
+          business_id = parseInt(selectedBusinessId);
+        }
+      }
       
       // Validate business access for non-Super Admin users
       if (!user.isSuperAdmin) {
         if (!business_id) {
-          return res.status(400).json({ error: "Business ID is required" });
+          return res.status(400).json({ error: "Business ID is required in request body or x-selected-business-id header" });
         }
 
         // For merchants (Role ID 2), fetch fresh business associations from database
@@ -1161,12 +1170,20 @@ export function registerRoutes(app: Express): void {
   app.post("/api/services", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const user = req.user!;
-      const { business_id } = req.body;
       
-      // Validate business access for non-Super Admin users - same logic as Staff endpoint
+      // Get business_id from request body or header
+      let business_id = req.body.business_id;
+      if (!business_id) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (selectedBusinessId) {
+          business_id = parseInt(selectedBusinessId);
+        }
+      }
+      
+      // Validate business access for non-Super Admin users
       if (!user.isSuperAdmin) {
         if (!business_id) {
-          return res.status(400).json({ error: "Business ID is required" });
+          return res.status(400).json({ error: "Business ID is required in request body or x-selected-business-id header" });
         }
 
         // For merchants (Role ID 2), fetch fresh business associations from database
@@ -1227,7 +1244,15 @@ export function registerRoutes(app: Express): void {
     try {
       const id = parseInt(req.params.id);
       const user = req.user!;
-      const { business_id } = req.body;
+      
+      // Get business_id from request body or header
+      let business_id = req.body.business_id;
+      if (!business_id) {
+        const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+        if (selectedBusinessId) {
+          business_id = parseInt(selectedBusinessId);
+        }
+      }
 
       // Get existing service to verify it exists
       const existingService = await storage.getService(id);
@@ -1235,10 +1260,10 @@ export function registerRoutes(app: Express): void {
         return res.status(404).json({ error: "Service not found" });
       }
 
-      // Validate business access for non-Super Admin users - same logic as Staff endpoint
+      // Validate business access for non-Super Admin users
       if (!user.isSuperAdmin) {
         if (!business_id) {
-          return res.status(400).json({ error: "Business ID is required" });
+          return res.status(400).json({ error: "Business ID is required in request body or x-selected-business-id header" });
         }
 
         // For merchants (Role ID 2), fetch fresh business associations from database
