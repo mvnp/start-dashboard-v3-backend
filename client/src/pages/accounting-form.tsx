@@ -322,14 +322,14 @@ export default function AccountingForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel><TranslatableText>Client</TranslatableText></FormLabel>
-                      <Select onValueChange={(value) => field.onChange(value ? Number(value) : undefined)} value={field.value?.toString()}>
+                      <Select onValueChange={(value) => field.onChange(value === "0" ? undefined : Number(value))} value={field.value?.toString()}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder={<TranslatableText>Select client</TranslatableText>} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value=""><TranslatableText>No client</TranslatableText></SelectItem>
+                          <SelectItem value="0"><TranslatableText>No client</TranslatableText></SelectItem>
                           {clients.map((client) => (
                             <SelectItem key={client.id} value={client.id.toString()}>
                               {client.first_name} {client.last_name}
@@ -348,14 +348,14 @@ export default function AccountingForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel><TranslatableText>Staff Member</TranslatableText></FormLabel>
-                      <Select onValueChange={(value) => field.onChange(value ? Number(value) : undefined)} value={field.value?.toString()}>
+                      <Select onValueChange={(value) => field.onChange(value === "0" ? undefined : Number(value))} value={field.value?.toString()}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder={<TranslatableText>Select staff member</TranslatableText>} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value=""><TranslatableText>No staff member</TranslatableText></SelectItem>
+                          <SelectItem value="0"><TranslatableText>No staff member</TranslatableText></SelectItem>
                           {staff.map((member) => (
                             <SelectItem key={member.id} value={member.id.toString()}>
                               {member.first_name} {member.last_name}
