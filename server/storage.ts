@@ -343,10 +343,13 @@ class PostgresStorage implements IStorage {
         updated_at: persons.updated_at,
         deleted_at: persons.deleted_at,
         user_id: persons.user_id,
+        role_id: users_roles.role_id,
+        role_type: roles.type,
       })
       .from(persons)
       .innerJoin(users, eq(persons.user_id, users.id))
       .innerJoin(users_roles, eq(users.id, users_roles.user_id))
+      .innerJoin(roles, eq(users_roles.role_id, roles.id))
       .where(whereCondition);
     
     return result;
@@ -379,10 +382,13 @@ class PostgresStorage implements IStorage {
         updated_at: persons.updated_at,
         deleted_at: persons.deleted_at,
         user_id: persons.user_id,
+        role_id: users_roles.role_id,
+        role_type: roles.type,
       })
       .from(persons)
       .innerJoin(users, eq(persons.user_id, users.id))
       .innerJoin(users_roles, eq(users.id, users_roles.user_id))
+      .innerJoin(roles, eq(users_roles.role_id, roles.id))
       .innerJoin(users_business, eq(users.id, users_business.user_id))
       .where(and(roleWhereCondition, businessWhereCondition));
     
