@@ -2160,18 +2160,34 @@ export function registerRoutes(app: Express): void {
 
       // Validate business access for non-Super Admin users
       if (!currentUser.isSuperAdmin) {
-        // Get current user's business access
-        let userBusinessIds = currentUser.businessIds;
+        // For merchants (Role ID: 2), enforce strict business context validation
         if (currentUser.roleId === 2) {
+          const selectedBusinessId = req.headers['x-selected-business-id'] as string;
+          const selectedBusinessIdNum = selectedBusinessId ? parseInt(selectedBusinessId) : null;
+          
+          // Check if barber plan belongs to the selected business context
+          if (!selectedBusinessIdNum || plan.business_id !== selectedBusinessIdNum) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view barber plans from the selected business context." 
+            });
+          }
+          
+          // Verify user has access to the selected business
           const userData = await storage.getUserWithRoleAndBusiness(currentUser.userId);
-          userBusinessIds = userData?.businessIds || [];
-        }
-
-        // Check if barber plan belongs to user's business
-        if (!userBusinessIds.includes(plan.business_id)) {
-          return res.status(403).json({ 
-            error: "Access denied. You can only view barber plans from businesses you have access to." 
-          });
+          const userBusinessIds = userData?.businessIds || [];
+          if (!userBusinessIds.includes(selectedBusinessIdNum)) {
+            return res.status(403).json({ 
+              error: "Access denied. You don't have access to this business." 
+            });
+          }
+        } else {
+          // For other non-Super Admin users, use general business access validation
+          let userBusinessIds = currentUser.businessIds;
+          if (!userBusinessIds.includes(plan.business_id)) {
+            return res.status(403).json({ 
+              error: "Access denied. You can only view barber plans from businesses you have access to." 
+            });
+          }
         }
       }
 
