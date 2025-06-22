@@ -100,6 +100,9 @@ export default function AccountingForm() {
     enabled: user?.isSuperAdmin || !!selectedBusinessId,
   });
 
+  // Debug: Log categories data
+  console.log('Categories loaded:', categories);
+
   // Set form values when editing
   useEffect(() => {
     if (isEdit && transaction) {
