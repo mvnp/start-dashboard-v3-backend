@@ -4013,29 +4013,81 @@ export function registerRoutes(app: Express): void {
    * /api/accounting-transactions:
    *   get:
    *     summary: Get all accounting transactions
-   *     description: Retrieve all accounting transactions with business-based filtering. Super Admin sees all transactions, others see only transactions from their businesses.
+   *     description: |
+   *       Retrieve all accounting transactions with business-based filtering and financial tracking.
+   *       
+   *       **Business Context Requirements:**
+   *       - **Super Admin (Role ID: 1)**: Can access all transactions across all businesses without business context, OR filtered to specific business with `x-selected-business-id` header
+   *       - **Merchant (Role ID: 2)**: Must provide `x-selected-business-id` header to see transactions from their authorized businesses only
+   *       - **Other Roles**: See transactions from businesses they have access to
+   *       
+   *       **Financial Data:**
+   *       - Revenue and expense tracking with categorization
+   *       - Payment method documentation
+   *       - Transaction date filtering and organization
+   *       - Business-scoped financial reporting
    *     tags: [Accounting Management]
    *     security:
    *       - bearerAuth: []
+   *     parameters:
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Business ID for filtering transactions (mandatory for Role ID 2 - Merchant)
    *     responses:
    *       200:
-   *         description: List of accounting transactions
+   *         description: List of accounting transactions with business filtering applied
    *         content:
    *           application/json:
    *             schema:
    *               type: array
    *               items:
    *                 $ref: '#/components/schemas/AccountingTransaction'
+   *       400:
+   *         description: Missing business context for merchants
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Business ID is required"
    *       401:
    *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to selected business
    *       500:
    *         description: Server error
    *   post:
    *     summary: Create a new accounting transaction
-   *     description: Create a new accounting transaction for the user's business
+   *     description: |
+   *       Create a new accounting transaction with business association and validation.
+   *       
+   *       **Business Context Requirements:**
+   *       - **All Users (including Super Admin)**: Must provide `business_id` in request body OR `x-selected-business-id` header
+   *       - **Merchant (Role ID: 2)**: Can only create transactions in businesses they have access to
+   *       - **Super Admin (Role ID: 1)**: Can create transactions in any business
+   *       
+   *       **Transaction Properties:**
+   *       - Type: Revenue (income) or Expense (outgoing)
+   *       - Category: Business expense/revenue categories
+   *       - Amount: Decimal format with comma/dot support
+   *       - Description: Transaction details and purpose
+   *       - Payment method: Cash, card, transfer, etc.
+   *       - Date: Transaction occurrence date
    *     tags: [Accounting Management]
    *     security:
    *       - bearerAuth: []
+   *     parameters:
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Alternative way to specify business ID (used if business_id not in body)
    *     requestBody:
    *       required: true
    *       content:
@@ -4049,38 +4101,81 @@ export function registerRoutes(app: Express): void {
    *               - description
    *               - transaction_date
    *             properties:
-   *               type: 
+   *               type:
    *                 type: string
    *                 enum: [revenue, expense]
    *                 example: "revenue"
-   *               category_id: 
+   *                 description: Transaction type (revenue for income, expense for outgoing)
+   *               category_id:
    *                 type: integer
    *                 example: 1
-   *               amount: 
-   *                 type: number
-   *                 format: decimal
-   *                 example: 150.00
-   *               description: 
+   *                 description: Category ID from accounting transaction categories
+   *               amount:
    *                 type: string
-   *                 example: "Haircut service payment"
-   *               transaction_date: 
+   *                 example: "150.50"
+   *                 description: Transaction amount in decimal format (supports comma separator like 150,50)
+   *               description:
+   *                 type: string
+   *                 example: "Premium haircut service payment"
+   *                 description: Detailed transaction description
+   *               transaction_date:
    *                 type: string
    *                 format: date
    *                 example: "2025-06-17"
-   *               notes: 
+   *                 description: Date when transaction occurred (YYYY-MM-DD)
+   *               payment_method:
    *                 type: string
-   *                 example: "Cash payment from client"
+   *                 example: "Cash"
+   *                 nullable: true
+   *                 description: Payment method (Cash, Credit Card, Bank Transfer, etc.)
+   *               notes:
+   *                 type: string
+   *                 example: "Client paid in cash after premium service"
+   *                 nullable: true
+   *                 description: Additional transaction notes
+   *               business_id:
+   *                 type: integer
+   *                 example: 38
+   *                 description: Business ID to associate transaction with (required if x-selected-business-id header not provided)
    *     responses:
    *       201:
-   *         description: Transaction created successfully
+   *         description: Transaction created successfully with business validation
    *         content:
    *           application/json:
    *             schema:
    *               $ref: '#/components/schemas/AccountingTransaction'
    *       400:
-   *         description: Invalid input data
+   *         description: Invalid input data or missing business ID
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               missing_business_id:
+   *                 summary: Missing business ID
+   *                 value:
+   *                   error: "Business ID is required and must be a valid number"
+   *               missing_fields:
+   *                 summary: Missing required fields
+   *                 value:
+   *                   error: "Invalid data"
+   *                   details:
+   *                     - path: ["amount"]
+   *                       message: "Amount is required"
+   *                     - path: ["description"]
+   *                       message: "Description is required"
+   *                     - path: ["transaction_date"]
+   *                       message: "Transaction date is required"
    *       401:
    *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied - cannot create transactions in this business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied. You can only create transactions in businesses you have access to."
    *       500:
    *         description: Server error
    */
@@ -4119,8 +4214,19 @@ export function registerRoutes(app: Express): void {
    * @swagger
    * /api/accounting-transactions/{id}:
    *   get:
-   *     summary: Get a specific accounting transaction
-   *     description: Retrieve a specific accounting transaction by ID with business access validation
+   *     summary: Get a specific accounting transaction by ID
+   *     description: |
+   *       Retrieve a specific accounting transaction by ID with business context validation.
+   *       
+   *       **Business Context Requirements:**
+   *       - **Super Admin (Role ID: 1)**: Can access any transaction without business context, OR with business context validation
+   *       - **Merchant (Role ID: 2)**: Must provide `x-selected-business-id` header and can only access transactions from their authorized businesses
+   *       - **Other Roles**: Can access transactions from businesses they have access to
+   *       
+   *       **Financial Information:**
+   *       - Complete transaction details including amount, type, category
+   *       - Payment method and transaction date information
+   *       - Business association and notes
    *     tags: [Accounting Management]
    *     security:
    *       - bearerAuth: []
@@ -4130,18 +4236,254 @@ export function registerRoutes(app: Express): void {
    *         required: true
    *         schema:
    *           type: integer
+   *           example: 482
    *         description: Transaction ID
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Business ID for context validation (mandatory for Role ID 2 - Merchant)
    *     responses:
    *       200:
-   *         description: Transaction details
+   *         description: Transaction details with complete financial information
    *         content:
    *           application/json:
    *             schema:
    *               $ref: '#/components/schemas/AccountingTransaction'
+   *       400:
+   *         description: Invalid transaction ID or missing business context for merchants
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               invalid_id:
+   *                 summary: Invalid transaction ID
+   *                 value:
+   *                   error: "Invalid transaction ID"
+   *               missing_business_context:
+   *                 summary: Missing business context for merchant
+   *                 value:
+   *                   error: "Business ID is required in x-selected-business-id header for merchant operations"
    *       401:
    *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to transaction or selected business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied. You can only view transactions from the selected business context."
    *       404:
    *         description: Transaction not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Transaction not found"
+   *       500:
+   *         description: Server error
+   *   put:
+   *     summary: Update a specific accounting transaction
+   *     description: |
+   *       Update accounting transaction information with business context validation.
+   *       
+   *       **Business Context Requirements:**
+   *       - **All Users (including Super Admin)**: Must provide `business_id` in request body OR `x-selected-business-id` header
+   *       - **Merchant (Role ID: 2)**: Can only update transactions in businesses they have access to
+   *       - **Super Admin (Role ID: 1)**: Can update transactions in any business
+   *       
+   *       **Update Capabilities:**
+   *       - Modify transaction amount with decimal support
+   *       - Change transaction type (revenue/expense)
+   *       - Update category, description, and payment method
+   *       - Adjust transaction date and notes
+   *       - Maintain business association integrity
+   *     tags: [Accounting Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 482
+   *         description: Transaction ID to update
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Alternative way to specify business ID (used if business_id not in body)
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - type
+   *               - category_id
+   *               - amount
+   *               - description
+   *               - transaction_date
+   *             properties:
+   *               type:
+   *                 type: string
+   *                 enum: [revenue, expense]
+   *                 example: "expense"
+   *                 description: Updated transaction type
+   *               category_id:
+   *                 type: integer
+   *                 example: 3
+   *                 description: Updated category ID from accounting transaction categories
+   *               amount:
+   *                 type: string
+   *                 example: "89.75"
+   *                 description: Updated transaction amount in decimal format (supports comma separator)
+   *               description:
+   *                 type: string
+   *                 example: "Updated office supplies purchase"
+   *                 description: Updated transaction description
+   *               transaction_date:
+   *                 type: string
+   *                 format: date
+   *                 example: "2025-06-18"
+   *                 description: Updated transaction date (YYYY-MM-DD)
+   *               payment_method:
+   *                 type: string
+   *                 example: "Credit Card"
+   *                 nullable: true
+   *                 description: Updated payment method
+   *               notes:
+   *                 type: string
+   *                 example: "Updated notes - purchased additional supplies"
+   *                 nullable: true
+   *                 description: Updated transaction notes
+   *               business_id:
+   *                 type: integer
+   *                 example: 38
+   *                 description: Business ID for validation (required if x-selected-business-id header not provided)
+   *     responses:
+   *       200:
+   *         description: Transaction updated successfully with business validation
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/AccountingTransaction'
+   *       400:
+   *         description: Invalid input data or missing business ID
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               missing_business_id:
+   *                 summary: Missing business ID
+   *                 value:
+   *                   error: "Business ID is required and must be a valid number"
+   *               validation_error:
+   *                 summary: Input validation error
+   *                 value:
+   *                   error: "Invalid data"
+   *                   details:
+   *                     - path: ["amount"]
+   *                       message: "Amount must be a valid decimal number"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied - cannot update transactions in this business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied. You can only update transactions in businesses you have access to."
+   *       404:
+   *         description: Transaction not found or not accessible in business context
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Transaction not found"
+   *       500:
+   *         description: Server error
+   *   delete:
+   *     summary: Delete a specific accounting transaction
+   *     description: |
+   *       Delete an accounting transaction with business context validation.
+   *       
+   *       **Business Context Requirements:**
+   *       - **Super Admin (Role ID: 1)**: Can delete any transaction with optional business context validation
+   *       - **Merchant (Role ID: 2)**: Must provide `x-selected-business-id` header and can only delete transactions from their authorized businesses
+   *       - **Other Roles**: Can delete transactions from businesses they have access to
+   *       
+   *       **Safe Deletion:**
+   *       - Validates transaction belongs to specified business context
+   *       - Removes financial record from business accounting
+   *       - No cascade dependencies for transaction deletion
+   *       - Maintains data integrity for financial reporting
+   *     tags: [Accounting Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 482
+   *         description: Transaction ID to delete
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Business ID for context validation (mandatory for Role ID 2 - Merchant)
+   *     responses:
+   *       204:
+   *         description: Transaction deleted successfully (no content)
+   *       400:
+   *         description: Invalid transaction ID or missing business context for merchants
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               invalid_id:
+   *                 summary: Invalid transaction ID
+   *                 value:
+   *                   error: "Invalid transaction ID"
+   *               missing_business_context:
+   *                 summary: Missing business context for merchant
+   *                 value:
+   *                   error: "Business ID is required"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to delete this transaction
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "No business access"
+   *       404:
+   *         description: Transaction not found or not accessible in business context
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Transaction not found"
    *       500:
    *         description: Server error
    */
