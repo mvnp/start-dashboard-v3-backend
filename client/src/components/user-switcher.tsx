@@ -1,8 +1,4 @@
 import { useAuth } from '@/lib/auth';
-import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
-import { queryClient } from '@/lib/queryClient';
-import { TranslatableText } from '@/components/translatable-text';
 
 export default function UserSwitcher() {
   const { user, logout } = useAuth();
