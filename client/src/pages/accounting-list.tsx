@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Edit, Plus, Search, Trash2 } from "lucide-react";
+import { Edit, Plus, Search, Trash2, Copy } from "lucide-react";
 import { format } from "date-fns";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
@@ -50,6 +50,49 @@ export default function AccountingList() {
       toast({
         title: t("Error"),
         description: error.message || <TranslatableText>Failed to delete transaction</TranslatableText>,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const cloneTransactionMutation = useMutation({
+    mutationFn: async (transaction: AccountingTransaction) => {
+      // Payment methods available
+      const paymentMethods = ['Cash', 'Credit Card', 'Debit Card', 'Bank Transfer', 'Check', 'PayPal'];
+      const randomPaymentMethod = paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
+      
+      // Generate random date between a week ago and today
+      const today = new Date();
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const randomTime = weekAgo.getTime() + Math.random() * (today.getTime() - weekAgo.getTime());
+      const randomDate = new Date(randomTime);
+      const formattedDate = randomDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+      
+      const clonedTransaction = {
+        type: transaction.type,
+        category_id: transaction.category_id,
+        description: transaction.description,
+        amount: transaction.amount,
+        payment_method: randomPaymentMethod,
+        transaction_date: formattedDate,
+        notes: transaction.description, // Insert description into notes
+        business_id: selectedBusinessId
+      };
+      
+      return apiRequest("POST", "/api/accounting-transactions", clonedTransaction);
+    },
+    onSuccess: () => {
+      const queryKey = user?.isSuperAdmin ? ["/api/accounting-transactions"] : ["/api/accounting-transactions", selectedBusinessId];
+      queryClient.invalidateQueries({ queryKey });
+      toast({
+        title: t("Success"),
+        description: t("Transaction cloned successfully"),
+      });
+    },
+    onError: () => {
+      toast({
+        title: t("Error"),
+        description: t("Failed to clone transaction"),
         variant: "destructive",
       });
     },
@@ -219,13 +262,22 @@ export default function AccountingList() {
                         variant="outline"
                         size="sm"
                         onClick={() => {
-                          if (confirm(<TranslatableText>Are you sure you want to delete this transaction?</TranslatableText>)) {
+                          if (confirm(t("Are you sure you want to delete this transaction?"))) {
                             deleteMutation.mutate(transaction.id);
                           }
                         }}
                         disabled={deleteMutation.isPending}
                       >
                         <Trash2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => cloneTransactionMutation.mutate(transaction)}
+                        disabled={cloneTransactionMutation.isPending}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        <Copy className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
