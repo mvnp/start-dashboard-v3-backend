@@ -469,6 +469,238 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  /**
+   * @swagger
+   * /api/staff:
+   *   get:
+   *     summary: Get all staff members
+   *     description: |
+   *       Retrieve all staff members with business-based filtering and role information.
+   *       
+   *       **Business Context Requirements:**
+   *       - **Super Admin (Role ID: 1)**: Can access all staff across all businesses without business context, OR filtered to specific business with `x-selected-business-id` header
+   *       - **Merchant (Role ID: 2)**: Must provide `x-selected-business-id` header to see staff from their authorized businesses only
+   *       - **Other Roles**: See staff from businesses they have access to
+   *       
+   *       **Staff Information:**
+   *       - Includes super-admin, merchant, and employee roles (Role IDs: 1, 2, 3)
+   *       - Personal details with contact information
+   *       - Email addresses and role assignments
+   *       - Business associations and hire dates
+   *       - Salary information for authorized users
+   *     tags: [Staff Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Business ID for filtering staff (mandatory for Role ID 2 - Merchant)
+   *     responses:
+   *       200:
+   *         description: List of staff members with business filtering applied
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   id:
+   *                     type: integer
+   *                     example: 565
+   *                     description: Staff member person ID
+   *                   first_name:
+   *                     type: string
+   *                     example: "John"
+   *                     description: Staff member first name
+   *                   last_name:
+   *                     type: string
+   *                     example: "Smith"
+   *                     description: Staff member last name
+   *                   phone:
+   *                     type: string
+   *                     example: "+1234567890"
+   *                     description: Contact phone number
+   *                   address:
+   *                     type: string
+   *                     example: "123 Main St, City, State"
+   *                     nullable: true
+   *                     description: Home address
+   *                   salary:
+   *                     type: string
+   *                     example: "3500.00"
+   *                     nullable: true
+   *                     description: Monthly salary amount
+   *                   hire_date:
+   *                     type: string
+   *                     format: date
+   *                     example: "2025-01-15"
+   *                     nullable: true
+   *                     description: Date of hire
+   *                   email:
+   *                     type: string
+   *                     example: "john.smith@business.com"
+   *                     description: Staff member email address
+   *                   role:
+   *                     type: string
+   *                     example: "employee"
+   *                     description: Staff member role type
+   *       400:
+   *         description: Missing business context for merchants
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Business ID is required for merchant operations"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to selected business
+   *       500:
+   *         description: Server error
+   *   post:
+   *     summary: Create a new staff member
+   *     description: |
+   *       Create a new staff member with business association and user account.
+   *       
+   *       **Business Context Requirements:**
+   *       - **All Users (including Super Admin)**: Must provide `business_id` in request body OR `x-selected-business-id` header
+   *       - **Merchant (Role ID: 2)**: Can only create staff in businesses they have access to
+   *       - **Super Admin (Role ID: 1)**: Can create staff in any business
+   *       
+   *       **Staff Creation Process:**
+   *       - Creates person record with personal details
+   *       - Creates associated user account with email
+   *       - Assigns role (employee by default, merchant/super-admin if specified)
+   *       - Establishes business association
+   *       - Sets hire date and salary information
+   *     tags: [Staff Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Alternative way to specify business ID (used if business_id not in body)
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - first_name
+   *               - last_name
+   *               - phone
+   *               - email
+   *             properties:
+   *               first_name:
+   *                 type: string
+   *                 example: "Sarah"
+   *                 description: Staff member first name
+   *               last_name:
+   *                 type: string
+   *                 example: "Johnson"
+   *                 description: Staff member last name
+   *               phone:
+   *                 type: string
+   *                 example: "+1987654321"
+   *                 description: Contact phone number
+   *               email:
+   *                 type: string
+   *                 format: email
+   *                 example: "sarah.johnson@business.com"
+   *                 description: Unique email address for user account
+   *               address:
+   *                 type: string
+   *                 example: "456 Oak Ave, City, State"
+   *                 nullable: true
+   *                 description: Home address (optional)
+   *               salary:
+   *                 type: string
+   *                 example: "4000.00"
+   *                 nullable: true
+   *                 description: Monthly salary amount (optional)
+   *               hire_date:
+   *                 type: string
+   *                 format: date
+   *                 example: "2025-06-22"
+   *                 nullable: true
+   *                 description: Date of hire (defaults to today if not provided)
+   *               role_id:
+   *                 type: integer
+   *                 example: 3
+   *                 default: 3
+   *                 description: Role ID (1=super-admin, 2=merchant, 3=employee)
+   *               business_id:
+   *                 type: integer
+   *                 example: 38
+   *                 description: Business ID to associate staff with (required if x-selected-business-id header not provided)
+   *     responses:
+   *       201:
+   *         description: Staff member created successfully with user account
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 person:
+   *                   type: object
+   *                   description: Created person record
+   *                 user:
+   *                   type: object
+   *                   description: Created user account
+   *                 message:
+   *                   type: string
+   *                   example: "Staff member created successfully"
+   *       400:
+   *         description: Invalid input data or missing business ID
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               missing_business_id:
+   *                 summary: Missing business ID
+   *                 value:
+   *                   error: "Business ID is required in request body or x-selected-business-id header"
+   *               email_exists:
+   *                 summary: Email already exists
+   *                 value:
+   *                   error: "Email already exists"
+   *                   details:
+   *                     - path: ["email"]
+   *                       message: "This email address is already registered"
+   *               missing_fields:
+   *                 summary: Missing required fields
+   *                 value:
+   *                   error: "Invalid data"
+   *                   details:
+   *                     - path: ["first_name"]
+   *                       message: "First name is required"
+   *                     - path: ["email"]
+   *                       message: "Email is required"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied - cannot create staff in this business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied. You can only create staff in businesses you have access to."
+   *       500:
+   *         description: Server error
+   */
   // Staff routes (using persons table now) - roles 1,2,3 (super-admin, merchant, employee)
   app.get("/api/staff", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
@@ -515,6 +747,347 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  /**
+   * @swagger
+   * /api/staff/{id}:
+   *   get:
+   *     summary: Get a specific staff member by ID
+   *     description: |
+   *       Retrieve a specific staff member by ID with business context validation.
+   *       
+   *       **Business Context Requirements:**
+   *       - **Super Admin (Role ID: 1)**: Can access any staff member without business context, OR with business context validation
+   *       - **Merchant (Role ID: 2)**: Must provide `x-selected-business-id` header and can only access staff from their authorized businesses
+   *       - **Other Roles**: Can access staff from businesses they have access to
+   *       
+   *       **Staff Information:**
+   *       - Complete personal and professional details
+   *       - Contact information and address
+   *       - Role assignment and business associations
+   *       - Salary and hire date information
+   *       - Email address and user account details
+   *     tags: [Staff Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 565
+   *         description: Staff member person ID
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Business ID for context validation (mandatory for Role ID 2 - Merchant)
+   *     responses:
+   *       200:
+   *         description: Staff member details with complete information
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 id:
+   *                   type: integer
+   *                   example: 565
+   *                   description: Staff member person ID
+   *                 first_name:
+   *                   type: string
+   *                   example: "John"
+   *                   description: Staff member first name
+   *                 last_name:
+   *                   type: string
+   *                   example: "Smith"
+   *                   description: Staff member last name
+   *                 phone:
+   *                   type: string
+   *                   example: "+1234567890"
+   *                   description: Contact phone number
+   *                 address:
+   *                   type: string
+   *                   example: "123 Main St, City, State"
+   *                   nullable: true
+   *                   description: Home address
+   *                 salary:
+   *                   type: string
+   *                   example: "3500.00"
+   *                   nullable: true
+   *                   description: Monthly salary amount
+   *                 hire_date:
+   *                   type: string
+   *                   format: date
+   *                   example: "2025-01-15"
+   *                   nullable: true
+   *                   description: Date of hire
+   *                 user_id:
+   *                   type: integer
+   *                   example: 551
+   *                   description: Associated user account ID
+   *                 email:
+   *                   type: string
+   *                   example: "john.smith@business.com"
+   *                   description: Staff member email address
+   *                 role:
+   *                   type: string
+   *                   example: "employee"
+   *                   description: Staff member role type
+   *       400:
+   *         description: Invalid staff ID or missing business context for merchants
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               invalid_id:
+   *                 summary: Invalid staff ID
+   *                 value:
+   *                   error: "Invalid staff ID"
+   *               missing_business_context:
+   *                 summary: Missing business context for merchant
+   *                 value:
+   *                   error: "Business ID is required in x-selected-business-id header for merchant operations"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to staff member or selected business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied. You can only view staff from the selected business context."
+   *       404:
+   *         description: Staff member not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Staff member not found"
+   *       500:
+   *         description: Server error
+   *   put:
+   *     summary: Update a specific staff member
+   *     description: |
+   *       Update staff member information with business context validation.
+   *       
+   *       **Business Context Requirements:**
+   *       - **All Users (including Super Admin)**: Must provide `business_id` in request body OR `x-selected-business-id` header
+   *       - **Merchant (Role ID: 2)**: Can only update staff in businesses they have access to
+   *       - **Super Admin (Role ID: 1)**: Can update staff in any business
+   *       
+   *       **Update Capabilities:**
+   *       - Modify personal information (name, phone, address)
+   *       - Update salary and hire date
+   *       - Change role assignments (with proper authorization)
+   *       - Maintain business association integrity
+   *       - Update contact details
+   *     tags: [Staff Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 565
+   *         description: Staff member person ID to update
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Alternative way to specify business ID (used if business_id not in body)
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               first_name:
+   *                 type: string
+   *                 example: "John"
+   *                 description: Updated first name
+   *               last_name:
+   *                 type: string
+   *                 example: "Smith"
+   *                 description: Updated last name
+   *               phone:
+   *                 type: string
+   *                 example: "+1234567890"
+   *                 description: Updated contact phone number
+   *               address:
+   *                 type: string
+   *                 example: "456 Updated Ave, City, State"
+   *                 nullable: true
+   *                 description: Updated home address
+   *               salary:
+   *                 type: string
+   *                 example: "3800.00"
+   *                 nullable: true
+   *                 description: Updated monthly salary amount
+   *               hire_date:
+   *                 type: string
+   *                 format: date
+   *                 example: "2025-06-15"
+   *                 nullable: true
+   *                 description: Updated hire date
+   *               business_id:
+   *                 type: integer
+   *                 example: 38
+   *                 description: Business ID for validation (required if x-selected-business-id header not provided)
+   *     responses:
+   *       200:
+   *         description: Staff member updated successfully with business validation
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 id:
+   *                   type: integer
+   *                   example: 565
+   *                 first_name:
+   *                   type: string
+   *                   example: "John"
+   *                 last_name:
+   *                   type: string
+   *                   example: "Smith"
+   *                 phone:
+   *                   type: string
+   *                   example: "+1234567890"
+   *                 address:
+   *                   type: string
+   *                   example: "456 Updated Ave, City, State"
+   *                 salary:
+   *                   type: string
+   *                   example: "3800.00"
+   *                 hire_date:
+   *                   type: string
+   *                   example: "2025-06-15"
+   *       400:
+   *         description: Invalid input data or missing business ID
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               missing_business_id:
+   *                 summary: Missing business ID
+   *                 value:
+   *                   error: "Business ID is required and must be a valid number"
+   *               validation_error:
+   *                 summary: Input validation error
+   *                 value:
+   *                   error: "Invalid data"
+   *                   details:
+   *                     - path: ["phone"]
+   *                       message: "Phone number must be valid"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied - cannot update staff in this business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied. You can only update staff in businesses you have access to."
+   *       404:
+   *         description: Staff member not found or not accessible in business context
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Staff member not found"
+   *       500:
+   *         description: Server error
+   *   delete:
+   *     summary: Delete a specific staff member
+   *     description: |
+   *       Delete a staff member with business context validation and dependency checking.
+   *       
+   *       **Business Context Requirements:**
+   *       - **Super Admin (Role ID: 1)**: Can delete any staff member with optional business context validation
+   *       - **Merchant (Role ID: 2)**: Must provide `x-selected-business-id` header and can only delete staff from their authorized businesses
+   *       - **Other Roles**: Can delete staff from businesses they have access to
+   *       
+   *       **Safe Deletion:**
+   *       - Validates staff belongs to specified business context
+   *       - Checks for appointment dependencies before deletion
+   *       - Removes staff from business roster
+   *       - Maintains data integrity for scheduling system
+   *       - Does not delete associated user account (staff can retain login access)
+   *     tags: [Staff Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 565
+   *         description: Staff member person ID to delete
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Business ID for context validation (mandatory for Role ID 2 - Merchant)
+   *     responses:
+   *       204:
+   *         description: Staff member deleted successfully (no content)
+   *       400:
+   *         description: Invalid staff ID or missing business context for merchants
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               invalid_id:
+   *                 summary: Invalid staff ID
+   *                 value:
+   *                   error: "Invalid staff ID"
+   *               missing_business_context:
+   *                 summary: Missing business context for merchant
+   *                 value:
+   *                   error: "Business ID is required"
+   *               has_appointments:
+   *                 summary: Staff has active appointments
+   *                 value:
+   *                   error: "Cannot delete staff member with existing appointments"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to delete this staff member
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "No business access"
+   *       404:
+   *         description: Staff member not found or not accessible in business context
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Staff member not found"
+   *       500:
+   *         description: Server error
+   */
   app.get("/api/staff/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const currentUser = req.user!;
