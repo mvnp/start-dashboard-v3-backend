@@ -59,6 +59,30 @@ export const navigationItems = [
     current: false,
   },
   {
+    name: "Accounting",
+    href: "/accounting",
+    icon: Calculator,
+    current: false,
+  },
+  {
+    name: "FAQs",
+    href: "/faqs",
+    icon: FileText,
+    current: false,
+  },
+  {
+    name: "Support Tickets",
+    href: "/support-tickets",
+    icon: HelpCircle,
+    current: false,
+  },
+  {
+    name: "Support",
+    href: "/support",
+    icon: HeadphonesIcon,
+    current: false,
+  },
+  {
     name: "WhatsApp Instances",
     href: "/whatsapp",
     icon: MessageCircle,
@@ -77,24 +101,6 @@ export const navigationItems = [
     current: false,
   },
   {
-    name: "Support Tickets",
-    href: "/support-tickets",
-    icon: HelpCircle,
-    current: false,
-  },
-  {
-    name: "FAQs",
-    href: "/faqs",
-    icon: FileText,
-    current: false,
-  },
-  {
-    name: "Accounting",
-    href: "/accounting",
-    icon: Calculator,
-    current: false,
-  },
-  {
     name: "Settings",
     href: "/settings",
     icon: Settings,
@@ -104,12 +110,6 @@ export const navigationItems = [
     name: "Traductions",
     href: "/traductions",
     icon: Languages,
-    current: false,
-  },
-  {
-    name: "Support",
-    href: "/support",
-    icon: HeadphonesIcon,
     current: false,
   },
   {
