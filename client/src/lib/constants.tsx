@@ -35,6 +35,12 @@ export const navigationItems = [
     current: false,
   },
   {
+    name: "Barber Plans",
+    href: "/plans",
+    icon: Crown,
+    current: false,
+  },
+  {
     name: "Staff",
     href: "/staff",
     icon: User,
@@ -86,12 +92,6 @@ export const navigationItems = [
     name: "WhatsApp Instances",
     href: "/whatsapp",
     icon: MessageCircle,
-    current: false,
-  },
-  {
-    name: "Barber Plans",
-    href: "/plans",
-    icon: Crown,
     current: false,
   },
   {
