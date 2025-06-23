@@ -137,8 +137,8 @@ export default function AccountingList() {
       {/* Standard SaaS Header */}
       <div className="flex justify-between items-start mb-8">
         <div className="flex items-center gap-4">
-          <div className="flex items-center justify-center w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg">
-            <Calculator className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          <div className="flex items-center justify-center w-12 h-12 bg-orange-600 rounded-lg">
+            <Calculator className="h-6 w-6 text-white" />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
