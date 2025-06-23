@@ -12,10 +12,6 @@ export default function UserSwitcher() {
   return (
     <div className="flex items-center justify-between w-full p-2 border rounded">
       <span className="text-sm text-gray-600">{user.email}</span>
-      <Button variant="ghost" size="sm" onClick={logout} className="text-red-600">
-        <LogOut className="h-4 w-4 mr-1" />
-        <TranslatableText>Logout</TranslatableText>
-      </Button>
     </div>
   );
 }
