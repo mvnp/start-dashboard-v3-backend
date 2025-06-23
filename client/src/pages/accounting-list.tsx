@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Edit, Plus, Search, Trash2, Copy } from "lucide-react";
+import { Edit, Plus, Search, Trash2, Copy, Calculator } from "lucide-react";
 import { format } from "date-fns";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
@@ -134,9 +134,22 @@ export default function AccountingList() {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold"><TranslatableText>Accounting Transactions</TranslatableText></h1>
-        <Button onClick={() => setLocation("/accounting-transactions/new")}>
+      {/* Standard SaaS Header */}
+      <div className="flex justify-between items-start mb-8">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg">
+            <Calculator className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <TranslatableText>Accounting Transactions</TranslatableText>
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              <TranslatableText>Track and manage your business revenue and expenses</TranslatableText>
+            </p>
+          </div>
+        </div>
+        <Button onClick={() => setLocation("/accounting-transactions/new")} className="mt-2">
           <Plus className="h-4 w-4 mr-2" />
           <TranslatableText>Add Transaction</TranslatableText>
         </Button>
