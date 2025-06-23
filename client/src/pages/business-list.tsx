@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Building2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Building2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -59,10 +59,60 @@ export default function BusinessList() {
     },
   });
 
+  const cloneMutation = useMutation({
+    mutationFn: async (business: Business) => {
+      // Generate random email for cloned business
+      const timestamp = Date.now();
+      const randomNum = Math.floor(Math.random() * 1000);
+      const businessNameSlug = business.name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+      const clonedEmail = `${businessNameSlug}.${timestamp}.${randomNum}@business.com`;
+      
+      const clonedData = {
+        name: `${business.name} (Copy)`,
+        description: business.description,
+        address: business.address,
+        phone: business.phone,
+        email: clonedEmail,
+        tax_id: business.tax_id,
+      };
+
+      const response = await fetch("/api/businesses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(clonedData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to clone business");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/businesses"] });
+      toast({
+        title: t("Success"),
+        description: t("Business cloned successfully"),
+      });
+    },
+    onError: () => {
+      toast({
+        title: t("Error"),
+        description: t("Failed to clone business"),
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleDelete = (id: number) => {
     if (confirm(t("Are you sure you want to delete this business?"))) {
       deleteMutation.mutate(id);
     }
+  };
+
+  const handleClone = (business: Business) => {
+    cloneMutation.mutate(business);
   };
 
   if (isLoading) {
@@ -111,6 +161,16 @@ export default function BusinessList() {
                         <Pencil className="h-4 w-4" />
                       </Button>
                     </Link>
+                  )}
+                  {canCreateBusiness && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleClone(business)}
+                      disabled={cloneMutation.isPending}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
                   )}
                   {canDeleteBusiness && (
                     <Button
