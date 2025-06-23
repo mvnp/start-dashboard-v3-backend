@@ -873,19 +873,173 @@ export function registerRoutes(app: Express): void {
    * /api/clients:
    *   get:
    *     summary: Get all clients
-   *     description: Retrieve all clients with business-based filtering. Super Admin sees all clients, others see only clients from their businesses.
+   *     description: |
+   *       Retrieve all clients with business-based filtering. 
+   *       
+   *       **Business Context Requirements:**
+   *       - **Super Admin (Role ID: 1)**: Can access all clients across all businesses without business context, OR filtered to specific business with `x-selected-business-id` header
+   *       - **Merchant (Role ID: 2)**: Must provide `x-selected-business-id` header to see clients from their authorized businesses only
+   *       - **Other Roles**: See clients from businesses they have access to
    *     tags: [Client Management]
    *     security:
    *       - bearerAuth: []
+   *     parameters:
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Business ID for filtering clients (mandatory for Role ID 2 - Merchant)
    *     responses:
    *       200:
-   *         description: List of clients
+   *         description: List of clients with email information
    *         content:
    *           application/json:
    *             schema:
    *               type: array
    *               items:
-   *                 $ref: '#/components/schemas/Person'
+   *                 allOf:
+   *                   - $ref: '#/components/schemas/Person'
+   *                   - type: object
+   *                     properties:
+   *                       email:
+   *                         type: string
+   *                         format: email
+   *                         nullable: true
+   *                         example: "client@example.com"
+   *       400:
+   *         description: Missing business context for merchants
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Business ID is required for merchant operations"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to selected business
+   *       500:
+   *         description: Server error
+   *   post:
+   *     summary: Create a new client
+   *     description: |
+   *       Create a new client with automatic user account creation and business association.
+   *       
+   *       **Business Context Requirements:**
+   *       - **All Users (including Super Admin)**: Must provide `business_id` in request body OR `x-selected-business-id` header
+   *       - **Merchant (Role ID: 2)**: Can only create clients in businesses they have access to
+   *       - **Super Admin (Role ID: 1)**: Can create clients in any business
+   *       
+   *       **Automatic Operations:**
+   *       - Creates user account with generated password
+   *       - Assigns Client role (Role ID: 4)
+   *       - Associates client with specified business
+   *     tags: [Client Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Alternative way to specify business ID (used if business_id not in body)
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - first_name
+   *               - last_name
+   *               - email
+   *               - phone
+   *             properties:
+   *               first_name:
+   *                 type: string
+   *                 example: "John"
+   *                 description: Client's first name
+   *               last_name:
+   *                 type: string
+   *                 example: "Doe"
+   *                 description: Client's last name
+   *               email:
+   *                 type: string
+   *                 format: email
+   *                 example: "john.doe@email.com"
+   *                 description: Client's email (must be unique)
+   *               phone:
+   *                 type: string
+   *                 example: "+1-555-0123"
+   *                 description: Client's phone number
+   *               tax_id:
+   *                 type: string
+   *                 example: "12345678901"
+   *                 nullable: true
+   *                 description: Client's tax ID (optional)
+   *               address:
+   *                 type: string
+   *                 example: "123 Main St, City, State"
+   *                 nullable: true
+   *                 description: Client's address (optional)
+   *               business_id:
+   *                 type: integer
+   *                 example: 38
+   *                 description: Business ID to associate client with (required if x-selected-business-id header not provided)
+   *     responses:
+   *       201:
+   *         description: Client created successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               allOf:
+   *                 - $ref: '#/components/schemas/Person'
+   *                 - type: object
+   *                   properties:
+   *                     user:
+   *                       type: object
+   *                       properties:
+   *                         email:
+   *                           type: string
+   *                           format: email
+   *                           example: "john.doe@email.com"
+   *       400:
+   *         description: Invalid input data or missing business ID
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               missing_business_id:
+   *                 summary: Missing business ID
+   *                 value:
+   *                   error: "Business ID is required in request body or x-selected-business-id header"
+   *               missing_fields:
+   *                 summary: Missing required fields
+   *                 value:
+   *                   error: "Missing required fields"
+   *                   details:
+   *                     - path: ["first_name"]
+   *                       message: "First name is required"
+   *               email_exists:
+   *                 summary: Email already exists
+   *                 value:
+   *                   error: "Email already exists"
+   *                   details:
+   *                     - path: ["email"]
+   *                       message: "This email address is already registered"
+   *       403:
+   *         description: Access denied - cannot create clients in this business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied. You can only create clients in businesses you have access to."
    *       401:
    *         description: Unauthorized - invalid or missing token
    *       500:
@@ -934,6 +1088,304 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  /**
+   * @swagger
+   * /api/clients/{id}:
+   *   get:
+   *     summary: Get a specific client by ID
+   *     description: |
+   *       Retrieve a specific client by ID with business context validation.
+   *       
+   *       **Business Context Requirements:**
+   *       - **Super Admin (Role ID: 1)**: Can access any client without business context, OR with business context validation
+   *       - **Merchant (Role ID: 2)**: Must provide `x-selected-business-id` header and can only access clients from their authorized businesses
+   *       - **Other Roles**: Can access clients from businesses they have access to
+   *     tags: [Client Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 580
+   *         description: Client ID
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Business ID for context validation (mandatory for Role ID 2 - Merchant)
+   *     responses:
+   *       200:
+   *         description: Client details with user information
+   *         content:
+   *           application/json:
+   *             schema:
+   *               allOf:
+   *                 - $ref: '#/components/schemas/Person'
+   *                 - type: object
+   *                   properties:
+   *                     user:
+   *                       type: object
+   *                       nullable: true
+   *                       properties:
+   *                         email:
+   *                           type: string
+   *                           format: email
+   *                           example: "client@example.com"
+   *       400:
+   *         description: Invalid client ID or missing business context for merchants
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               invalid_id:
+   *                 summary: Invalid client ID
+   *                 value:
+   *                   error: "Invalid client ID"
+   *               missing_business_context:
+   *                 summary: Missing business context for merchant
+   *                 value:
+   *                   error: "Business ID is required in x-selected-business-id header for merchant operations"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to client or selected business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied. You can only view clients from the selected business context."
+   *       404:
+   *         description: Client not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Client not found"
+   *       500:
+   *         description: Server error
+   *   put:
+   *     summary: Update a specific client
+   *     description: |
+   *       Update client information with business context validation.
+   *       
+   *       **Business Context Requirements:**
+   *       - **All Users (including Super Admin)**: Must provide `business_id` in request body OR `x-selected-business-id` header
+   *       - **Merchant (Role ID: 2)**: Can only update clients in businesses they have access to
+   *       - **Super Admin (Role ID: 1)**: Can update clients in any business
+   *       
+   *       **Update Operations:**
+   *       - Updates person information (name, phone, address, tax_id)
+   *       - Updates associated user email if changed
+   *       - Validates client belongs to specified business
+   *     tags: [Client Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 580
+   *         description: Client ID to update
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Alternative way to specify business ID (used if business_id not in body)
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - first_name
+   *               - last_name
+   *               - email
+   *               - phone
+   *             properties:
+   *               first_name:
+   *                 type: string
+   *                 example: "John"
+   *                 description: Client's updated first name
+   *               last_name:
+   *                 type: string
+   *                 example: "Doe"
+   *                 description: Client's updated last name
+   *               email:
+   *                 type: string
+   *                 format: email
+   *                 example: "john.doe@email.com"
+   *                 description: Client's updated email (must be unique)
+   *               phone:
+   *                 type: string
+   *                 example: "+1-555-0123"
+   *                 description: Client's updated phone number
+   *               tax_id:
+   *                 type: string
+   *                 example: "12345678901"
+   *                 nullable: true
+   *                 description: Client's updated tax ID (optional)
+   *               address:
+   *                 type: string
+   *                 example: "123 Main St, City, State"
+   *                 nullable: true
+   *                 description: Client's updated address (optional)
+   *               business_id:
+   *                 type: integer
+   *                 example: 38
+   *                 description: Business ID for validation (required if x-selected-business-id header not provided)
+   *     responses:
+   *       200:
+   *         description: Client updated successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               allOf:
+   *                 - $ref: '#/components/schemas/Person'
+   *                 - type: object
+   *                   properties:
+   *                     user:
+   *                       type: object
+   *                       properties:
+   *                         email:
+   *                           type: string
+   *                           format: email
+   *                           example: "john.doe@email.com"
+   *       400:
+   *         description: Invalid input data or missing business ID
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               missing_business_id:
+   *                 summary: Missing business ID
+   *                 value:
+   *                   error: "Business ID is required in request body or x-selected-business-id header"
+   *               missing_fields:
+   *                 summary: Missing required fields
+   *                 value:
+   *                   error: "Missing required fields"
+   *                   details:
+   *                     - path: ["first_name"]
+   *                       message: "First name is required"
+   *               email_exists:
+   *                 summary: Email already exists
+   *                 value:
+   *                   error: "Email already exists"
+   *                   details:
+   *                     - path: ["email"]
+   *                       message: "This email address is already registered"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied - cannot update clients in this business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "No access to this business"
+   *       404:
+   *         description: Client not found or not in specified business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               client_not_found:
+   *                 summary: Client not found
+   *                 value:
+   *                   error: "Client not found"
+   *               client_not_in_business:
+   *                 summary: Client not in business
+   *                 value:
+   *                   error: "Client not found in this business"
+   *       500:
+   *         description: Server error
+   *   delete:
+   *     summary: Delete a specific client
+   *     description: |
+   *       Delete a client with business context validation and dependency checking.
+   *       
+   *       **Business Context Requirements:**
+   *       - **Super Admin (Role ID: 1)**: Can delete any client with optional business context validation
+   *       - **Merchant (Role ID: 2)**: Must provide `x-selected-business-id` header and can only delete clients from their authorized businesses
+   *       - **Other Roles**: Can delete clients from businesses they have access to
+   *       
+   *       **Dependency Validation:**
+   *       - Prevents deletion if client has existing appointments
+   *       - Returns specific error message for dependency conflicts
+   *     tags: [Client Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 580
+   *         description: Client ID to delete
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Business ID for context validation (mandatory for Role ID 2 - Merchant)
+   *     responses:
+   *       204:
+   *         description: Client deleted successfully (no content)
+   *       400:
+   *         description: Cannot delete due to dependencies or missing business context
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               dependency_conflict:
+   *                 summary: Client has existing appointments
+   *                 value:
+   *                   error: "Cannot delete client with existing appointments"
+   *                   message: "Please cancel or reassign all appointments for this client before deletion."
+   *               missing_business_context:
+   *                 summary: Missing business context for merchant
+   *                 value:
+   *                   error: "Business ID is required"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to delete this client
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "No business access"
+   *       404:
+   *         description: Client not found or not accessible in business context
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Client not found"
+   *       500:
+   *         description: Server error
+   */
   app.get("/api/clients/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
