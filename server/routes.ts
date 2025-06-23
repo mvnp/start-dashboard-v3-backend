@@ -2481,11 +2481,30 @@ export function registerRoutes(app: Express): void {
    * /api/appointments:
    *   get:
    *     summary: Get appointments with filtering and pagination
-   *     description: Retrieve appointments with business-based filtering, pagination, and various filters like status, date range, etc.
+   *     description: |
+   *       Retrieve appointments with business-based filtering, pagination, and various filters like status, date range, etc.
+   *       
+   *       **Business Context Requirements:**
+   *       - **Super Admin (Role ID: 1)**: Can access all appointments across all businesses without business context, OR filtered to specific business with `x-selected-business-id` header
+   *       - **Merchant (Role ID: 2)**: Must provide `x-selected-business-id` header to see appointments from their authorized businesses only
+   *       - **Other Roles**: See appointments from businesses they have access to
+   *       
+   *       **Advanced Filtering:**
+   *       - Status filtering (Scheduled, Confirmed, Completed, Cancelled)
+   *       - Date range filtering with start and end dates
+   *       - Today's appointments quick filter
+   *       - Pagination with configurable page size
    *     tags: [Appointment Management]
    *     security:
    *       - bearerAuth: []
    *     parameters:
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Business ID for filtering appointments (mandatory for Role ID 2 - Merchant)
    *       - in: query
    *         name: page
    *         schema:
@@ -2497,7 +2516,7 @@ export function registerRoutes(app: Express): void {
    *         schema:
    *           type: integer
    *           default: 25
-   *         description: Number of appointments per page
+   *         description: Number of appointments per page (max 100)
    *       - in: query
    *         name: status
    *         schema:
@@ -2514,16 +2533,18 @@ export function registerRoutes(app: Express): void {
    *         schema:
    *           type: string
    *           format: date
-   *         description: Start date for date range filter
+   *           example: "2025-06-20"
+   *         description: Start date for date range filter (YYYY-MM-DD)
    *       - in: query
    *         name: endDate
    *         schema:
    *           type: string
    *           format: date
-   *         description: End date for date range filter
+   *           example: "2025-06-25"
+   *         description: End date for date range filter (YYYY-MM-DD)
    *     responses:
    *       200:
-   *         description: Paginated list of appointments
+   *         description: Paginated list of appointments with filtering applied
    *         content:
    *           application/json:
    *             schema:
@@ -2533,19 +2554,58 @@ export function registerRoutes(app: Express): void {
    *                   type: array
    *                   items:
    *                     $ref: '#/components/schemas/Appointment'
-   *                 total: { type: integer, example: 150 }
-   *                 totalPages: { type: integer, example: 6 }
-   *                 currentPage: { type: integer, example: 1 }
+   *                 total:
+   *                   type: integer
+   *                   example: 150
+   *                   description: Total number of appointments matching filters
+   *                 totalPages:
+   *                   type: integer
+   *                   example: 6
+   *                   description: Total number of pages available
+   *                 currentPage:
+   *                   type: integer
+   *                   example: 1
+   *                   description: Current page number
+   *       400:
+   *         description: Missing business context for merchants or invalid parameters
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Business ID is required in x-selected-business-id header for merchant operations"
    *       401:
    *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to selected business
    *       500:
    *         description: Server error
    *   post:
    *     summary: Create a new appointment
-   *     description: Create a new appointment for a client with a staff member
+   *     description: |
+   *       Create a new appointment with comprehensive business context validation.
+   *       
+   *       **Business Context Requirements:**
+   *       - **All Users**: Must provide `x-selected-business-id` header for business context
+   *       - **Merchant (Role ID: 2)**: Can only create appointments with staff, clients, and services from their authorized businesses
+   *       - **Super Admin (Role ID: 1)**: Can create appointments across any business
+   *       
+   *       **Cross-Reference Validation:**
+   *       - Staff member (user_id) must belong to selected business
+   *       - Client (client_id) must belong to selected business  
+   *       - Service (service_id) must belong to selected business
+   *       - Prevents cross-business data mixing in appointments
    *     tags: [Appointment Management]
    *     security:
    *       - bearerAuth: []
+   *     parameters:
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: true
+   *         description: Business ID for context validation (required for all users)
    *     requestBody:
    *       required: true
    *       content:
@@ -2560,22 +2620,84 @@ export function registerRoutes(app: Express): void {
    *               - client_id
    *               - service_id
    *             properties:
-   *               appointment_date: { type: string, format: date, example: "2025-06-17" }
-   *               appointment_time: { type: string, format: time, example: "14:30" }
-   *               status: { type: string, enum: [Scheduled, Confirmed, Completed, Cancelled], example: "Scheduled" }
-   *               notes: { type: string, example: "Client prefers shorter sides" }
-   *               user_id: { type: integer, example: 1 }
-   *               client_id: { type: integer, example: 2 }
-   *               service_id: { type: integer, example: 1 }
+   *               appointment_date:
+   *                 type: string
+   *                 format: date
+   *                 example: "2025-06-17"
+   *                 description: Appointment date (YYYY-MM-DD)
+   *               appointment_time:
+   *                 type: string
+   *                 format: time
+   *                 example: "14:30"
+   *                 description: Appointment time (HH:MM)
+   *               status:
+   *                 type: string
+   *                 enum: [Scheduled, Confirmed, Completed, Cancelled]
+   *                 example: "Scheduled"
+   *                 description: Initial appointment status
+   *               notes:
+   *                 type: string
+   *                 example: "Client prefers shorter sides and beard trim"
+   *                 nullable: true
+   *                 description: Optional appointment notes
+   *               user_id:
+   *                 type: integer
+   *                 example: 551
+   *                 description: Staff member ID (must belong to selected business)
+   *               client_id:
+   *                 type: integer
+   *                 example: 580
+   *                 description: Client ID (must belong to selected business)
+   *               service_id:
+   *                 type: integer
+   *                 example: 251
+   *                 description: Service ID (must belong to selected business)
    *     responses:
    *       201:
-   *         description: Appointment created successfully
+   *         description: Appointment created successfully with business validation
    *         content:
    *           application/json:
    *             schema:
    *               $ref: '#/components/schemas/Appointment'
    *       400:
-   *         description: Invalid input data
+   *         description: Invalid input data or cross-business reference validation failed
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               missing_business_context:
+   *                 summary: Missing business context
+   *                 value:
+   *                   error: "Business ID is required in x-selected-business-id header"
+   *               invalid_service:
+   *                 summary: Service not in selected business
+   *                 value:
+   *                   error: "Invalid service_id"
+   *                   message: "Service does not belong to the selected business"
+   *               invalid_staff:
+   *                 summary: Staff not in selected business  
+   *                 value:
+   *                   error: "Invalid user_id"
+   *                   message: "Staff member does not belong to the selected business"
+   *               invalid_client:
+   *                 summary: Client not in selected business
+   *                 value:
+   *                   error: "Invalid client_id"
+   *                   message: "Client does not belong to the selected business"
+   *               validation_error:
+   *                 summary: Required field validation
+   *                 value:
+   *                   error: "Invalid data"
+   *                   details:
+   *                     - path: ["appointment_date"]
+   *                       message: "Appointment date is required"
+   *                     - path: ["appointment_time"]
+   *                       message: "Appointment time is required"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied - cannot create appointments in this business
    *       500:
    *         description: Server error
    */
@@ -2679,6 +2801,279 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  /**
+   * @swagger
+   * /api/appointments/{id}:
+   *   get:
+   *     summary: Get a specific appointment by ID
+   *     description: |
+   *       Retrieve a specific appointment by ID with business context validation.
+   *       
+   *       **Business Context Requirements:**
+   *       - **Super Admin (Role ID: 1)**: Can access any appointment without business context, OR with business context validation
+   *       - **Merchant (Role ID: 2)**: Must provide `x-selected-business-id` header and can only access appointments from their authorized businesses
+   *       - **Other Roles**: Can access appointments from businesses they have access to
+   *       
+   *       **Business Context Validation:**
+   *       - When business context header is provided, appointment must belong to that business
+   *       - Prevents cross-business appointment access even for Super Admin when context is specified
+   *     tags: [Appointment Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 357
+   *         description: Appointment ID
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Business ID for context validation (mandatory for Role ID 2 - Merchant)
+   *     responses:
+   *       200:
+   *         description: Appointment details with staff, client, and service information
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Appointment'
+   *       400:
+   *         description: Invalid appointment ID or missing business context for merchants
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               invalid_id:
+   *                 summary: Invalid appointment ID
+   *                 value:
+   *                   error: "Invalid appointment ID"
+   *               missing_business_context:
+   *                 summary: Missing business context for merchant
+   *                 value:
+   *                   error: "Business ID is required in x-selected-business-id header for merchant operations"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to appointment or selected business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied. You can only view appointments from the selected business context."
+   *       404:
+   *         description: Appointment not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Appointment not found"
+   *       500:
+   *         description: Server error
+   *   put:
+   *     summary: Update a specific appointment
+   *     description: |
+   *       Update appointment information with comprehensive business context validation.
+   *       
+   *       **Business Context Requirements:**
+   *       - **All Users**: Must provide `x-selected-business-id` header for business context
+   *       - **Merchant (Role ID: 2)**: Can only update appointments with staff, clients, and services from their authorized businesses
+   *       - **Super Admin (Role ID: 1)**: Can update appointments across any business
+   *       
+   *       **Cross-Reference Validation:**
+   *       - Staff member (user_id) must belong to selected business
+   *       - Client (client_id) must belong to selected business  
+   *       - Service (service_id) must belong to selected business
+   *       - Appointment must exist in selected business context
+   *     tags: [Appointment Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 357
+   *         description: Appointment ID to update
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: true
+   *         description: Business ID for context validation (required for all users)
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - appointment_date
+   *               - appointment_time
+   *               - status
+   *               - user_id
+   *               - client_id
+   *               - service_id
+   *             properties:
+   *               appointment_date:
+   *                 type: string
+   *                 format: date
+   *                 example: "2025-06-18"
+   *                 description: Updated appointment date (YYYY-MM-DD)
+   *               appointment_time:
+   *                 type: string
+   *                 format: time
+   *                 example: "15:30"
+   *                 description: Updated appointment time (HH:MM)
+   *               status:
+   *                 type: string
+   *                 enum: [Scheduled, Confirmed, Completed, Cancelled]
+   *                 example: "Confirmed"
+   *                 description: Updated appointment status
+   *               notes:
+   *                 type: string
+   *                 example: "Client requested earlier time - confirmed for 3:30 PM"
+   *                 nullable: true
+   *                 description: Updated appointment notes
+   *               user_id:
+   *                 type: integer
+   *                 example: 551
+   *                 description: Updated staff member ID (must belong to selected business)
+   *               client_id:
+   *                 type: integer
+   *                 example: 580
+   *                 description: Updated client ID (must belong to selected business)
+   *               service_id:
+   *                 type: integer
+   *                 example: 251
+   *                 description: Updated service ID (must belong to selected business)
+   *     responses:
+   *       200:
+   *         description: Appointment updated successfully with business validation
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Appointment'
+   *       400:
+   *         description: Invalid input data or cross-business reference validation failed
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               missing_business_context:
+   *                 summary: Missing business context
+   *                 value:
+   *                   error: "Business ID is required in x-selected-business-id header"
+   *               invalid_service:
+   *                 summary: Service not in selected business
+   *                 value:
+   *                   error: "Invalid service_id"
+   *                   message: "Service does not belong to the selected business"
+   *               invalid_staff:
+   *                 summary: Staff not in selected business  
+   *                 value:
+   *                   error: "Invalid user_id"
+   *                   message: "Staff member does not belong to the selected business"
+   *               invalid_client:
+   *                 summary: Client not in selected business
+   *                 value:
+   *                   error: "Invalid client_id"
+   *                   message: "Client does not belong to the selected business"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied - cannot update appointments in this business
+   *       404:
+   *         description: Appointment not found or not accessible in business context
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Appointment not found"
+   *       500:
+   *         description: Server error
+   *   delete:
+   *     summary: Delete a specific appointment
+   *     description: |
+   *       Delete an appointment with business context validation.
+   *       
+   *       **Business Context Requirements:**
+   *       - **Super Admin (Role ID: 1)**: Can delete any appointment with optional business context validation
+   *       - **Merchant (Role ID: 2)**: Must provide `x-selected-business-id` header and can only delete appointments from their authorized businesses
+   *       - **Other Roles**: Can delete appointments from businesses they have access to
+   *       
+   *       **Safe Deletion:**
+   *       - Validates appointment belongs to specified business context
+   *       - Prevents accidental cross-business deletions
+   *       - No cascade dependencies for appointment deletion
+   *     tags: [Appointment Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 357
+   *         description: Appointment ID to delete
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Business ID for context validation (mandatory for Role ID 2 - Merchant)
+   *     responses:
+   *       204:
+   *         description: Appointment deleted successfully (no content)
+   *       400:
+   *         description: Invalid appointment ID or missing business context for merchants
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               invalid_id:
+   *                 summary: Invalid appointment ID
+   *                 value:
+   *                   error: "Invalid appointment ID"
+   *               missing_business_context:
+   *                 summary: Missing business context for merchant
+   *                 value:
+   *                   error: "Business ID is required"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to delete this appointment
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "No business access"
+   *       404:
+   *         description: Appointment not found or not accessible in business context
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Appointment not found"
+   *       500:
+   *         description: Server error
+   */
   app.get("/api/appointments/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const currentUser = req.user!;
