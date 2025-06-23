@@ -307,6 +307,209 @@ export function registerRoutes(app: Express): void {
     }
   });
   
+  /**
+   * @swagger
+   * /api/businesses:
+   *   get:
+   *     summary: Get all businesses
+   *     description: |
+   *       Retrieve businesses based on user access permissions and role.
+   *       
+   *       **Access Control:**
+   *       - **Super Admin (Role ID: 1)**: Can view all businesses across the entire system
+   *       - **Merchant (Role ID: 2)**: Can only view businesses they have access to
+   *       - **Other Roles**: Can view businesses they are associated with
+   *       
+   *       **Business Information:**
+   *       - Complete business profile and configuration
+   *       - Contact details and operational information
+   *       - Business status and metadata
+   *       - User association and access management
+   *     tags: [Business Management]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: List of businesses with access control applied
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   id:
+   *                     type: integer
+   *                     example: 41
+   *                     description: Business unique identifier
+   *                   name:
+   *                     type: string
+   *                     example: "Elite Barbershop"
+   *                     description: Business name
+   *                   description:
+   *                     type: string
+   *                     example: "Premium barbershop services with experienced professionals"
+   *                     description: Business description
+   *                   address:
+   *                     type: string
+   *                     example: "123 Main Street, Downtown, City"
+   *                     nullable: true
+   *                     description: Business address
+   *                   phone:
+   *                     type: string
+   *                     example: "+1-555-0123"
+   *                     nullable: true
+   *                     description: Business contact phone
+   *                   email:
+   *                     type: string
+   *                     format: email
+   *                     example: "info@elitebarbershop.com"
+   *                     nullable: true
+   *                     description: Business contact email
+   *                   website:
+   *                     type: string
+   *                     example: "https://elitebarbershop.com"
+   *                     nullable: true
+   *                     description: Business website URL
+   *                   created_at:
+   *                     type: string
+   *                     format: date-time
+   *                     example: "2025-01-10T08:00:00Z"
+   *                     description: Business creation timestamp
+   *                   updated_at:
+   *                     type: string
+   *                     format: date-time
+   *                     example: "2025-06-15T14:30:00Z"
+   *                     description: Last update timestamp
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       500:
+   *         description: Server error
+   *   post:
+   *     summary: Create a new business
+   *     description: |
+   *       Create a new business with complete configuration and setup.
+   *       
+   *       **Access Control:**
+   *       - **Super Admin (Role ID: 1) ONLY**: Can create new businesses
+   *       - **All Other Roles**: Access denied with 403 error
+   *       
+   *       **Business Creation:**
+   *       - Complete business profile setup
+   *       - Contact information configuration
+   *       - Initial business metadata
+   *       - Automatic timestamp generation
+   *       - Business registration and activation
+   *     tags: [Business Management]
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - name
+   *               - description
+   *             properties:
+   *               name:
+   *                 type: string
+   *                 example: "Premium Hair Studio"
+   *                 description: Business name (must be unique)
+   *               description:
+   *                 type: string
+   *                 example: "Modern hair styling and barbershop services with premium amenities"
+   *                 description: Detailed business description
+   *               address:
+   *                 type: string
+   *                 example: "456 Business District, Suite 200, Metro City"
+   *                 nullable: true
+   *                 description: Business physical address (optional)
+   *               phone:
+   *                 type: string
+   *                 example: "+1-555-0456"
+   *                 nullable: true
+   *                 description: Business contact phone number (optional)
+   *               email:
+   *                 type: string
+   *                 format: email
+   *                 example: "contact@premiumhairstudio.com"
+   *                 nullable: true
+   *                 description: Business contact email address (optional)
+   *               website:
+   *                 type: string
+   *                 example: "https://premiumhairstudio.com"
+   *                 nullable: true
+   *                 description: Business website URL (optional)
+   *     responses:
+   *       201:
+   *         description: Business created successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 id:
+   *                   type: integer
+   *                   example: 42
+   *                 name:
+   *                   type: string
+   *                   example: "Premium Hair Studio"
+   *                 description:
+   *                   type: string
+   *                   example: "Modern hair styling and barbershop services with premium amenities"
+   *                 address:
+   *                   type: string
+   *                   example: "456 Business District, Suite 200, Metro City"
+   *                 phone:
+   *                   type: string
+   *                   example: "+1-555-0456"
+   *                 email:
+   *                   type: string
+   *                   example: "contact@premiumhairstudio.com"
+   *                 website:
+   *                   type: string
+   *                   example: "https://premiumhairstudio.com"
+   *                 created_at:
+   *                   type: string
+   *                   format: date-time
+   *                 updated_at:
+   *                   type: string
+   *                   format: date-time
+   *       400:
+   *         description: Invalid input data or validation failed
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               missing_fields:
+   *                 summary: Missing required fields
+   *                 value:
+   *                   error: "Invalid data"
+   *                   details:
+   *                     - path: ["name"]
+   *                       message: "Business name is required"
+   *                     - path: ["description"]
+   *                       message: "Business description is required"
+   *               duplicate_name:
+   *                 summary: Business name already exists
+   *                 value:
+   *                   error: "Business name already exists"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Forbidden - only Super Admin can create businesses
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied. Only Super Admin can create businesses."
+   *       500:
+   *         description: Server error
+   */
   // Business routes
   app.get("/api/businesses", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
@@ -337,6 +540,310 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  /**
+   * @swagger
+   * /api/businesses/{id}:
+   *   get:
+   *     summary: Get a specific business by ID
+   *     description: |
+   *       Retrieve a specific business by ID with access control validation.
+   *       
+   *       **Access Control:**
+   *       - **Super Admin (Role ID: 1)**: Can access any business without restrictions
+   *       - **Merchant (Role ID: 2)**: Can only access businesses they have authorization for
+   *       - **Other Roles**: Can access businesses they are associated with
+   *       
+   *       **Business Details:**
+   *       - Complete business profile information
+   *       - Contact details and operational data
+   *       - Business configuration and metadata
+   *       - Access control validation
+   *     tags: [Business Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 41
+   *         description: Business ID
+   *     responses:
+   *       200:
+   *         description: Business details with complete information
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 id:
+   *                   type: integer
+   *                   example: 41
+   *                   description: Business unique identifier
+   *                 name:
+   *                   type: string
+   *                   example: "Elite Barbershop"
+   *                   description: Business name
+   *                 description:
+   *                   type: string
+   *                   example: "Premium barbershop services with experienced professionals"
+   *                   description: Business description
+   *                 address:
+   *                   type: string
+   *                   example: "123 Main Street, Downtown, City"
+   *                   nullable: true
+   *                   description: Business address
+   *                 phone:
+   *                   type: string
+   *                   example: "+1-555-0123"
+   *                   nullable: true
+   *                   description: Business contact phone
+   *                 email:
+   *                   type: string
+   *                   format: email
+   *                   example: "info@elitebarbershop.com"
+   *                   nullable: true
+   *                   description: Business contact email
+   *                 website:
+   *                   type: string
+   *                   example: "https://elitebarbershop.com"
+   *                   nullable: true
+   *                   description: Business website URL
+   *                 created_at:
+   *                   type: string
+   *                   format: date-time
+   *                   example: "2025-01-10T08:00:00Z"
+   *                   description: Business creation timestamp
+   *                 updated_at:
+   *                   type: string
+   *                   format: date-time
+   *                   example: "2025-06-15T14:30:00Z"
+   *                   description: Last update timestamp
+   *       400:
+   *         description: Invalid business ID
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Invalid business ID"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied. You can only view businesses you have access to."
+   *       404:
+   *         description: Business not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Business not found"
+   *       500:
+   *         description: Server error
+   *   put:
+   *     summary: Update a specific business
+   *     description: |
+   *       Update business information with access control validation.
+   *       
+   *       **Access Control:**
+   *       - **Super Admin (Role ID: 1)**: Can update any business
+   *       - **Merchant (Role ID: 2)**: Can only update businesses they own/manage
+   *       - **Other Roles**: Cannot update businesses (403 error)
+   *       
+   *       **Update Capabilities:**
+   *       - Modify business profile information
+   *       - Update contact details and operational data
+   *       - Change business description and branding
+   *       - Maintain business configuration integrity
+   *       - Automatic timestamp management
+   *     tags: [Business Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 41
+   *         description: Business ID to update
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               name:
+   *                 type: string
+   *                 example: "Elite Barbershop & Spa"
+   *                 description: Updated business name
+   *               description:
+   *                 type: string
+   *                 example: "Premium barbershop and spa services with experienced professionals and luxury amenities"
+   *                 description: Updated business description
+   *               address:
+   *                 type: string
+   *                 example: "123 Main Street, Suite 100, Downtown, City"
+   *                 nullable: true
+   *                 description: Updated business address
+   *               phone:
+   *                 type: string
+   *                 example: "+1-555-0123"
+   *                 nullable: true
+   *                 description: Updated business contact phone
+   *               email:
+   *                 type: string
+   *                 format: email
+   *                 example: "info@elitebarbershopspa.com"
+   *                 nullable: true
+   *                 description: Updated business contact email
+   *               website:
+   *                 type: string
+   *                 example: "https://elitebarbershopspa.com"
+   *                 nullable: true
+   *                 description: Updated business website URL
+   *     responses:
+   *       200:
+   *         description: Business updated successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 id:
+   *                   type: integer
+   *                   example: 41
+   *                 name:
+   *                   type: string
+   *                   example: "Elite Barbershop & Spa"
+   *                 description:
+   *                   type: string
+   *                   example: "Premium barbershop and spa services with experienced professionals and luxury amenities"
+   *                 address:
+   *                   type: string
+   *                   example: "123 Main Street, Suite 100, Downtown, City"
+   *                 phone:
+   *                   type: string
+   *                   example: "+1-555-0123"
+   *                 email:
+   *                   type: string
+   *                   example: "info@elitebarbershopspa.com"
+   *                 website:
+   *                   type: string
+   *                   example: "https://elitebarbershopspa.com"
+   *                 updated_at:
+   *                   type: string
+   *                   format: date-time
+   *       400:
+   *         description: Invalid input data or validation failed
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               validation_error:
+   *                 summary: Input validation error
+   *                 value:
+   *                   error: "Invalid data"
+   *                   details:
+   *                     - path: ["email"]
+   *                       message: "Email format is invalid"
+   *                     - path: ["website"]
+   *                       message: "Website URL format is invalid"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied - cannot update this business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied. You can only update businesses you have access to."
+   *       404:
+   *         description: Business not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Business not found"
+   *       500:
+   *         description: Server error
+   *   delete:
+   *     summary: Delete a specific business
+   *     description: |
+   *       Delete a business with access control validation and dependency checking.
+   *       
+   *       **Access Control:**
+   *       - **Super Admin (Role ID: 1) ONLY**: Can delete businesses
+   *       - **All Other Roles**: Access denied with 403 error
+   *       
+   *       **Safe Deletion:**
+   *       - Validates business exists and user has access
+   *       - Checks for dependent data before deletion
+   *       - Removes business and associated configurations
+   *       - Maintains data integrity for multi-tenant system
+   *       - Permanent removal of business profile
+   *     tags: [Business Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 41
+   *         description: Business ID to delete
+   *     responses:
+   *       204:
+   *         description: Business deleted successfully (no content)
+   *       400:
+   *         description: Invalid business ID or business has dependencies
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               invalid_id:
+   *                 summary: Invalid business ID
+   *                 value:
+   *                   error: "Invalid business ID"
+   *               has_dependencies:
+   *                 summary: Business has active dependencies
+   *                 value:
+   *                   error: "Cannot delete business with existing staff, clients, or appointments"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Forbidden - only Super Admin can delete businesses
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied. Only Super Admin can delete businesses."
+   *       404:
+   *         description: Business not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Business not found"
+   *       500:
+   *         description: Server error
+   */
   app.get("/api/businesses/:id", authenticateJWT, async (req: AuthenticatedRequest, res) => {
     try {
       const id = parseInt(req.params.id);
