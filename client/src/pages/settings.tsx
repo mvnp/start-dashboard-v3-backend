@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertSettingsSchema, type Settings } from "@shared/schema";
-import { Save, Globe, Clock, DollarSign, Edit3 } from "lucide-react";
+import { Save, Globe, Clock, DollarSign, Edit3, Settings as SettingsIcon } from "lucide-react";
 import { useEdition } from "@/lib/edition-context";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
@@ -409,12 +409,23 @@ export default function Settings() {
 
   return (
     <div className="w-full p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-slate-900">
-          <TranslatableText>Business Settings</TranslatableText>
-        </h1>
+      {/* Standard SaaS Header */}
+      <div className="flex justify-between items-start mb-8">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center w-12 h-12 bg-barber-primary rounded-lg">
+            <SettingsIcon className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <TranslatableText>Business Settings</TranslatableText>
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              <TranslatableText>Configure your business language, timezone, and currency preferences</TranslatableText>
+            </p>
+          </div>
+        </div>
         {canEdit && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mt-2">
             <Edit3 className="w-4 h-4 text-slate-600" />
             <span className="text-sm text-slate-600">
               <TranslatableText>Edition Mode</TranslatableText>
