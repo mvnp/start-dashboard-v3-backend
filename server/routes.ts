@@ -1764,10 +1764,24 @@ export function registerRoutes(app: Express): void {
    * /api/services:
    *   get:
    *     summary: Get all services
-   *     description: Retrieve all services with business-based filtering. Super Admin sees all services, others see only services from their businesses.
+   *     description: |
+   *       Retrieve all services with business-based filtering.
+   *       
+   *       **Business Context Requirements:**
+   *       - **Super Admin (Role ID: 1)**: Can access all services across all businesses without business context, OR filtered to specific business with `x-selected-business-id` header
+   *       - **Merchant (Role ID: 2)**: Must provide `x-selected-business-id` header to see services from their authorized businesses only
+   *       - **Other Roles**: See services from businesses they have access to
    *     tags: [Service Management]
    *     security:
    *       - bearerAuth: []
+   *     parameters:
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Business ID for filtering services (mandatory for Role ID 2 - Merchant)
    *     responses:
    *       200:
    *         description: List of services
@@ -1777,14 +1791,46 @@ export function registerRoutes(app: Express): void {
    *               type: array
    *               items:
    *                 $ref: '#/components/schemas/Service'
+   *       400:
+   *         description: Missing business context for merchants
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Business ID is required for merchant operations"
    *       401:
    *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to selected business
    *       500:
    *         description: Server error
    *   post:
    *     summary: Create a new service
-   *     description: Create a new service for the business
+   *     description: |
+   *       Create a new service with business association and validation.
+   *       
+   *       **Business Context Requirements:**
+   *       - **All Users (including Super Admin)**: Must provide `business_id` in request body OR `x-selected-business-id` header
+   *       - **Merchant (Role ID: 2)**: Can only create services in businesses they have access to
+   *       - **Super Admin (Role ID: 1)**: Can create services in any business
+   *       
+   *       **Service Properties:**
+   *       - Name and description for service identification
+   *       - Duration in minutes for scheduling
+   *       - Price in decimal format
+   *       - Active status for availability control
    *     tags: [Service Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Alternative way to specify business ID (used if business_id not in body)
    *     requestBody:
    *       required: true
    *       content:
@@ -1795,13 +1841,33 @@ export function registerRoutes(app: Express): void {
    *               - name
    *               - duration
    *               - price
-   *               - business_id
    *             properties:
-   *               name: { type: string, example: "Premium Haircut" }
-   *               description: { type: string, example: "Professional haircut with styling" }
-   *               duration: { type: integer, example: 60 }
-   *               price: { type: number, format: decimal, example: 35.00 }
-   *               business_id: { type: integer, example: 1 }
+   *               name:
+   *                 type: string
+   *                 example: "Premium Haircut"
+   *                 description: Service name
+   *               description:
+   *                 type: string
+   *                 example: "Professional haircut with styling and wash"
+   *                 nullable: true
+   *                 description: Detailed service description (optional)
+   *               duration:
+   *                 type: integer
+   *                 example: 60
+   *                 description: Service duration in minutes
+   *               price:
+   *                 type: string
+   *                 example: "35.00"
+   *                 description: Service price in decimal format
+   *               is_active:
+   *                 type: boolean
+   *                 example: true
+   *                 default: true
+   *                 description: Whether service is available for booking
+   *               business_id:
+   *                 type: integer
+   *                 example: 38
+   *                 description: Business ID to associate service with (required if x-selected-business-id header not provided)
    *     responses:
    *       201:
    *         description: Service created successfully
@@ -1810,7 +1876,37 @@ export function registerRoutes(app: Express): void {
    *             schema:
    *               $ref: '#/components/schemas/Service'
    *       400:
-   *         description: Invalid input data
+   *         description: Invalid input data or missing business ID
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               missing_business_id:
+   *                 summary: Missing business ID
+   *                 value:
+   *                   error: "Business ID is required in request body or x-selected-business-id header"
+   *               missing_fields:
+   *                 summary: Missing required fields
+   *                 value:
+   *                   error: "Invalid data"
+   *                   details:
+   *                     - path: ["name"]
+   *                       message: "Name is required"
+   *                     - path: ["duration"]
+   *                       message: "Duration is required"
+   *                     - path: ["price"]
+   *                       message: "Price is required"
+   *       403:
+   *         description: Access denied - cannot create services in this business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied. You can only create services in businesses you have access to."
+   *       401:
+   *         description: Unauthorized - invalid or missing token
    *       500:
    *         description: Server error
    */
@@ -1841,6 +1937,266 @@ export function registerRoutes(app: Express): void {
     }
   });
 
+  /**
+   * @swagger
+   * /api/services/{id}:
+   *   get:
+   *     summary: Get a specific service by ID
+   *     description: |
+   *       Retrieve a specific service by ID with business context validation.
+   *       
+   *       **Business Context Requirements:**
+   *       - **Super Admin (Role ID: 1)**: Can access any service without business context, OR with business context validation
+   *       - **Merchant (Role ID: 2)**: Must provide `x-selected-business-id` header and can only access services from their authorized businesses
+   *       - **Other Roles**: Can access services from businesses they have access to
+   *     tags: [Service Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 251
+   *         description: Service ID
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Business ID for context validation (mandatory for Role ID 2 - Merchant)
+   *     responses:
+   *       200:
+   *         description: Service details
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Service'
+   *       400:
+   *         description: Invalid service ID or missing business context for merchants
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               invalid_id:
+   *                 summary: Invalid service ID
+   *                 value:
+   *                   error: "Invalid service ID"
+   *               missing_business_context:
+   *                 summary: Missing business context for merchant
+   *                 value:
+   *                   error: "Business ID is required in x-selected-business-id header for merchant operations"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to service or selected business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied. You can only view services from the selected business context."
+   *       404:
+   *         description: Service not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Service not found"
+   *       500:
+   *         description: Server error
+   *   put:
+   *     summary: Update a specific service
+   *     description: |
+   *       Update service information with business context validation and business transfer prevention.
+   *       
+   *       **Business Context Requirements:**
+   *       - **All Users (including Super Admin)**: Must provide `business_id` in request body OR `x-selected-business-id` header
+   *       - **Merchant (Role ID: 2)**: Can only update services in businesses they have access to
+   *       - **Super Admin (Role ID: 1)**: Can update services in any business
+   *       
+   *       **Business Transfer Protection:**
+   *       - Services cannot be moved between businesses during updates
+   *       - Attempting to change business_id returns validation error
+   *       - Service must remain in original business context
+   *     tags: [Service Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 251
+   *         description: Service ID to update
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Alternative way to specify business ID (used if business_id not in body)
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - name
+   *               - duration
+   *               - price
+   *             properties:
+   *               name:
+   *                 type: string
+   *                 example: "Premium Haircut & Styling"
+   *                 description: Updated service name
+   *               description:
+   *                 type: string
+   *                 example: "Professional haircut with premium styling and wash"
+   *                 nullable: true
+   *                 description: Updated service description
+   *               duration:
+   *                 type: integer
+   *                 example: 75
+   *                 description: Updated service duration in minutes
+   *               price:
+   *                 type: string
+   *                 example: "45.00"
+   *                 description: Updated service price in decimal format
+   *               is_active:
+   *                 type: boolean
+   *                 example: true
+   *                 description: Updated service availability status
+   *               business_id:
+   *                 type: integer
+   *                 example: 38
+   *                 description: Business ID for validation (required if x-selected-business-id header not provided)
+   *     responses:
+   *       200:
+   *         description: Service updated successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Service'
+   *       400:
+   *         description: Invalid input data, missing business ID, or business transfer attempt
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               missing_business_id:
+   *                 summary: Missing business ID
+   *                 value:
+   *                   error: "Business ID is required in request body or x-selected-business-id header"
+   *               business_transfer_attempt:
+   *                 summary: Business transfer prevention
+   *                 value:
+   *                   error: "Cannot change business_id of existing service. Services must remain in their original business."
+   *               validation_error:
+   *                 summary: Input validation error
+   *                 value:
+   *                   error: "Invalid data"
+   *                   details:
+   *                     - path: ["price"]
+   *                       message: "Price must be a valid decimal number"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied - cannot update services in this business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "No access to this business"
+   *       404:
+   *         description: Service not found or not in specified business
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Service not found"
+   *       500:
+   *         description: Server error
+   *   delete:
+   *     summary: Delete a specific service
+   *     description: |
+   *       Delete a service with business context validation and dependency checking.
+   *       
+   *       **Business Context Requirements:**
+   *       - **Super Admin (Role ID: 1)**: Can delete any service with optional business context validation
+   *       - **Merchant (Role ID: 2)**: Must provide `x-selected-business-id` header and can only delete services from their authorized businesses
+   *       - **Other Roles**: Can delete services from businesses they have access to
+   *       
+   *       **Dependency Validation:**
+   *       - Prevents deletion if service has existing appointments
+   *       - Returns specific error message for dependency conflicts
+   *     tags: [Service Management]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           example: 251
+   *         description: Service ID to delete
+   *       - in: header
+   *         name: x-selected-business-id
+   *         schema:
+   *           type: integer
+   *           example: 38
+   *         required: false
+   *         description: Business ID for context validation (mandatory for Role ID 2 - Merchant)
+   *     responses:
+   *       204:
+   *         description: Service deleted successfully (no content)
+   *       400:
+   *         description: Cannot delete due to dependencies or missing business context
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               dependency_conflict:
+   *                 summary: Service has existing appointments
+   *                 value:
+   *                   error: "Cannot delete service with existing appointments"
+   *                   message: "Please cancel or reassign all appointments for this service before deletion."
+   *               missing_business_context:
+   *                 summary: Missing business context for merchant
+   *                 value:
+   *                   error: "Business ID is required"
+   *       401:
+   *         description: Unauthorized - invalid or missing token
+   *       403:
+   *         description: Access denied to delete this service
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "No business access"
+   *       404:
+   *         description: Service not found or not accessible in business context
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Service not found"
+   *       500:
+   *         description: Server error
+   */
   app.get("/api/services/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
