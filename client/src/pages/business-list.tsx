@@ -25,6 +25,7 @@ export default function BusinessList() {
   const isSuperAdmin = user?.isSuperAdmin;
   const isMerchant = user?.roleId === 2;
   const canCreateBusiness = isSuperAdmin;
+  const canCloneBusiness = isSuperAdmin || isMerchant;
   const canDeleteBusiness = isSuperAdmin;
   
   const canEditBusiness = (businessId: number) => {
@@ -162,7 +163,7 @@ export default function BusinessList() {
                       </Button>
                     </Link>
                   )}
-                  {canCreateBusiness && (
+                  {canCloneBusiness && (
                     <Button
                       variant="ghost"
                       size="sm"
