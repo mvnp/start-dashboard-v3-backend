@@ -5810,13 +5810,25 @@ export function registerRoutes(app: Express): void {
    * /api/faqs:
    *   get:
    *     summary: Get all FAQs
-   *     description: Retrieve all FAQs. All authenticated users can view FAQs. No business context filtering.
+   *     description: |
+   *       Retrieve all frequently asked questions available in the system.
+   *       
+   *       **Access Control:**
+   *       - **All Authenticated Users**: Can view all published FAQs
+   *       - **Super Admin (Role ID: 1)**: Can view all FAQs including unpublished ones
+   *       - **No Business Context**: FAQs are global and not business-specific
+   *       
+   *       **FAQ Information:**
+   *       - Complete question and answer content
+   *       - Category organization for better navigation
+   *       - Publication status and ordering index
+   *       - Creation and modification timestamps
    *     tags: [FAQ Management]
    *     security:
    *       - bearerAuth: []
    *     responses:
    *       200:
-   *         description: List of FAQs
+   *         description: List of FAQs with complete information
    *         content:
    *           application/json:
    *             schema:
@@ -5826,35 +5838,57 @@ export function registerRoutes(app: Express): void {
    *                 properties:
    *                   id:
    *                     type: integer
-   *                     example: 1
+   *                     example: 4
+   *                     description: Unique FAQ identifier
    *                   question:
    *                     type: string
-   *                     example: "What is SaaS?"
+   *                     example: "Do I need to install anything to use this barbershop management system?"
+   *                     description: FAQ question text
    *                   answer:
    *                     type: string
-   *                     example: "SaaS stands for Software as a Service..."
+   *                     example: "No installation required. Our barbershop management system is completely web-based and runs in your browser. Simply log in with your credentials and start managing your barbershop operations immediately."
+   *                     description: Detailed answer content
    *                   category:
    *                     type: string
-   *                     example: "General"
+   *                     example: "Getting Started"
+   *                     description: FAQ category for organization
    *                   is_published:
    *                     type: boolean
    *                     example: true
+   *                     description: Publication status (visible to users)
    *                   order_index:
    *                     type: integer
    *                     example: 1
+   *                     description: Display order priority
    *                   created_at:
    *                     type: string
    *                     format: date-time
+   *                     example: "2025-06-17T10:30:00Z"
+   *                     description: FAQ creation timestamp
    *                   updated_at:
    *                     type: string
    *                     format: date-time
+   *                     example: "2025-06-22T15:45:00Z"
+   *                     description: Last modification timestamp
    *       401:
    *         description: Unauthorized - invalid or missing token
    *       500:
    *         description: Server error
    *   post:
    *     summary: Create a new FAQ
-   *     description: Create a new FAQ. Only Super Admin (Role ID 1) can create FAQs.
+   *     description: |
+   *       Create a new frequently asked question with answer and categorization.
+   *       
+   *       **Access Control:**
+   *       - **Super Admin (Role ID: 1) ONLY**: Can create new FAQs
+   *       - **All Other Roles**: Access denied with 403 error
+   *       
+   *       **FAQ Creation:**
+   *       - Question and answer content management
+   *       - Category assignment for organization
+   *       - Publication control for visibility
+   *       - Order index for display priority
+   *       - Automatic timestamp generation
    *     tags: [FAQ Management]
    *     security:
    *       - bearerAuth: []
@@ -5867,31 +5901,98 @@ export function registerRoutes(app: Express): void {
    *             required:
    *               - question
    *               - answer
+   *               - category
    *             properties:
    *               question:
    *                 type: string
-   *                 example: "What is SaaS?"
+   *                 example: "How do I schedule appointments for multiple services?"
+   *                 description: Clear, concise question text
    *               answer:
    *                 type: string
-   *                 example: "SaaS stands for Software as a Service..."
+   *                 example: "You can schedule appointments for multiple services by selecting each service when creating the appointment. The system will automatically calculate the total duration and cost for all selected services."
+   *                 description: Comprehensive answer with helpful details
    *               category:
    *                 type: string
-   *                 example: "General"
+   *                 example: "Appointment Management"
+   *                 description: Category for FAQ organization (Getting Started, Account Management, Appointments, etc.)
    *               is_published:
    *                 type: boolean
    *                 example: true
+   *                 default: true
+   *                 description: Whether FAQ is visible to users (defaults to published)
    *               order_index:
    *                 type: integer
-   *                 example: 1
+   *                 example: 5
+   *                 default: 0
+   *                 description: Display order priority (lower numbers appear first)
    *     responses:
    *       201:
    *         description: FAQ created successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 id:
+   *                   type: integer
+   *                   example: 8
+   *                 question:
+   *                   type: string
+   *                   example: "How do I schedule appointments for multiple services?"
+   *                 answer:
+   *                   type: string
+   *                   example: "You can schedule appointments for multiple services..."
+   *                 category:
+   *                   type: string
+   *                   example: "Appointment Management"
+   *                 is_published:
+   *                   type: boolean
+   *                   example: true
+   *                 order_index:
+   *                   type: integer
+   *                   example: 5
+   *                 created_at:
+   *                   type: string
+   *                   format: date-time
+   *                 updated_at:
+   *                   type: string
+   *                   format: date-time
    *       400:
-   *         description: Invalid input data
+   *         description: Invalid input data or validation failed
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               missing_fields:
+   *                 summary: Missing required fields
+   *                 value:
+   *                   error: "Validation failed"
+   *                   details:
+   *                     - path: ["question"]
+   *                       message: "Question is required"
+   *                     - path: ["answer"]
+   *                       message: "Answer is required"
+   *                     - path: ["category"]
+   *                       message: "Category is required"
+   *               invalid_data:
+   *                 summary: Invalid field data
+   *                 value:
+   *                   error: "Validation failed"
+   *                   details:
+   *                     - path: ["order_index"]
+   *                       message: "Order index must be a non-negative integer"
    *       401:
    *         description: Unauthorized - invalid or missing token
    *       403:
    *         description: Forbidden - only Super Admin can create FAQs
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied"
+   *               message: "Only Super Admin can create FAQs"
    *       500:
    *         description: Server error
    */
@@ -5928,8 +6029,20 @@ export function registerRoutes(app: Express): void {
    * @swagger
    * /api/faqs/{id}:
    *   get:
-   *     summary: Get a specific FAQ
-   *     description: Retrieve a specific FAQ by ID. All authenticated users can view FAQs.
+   *     summary: Get a specific FAQ by ID
+   *     description: |
+   *       Retrieve a specific FAQ by ID with complete question and answer details.
+   *       
+   *       **Access Control:**
+   *       - **All Authenticated Users**: Can view published FAQs
+   *       - **Super Admin (Role ID: 1)**: Can view all FAQs including unpublished ones
+   *       - **No Business Context**: FAQs are global and not business-specific
+   *       
+   *       **FAQ Details:**
+   *       - Complete question and answer content
+   *       - Category and publication information
+   *       - Order index and timestamps
+   *       - Content management metadata
    *     tags: [FAQ Management]
    *     security:
    *       - bearerAuth: []
@@ -5939,19 +6052,85 @@ export function registerRoutes(app: Express): void {
    *         required: true
    *         schema:
    *           type: integer
+   *           example: 4
    *         description: FAQ ID
    *     responses:
    *       200:
-   *         description: FAQ details
+   *         description: FAQ details with complete information
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 id:
+   *                   type: integer
+   *                   example: 4
+   *                   description: FAQ unique identifier
+   *                 question:
+   *                   type: string
+   *                   example: "Do I need to install anything to use this barbershop management system?"
+   *                   description: FAQ question text
+   *                 answer:
+   *                   type: string
+   *                   example: "No installation required. Our barbershop management system is completely web-based and runs in your browser. Simply log in with your credentials and start managing your barbershop operations immediately."
+   *                   description: Detailed answer content
+   *                 category:
+   *                   type: string
+   *                   example: "Getting Started"
+   *                   description: FAQ category
+   *                 is_published:
+   *                   type: boolean
+   *                   example: true
+   *                   description: Publication status
+   *                 order_index:
+   *                   type: integer
+   *                   example: 1
+   *                   description: Display order priority
+   *                 created_at:
+   *                   type: string
+   *                   format: date-time
+   *                   example: "2025-06-17T10:30:00Z"
+   *                   description: Creation timestamp
+   *                 updated_at:
+   *                   type: string
+   *                   format: date-time
+   *                   example: "2025-06-22T15:45:00Z"
+   *                   description: Last update timestamp
+   *       400:
+   *         description: Invalid FAQ ID
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Invalid FAQ ID"
    *       401:
    *         description: Unauthorized - invalid or missing token
    *       404:
    *         description: FAQ not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "FAQ not found"
    *       500:
    *         description: Server error
    *   put:
-   *     summary: Update a FAQ
-   *     description: Update a FAQ. Only Super Admin (Role ID 1) can update FAQs.
+   *     summary: Update a specific FAQ
+   *     description: |
+   *       Update FAQ information with complete content management capabilities.
+   *       
+   *       **Access Control:**
+   *       - **Super Admin (Role ID: 1) ONLY**: Can update FAQs
+   *       - **All Other Roles**: Access denied with 403 error
+   *       
+   *       **Update Capabilities:**
+   *       - Modify question and answer content
+   *       - Change category and publication status
+   *       - Adjust display order priority
+   *       - Update content metadata
+   *       - Automatic timestamp management
    *     tags: [FAQ Management]
    *     security:
    *       - bearerAuth: []
@@ -5961,7 +6140,8 @@ export function registerRoutes(app: Express): void {
    *         required: true
    *         schema:
    *           type: integer
-   *         description: FAQ ID
+   *           example: 4
+   *         description: FAQ ID to update
    *     requestBody:
    *       required: true
    *       content:
@@ -5971,30 +6151,104 @@ export function registerRoutes(app: Express): void {
    *             properties:
    *               question:
    *                 type: string
+   *                 example: "Do I need to install anything to use this updated barbershop system?"
+   *                 description: Updated question text
    *               answer:
    *                 type: string
+   *                 example: "No installation required. Our enhanced barbershop management system is completely web-based with new features and improved performance. Simply log in with your credentials."
+   *                 description: Updated answer content
    *               category:
    *                 type: string
+   *                 example: "Getting Started"
+   *                 description: Updated category assignment
    *               is_published:
    *                 type: boolean
+   *                 example: true
+   *                 description: Updated publication status
    *               order_index:
    *                 type: integer
+   *                 example: 2
+   *                 description: Updated display order priority
    *     responses:
    *       200:
    *         description: FAQ updated successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 id:
+   *                   type: integer
+   *                   example: 4
+   *                 question:
+   *                   type: string
+   *                   example: "Do I need to install anything to use this updated barbershop system?"
+   *                 answer:
+   *                   type: string
+   *                   example: "No installation required. Our enhanced barbershop management system..."
+   *                 category:
+   *                   type: string
+   *                   example: "Getting Started"
+   *                 is_published:
+   *                   type: boolean
+   *                   example: true
+   *                 order_index:
+   *                   type: integer
+   *                   example: 2
+   *                 updated_at:
+   *                   type: string
+   *                   format: date-time
    *       400:
-   *         description: Invalid input data
+   *         description: Invalid input data or validation failed
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             examples:
+   *               validation_error:
+   *                 summary: Input validation error
+   *                 value:
+   *                   error: "Validation failed"
+   *                   details:
+   *                     - path: ["question"]
+   *                       message: "Question cannot be empty"
+   *                     - path: ["order_index"]
+   *                       message: "Order index must be a non-negative integer"
    *       401:
    *         description: Unauthorized - invalid or missing token
    *       403:
    *         description: Forbidden - only Super Admin can update FAQs
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied"
+   *               message: "Only Super Admin can update FAQs"
    *       404:
    *         description: FAQ not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "FAQ not found"
    *       500:
    *         description: Server error
    *   delete:
-   *     summary: Delete a FAQ
-   *     description: Delete a FAQ. Only Super Admin (Role ID 1) can delete FAQs.
+   *     summary: Delete a specific FAQ
+   *     description: |
+   *       Delete an FAQ with proper access control and content management.
+   *       
+   *       **Access Control:**
+   *       - **Super Admin (Role ID: 1) ONLY**: Can delete FAQs
+   *       - **All Other Roles**: Access denied with 403 error
+   *       
+   *       **Safe Deletion:**
+   *       - Removes FAQ from knowledge base
+   *       - No cascade dependencies for FAQ deletion
+   *       - Maintains content management integrity
+   *       - Permanent removal of question and answer
    *     tags: [FAQ Management]
    *     security:
    *       - bearerAuth: []
@@ -6004,16 +6258,38 @@ export function registerRoutes(app: Express): void {
    *         required: true
    *         schema:
    *           type: integer
-   *         description: FAQ ID
+   *           example: 4
+   *         description: FAQ ID to delete
    *     responses:
    *       204:
-   *         description: FAQ deleted successfully
+   *         description: FAQ deleted successfully (no content)
+   *       400:
+   *         description: Invalid FAQ ID
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Invalid FAQ ID"
    *       401:
    *         description: Unauthorized - invalid or missing token
    *       403:
    *         description: Forbidden - only Super Admin can delete FAQs
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "Access denied"
+   *               message: "Only Super Admin can delete FAQs"
    *       404:
    *         description: FAQ not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Error'
+   *             example:
+   *               error: "FAQ not found"
    *       500:
    *         description: Server error
    */
