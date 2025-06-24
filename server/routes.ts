@@ -1,5 +1,6 @@
 import { Express, Request, Response } from "express";
 import { z } from "zod";
+import { WebSocket } from "ws";
 import storage from "./storage";
 
 import { 
@@ -28,6 +29,25 @@ import {
   insertSettingsSchema,
   insertTraductionSchema,
 } from "@shared/schema";
+
+// Helper function to broadcast WebSocket updates
+function broadcastAccountingUpdate(app: Express, eventType: string, data: any, businessId?: number) {
+  const wss = app.get('wss');
+  if (wss) {
+    const message = JSON.stringify({
+      type: 'accounting_transaction_update',
+      eventType,
+      data,
+      businessId
+    });
+    
+    wss.clients.forEach((client: WebSocket) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  }
+}
 
 export function registerRoutes(app: Express): void {
   
@@ -5663,6 +5683,10 @@ export function registerRoutes(app: Express): void {
       });
       
       const transaction = await storage.createAccountingTransaction(validatedData);
+      
+      // Broadcast real-time update
+      broadcastAccountingUpdate(req.app, 'create', transaction, selectedBusinessId);
+      
       res.status(201).json(transaction);
     } catch (error) {
       console.error("Accounting transaction creation error:", error);
@@ -5772,6 +5796,9 @@ export function registerRoutes(app: Express): void {
         business_id: selectedBusinessId
       });
       const transaction = await storage.updateAccountingTransaction(id, validatedData, businessIds);
+      
+      // Broadcast real-time update
+      broadcastAccountingUpdate(req.app, 'update', transaction, selectedBusinessId);
       
       res.json(transaction);
     } catch (error) {

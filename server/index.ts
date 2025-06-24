@@ -1,4 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
+import { createServer } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { setupSwagger } from "./swagger";
@@ -72,7 +74,27 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = 5000;
-  const server = app.listen(port, "0.0.0.0", () => {
+  const server = createServer(app);
+  
+  // Setup WebSocket server for real-time updates
+  const wss = new WebSocketServer({ server, path: '/ws' });
+  
+  wss.on('connection', (ws) => {
+    log('WebSocket client connected');
+    
+    ws.on('close', () => {
+      log('WebSocket client disconnected');
+    });
+    
+    ws.on('error', (error) => {
+      log(`WebSocket error: ${error.message}`);
+    });
+  });
+  
+  // Make WebSocket server available to routes
+  app.set('wss', wss);
+  
+  server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
   });
 
