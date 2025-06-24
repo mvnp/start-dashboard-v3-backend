@@ -5865,6 +5865,10 @@ export function registerRoutes(app: Express): void {
       if (!deleted) {
         return res.status(404).json({ error: "Transaction not found" });
       }
+      
+      // Broadcast real-time update for deletion
+      broadcastAccountingUpdate(req.app, 'delete', { id }, existingTransaction.business_id);
+      
       res.status(204).send();
     } catch (error) {
       console.error("Accounting transaction deletion error:", error);

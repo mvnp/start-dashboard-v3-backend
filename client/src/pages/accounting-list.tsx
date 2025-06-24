@@ -7,12 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Edit, Plus, Search, Trash2, Copy, Calculator } from "lucide-react";
+import { Edit, Plus, Search, Trash2, Copy, Calculator, Wifi, WifiOff } from "lucide-react";
 import { format } from "date-fns";
 import { TranslatableText } from "@/components/translatable-text";
 import { useTranslationHelper } from "@/lib/translation-helper";
 import { useBusinessContext } from "@/hooks/use-business-context";
 import { useAuth } from "@/lib/auth";
+import { useWebSocket } from "@/hooks/use-websocket";
 import type { AccountingTransaction, AccountingTransactionCategory } from "@shared/schema";
 
 export default function AccountingList() {
@@ -21,6 +22,7 @@ export default function AccountingList() {
   const { t } = useTranslationHelper();
   const { selectedBusinessId } = useBusinessContext();
   const { user } = useAuth();
+  const { isConnected } = useWebSocket();
 
   const { data: transactions = [], isLoading } = useQuery<AccountingTransaction[]>({
     queryKey: user?.isSuperAdmin ? ["/api/accounting-transactions"] : ["/api/accounting-transactions", selectedBusinessId],
@@ -147,6 +149,19 @@ export default function AccountingList() {
             <p className="text-gray-600 dark:text-gray-400 mt-1">
               <TranslatableText>Track and manage your business revenue and expenses</TranslatableText>
             </p>
+            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {isConnected ? (
+                <>
+                  <Wifi className="h-3 w-3 text-green-500" />
+                  <span>Real-time updates active</span>
+                </>
+              ) : (
+                <>
+                  <WifiOff className="h-3 w-3 text-red-500" />
+                  <span>Real-time updates disconnected</span>
+                </>
+              )}
+            </div>
           </div>
         </div>
         <Button onClick={() => setLocation("/accounting-transactions/new")} className="mt-2">
