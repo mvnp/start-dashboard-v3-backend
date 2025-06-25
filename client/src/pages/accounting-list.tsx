@@ -135,7 +135,7 @@ export default function AccountingList() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="w-full p-6">
       {/* Standard SaaS Header */}
       <div className="flex justify-between items-start mb-8">
         <div className="flex items-center gap-4">
