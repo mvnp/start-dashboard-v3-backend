@@ -204,7 +204,7 @@ export default function AccountingForm() {
 
   if (isEdit && transactionError) {
     return (
-      <div className="container mx-auto py-6">
+      <div className="w-full py-6">
         <Card>
           <CardHeader>
             <CardTitle><TranslatableText>Error</TranslatableText></CardTitle>
@@ -218,7 +218,7 @@ export default function AccountingForm() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="w-full p-6">
       <div className="flex items-center gap-4 mb-6">
         <Button
           variant="outline"
