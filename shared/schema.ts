@@ -226,6 +226,33 @@ export const translations = pgTable("translations", {
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
+// E-commerce tables
+export const shopCategories = pgTable("shop_categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  order: integer("order").notNull().default(0),
+  featured: boolean("featured").notNull().default(false),
+  business_id: integer("business_id").references(() => businesses.id).notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
+export const shopProducts = pgTable("shop_products", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  image: text("image"),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  status: boolean("status").notNull().default(true),
+  order: integer("order").notNull().default(0),
+  featured: boolean("featured").notNull().default(false),
+  category_id: integer("category_id").references(() => shopCategories.id),
+  business_id: integer("business_id").references(() => businesses.id).notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
 // Create insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -400,6 +427,38 @@ export const insertTranslationSchema = createInsertSchema(translations).omit({
   language: z.string().min(1, "Language is required"),
 });
 
+export const insertShopCategorySchema = createInsertSchema(shopCategories).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+}).extend({
+  name: z.string().min(1, "Category name is required"),
+  description: z.string().optional(),
+  order: z.number().default(0),
+  featured: z.boolean().default(false),
+  business_id: z.number().min(1, "Business ID is required"),
+});
+
+export const insertShopProductSchema = createInsertSchema(shopProducts).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+}).extend({
+  name: z.string().min(1, "Product name is required"),
+  description: z.string().optional(),
+  image: z.string().optional(),
+  price: z.union([z.string(), z.number()]).transform((val) => {
+    if (typeof val === 'number') return val.toString();
+    if (typeof val === 'string') return val.replace(',', '.');
+    return '0';
+  }),
+  status: z.boolean().default(true),
+  order: z.number().default(0),
+  featured: z.boolean().default(false),
+  category_id: z.number().optional(),
+  business_id: z.number().min(1, "Business ID is required"),
+});
+
 // Export types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -441,6 +500,10 @@ export type InsertTraduction = z.infer<typeof insertTraductionSchema>;
 export type Traduction = typeof traductions.$inferSelect;
 export type InsertTranslation = z.infer<typeof insertTranslationSchema>;
 export type Translation = typeof translations.$inferSelect;
+export type InsertShopCategory = z.infer<typeof insertShopCategorySchema>;
+export type ShopCategory = typeof shopCategories.$inferSelect;
+export type InsertShopProduct = z.infer<typeof insertShopProductSchema>;
+export type ShopProduct = typeof shopProducts.$inferSelect;
 
 // Dashboard Stats Type
 export interface DashboardStats {
