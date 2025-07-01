@@ -100,7 +100,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 const hasActiveChild = item.children.some(child => location === child.href);
                 
                 return (
-                  <div key={item.name}>
+                  <div key={item.name} style="margin-top 0!important">
                     <div 
                       className={cn(
                         "flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer",
