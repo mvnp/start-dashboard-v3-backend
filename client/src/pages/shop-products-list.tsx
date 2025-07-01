@@ -47,12 +47,12 @@ export default function ShopProductsList() {
 
   const { data: products = [], isLoading, error } = useQuery<ShopProduct[]>({
     queryKey: ["/api/shop-products", selectedBusinessId],
-    enabled: !!selectedBusinessId,
+    enabled: user?.isSuperAdmin || !!selectedBusinessId,
   });
 
   const { data: categories = [] } = useQuery<ShopCategory[]>({
     queryKey: ["/api/shop-categories", selectedBusinessId],
-    enabled: !!selectedBusinessId,
+    enabled: user?.isSuperAdmin || !!selectedBusinessId,
   });
 
   const deleteMutation = useMutation({
@@ -113,13 +113,13 @@ export default function ShopProductsList() {
     cloneMutation.mutate(product);
   };
 
-  const filteredProducts = products.filter((product: ShopProduct) => {
+  const filteredProducts = Array.isArray(products) ? products.filter((product: ShopProduct) => {
     if (onlyFeatured && !product.featured) return false;
     if (onlyActive && !product.status) return false;
     if (selectedCategory !== "all" && product.category_id !== parseInt(selectedCategory)) return false;
     if (searchTerm && !product.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
     return true;
-  });
+  }) : [];
 
   const getCategoryName = (categoryId: number | null) => {
     if (!categoryId) return "Uncategorized";
