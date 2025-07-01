@@ -61,7 +61,7 @@ export default function ShopProductsForm() {
   });
 
   const { data: product, isLoading } = useQuery<any>({
-    queryKey: ["/api/shop-products", productId],
+    queryKey: [`/api/shop-products/${productId}`],
     enabled: isEdit && !!productId && typeof productId === 'string',
   });
 
