@@ -9,8 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { TranslatableText } from "@/components/ui/translatable-text";
-import { useBusinessContext } from "@/lib/business-context";
+import { TranslatableText } from "@/components/translatable-text";
+import { useBusinessContext } from "@/hooks/use-business-context";
 import { useAuth } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
 

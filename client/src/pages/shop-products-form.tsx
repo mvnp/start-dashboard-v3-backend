@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { TranslatableText } from "@/components/ui/translatable-text";
+import { TranslatableText } from "@/components/translatable-text";
 import { useBusinessContext } from "@/lib/business-context";
 import { apiRequest } from "@/lib/queryClient";
 import { useTranslationHelper } from "@/lib/translation-helper";
