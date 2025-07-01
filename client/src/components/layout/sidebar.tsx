@@ -1,10 +1,11 @@
 import { Link, useLocation } from "wouter";
-import { LogOut } from "lucide-react";
+import { LogOut, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { navigationItems } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import UserSwitcher from "@/components/user-switcher";
 import { TranslatableText } from "@/components/translatable-text";
+import { useState } from "react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -13,6 +14,17 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [location] = useLocation();
+  const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set());
+
+  const toggleDropdown = (name: string) => {
+    const newOpenDropdowns = new Set(openDropdowns);
+    if (newOpenDropdowns.has(name)) {
+      newOpenDropdowns.delete(name);
+    } else {
+      newOpenDropdowns.add(name);
+    }
+    setOpenDropdowns(newOpenDropdowns);
+  };
 
   return (
     <>
@@ -55,6 +67,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             {navigationItems.map((item) => {
               const isActive = location === item.href;
               const Icon = item.icon;
+              const isDropdownOpen = openDropdowns.has(item.name);
               
               if (item.target === "_blank") {
                 return (
@@ -78,7 +91,67 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   </a>
                 );
               }
+
+              // Handle dropdown items
+              if (item.isDropdown && item.children) {
+                const hasActiveChild = item.children.some(child => location === child.href);
+                
+                return (
+                  <div key={item.name}>
+                    <div 
+                      className={cn(
+                        "flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer",
+                        hasActiveChild || isDropdownOpen
+                          ? "barber-primary bg-orange-50 border border-orange-200" 
+                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                      )}
+                      onClick={() => toggleDropdown(item.name)}
+                    >
+                      <div className="flex items-center">
+                        <Icon className="w-5 h-5 mr-3" />
+                        <TranslatableText>{item.name}</TranslatableText>
+                      </div>
+                      {isDropdownOpen ? (
+                        <ChevronDown className="w-4 h-4" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4" />
+                      )}
+                    </div>
+                    
+                    {isDropdownOpen && (
+                      <div className="ml-8 mt-1 space-y-1">
+                        {item.children.map((child) => {
+                          const isChildActive = location === child.href;
+                          const ChildIcon = child.icon;
+                          
+                          return (
+                            <Link key={child.name} href={child.href}>
+                              <div 
+                                className={cn(
+                                  "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer",
+                                  isChildActive 
+                                    ? "barber-primary bg-orange-50 border border-orange-200" 
+                                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                )}
+                                onClick={() => {
+                                  if (window.innerWidth < 1024) {
+                                    onClose();
+                                  }
+                                }}
+                              >
+                                <ChildIcon className="w-4 h-4 mr-3" />
+                                <TranslatableText>{child.name}</TranslatableText>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
               
+              // Regular menu items
               return (
                 <Link key={item.name} href={item.href}>
                   <div 

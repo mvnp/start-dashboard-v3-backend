@@ -23,7 +23,17 @@ import {
   Package
 } from "lucide-react";
 
-export const navigationItems = [
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: any;
+  current: boolean;
+  target?: string;
+  isDropdown?: boolean;
+  children?: NavigationItem[];
+}
+
+export const navigationItems: NavigationItem[] = [
   {
     name: "Dashboard",
     href: "/",
@@ -67,16 +77,25 @@ export const navigationItems = [
     current: false,
   },
   {
-    name: "Shop Categories",
-    href: "/shop-categories",
+    name: "Shop",
+    href: "#",
     icon: ShoppingCart,
     current: false,
-  },
-  {
-    name: "Shop Products",
-    href: "/shop-products",
-    icon: Package,
-    current: false,
+    isDropdown: true,
+    children: [
+      {
+        name: "Shop Categories",
+        href: "/shop-categories",
+        icon: ShoppingCart,
+        current: false,
+      },
+      {
+        name: "Shop Products",
+        href: "/shop-products",
+        icon: Package,
+        current: false,
+      },
+    ],
   },
   {
     name: "Accounting",
