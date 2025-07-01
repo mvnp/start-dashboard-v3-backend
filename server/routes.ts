@@ -7152,7 +7152,7 @@ export function registerRoutes(app: Express): void {
   // Shop Categories endpoints
   app.get("/api/shop-categories", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const businessIds = await getBusinessFilter(req.user!);
+      const businessIds = getBusinessFilter(req.user!, req);
       
       let categories;
       if (businessIds === null) {
@@ -7342,7 +7342,7 @@ export function registerRoutes(app: Express): void {
   // Shop Products endpoints
   app.get("/api/shop-products", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const businessIds = await getBusinessFilter(req.user!);
+      const businessIds = getBusinessFilter(req.user!, req);
       
       let products;
       if (businessIds === null) {
