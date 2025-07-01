@@ -13,8 +13,9 @@ export function useWebSocket() {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Only connect WebSocket on accounting pages to avoid unnecessary connections
+    // Only connect WebSocket on accounting pages - completely skip for other pages
     if (!window.location.pathname.includes('/accounting')) {
+      setIsConnected(false);
       return;
     }
 
@@ -25,6 +26,7 @@ export function useWebSocket() {
       ws.current = new WebSocket(wsUrl);
     } catch (error) {
       console.error('Failed to create WebSocket connection:', error);
+      setIsConnected(false);
       return;
     }
 
@@ -56,10 +58,7 @@ export function useWebSocket() {
     };
 
     ws.current.onerror = (error) => {
-      // Only log WebSocket errors if we're on accounting pages to reduce noise
-      if (window.location.pathname.includes('/accounting')) {
-        console.error('WebSocket error:', error);
-      }
+      console.error('WebSocket error:', error);
       setIsConnected(false);
     };
 
