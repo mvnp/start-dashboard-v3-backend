@@ -269,7 +269,7 @@ export default function ShopProductsList() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-semibold text-green-600">
-                      ${product.price.toFixed(2)}
+                      ${Number(product.price).toFixed(2)}
                     </span>
                     <span className="text-sm text-muted-foreground">
                       <TranslatableText>Order</TranslatableText>: {product.order}

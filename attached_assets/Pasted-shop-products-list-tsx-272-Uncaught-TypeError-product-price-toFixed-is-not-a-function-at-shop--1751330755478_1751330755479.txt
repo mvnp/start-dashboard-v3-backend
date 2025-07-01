@@ -1,0 +1,34 @@
+shop-products-list.tsx:272 Uncaught TypeError: product.price.toFixed is not a function
+    at shop-products-list.tsx:272:39
+    at Array.map (<anonymous>)
+    at ShopProductsList (shop-products-list.tsx:240:29)
+
+shop-products-list.tsx:272 Uncaught TypeError: product.price.toFixed is not a function
+    at shop-products-list.tsx:272:39
+    at Array.map (<anonymous>)
+    at ShopProductsList (shop-products-list.tsx:240:29)
+chunk-RPCDYKBN.js?v=2b685372:14032 The above error occurred in the <ShopProductsList> component:
+
+    at ShopProductsList (https://9d5dc195-9aec-4464-a135-6e1134bfee48-00-3a9ys8x8hly4z.riker.replit.dev/src/pages/shop-products-list.tsx:36:39)
+    at main
+    at div
+    at Layout (https://9d5dc195-9aec-4464-a135-6e1134bfee48-00-3a9ys8x8hly4z.riker.replit.dev/src/App.tsx?v=wNJU6S_IjPY3BTReWiNxp:67:19)
+    at Route (https://9d5dc195-9aec-4464-a135-6e1134bfee48-00-3a9ys8x8hly4z.riker.replit.…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=2b685372:323:16)
+    at Switch (https://9d5dc195-9aec-4464-a135-6e1134bfee48-00-3a9ys8x8hly4z.riker.replit.…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=2b685372:379:17)
+    at Router (https://9d5dc195-9aec-4464-a135-6e1134bfee48-00-3a9ys8x8hly4z.riker.replit.dev/src/App.tsx?v=wNJU6S_IjPY3BTReWiNxp:98:29)
+    at Provider (https://9d5dc195-9aec-4464-a135-6e1134bfee48-00-3a9ys8x8hly4z.riker.replit.…unner/workspace/node_modules/.vite/deps/chunk-MV53PHM7.js?v=2b685372:48:15)
+    at TooltipProvider (https://9d5dc195-9aec-4464-a135-6e1134bfee48-00-3a9ys8x8hly4z.riker.replit.…rkspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=2b685372:59:5)
+    at TranslationCacheProvider (https://9d5dc195-9aec-4464-a135-6e1134bfee48-00-3a9ys8x8hly4z.riker.replit.dev/src/lib/translation-cache.tsx:21:44)
+    at EditionProvider (https://9d5dc195-9aec-4464-a135-6e1134bfee48-00-3a9ys8x8hly4z.riker.replit.dev/src/lib/edition-context.tsx:31:35)
+    at BusinessLanguageProvider (https://9d5dc195-9aec-4464-a135-6e1134bfee48-00-3a9ys8x8hly4z.riker.replit.dev/src/lib/business-language-context.tsx:30:44)
+    at BusinessProvider (https://9d5dc195-9aec-4464-a135-6e1134bfee48-00-3a9ys8x8hly4z.riker.replit.dev/src/lib/business-context.tsx:30:36)
+    at AuthProvider (https://9d5dc195-9aec-4464-a135-6e1134bfee48-00-3a9ys8x8hly4z.riker.replit.dev/src/lib/auth.tsx:22:32)
+    at QueryClientProvider (https://9d5dc195-9aec-4464-a135-6e1134bfee48-00-3a9ys8x8hly4z.riker.replit.…rkspace/node_modules/.vite/deps/@tanstack_react-query.js?v=2b685372:2805:3)
+    at App (https://9d5dc195-9aec-4464-a135-6e1134bfee48-00-3a9ys8x8hly4z.riker.replit.dev/src/App.tsx?v=wNJU6S_IjPY3BTReWiNxp:842:3)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+chunk-RPCDYKBN.js?v=2b685372:19413 Uncaught TypeError: product.price.toFixed is not a function
+    at shop-products-list.tsx:272:39
+    at Array.map (<anonymous>)
+    at ShopProductsList (shop-products-list.tsx:240:29)
