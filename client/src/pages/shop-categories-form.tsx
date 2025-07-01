@@ -29,6 +29,7 @@ type FormValues = z.infer<typeof formSchema>;
 export default function ShopCategoriesForm() {
   const [, setLocation] = useLocation();
   const params = useParams();
+  const categoryId = params.categoryId;
   const { selectedBusinessId } = useBusinessContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
