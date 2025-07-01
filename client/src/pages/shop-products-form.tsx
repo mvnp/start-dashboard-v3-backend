@@ -66,7 +66,7 @@ export default function ShopProductsForm() {
   });
 
   const { data: categories = [] } = useQuery<ShopCategory[]>({
-    queryKey: ["/api/shop-categories", { businessId: selectedBusinessId }],
+    queryKey: ["/api/shop-categories", selectedBusinessId],
     enabled: !!selectedBusinessId,
   });
 

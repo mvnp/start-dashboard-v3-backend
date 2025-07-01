@@ -46,12 +46,12 @@ export default function ShopProductsList() {
   const queryClient = useQueryClient();
 
   const { data: products = [], isLoading, error } = useQuery<ShopProduct[]>({
-    queryKey: ["/api/shop-products", { businessId: selectedBusinessId }],
+    queryKey: ["/api/shop-products", selectedBusinessId],
     enabled: !!selectedBusinessId,
   });
 
   const { data: categories = [] } = useQuery<ShopCategory[]>({
-    queryKey: ["/api/shop-categories", { businessId: selectedBusinessId }],
+    queryKey: ["/api/shop-categories", selectedBusinessId],
     enabled: !!selectedBusinessId,
   });
 

@@ -35,6 +35,8 @@ export async function apiRequest(
     '/api/support-tickets',
     '/api/accounting-transactions',
     '/api/accounting-transaction-categories',
+    '/api/shop-categories',
+    '/api/shop-products',
     '/api/settings'
   ];
 
@@ -86,11 +88,13 @@ export const getQueryFn: <T>(options: {
                url === "/api/whatsapp-instances" ||
                url === "/api/support-tickets" ||
                url === "/api/accounting-transactions" ||
-               url === "/api/barber-plans") {
+               url === "/api/barber-plans" ||
+               url === "/api/shop-categories" ||
+               url === "/api/shop-products") {
         // Keep URL as-is, business ID is handled via headers not URL parameters
       }
       // For individual resource endpoints (already have ID in URL), don't append anything
-      else if (url.match(/^\/api\/(services|clients|staff|appointments|payment-gateways|whatsapp-instances|support-tickets|accounting-transactions|barber-plans)\/\d+$/)) {
+      else if (url.match(/^\/api\/(services|clients|staff|appointments|payment-gateways|whatsapp-instances|support-tickets|accounting-transactions|barber-plans|shop-categories|shop-products)\/\d+$/)) {
         // URL already has resource ID, don't append business ID - use headers instead
       }
       // Add other parameterized endpoints as needed
