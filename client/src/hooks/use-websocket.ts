@@ -13,10 +13,20 @@ export function useWebSocket() {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    // Only connect WebSocket on accounting pages to avoid unnecessary connections
+    if (!window.location.pathname.includes('/accounting')) {
+      return;
+    }
+
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
     
-    ws.current = new WebSocket(wsUrl);
+    try {
+      ws.current = new WebSocket(wsUrl);
+    } catch (error) {
+      console.error('Failed to create WebSocket connection:', error);
+      return;
+    }
 
     ws.current.onopen = () => {
       console.log('WebSocket connected for real-time updates');
@@ -46,7 +56,10 @@ export function useWebSocket() {
     };
 
     ws.current.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      // Only log WebSocket errors if we're on accounting pages to reduce noise
+      if (window.location.pathname.includes('/accounting')) {
+        console.error('WebSocket error:', error);
+      }
       setIsConnected(false);
     };
 
