@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { TranslatableText } from "@/components/translatable-text";
-import { useBusinessContext } from "@/lib/business-context";
+import { useBusinessContext } from "@/hooks/use-business-context";
 import { useAuth } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
 
