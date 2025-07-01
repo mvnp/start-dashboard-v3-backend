@@ -60,9 +60,9 @@ export default function ShopProductsForm() {
     },
   });
 
-  const { data: product, isLoading } = useQuery({
+  const { data: product, isLoading } = useQuery<any>({
     queryKey: ["/api/shop-products", productId],
-    enabled: !!productId,
+    enabled: !!productId && !isNaN(Number(productId)),
   });
 
   const { data: categories = [] } = useQuery({

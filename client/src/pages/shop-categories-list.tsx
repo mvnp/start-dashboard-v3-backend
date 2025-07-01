@@ -33,7 +33,7 @@ export default function ShopCategoriesList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: categories = [], isLoading, error } = useQuery({
+  const { data: categories = [], isLoading, error } = useQuery<ShopCategory[]>({
     queryKey: ["/api/shop-categories", selectedBusinessId],
     enabled: user?.isSuperAdmin || !!selectedBusinessId,
   });
@@ -58,19 +58,12 @@ export default function ShopCategoriesList() {
 
   const cloneMutation = useMutation({
     mutationFn: (originalCategory: ShopCategory) => {
-      return apiRequest("/api/shop-categories", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(selectedBusinessId && { "x-selected-business-id": selectedBusinessId.toString() }),
-        },
-        body: JSON.stringify({
-          name: `${originalCategory.name} (Copy)`,
-          description: originalCategory.description,
-          order: Math.max(...categories.map((c: ShopCategory) => c.order), 0) + 1,
-          featured: false,
-          business_id: selectedBusinessId || originalCategory.business_id,
-        }),
+      return apiRequest("POST", "/api/shop-categories", {
+        name: `${originalCategory.name} (Copy)`,
+        description: originalCategory.description,
+        order: Math.max(...(categories as ShopCategory[]).map((c: ShopCategory) => c.order), 0) + 1,
+        featured: false,
+        business_id: selectedBusinessId || originalCategory.business_id,
       });
     },
     onSuccess: () => {

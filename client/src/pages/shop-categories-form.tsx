@@ -46,9 +46,9 @@ export default function ShopCategoriesForm() {
     },
   });
 
-  const { data: category, isLoading } = useQuery({
+  const { data: category, isLoading } = useQuery<any>({
     queryKey: ["/api/shop-categories", categoryId],
-    enabled: !!categoryId,
+    enabled: !!categoryId && !isNaN(Number(categoryId)),
   });
 
   useEffect(() => {
@@ -67,16 +67,9 @@ export default function ShopCategoriesForm() {
       const url = isEdit ? `/api/shop-categories/${categoryId}` : "/api/shop-categories";
       const method = isEdit ? "PUT" : "POST";
 
-      return apiRequest(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(selectedBusinessId && { "x-selected-business-id": selectedBusinessId.toString() }),
-        },
-        body: JSON.stringify({
-          ...data,
-          business_id: selectedBusinessId,
-        }),
+      return apiRequest(method, url, {
+        ...data,
+        business_id: selectedBusinessId,
       });
     },
     onSuccess: () => {

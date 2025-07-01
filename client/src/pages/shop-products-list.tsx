@@ -45,20 +45,18 @@ export default function ShopProductsList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: products = [], isLoading, error } = useQuery({
+  const { data: products = [], isLoading, error } = useQuery<ShopProduct[]>({
     queryKey: ["/api/shop-products", selectedBusinessId],
     enabled: user?.isSuperAdmin || !!selectedBusinessId,
   });
 
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [] } = useQuery<ShopCategory[]>({
     queryKey: ["/api/shop-categories", selectedBusinessId],
     enabled: user?.isSuperAdmin || !!selectedBusinessId,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/shop-products/${id}`, {
-      method: "DELETE",
-    }),
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/shop-products/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/shop-products"] });
       toast({
