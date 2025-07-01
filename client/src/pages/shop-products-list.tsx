@@ -45,14 +45,23 @@ export default function ShopProductsList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  console.log('Shop Products Query Debug:', {
+    selectedBusinessId,
+    selectedBusinessIdType: typeof selectedBusinessId,
+    selectedBusinessIdBool: !!selectedBusinessId,
+    isSuperAdmin: user?.isSuperAdmin,
+    user: user,
+    enabled: !!selectedBusinessId
+  });
+
   const { data: products = [], isLoading, error } = useQuery<ShopProduct[]>({
     queryKey: ["/api/shop-products", selectedBusinessId],
-    enabled: user?.isSuperAdmin || !!selectedBusinessId,
+    enabled: true, // Temporarily force query to test
   });
 
   const { data: categories = [] } = useQuery<ShopCategory[]>({
     queryKey: ["/api/shop-categories", selectedBusinessId],
-    enabled: user?.isSuperAdmin || !!selectedBusinessId,
+    enabled: !!selectedBusinessId,
   });
 
   const deleteMutation = useMutation({
