@@ -13,14 +13,21 @@ export function useWebSocket() {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Only connect WebSocket on accounting pages - completely skip for other pages
+    // Only connect WebSocket on accounting pages - return early for all other pages
     if (!window.location.pathname.includes('/accounting')) {
       setIsConnected(false);
-      return;
+      return () => {}; // Return empty cleanup function
     }
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
+    
+    // Ensure we're not conflicting with Vite's HMR WebSocket
+    if (wsUrl.includes('undefined') || wsUrl.includes('token=')) {
+      console.warn('Skipping WebSocket connection due to invalid URL');
+      setIsConnected(false);
+      return;
+    }
     
     try {
       ws.current = new WebSocket(wsUrl);
