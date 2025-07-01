@@ -34,8 +34,8 @@ export default function ShopCategoriesList() {
   const queryClient = useQueryClient();
 
   const { data: categories = [], isLoading, error } = useQuery<ShopCategory[]>({
-    queryKey: ["/api/shop-categories", selectedBusinessId],
-    enabled: user?.isSuperAdmin || !!selectedBusinessId,
+    queryKey: ["/api/shop-categories", { businessId: selectedBusinessId }],
+    enabled: !!selectedBusinessId,
   });
 
   const deleteMutation = useMutation({
