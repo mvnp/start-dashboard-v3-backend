@@ -75,23 +75,16 @@ export default function ShopProductsList() {
 
   const cloneMutation = useMutation({
     mutationFn: (originalProduct: ShopProduct) => {
-      return apiRequest("/api/shop-products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(selectedBusinessId && { "x-selected-business-id": selectedBusinessId.toString() }),
-        },
-        body: JSON.stringify({
-          name: `${originalProduct.name} (Copy)`,
-          description: originalProduct.description,
-          image: originalProduct.image,
-          price: originalProduct.price,
-          status: true,
-          order: Math.max(...products.map((p: ShopProduct) => p.order), 0) + 1,
-          featured: false,
-          category_id: originalProduct.category_id,
-          business_id: selectedBusinessId || originalProduct.business_id,
-        }),
+      return apiRequest("POST", "/api/shop-products", {
+        name: `${originalProduct.name} (Copy)`,
+        description: originalProduct.description,
+        image: originalProduct.image,
+        price: originalProduct.price,
+        status: true,
+        order: Math.max(...products.map((p: ShopProduct) => p.order), 0) + 1,
+        featured: false,
+        category_id: originalProduct.category_id,
+        business_id: selectedBusinessId || originalProduct.business_id,
       });
     },
     onSuccess: () => {

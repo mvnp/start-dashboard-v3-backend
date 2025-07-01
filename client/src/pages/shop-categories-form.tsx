@@ -48,7 +48,7 @@ export default function ShopCategoriesForm() {
 
   const { data: category, isLoading } = useQuery<any>({
     queryKey: ["/api/shop-categories", categoryId],
-    enabled: !!categoryId && !isNaN(Number(categoryId)),
+    enabled: isEdit && !!categoryId && !isNaN(Number(categoryId)) && categoryId !== "new",
   });
 
   useEffect(() => {

@@ -62,7 +62,7 @@ export default function ShopProductsForm() {
 
   const { data: product, isLoading } = useQuery<any>({
     queryKey: ["/api/shop-products", productId],
-    enabled: !!productId && !isNaN(Number(productId)),
+    enabled: isEdit && !!productId && !isNaN(Number(productId)) && productId !== "new",
   });
 
   const { data: categories = [] } = useQuery({
@@ -90,16 +90,9 @@ export default function ShopProductsForm() {
       const url = isEdit ? `/api/shop-products/${productId}` : "/api/shop-products";
       const method = isEdit ? "PUT" : "POST";
 
-      return apiRequest(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(selectedBusinessId && { "x-selected-business-id": selectedBusinessId.toString() }),
-        },
-        body: JSON.stringify({
-          ...data,
-          business_id: selectedBusinessId,
-        }),
+      return apiRequest(method, url, {
+        ...data,
+        business_id: selectedBusinessId,
       });
     },
     onSuccess: () => {
