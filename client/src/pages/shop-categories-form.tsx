@@ -36,6 +36,14 @@ export default function ShopCategoriesForm() {
   const { t } = useTranslationHelper();
   const isEdit = !!categoryId;
 
+  // Debug logging
+  console.log("ShopCategoriesForm - categoryId:", categoryId, "isEdit:", isEdit, "params:", params);
+
+  // Clear any cached queries that might be causing issues
+  useEffect(() => {
+    queryClient.removeQueries({ queryKey: ["/api/shop-categories"] });
+  }, [queryClient]);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
