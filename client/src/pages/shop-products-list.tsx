@@ -59,6 +59,13 @@ export default function ShopProductsList() {
     enabled: true, // Temporarily force query to test
   });
 
+  console.log('Query Results:', {
+    products,
+    isLoading,
+    error,
+    productsLength: products?.length
+  });
+
   const { data: categories = [] } = useQuery<ShopCategory[]>({
     queryKey: ["/api/shop-categories", selectedBusinessId],
     enabled: !!selectedBusinessId,
