@@ -122,7 +122,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     </div>
                     
                     {isDropdownOpen && (
-                      <div className="ml-8 mt-1 space-y-1">
+                      <div className="ml-8 space-y-1">
                         {item.children.map((child) => {
                           const isChildActive = location === child.href;
                           const ChildIcon = child.icon;
