@@ -290,8 +290,8 @@ export default function ShopProductsForm() {
                         <TranslatableText>Category</TranslatableText>
                       </FormLabel>
                       <Select 
-                        value={field.value?.toString() || ""} 
-                        onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}
+                        value={field.value?.toString() || "none"} 
+                        onValueChange={(value) => field.onChange(value && value !== "none" ? parseInt(value) : null)}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -299,7 +299,7 @@ export default function ShopProductsForm() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">
+                          <SelectItem value="none">
                             <TranslatableText>No Category</TranslatableText>
                           </SelectItem>
                           {categories.map((category: ShopCategory) => (
