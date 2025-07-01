@@ -62,7 +62,7 @@ export default function ShopProductsForm() {
 
   const { data: product, isLoading } = useQuery<any>({
     queryKey: ["/api/shop-products", productId],
-    enabled: false, // Temporarily disabled to stop unwanted calls
+    enabled: isEdit && !!productId && typeof productId === 'string',
   });
 
   const { data: categories = [] } = useQuery<ShopCategory[]>({
