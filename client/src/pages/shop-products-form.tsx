@@ -62,12 +62,12 @@ export default function ShopProductsForm() {
 
   const { data: product, isLoading } = useQuery<any>({
     queryKey: ["/api/shop-products", productId],
-    enabled: isEdit && !!productId && !isNaN(Number(productId)) && productId !== "new",
+    enabled: false, // Temporarily disabled to stop unwanted calls
   });
 
   const { data: categories = [] } = useQuery<ShopCategory[]>({
     queryKey: ["/api/shop-categories", selectedBusinessId],
-    enabled: user?.isSuperAdmin || !!selectedBusinessId,
+    enabled: !!selectedBusinessId,
   });
 
   useEffect(() => {
