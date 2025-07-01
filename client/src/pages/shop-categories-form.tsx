@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { z } from "zod";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,12 +26,9 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-interface ShopCategoriesFormProps {
-  categoryId?: string;
-}
-
-export default function ShopCategoriesForm({ categoryId }: ShopCategoriesFormProps) {
+export default function ShopCategoriesForm() {
   const [, setLocation] = useLocation();
+  const params = useParams();
   const { selectedBusinessId } = useBusinessContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
