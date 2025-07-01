@@ -45,25 +45,9 @@ export default function ShopProductsList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  console.log('Shop Products Query Debug:', {
-    selectedBusinessId,
-    selectedBusinessIdType: typeof selectedBusinessId,
-    selectedBusinessIdBool: !!selectedBusinessId,
-    isSuperAdmin: user?.isSuperAdmin,
-    user: user,
-    enabled: !!selectedBusinessId
-  });
-
   const { data: products = [], isLoading, error } = useQuery<ShopProduct[]>({
     queryKey: ["/api/shop-products", selectedBusinessId],
-    enabled: true, // Temporarily force query to test
-  });
-
-  console.log('Query Results:', {
-    products,
-    isLoading,
-    error,
-    productsLength: products?.length
+    enabled: !!selectedBusinessId,
   });
 
   const { data: categories = [] } = useQuery<ShopCategory[]>({
@@ -72,7 +56,7 @@ export default function ShopProductsList() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("DELETE", `/api/shop-products/${id}`),
+    mutationFn: (id: number) => apiRequest(`/api/shop-products/${id}`, "DELETE"),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/shop-products"] });
       toast({
@@ -91,7 +75,7 @@ export default function ShopProductsList() {
 
   const cloneMutation = useMutation({
     mutationFn: (originalProduct: ShopProduct) => {
-      return apiRequest("POST", "/api/shop-products", {
+      return apiRequest("/api/shop-products", "POST", {
         name: `${originalProduct.name} (Copy)`,
         description: originalProduct.description,
         image: originalProduct.image,
