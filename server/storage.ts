@@ -6,6 +6,7 @@ import {
   services, appointments, barber_plans, payment_gateways, payment_gateway_types,
   accounting_transactions, accounting_transaction_categories,
   support_tickets, support_ticket_categories, whatsapp_instances, faqs, settings, traductions, translations,
+  shopCategories, shopProducts,
   type User, type InsertUser, 
   type Business, type InsertBusiness,
   type Person, type InsertPerson,
@@ -25,7 +26,9 @@ import {
   type Faq, type InsertFaq,
   type Settings, type InsertSettings,
   type Traduction, type InsertTraduction,
-  type Translation, type InsertTranslation
+  type Translation, type InsertTranslation,
+  type ShopCategory, type InsertShopCategory,
+  type ShopProduct, type InsertShopProduct
 } from "@shared/schema";
 
 export interface IStorage {
@@ -175,6 +178,22 @@ export interface IStorage {
   createTraduction(traduction: InsertTraduction): Promise<Traduction>;
   updateTraduction(string: string, language: string, traduction: string): Promise<Traduction | undefined>;
   deleteTraduction(id: number): Promise<boolean>;
+
+  // Shop Category methods
+  getAllShopCategories(): Promise<any[]>;
+  getShopCategoriesByBusinessIds(businessIds: number[]): Promise<any[]>;
+  getShopCategory(id: number): Promise<any | undefined>;
+  createShopCategory(category: any): Promise<any>;
+  updateShopCategory(id: number, category: any, businessIds?: number[] | null): Promise<any | undefined>;
+  deleteShopCategory(id: number, businessIds?: number[] | null): Promise<boolean>;
+
+  // Shop Product methods
+  getAllShopProducts(): Promise<any[]>;
+  getShopProductsByBusinessIds(businessIds: number[]): Promise<any[]>;
+  getShopProduct(id: number): Promise<any | undefined>;
+  createShopProduct(product: any): Promise<any>;
+  updateShopProduct(id: number, product: any, businessIds?: number[] | null): Promise<any | undefined>;
+  deleteShopProduct(id: number, businessIds?: number[] | null): Promise<boolean>;
 }
 
 class PostgresStorage implements IStorage {
@@ -1230,6 +1249,116 @@ class PostgresStorage implements IStorage {
       
       return result;
     }
+  }
+
+  // Shop Category methods
+  async getAllShopCategories(): Promise<ShopCategory[]> {
+    const result = await this.db.select().from(shopCategories).orderBy(asc(shopCategories.order));
+    return result;
+  }
+
+  async getShopCategoriesByBusinessIds(businessIds: number[]): Promise<ShopCategory[]> {
+    const result = await this.db
+      .select()
+      .from(shopCategories)
+      .where(inArray(shopCategories.business_id, businessIds))
+      .orderBy(asc(shopCategories.order));
+    return result;
+  }
+
+  async getShopCategory(id: number): Promise<ShopCategory | undefined> {
+    const result = await this.db.select().from(shopCategories).where(eq(shopCategories.id, id));
+    return result[0];
+  }
+
+  async createShopCategory(category: InsertShopCategory): Promise<ShopCategory> {
+    const result = await this.db.insert(shopCategories).values(category).returning();
+    return result[0];
+  }
+
+  async updateShopCategory(id: number, category: Partial<InsertShopCategory>, businessIds?: number[] | null): Promise<ShopCategory | undefined> {
+    if (businessIds) {
+      // Check if the category belongs to an accessible business
+      const existingCategory = await this.getShopCategory(id);
+      if (!existingCategory || !businessIds.includes(existingCategory.business_id)) {
+        return undefined;
+      }
+    }
+    
+    const result = await this.db
+      .update(shopCategories)
+      .set({ ...category, updated_at: new Date() })
+      .where(eq(shopCategories.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteShopCategory(id: number, businessIds?: number[] | null): Promise<boolean> {
+    if (businessIds) {
+      // Check if the category belongs to an accessible business
+      const existingCategory = await this.getShopCategory(id);
+      if (!existingCategory || !businessIds.includes(existingCategory.business_id)) {
+        return false;
+      }
+    }
+    
+    const result = await this.db.delete(shopCategories).where(eq(shopCategories.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Shop Product methods
+  async getAllShopProducts(): Promise<ShopProduct[]> {
+    const result = await this.db.select().from(shopProducts).orderBy(asc(shopProducts.order));
+    return result;
+  }
+
+  async getShopProductsByBusinessIds(businessIds: number[]): Promise<ShopProduct[]> {
+    const result = await this.db
+      .select()
+      .from(shopProducts)
+      .where(inArray(shopProducts.business_id, businessIds))
+      .orderBy(asc(shopProducts.order));
+    return result;
+  }
+
+  async getShopProduct(id: number): Promise<ShopProduct | undefined> {
+    const result = await this.db.select().from(shopProducts).where(eq(shopProducts.id, id));
+    return result[0];
+  }
+
+  async createShopProduct(product: InsertShopProduct): Promise<ShopProduct> {
+    const result = await this.db.insert(shopProducts).values(product).returning();
+    return result[0];
+  }
+
+  async updateShopProduct(id: number, product: Partial<InsertShopProduct>, businessIds?: number[] | null): Promise<ShopProduct | undefined> {
+    if (businessIds) {
+      // Check if the product belongs to an accessible business
+      const existingProduct = await this.getShopProduct(id);
+      if (!existingProduct || !businessIds.includes(existingProduct.business_id)) {
+        return undefined;
+      }
+    }
+    
+    const result = await this.db
+      .update(shopProducts)
+      .set({ ...product, updated_at: new Date() })
+      .where(eq(shopProducts.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteShopProduct(id: number, businessIds?: number[] | null): Promise<boolean> {
+    if (businessIds) {
+      // Check if the product belongs to an accessible business
+      const existingProduct = await this.getShopProduct(id);
+      if (!existingProduct || !businessIds.includes(existingProduct.business_id)) {
+        return false;
+      }
+    }
+    
+    const result = await this.db.delete(shopProducts).where(eq(shopProducts.id, id)).returning();
+    return result.length > 0;
   }
 }
 

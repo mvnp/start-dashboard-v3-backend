@@ -28,6 +28,8 @@ import {
   insertUserRoleSchema,
   insertSettingsSchema,
   insertTraductionSchema,
+  insertShopCategorySchema,
+  insertShopProductSchema,
 } from "@shared/schema";
 
 // Helper function to broadcast WebSocket updates
@@ -7144,6 +7146,386 @@ export function registerRoutes(app: Express): void {
     } catch (error) {
       console.error("Error deleting translation:", error);
       res.status(500).json({ error: "Failed to delete translation" });
+    }
+  });
+
+  // Shop Categories endpoints
+  app.get("/api/shop-categories", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const businessIds = await getBusinessFilter(req.user!);
+      
+      let categories;
+      if (businessIds === null) {
+        // Super Admin without business context - return all categories
+        categories = await storage.getAllShopCategories();
+      } else {
+        // Business-scoped access
+        categories = await storage.getShopCategoriesByBusinessIds(businessIds);
+      }
+      
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching shop categories:", error);
+      res.status(500).json({ error: "Failed to fetch shop categories" });
+    }
+  });
+
+  app.get("/api/shop-categories/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid category ID" });
+      }
+
+      const businessIds = await getBusinessFilter(req.user!);
+      const selectedBusinessId = req.headers['x-selected-business-id'];
+      
+      // For merchants (Role ID 2), require business context
+      if (req.user?.roleId === 2) {
+        if (!selectedBusinessId) {
+          return res.status(400).json({ error: "Business ID is required" });
+        }
+        
+        const businessIdNum = parseInt(selectedBusinessId as string);
+        if (isNaN(businessIdNum)) {
+          return res.status(400).json({ error: "Invalid business ID" });
+        }
+        
+        if (businessIds && !businessIds.includes(businessIdNum)) {
+          return res.status(403).json({ error: "Access denied to selected business" });
+        }
+      }
+
+      const category = await storage.getShopCategory(id);
+      if (!category) {
+        return res.status(404).json({ error: "Shop category not found" });
+      }
+
+      // Validate business context if provided
+      if (selectedBusinessId && category.business_id !== parseInt(selectedBusinessId as string)) {
+        return res.status(403).json({ error: "Category does not belong to selected business" });
+      }
+
+      res.json(category);
+    } catch (error) {
+      console.error("Error fetching shop category:", error);
+      res.status(500).json({ error: "Failed to fetch shop category" });
+    }
+  });
+
+  app.post("/api/shop-categories", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      // Validate business_id requirement
+      const businessId = req.body.business_id || req.headers['x-selected-business-id'];
+      if (!businessId) {
+        return res.status(400).json({ error: "Business ID is required in request body or x-selected-business-id header" });
+      }
+
+      const businessIdNum = parseInt(businessId);
+      if (isNaN(businessIdNum)) {
+        return res.status(400).json({ error: "Invalid business ID" });
+      }
+
+      // For non-Super Admin users, validate business access
+      if (req.user?.roleId !== 1) {
+        const businessIds = await getBusinessFilter(req.user!);
+        if (!businessIds || !businessIds.includes(businessIdNum)) {
+          return res.status(403).json({ error: "Access denied to selected business" });
+        }
+      }
+
+      const validatedData = insertShopCategorySchema.parse({
+        ...req.body,
+        business_id: businessIdNum
+      });
+
+      const category = await storage.createShopCategory(validatedData);
+      res.status(201).json(category);
+    } catch (error) {
+      console.error("Error creating shop category:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create shop category" });
+    }
+  });
+
+  app.put("/api/shop-categories/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid category ID" });
+      }
+
+      const businessIds = await getBusinessFilter(req.user!);
+      const selectedBusinessId = req.headers['x-selected-business-id'] || req.body.business_id;
+
+      // For merchants (Role ID 2), require business context
+      if (req.user?.roleId === 2) {
+        if (!selectedBusinessId) {
+          return res.status(400).json({ error: "Business ID is required" });
+        }
+        
+        const businessIdNum = parseInt(selectedBusinessId as string);
+        if (isNaN(businessIdNum)) {
+          return res.status(400).json({ error: "Invalid business ID" });
+        }
+        
+        if (businessIds && !businessIds.includes(businessIdNum)) {
+          return res.status(403).json({ error: "Access denied to selected business" });
+        }
+      }
+
+      // Prevent changing business_id if provided
+      if (req.body.business_id) {
+        const existingCategory = await storage.getShopCategory(id);
+        if (existingCategory && existingCategory.business_id !== req.body.business_id) {
+          return res.status(400).json({ error: "Cannot change business_id of existing category. Categories must remain in their original business." });
+        }
+      }
+
+      const validatedData = insertShopCategorySchema.partial().parse(req.body);
+      const category = await storage.updateShopCategory(id, validatedData, businessIds);
+      
+      if (!category) {
+        return res.status(404).json({ error: "Shop category not found" });
+      }
+
+      res.json(category);
+    } catch (error) {
+      console.error("Error updating shop category:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update shop category" });
+    }
+  });
+
+  app.delete("/api/shop-categories/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid category ID" });
+      }
+
+      const businessIds = await getBusinessFilter(req.user!);
+      const selectedBusinessId = req.headers['x-selected-business-id'];
+
+      // For merchants (Role ID 2), require business context
+      if (req.user?.roleId === 2) {
+        if (!selectedBusinessId) {
+          return res.status(400).json({ error: "Business ID is required" });
+        }
+        
+        const businessIdNum = parseInt(selectedBusinessId as string);
+        if (isNaN(businessIdNum)) {
+          return res.status(400).json({ error: "Invalid business ID" });
+        }
+        
+        if (businessIds && !businessIds.includes(businessIdNum)) {
+          return res.status(403).json({ error: "Access denied to selected business" });
+        }
+      }
+
+      const success = await storage.deleteShopCategory(id, businessIds);
+      if (!success) {
+        return res.status(404).json({ error: "Shop category not found" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting shop category:", error);
+      res.status(500).json({ error: "Failed to delete shop category" });
+    }
+  });
+
+  // Shop Products endpoints
+  app.get("/api/shop-products", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const businessIds = await getBusinessFilter(req.user!);
+      
+      let products;
+      if (businessIds === null) {
+        // Super Admin without business context - return all products
+        products = await storage.getAllShopProducts();
+      } else {
+        // Business-scoped access
+        products = await storage.getShopProductsByBusinessIds(businessIds);
+      }
+      
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching shop products:", error);
+      res.status(500).json({ error: "Failed to fetch shop products" });
+    }
+  });
+
+  app.get("/api/shop-products/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid product ID" });
+      }
+
+      const businessIds = await getBusinessFilter(req.user!);
+      const selectedBusinessId = req.headers['x-selected-business-id'];
+      
+      // For merchants (Role ID 2), require business context
+      if (req.user?.roleId === 2) {
+        if (!selectedBusinessId) {
+          return res.status(400).json({ error: "Business ID is required" });
+        }
+        
+        const businessIdNum = parseInt(selectedBusinessId as string);
+        if (isNaN(businessIdNum)) {
+          return res.status(400).json({ error: "Invalid business ID" });
+        }
+        
+        if (businessIds && !businessIds.includes(businessIdNum)) {
+          return res.status(403).json({ error: "Access denied to selected business" });
+        }
+      }
+
+      const product = await storage.getShopProduct(id);
+      if (!product) {
+        return res.status(404).json({ error: "Shop product not found" });
+      }
+
+      // Validate business context if provided
+      if (selectedBusinessId && product.business_id !== parseInt(selectedBusinessId as string)) {
+        return res.status(403).json({ error: "Product does not belong to selected business" });
+      }
+
+      res.json(product);
+    } catch (error) {
+      console.error("Error fetching shop product:", error);
+      res.status(500).json({ error: "Failed to fetch shop product" });
+    }
+  });
+
+  app.post("/api/shop-products", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      // Validate business_id requirement
+      const businessId = req.body.business_id || req.headers['x-selected-business-id'];
+      if (!businessId) {
+        return res.status(400).json({ error: "Business ID is required in request body or x-selected-business-id header" });
+      }
+
+      const businessIdNum = parseInt(businessId);
+      if (isNaN(businessIdNum)) {
+        return res.status(400).json({ error: "Invalid business ID" });
+      }
+
+      // For non-Super Admin users, validate business access
+      if (req.user?.roleId !== 1) {
+        const businessIds = await getBusinessFilter(req.user!);
+        if (!businessIds || !businessIds.includes(businessIdNum)) {
+          return res.status(403).json({ error: "Access denied to selected business" });
+        }
+      }
+
+      const validatedData = insertShopProductSchema.parse({
+        ...req.body,
+        business_id: businessIdNum
+      });
+
+      const product = await storage.createShopProduct(validatedData);
+      res.status(201).json(product);
+    } catch (error) {
+      console.error("Error creating shop product:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create shop product" });
+    }
+  });
+
+  app.put("/api/shop-products/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid product ID" });
+      }
+
+      const businessIds = await getBusinessFilter(req.user!);
+      const selectedBusinessId = req.headers['x-selected-business-id'] || req.body.business_id;
+
+      // For merchants (Role ID 2), require business context
+      if (req.user?.roleId === 2) {
+        if (!selectedBusinessId) {
+          return res.status(400).json({ error: "Business ID is required" });
+        }
+        
+        const businessIdNum = parseInt(selectedBusinessId as string);
+        if (isNaN(businessIdNum)) {
+          return res.status(400).json({ error: "Invalid business ID" });
+        }
+        
+        if (businessIds && !businessIds.includes(businessIdNum)) {
+          return res.status(403).json({ error: "Access denied to selected business" });
+        }
+      }
+
+      // Prevent changing business_id if provided
+      if (req.body.business_id) {
+        const existingProduct = await storage.getShopProduct(id);
+        if (existingProduct && existingProduct.business_id !== req.body.business_id) {
+          return res.status(400).json({ error: "Cannot change business_id of existing product. Products must remain in their original business." });
+        }
+      }
+
+      const validatedData = insertShopProductSchema.partial().parse(req.body);
+      const product = await storage.updateShopProduct(id, validatedData, businessIds);
+      
+      if (!product) {
+        return res.status(404).json({ error: "Shop product not found" });
+      }
+
+      res.json(product);
+    } catch (error) {
+      console.error("Error updating shop product:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update shop product" });
+    }
+  });
+
+  app.delete("/api/shop-products/:id", authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid product ID" });
+      }
+
+      const businessIds = await getBusinessFilter(req.user!);
+      const selectedBusinessId = req.headers['x-selected-business-id'];
+
+      // For merchants (Role ID 2), require business context
+      if (req.user?.roleId === 2) {
+        if (!selectedBusinessId) {
+          return res.status(400).json({ error: "Business ID is required" });
+        }
+        
+        const businessIdNum = parseInt(selectedBusinessId as string);
+        if (isNaN(businessIdNum)) {
+          return res.status(400).json({ error: "Invalid business ID" });
+        }
+        
+        if (businessIds && !businessIds.includes(businessIdNum)) {
+          return res.status(403).json({ error: "Access denied to selected business" });
+        }
+      }
+
+      const success = await storage.deleteShopProduct(id, businessIds);
+      if (!success) {
+        return res.status(404).json({ error: "Shop product not found" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting shop product:", error);
+      res.status(500).json({ error: "Failed to delete shop product" });
     }
   });
 
