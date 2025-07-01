@@ -17,13 +17,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set());
 
   const toggleDropdown = (name: string) => {
-    const newOpenDropdowns = new Set(openDropdowns);
-    if (newOpenDropdowns.has(name)) {
-      newOpenDropdowns.delete(name);
-    } else {
+    const newOpenDropdowns = new Set<string>();
+    if (!openDropdowns.has(name)) {
       newOpenDropdowns.add(name);
     }
     setOpenDropdowns(newOpenDropdowns);
+  };
+
+  const closeAllDropdowns = () => {
+    setOpenDropdowns(new Set());
   };
 
   return (
@@ -81,6 +83,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                       "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                     )}
                     onClick={() => {
+                      closeAllDropdowns();
                       if (window.innerWidth < 1024) {
                         onClose();
                       }
@@ -162,6 +165,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                         : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                     )}
                     onClick={() => {
+                      closeAllDropdowns();
                       if (window.innerWidth < 1024) {
                         onClose();
                       }
