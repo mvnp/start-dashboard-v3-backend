@@ -18,7 +18,9 @@ import {
   Calculator,
   HeadphonesIcon,
   Building2,
-  Languages
+  Languages,
+  ShoppingCart,
+  Package
 } from "lucide-react";
 
 export const navigationItems = [
@@ -62,6 +64,18 @@ export const navigationItems = [
     name: "Services",
     href: "/services",
     icon: Settings,
+    current: false,
+  },
+  {
+    name: "Shop Categories",
+    href: "/shop-categories",
+    icon: ShoppingCart,
+    current: false,
+  },
+  {
+    name: "Shop Products",
+    href: "/shop-products",
+    icon: Package,
     current: false,
   },
   {

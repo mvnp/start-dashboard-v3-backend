@@ -42,6 +42,10 @@ import BusinessForm from "@/pages/business-form";
 import Settings from "@/pages/settings";
 import Traductions from "@/pages/traductions";
 import Support from "@/pages/support";
+import ShopCategoriesList from "@/pages/shop-categories-list";
+import ShopCategoriesForm from "@/pages/shop-categories-form";
+import ShopProductsList from "@/pages/shop-products-list";
+import ShopProductsForm from "@/pages/shop-products-form";
 import NotFound from "@/pages/not-found";
 import { TranslatableText } from "./components/translatable-text";
 
@@ -313,6 +317,36 @@ function Router() {
       <Route path="/traductions">
         <Layout>
           <Traductions />
+        </Layout>
+      </Route>
+      <Route path="/shop-categories">
+        <Layout>
+          <ShopCategoriesList />
+        </Layout>
+      </Route>
+      <Route path="/shop-categories/new">
+        <Layout>
+          <ShopCategoriesForm />
+        </Layout>
+      </Route>
+      <Route path="/shop-categories/edit/:categoryId">
+        <Layout>
+          <ShopCategoriesForm />
+        </Layout>
+      </Route>
+      <Route path="/shop-products">
+        <Layout>
+          <ShopProductsList />
+        </Layout>
+      </Route>
+      <Route path="/shop-products/new">
+        <Layout>
+          <ShopProductsForm />
+        </Layout>
+      </Route>
+      <Route path="/shop-products/edit/:productId">
+        <Layout>
+          <ShopProductsForm />
         </Layout>
       </Route>
 
